@@ -12,4 +12,8 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   root "pages#index"
+
+  namespace :dashboard do
+    resources :participants
+  end
 end

@@ -5,5 +5,17 @@ class Participant < ApplicationRecord
   enum :genre, { female: 0, male: 1 }
 
   validates :first_name, :last_name, :age, :stake, :shirt_number, :genre, presence: true
-  validates :age, numericality: { only_integer: true, greater_than: 0, less_than: 80 }
+   validate :age_must_be_in_range
+
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+
+  private
+
+  def age_must_be_in_range
+    if age.present? && (age <= 0 || age >= 80)
+      errors.add(:age, "should be greater than 0 but less than 80")
+    end
+  end
 end
