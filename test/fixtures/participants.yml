@@ -1,0 +1,35 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  rol: 1
+  first_name: MyString
+  last_name: MyString
+  age: 1
+  stake: 1
+  ward: 1
+  date_of_inscription: 2026-07-22
+  shirt_number: 1
+  room: MyString
+  company: 1
+  respond_to: MyString
+  medical_info: 
+  additional_instructions: MyText
+  identity_document: 1
+  genre: 1
+
+two:
+  rol: 1
+  first_name: MyString
+  last_name: MyString
+  age: 1
+  stake: 1
+  ward: 1
+  date_of_inscription: 2026-07-22
+  shirt_number: 1
+  room: MyString
+  company: 1
+  respond_to: MyString
+  medical_info: 
+  additional_instructions: MyText
+  identity_document: 1
+  genre: 1
