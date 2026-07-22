@@ -68,3 +68,5 @@ end
 gem "tailwindcss-rails", "~> 4.6"
 
 gem "chartkick", "~> 5.2"
+
+gem "hotwire-livereload", "~> 2.1", group: :development
