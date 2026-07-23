@@ -1,1 +1,94 @@
-<h3><%= @participant.full_name%></h3>
+<div class=" max-w-255 min-h-100 rounded-xl border border-gray-200 pb-5">
+  <section class="relative h-32 w-full bg-fsy-pattern bg-repeat-space bg-center rounded-t-xl shadow-md">
+    <%= avatar_for(@participant, class: "absolute -bottom-20 left-5 w-25 h-25 rounded-full border-4 border-white shadow-md object-cover relative z-10") %>
+  </section>
+  <section class="mt-20 px-5">
+    <div class="flex justify-between items-center">
+      <div class="flex flex-col gap-1 items-start">
+        <h2 class="font-bold text-2xl "><%= @participant.full_name%></h2>
+        <span class="bg-green-100 py-1.5 px-3 rounded-2xl text-sm text-gray-600"><%= @participant.rol.capitalize%></span>
+      </div>
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_dashboard_participant_path(@participant), type: "muted", icon: "edit.svg"))%>
+    </div>
+  </section>
+  <div class="mt-7 px-8">
+    <section class="border border-gray-200 p-3">
+      <h3 class="font-bold text-md">Informacion General</h3>
+      <dl class="mt-4 grid grid-cols-2 md:grid-cols-4 ">
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("company.svg", class: "w-[25px] h-[25px]")%>
+              <span class="text-gray-600">Compañia</span>
+            </div>
+          </dt>
+          <dd class="font-semibold"><%= check_value(@participant.company)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("room.svg", class: "w-[25px] h-[25px]")%>
+              <span>Cuarto</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.room)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("respond_to.svg", class: "w-[25px] h-[25px]")%>
+              <span>Consejeros</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.m_respond_to)%></dd>
+          <dd><%= check_value(@participant.h_respond_to)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("stake.svg", class: "w-[25px] h-[25px]")%>
+              <span>Estaca</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.stake.titleize)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("ward.svg", class: "w-[25px] h-[25px]")%>
+              <span>Barrio</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.ward)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("gender.svg", class: "w-[25px] h-[25px]")%>
+              <span>Genero</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.genre)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("id.svg", class: "w-[25px] h-[25px]")%>
+              <span>Identificacion</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.identity_document)%></dd>
+        </div>
+        <div class="mb-5">
+          <dt>
+            <div class="flex gap-1 items-center">
+              <%= image_tag("shirt.svg", class: "w-[25px] h-[25px]")%>
+              <span>Camisa</span>
+            </div>
+          </dt>
+          <dd><%= check_value(@participant.shirt_number.capitalize)%></dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>

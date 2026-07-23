@@ -1,0 +1,8 @@
+<%= link_to @url, class: "#{styles}" do %>
+  <div class="flex gap-1 items-center">
+    <%if @icon%>
+      <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
+    <%end%>
+    <span><%= @text %></span>
+  </div>
+<%end%>
