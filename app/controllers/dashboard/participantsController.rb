@@ -8,6 +8,9 @@ class Dashboard::ParticipantsController < ApplicationController
   def show
   end
 
+  def edit
+  end
+
   private
   def set_product
     @participant = Participant.find(params[:id])

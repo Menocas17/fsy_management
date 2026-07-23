@@ -4,6 +4,9 @@ class Participant < ApplicationRecord
   enum :shirt_number, { xs: 0, s: 1, m: 2, l: 3, xl: 4 }
   enum :genre, { M: 0, H: 1 }
 
+  store_accessor :contact_info, :phone_number, :email_address, :emergency_contact
+  store_accessor :respond_to, :m_respond_to, :h_respond_to
+
   validates :first_name, :last_name, :age, :stake, :shirt_number, :genre, presence: true
    validate :age_must_be_in_range
 
