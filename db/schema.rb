@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_22_201814) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_23_183214) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_201814) do
     t.text "additional_instructions"
     t.integer "age"
     t.integer "company"
+    t.jsonb "contact_info"
     t.datetime "created_at", null: false
     t.date "date_of_inscription"
     t.string "first_name"
@@ -26,7 +27,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_201814) do
     t.integer "identity_document"
     t.string "last_name"
     t.jsonb "medical_info"
-    t.string "respond_to"
+    t.jsonb "respond_to"
     t.integer "rol"
     t.string "room"
     t.integer "shirt_number"

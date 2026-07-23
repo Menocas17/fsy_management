@@ -1,6 +1,54 @@
-<h1 class="font-bold text-2xl block">Here will be all the participants</h1>
-<div>
-  <% @participants.each do |participant|%>
-    <h2 class="block"><%= participant.full_name%></h2>
-  <% end%>
-</div>
+<section>
+  <h2>Estadisticas</h2>
+  <div class="max-w-2/6">
+    <%= column_chart @participants.group(:stake).count.transform_keys { |stake_key| stake_key.titleize } %>
+  </div>
+</section>
+<section class="mt-5">
+  <h2 class="font-bold text-xl mb-5">Participantes</h2>
+  <div class="overflow-x-auto shadow-md rounded-lg border border-gray-200">
+    <table class="w-full text-left border-collapse bg-white">
+      <thead>
+        <tr class="bg-linear-to-tr from-[#095581] via-[#238db4] to-[#3c9baa] text-center text-white">
+          <th class="py-3 px-4"> Nombre Completo</th>
+          <th lass="py-3 px-4"> Estaca </th>
+          <th lass="py-3 px-4">Barrio</th>
+          <th lass="py-3 px-4">Edad</th>
+          <th lass="py-3 px-4">Genero</th>
+          <th lass="py-3 px-4">Compañia</th>
+          <th lass="py-3 px-4">Cuarto</th>
+          <th lass="py-3 px-4"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 text-sm text-gray-600 text-center">
+        <% @participants.each do |participant|%>
+          <tr class="odd:bg-gray-100">
+            <td class="py-3 px-4 font-medium text-gray-900 underline">
+              <%= link_to participant.full_name, dashboard_participant_path(participant) %>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.stake.titleize%>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.ward%>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.age%>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.genre.capitalize%>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.company%>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.room%>
+            </td>
+            <td><%= link_to "Ver registro", dashboard_participant_path(participant), class: "text-gray-900 underline"%>
+            </td>
+          </tr>
+        <% end%>
+      </tbody>
+    </table>
+  </div>
+</section>
