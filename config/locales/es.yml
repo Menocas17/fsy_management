@@ -1,0 +1,34 @@
+es:
+  helpers:
+    submit:
+      create: 'Crear %{model}'
+      update: 'Actualizar %{model}'
+      submit: 'Guardar %{model}'
+  activerecord:
+    models:
+      participant: 'Participante'
+    attributes:
+      participant:
+        first_name: 'Primer Nombre'
+        last_name: 'Segundo Nombre'
+        age: 'Edad'
+        stake: 'Estaca'
+        ward: 'Barrio'
+        date_of_inscription: 'Fecha de Inscripción'
+        shirt_numbrer: 'Número de camisa'
+        room: 'Cuarto'
+        comapany: 'Compañia'
+        m_person_in_charge: 'Persona a cargo (mujer)'
+        h_person_in_charge: 'Perosina a cargo (hombre)'
+        allergies: 'Alergias'
+        medicines: 'Medicinas'
+        diet: 'Dieta'
+        additional_medical_notes: 'Notas medicas adicionales'
+        additional_instructions: 'Notas adicionales'
+        identity_document: 'Documento de Identidad'
+        genre: 'Genero'
+        phone_number: 'Número de telefono'
+        email_address: 'Correo electrónico'
+        emergency_contact_number: 'Número de emergencia'
+        emergency_contat_relation: 'Relacion del contacto de emergencia'
+        avatar: 'Imagen de Perfil'

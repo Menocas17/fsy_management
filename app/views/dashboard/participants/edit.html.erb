@@ -1,0 +1,30 @@
+<h1>editinf</h1>
+<%= form_with model: [:dashboard, @participant] do |form| %>
+  <% if form.object.errors.any? %>
+    <p class="error"><%= form.object.errors.full_messages.first %></p>
+  <% end %>
+  <section>
+    <legend>Informacion General</legend>
+    <fieldset>
+      <div>
+        <%= form.label :first_name %>
+        <%= form.text_field :first_name %>
+      </div>
+      <div>
+        <%= form.label :last_name%>
+        <%= form.text_field :last_name%>
+      </div>
+      <div>
+        <%= form.label :rol%>
+        <%= form.select :rol, Participant.rols.keys.map { |key| [key.titleize, key]}, prompt: "Seleciona un rol"%>
+      </div>
+      <div>
+        <%= form.label :avatar%>
+        <%= form.file_field :avatar, accept: "image/*"%>
+      </div>
+    </fieldset>
+  </section>
+  <div>
+    <%= form.submit%>
+  </div>
+<% end %>

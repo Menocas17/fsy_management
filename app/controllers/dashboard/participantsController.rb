@@ -1,5 +1,5 @@
 class Dashboard::ParticipantsController < ApplicationController
-  before_action :set_participant, only: %i[show edit]
+  before_action :set_participant, only: %i[show edit update]
 
   def index
     @participants = Participant.all
@@ -11,8 +11,20 @@ class Dashboard::ParticipantsController < ApplicationController
   def edit
   end
 
+  def update
+    if @participant.update(participant_params)
+      redirect_to [ :dashboard, @participant ]
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
   def set_participant
     @participant = Participant.find(params[:id])
+  end
+
+  def participant_params
+    params.expect(participant: %i[ first_name last_name rol avatar])
   end
 end

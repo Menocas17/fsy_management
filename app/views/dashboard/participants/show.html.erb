@@ -1,23 +1,40 @@
 <div class=" max-w-255 min-h-100 rounded-xl border border-gray-200 pb-5 shadow-md">
-  <section class="relative h-32 w-full bg-fsy-pattern bg-repeat-space bg-center rounded-t-xl shadow-md">
-    <%= avatar_for(@participant, class: "absolute -bottom-20 left-5 w-24 h-24 rounded-full border-4 border-white shadow-md object-cover relative z-10") %>
-  </section>
+  <%# This is the banner profile photo section %>
+  <%# This div contains the thumbnail shpown in the profile but also all the logic for openind a dialog to show the full picture %>
+  <div class="relative h-32 w-full bg-fsy-pattern bg-repeat-space bg-center rounded-t-xl shadow-md" data-controller="dialog">
+    <button type="button" data-action="click->dialog#open" class="absolute -bottom-20 left-5 z-10 cursor-pointer group rounded-full focus:outline-none">
+      <%= avatar_for(@participant, class: "w-24 h-24 rounded-full border-4 border-white shadow-md object-cover group-hover:brightness-95 transition") %>
+    </button>
+    <%# This is the modal/dialog %>
+    <dialog data-dialog-target="modal" data-action="click->dialog#clickOutside" class="p-0 rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm max-w-lg w-full m-auto">
+      <div class="p-4 bg-white rounded-2xl relative ">
+        <button type="button" data-action="click->dialog#close" class="absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center font-bold cursor-pointer transition">
+          ✕
+        </button>
+        <h3 class="text-lg font-bold text-gray-800 mb-3 px-2">Fotografía de <%= @participant.full_name %></h3>
+        <% if @participant.avatar.attached? %>
+          <%= image_tag @participant.avatar, class: "w-full max-h-[70vh] object-contain rounded-xl bg-gray-50" %>
+        <% end %>
+      </div>
+    </dialog>
+  </div>
   <section class="mt-20 px-5">
     <div class="flex justify-between items-center">
       <div class="flex flex-col gap-1 items-start">
-        <h2 class="font-bold text-2xl "><%= @participant.full_name%></h2>
-        <span class="bg-green-100 py-1.5 px-3 rounded-2xl text-sm text-gray-600"><%= @participant.rol.capitalize%></span>
+        <h2 class="font-bold text-2xl"><%= @participant.full_name %></h2>
+        <span class="bg-green-100 py-1.5 px-3 rounded-2xl text-sm text-gray-600"><%= @participant.rol.capitalize %></span>
       </div>
-      <%= render(ButtonComponent.new(text: "Editar", url: edit_dashboard_participant_path(@participant), type: "muted", icon: "edit.svg"))%>
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_dashboard_participant_path(@participant), type: "muted", icon: "edit.svg")) %>
     </div>
   </section>
+  <%# This is the section of the general information %>
   <div class="mt-7 px-5">
     <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a]">
       <h3 class="font-bold text-lg bg-[#A1DFEC] px-3 py-2 rounded-t-xl">Informacion General</h3>
       <dl class="mt-5 grid grid-cols-2 md:grid-cols-4 p-3">
         <%= render(InfoTileComponent.new(title: "Compañia", icon: "company.svg", data: [@participant.company ]))%>
         <%= render(InfoTileComponent.new(title: "Cuarto", icon: "room.svg", data: [@participant.room ] ))%>
-        <%= render(InfoTileComponent.new(title: "Consejeros", icon: "respond_to.svg", data: [@participant.m_respond_to, @participant.h_respond_to] ))%>
+        <%= render(InfoTileComponent.new(title: "Consejeros", icon: "respond_to.svg", data: [@participant.m_person_in_charge, @participant.h_person_in_charge] ))%>
         <%= render(InfoTileComponent.new(title: "Estaca", icon: "stake.svg", data: [@participant.stake.titleize ] ))%>
         <%= render(InfoTileComponent.new(title: "Barrio", icon: "ward.svg", data: [@participant.ward] ))%>
         <%= render(InfoTileComponent.new(title: "Genero", icon: "gender.svg", data: [@participant.genre ] ))%>
@@ -25,6 +42,7 @@
         <%= render(InfoTileComponent.new(title: "Camisa", icon: "shirt.svg", data: [@participant.shirt_number.capitalize ] ))%>
       </dl>
     </section>
+    <%# This is the contact information section %>
     <section class="border border-gray-200  rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
       <h3 class="font-bold text-lg bg-[#C8E8E5] px-3 py-2 rounded-t-xl">Informacion de Contacto</h3>
       <dl class="mt-8 grid grid-cols-2 md:grid-cols-4 p-3">
@@ -40,6 +58,7 @@
         </div>
       </dl>
     </section>
+    <%# This the medical information section %>
     <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
       <h3 class="font-bold text-lg bg-[#A1CD98] px-3 py-2 rounded-t-xl">Informacion Medica</h3>
       <dl class="mt-5 grid grid-cols-2 md:grid-cols-4 p-3">
@@ -48,6 +67,7 @@
         <%= render(InfoTileComponent.new(title: "Dieta", icon: "diet.svg", data: [@participant.diet] ))%>
       </dl>
     </section>
+    <%# this is the adittional notes section %>
     <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
       <h3 class="font-bold text-lg bg-[#0A5681] px-3 py-2 rounded-t-xl text-white">Notas Adicionales</h3>
       <p class="font-thin italic text-center p-4">

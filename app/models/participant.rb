@@ -6,7 +6,7 @@ class Participant < ApplicationRecord
 
   # With this you can access to the structure of the jsonb columns and treat them as they were actual columns
   store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation
-  store_accessor :respond_to, :m_respond_to, :h_respond_to
+  store_accessor :person_in_charge, :m_person_in_charge, :h_person_in_charge
   store_accessor :medical_info, :allergies, :medicines, :diet, :additional_medical_notes
 
   validates :first_name, :last_name, :age, :stake, :shirt_number, :genre, presence: true
@@ -15,8 +15,9 @@ class Participant < ApplicationRecord
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
   has_one_attached :avatar do |attachable|
-    attachable.variant :thumb, resize_to_limit: [ 300, 300 ],
-    precompiled: true
+    attachable.variant :thumb, resize_to_limit: [ 300, 300 ]
+    attachable.variant :preview, resize_to_limit: [ 1200, 1200 ],
+    preprocessed: true
   end
 
 
