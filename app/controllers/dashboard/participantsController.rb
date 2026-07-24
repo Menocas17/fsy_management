@@ -1,5 +1,5 @@
 class Dashboard::ParticipantsController < ApplicationController
-  before_action :set_product, only: %i[show ]
+  before_action :set_participant, only: %i[show edit]
 
   def index
     @participants = Participant.all
@@ -12,7 +12,7 @@ class Dashboard::ParticipantsController < ApplicationController
   end
 
   private
-  def set_product
+  def set_participant
     @participant = Participant.find(params[:id])
   end
 end

@@ -5,8 +5,9 @@ class Participant < ApplicationRecord
   enum :genre, { M: 0, H: 1 }
 
   # With this you can access to the structure of the jsonb columns and treat them as they were actual columns
-  store_accessor :contact_info, :phone_number, :email_address, :emergency_contact
+  store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation
   store_accessor :respond_to, :m_respond_to, :h_respond_to
+  store_accessor :medical_info, :allergies, :medicines, :diet, :additional_medical_notes
 
   validates :first_name, :last_name, :age, :stake, :shirt_number, :genre, presence: true
   validate :age_must_be_in_range
