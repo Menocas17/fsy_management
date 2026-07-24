@@ -25,6 +25,6 @@ class Dashboard::ParticipantsController < ApplicationController
   end
 
   def participant_params
-    params.expect(participant: %i[ first_name last_name rol avatar])
+    params.expect(participant: %i[ first_name last_name rol avatar company room stake ward genre identity_document shirt_number phone_number email_address emergency_contact_number emergency_contact_name emergency_contact_relation medical_info allergies medicines diet additional_medical_notes additional_instructions])
   end
 end

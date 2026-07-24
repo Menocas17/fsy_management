@@ -12,10 +12,19 @@ module ApplicationHelper
 
   def check_notes (value)
     @value = value
-    if @value
+    if @value || @value === ""
       @value
     else
       "No hay notas adicional por ahora"
+    end
+  end
+
+  def check_if_na (value)
+    @value = value
+    if @value
+      @value
+    else
+      "N/A"
     end
   end
 end

@@ -30,5 +30,6 @@ es:
         phone_number: 'Número de telefono'
         email_address: 'Correo electrónico'
         emergency_contact_number: 'Número de emergencia'
-        emergency_contat_relation: 'Relacion del contacto de emergencia'
+        emergency_contact_name: 'Nombre del contacto de emergencia'
+        emergency_contact_relation: 'Parentesco del contacto de emergencia'
         avatar: 'Imagen de Perfil'

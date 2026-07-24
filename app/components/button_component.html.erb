@@ -1,8 +1,28 @@
-<%= link_to @url, class: "#{styles}" do %>
-  <div class="flex gap-1 items-center">
-    <%if @icon%>
-      <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
-    <%end%>
-    <span><%= @text %></span>
-  </div>
+<% if @is_submit%>
+  <button type="submit" class="<%= styles %>">
+    <div class="flex gap-1 items-center justify-center">
+      <% if @icon %>
+        <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
+      <% end %>
+      <span><%= @text %></span>
+    </div>
+  </button>
+<%elsif @type === "delete"%>
+  <%= button_to @url, method: :delete, data: { turbo_confirm: "Etas seguro que deseas borrar? Esta accion es irreversible" }, class: styles do %>
+    <div class="flex gap-1 items-center justify-center">
+      <% if @icon %>
+        <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
+      <% end %>
+      <span><%= @text %></span>
+    </div>
+  <% end %>
+<%else%>
+  <%= link_to @url, class: styles do %>
+    <div class="flex gap-1 items-center">
+      <%if @icon%>
+        <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
+      <%end%>
+      <span><%= @text %></span>
+    </div>
+  <%end%>
 <%end%>

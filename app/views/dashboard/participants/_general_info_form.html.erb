@@ -1,0 +1,43 @@
+    
+<section class="flex flex-col md:flex-row gap-5 md:gap-30 border-b-2 justify-left py-4 mx-3 border-gray-300 ">
+  <legend class="font-bold mt-5 text-3xl md:text-xl">General</legend>
+  <fieldset class="flex-1">
+    <%# <% if @participant.new_record? || Current.user.rol.in?(%w[director coordinador registrador])%>
+    <div class="mb-4">
+      <%= form.label :company, class:" font-semibold block mb-1"%>
+      <%= form.number_field :company, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4" %>
+    </div>
+    <%# <%end%>
+    <div class="mb-4">
+      <%= form.label :room, class:" font-semibold block mb-1"%>
+      <%= form.text_field :room, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"%>
+    </div>
+    <%# <% if @participant.new_record? || Current.user.rol.in?(%w[director coordinador registrador])%>
+    <div class="mb-4">
+      <%= form.label :stake, class:" font-semibold block mb-1"%>
+      <%= form.select :stake, Participant.stakes.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"}%>
+    </div>
+    <div class="mb-4">
+      <%= form.label :ward, class:" font-semibold block mb-1"%>
+      <%= form.select :ward, Participant.wards.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"}%>
+    </div>
+    <div class="mb-4">
+      <%= form.label :genre, class:" font-semibold block mb-1"%>
+      <%= form.select :genre, Participant.genres.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
+    </div>
+    <div class="mb-4">
+      <%= form.label :identity_document, class:" font-semibold block mb-1"%>
+      <%= form.text_field :identity_document, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"%>
+    </div>
+    <%# <%end%>
+    <div class="mb-4">
+      <%= form.label :shirt_number, class:" font-semibold block mb-1"%>
+      <%= form.select :shirt_number, Participant.shirt_numbers.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
+    </div>
+    <%# This will be present when creating extra tables for managin the stakes and wards %>
+    <%# <div class="mb-4"> %>
+    <%# <%= form.label :ward, class:" font-semibold block mb-1"%>
+    <%# <%= form.select :ward, Participant.wards.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4"}%>
+    <%# </div> %>
+  </fieldset>
+</section>
