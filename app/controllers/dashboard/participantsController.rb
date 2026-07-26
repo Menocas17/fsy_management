@@ -8,6 +8,19 @@ class Dashboard::ParticipantsController < ApplicationController
   def show
   end
 
+  def new
+    @participant = Participant.new
+  end
+
+  def create
+    @participant = Participant.new(participant_params)
+    if @participant.save
+      redirect_to @participant
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
   def edit
   end
 

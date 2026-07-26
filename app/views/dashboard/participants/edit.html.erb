@@ -1,24 +1,6 @@
 <h1 class="text-4xl md:text-3xl font-semibold mb-6"><%= @participant.full_name%></h1>
 <div class="relative">
-  <%= form_with model: [:dashboard, @participant] do |form| %>
-    <% if form.object.errors.any? %>
-      <p class="error"><%= form.object.errors.full_messages.first %></p>
-    <% end %>
-    <div class="md:max-w-3/4">
-      <%= render "essential_info_form", form: form%>
-      <%= render "general_info_form", form: form%>
-      <%= render "contact_info_form", form: form%>
-      <%= render "medical_info_form", form: form%>
-      <%= render "note_info_form", form: form%>
-      <div class="my-5 flex justify-end px-5 md:px-10 ">
-        <%# <div></div> %>
-        <div class="flex gap-3">
-          <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: [:dashboard, @participant]))%>
-          <%= render(ButtonComponent.new(text: "Actualizar", type:"primary", is_submit: true))%>
-        </div>
-      </div>
-    </div>
-  <% end %>
+  <%= render "form", participant: @participant%>
   <%# <%if Current.user.role.in?(%w[director coordinador admin])%>
   <div class="absolute bottom-0 left-5">
     <%= render(ButtonComponent.new(text: "Borrar", type:"delete", url: [:dashboard, @participant] ))%>

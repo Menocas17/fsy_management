@@ -27,4 +27,22 @@ module ApplicationHelper
       "N/A"
     end
   end
+
+  def submit_button_text(participant)
+    if participant.new_record?
+      "Crear Registro"
+    else
+      "Actualizar"
+    end
+  end
+
+  def toast_styles(type)
+    if type == "notice"
+      "bg-[#EBF7EE] border border-[#CEEAD5]"
+    elsif type == "alert"
+      "bg-[#FCEDE9] border border-[#FAD8D6]"
+    else
+      "bg-[#E5EFF9] border border-[#CCE2F8]"
+    end
+  end
 end
