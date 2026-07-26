@@ -1,0 +1,12 @@
+<div id="flash-messages" class="fixed top-5 right-5 z-50 flex flex-col gap-2">
+  <% flash.each do |type, message| %>
+    <div data-controller="toast "class="px-4 py-1 rounded-lg shadow-lg transition-all duration-300 ease-in-out flex items-center justify-between gap-4 <%= toast_styles(type) %>" role="alert">
+      <span>
+        <%= message %>
+      </span>
+      <button data-action="click->toast#close" class=" hover:bg-white text-gray-500 hover:text-black rounded-lg px-2 py-1 font-bold cursor-pointer focus:outline-none transition-colors">
+        x
+      </button>
+    </div>
+  <% end %>
+</div>
