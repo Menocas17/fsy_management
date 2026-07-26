@@ -1,5 +1,5 @@
 class Dashboard::ParticipantsController < ApplicationController
-  before_action :set_participant, only: %i[show edit update]
+  before_action :set_participant, only: %i[show edit update destroy]
 
   def index
     @participants = Participant.all
@@ -17,6 +17,12 @@ class Dashboard::ParticipantsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  # //TODO - Create the destroy method
+  def destroy
+    @participant.destroy
+    redirect_to dashboard_participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
   private
