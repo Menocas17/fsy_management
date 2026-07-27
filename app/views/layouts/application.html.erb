@@ -20,9 +20,15 @@
   </head>
   <body>
     <%= render "shared/toast"%>
-    <main class="container mx-auto mt-28 px-1 sm:px-2 md:px-0">
-      <%= yield %>
-    </main>
+    <div class="flex h-screen">
+      <%= render "shared/aside"%>
+      <div class="flex-1">
+        <%= render "shared/top_menu"%>
+        <main class="container mx-auto mt-10 px-1 sm:px-2 md:px-0">
+          <%= yield %>
+        </main>
+      </div>
+    </div>
     <%= render "shared/confirmation_modal"%>
   </body>
 </html>

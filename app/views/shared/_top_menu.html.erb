@@ -1,0 +1,41 @@
+<div data-controller="mobile-menu" class="relative">
+  <%# Main nav bar %>
+  <div class="border-b border-gray-300 py-0 px-5 h-15.25 flex items-center justify-between md:justify-end">
+    <div class="flex gap-3 md:hidden">
+      <button type="button" class="text-gray-700 hover:text-gray-700 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#toggle">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="flex gap-3 items-center">
+        <%= image_tag "fsy_letters.svg", class:"w-15 h-15"%>
+        <%= image_tag "fsy-logo.svg", class:"w-10 h-10"%>
+      </div>
+    </div>
+    <nav class="flex items-center justify-center gap-3">
+      <%= image_tag "avatar-default.svg", class: "w-8 h-8 rounded-full "%>
+      <%= render(ButtonComponent.new(text: "Cerrar Sesion", type: "muted", classes: "bg-[#C8E7E9] !border-[#268EB5] !font-semibold hidden md:block"))%>
+    </nav>
+  </div>
+  <%# backdrop %>
+  <div class="fixed inset-0 z-100 bg-black/50 transition-opacity hidden" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
+  </div>
+  <%# slide mobile menu%>
+  <div class="fixed inset-y-0 left-0 bg-white h-screen w-3/5 z-200 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-xl" data-mobile-menu-target="menu">
+    <div class="flex items-center justify-between px-3 pt-3">
+      <div class="flex gap-3 items-center">
+        <%= image_tag "fsy_letters.svg", class:"w-15 h-15"%>
+        <%= image_tag "fsy-logo.svg", class:"w-10 h-10"%>
+      </div>
+      <button type="button" class="text-gray-700 hover:text-gray-700 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#close">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <nav class="mt-10 px-3">
+      <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_participants_path, icon: "home.svg", classes: ""))%>
+      <%= render(ButtonComponent.new(text: "Cerrar Sesion", type: "muted", classes: "bg-[#C8E7E9] !border-[#268EB5] !font-semibold "))%>
+    </nav>
+  </div>
+</div>
