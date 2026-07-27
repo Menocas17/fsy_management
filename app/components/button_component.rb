@@ -33,7 +33,7 @@ class ButtonComponent < ViewComponent::Base
     when "delete"
       "border py-2 px-4 text-white bg-rose-800 hover:border-gray-600"
     else
-      "block py-1 px-2 rounded-lg ml-2 text-xl"
+      "block py-2 px-4 rounded-lg ml-2 text-xl"
     end
 
     [ base_styles, type_styles, @classes ].compact.join(" ")

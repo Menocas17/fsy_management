@@ -2,14 +2,14 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
     <div class="border border-slate-200 p-4 rounded-lg shadow-sm w-full min-w-0 overflow-hidden">
       <h3 class="text-gray-500 font-semibold mb-2">Participantes por Estaca</h3>
-      <%= column_chart participants.group(:stake).count.transform_keys(&:titleize),
+      <%= column_chart count_by_stake,
           colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
           height: "260px"
       %>
     </div>
     <div class="border border-slate-200 p-4 rounded-lg shadow-sm w-full min-w-0 overflow-hidden">
       <h3 class="text-gray-500 font-semibold mb-2">Distribucion por Rol</h3>
-      <%= pie_chart participants.group(:rol).count, 
+      <%= pie_chart count_by_role, 
           donut: true, 
           height: "260px" 
       %>

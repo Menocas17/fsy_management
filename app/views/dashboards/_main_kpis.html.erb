@@ -6,7 +6,7 @@
       </div>
       <h3 class="text-gray-500 ">Total de jovenes</h3>
     </div>
-    <p class="font-bold text-3xl mt-3"><%= Participant.where(rol: "joven").count %></p>
+    <p class="font-bold text-3xl mt-3"><%= total_jovenes %></p>
   </div>
   <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1 col-span-2 order-1">
     <div class="flex gap-3 items-center justify-center"">
@@ -15,7 +15,7 @@
       </div>
       <h3 class="text-gray-500 ">Total de Personas</h3>
     </div>
-    <p class="font-bold text-3xl mt-3"><%= participants.count%></p>
+    <p class="font-bold text-3xl mt-3"><%= total_participants%></p>
   </div>
   <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1">
     <div class="flex gap-3 items-center justify-center"">
@@ -24,6 +24,6 @@
       </div>
       <h3 class="text-gray-500 ">Total de Staff</h3>
     </div>
-    <p class="font-bold text-3xl mt-3"><%= Participant.where(rol: ["logistica", "coordinador", "director", "consejero", "consejero_auxiliar"]).count%></p>
+    <p class="font-bold text-3xl mt-3"><%= total_staff%></p>
   </div>
 </section>

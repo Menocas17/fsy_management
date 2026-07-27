@@ -11,20 +11,20 @@
         <div class="bg-gray-100 rounded-lg p-2">
           <%= image_tag ("male.svg"), class: "w-[30px] h-[30px]"%>
         </div>
-        <p class="font-bold text-3xl"><%= Participant.where(rol: "joven").count %></p>
+        <p class="font-bold text-3xl"><%= male_count %></p>
       </div>
       <div class="flex gap-5">
         <div class="bg-gray-100 rounded-lg p-2">
           <%= image_tag ("female.svg"), class: "w-[30px] h-[30px]"%>
         </div>
-        <p class="font-bold text-3xl"><%= Participant.where(rol: "joven").count %></p>
+        <p class="font-bold text-3xl"><%= female_count %></p>
       </div>
     </div>
   </div>
   <%= render "shirt_table", shirt_counts: shirt_counts %>
   <div class=" border border-slate-200 p-4 rounded-lg shadow-sm flex-1">
     <h3 class="font-bold text-center">Jovenes por edad</h3>
-    <%= bar_chart participants.group(:age).count,
+    <%= bar_chart data_by_age,
       colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
       height: "180px"
     %>

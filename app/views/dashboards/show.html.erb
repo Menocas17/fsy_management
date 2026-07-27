@@ -1,0 +1,4 @@
+<h1 class="font-bold text-2xl mb-5 ">Bienvenido de vuelta</h1>
+<%= render "main_kpis", total_jovenes: @total_jovenes, total_participants: @total_participants, total_staff: @total_staff %>
+<%= render "main_charts", count_by_stake: @count_by_stake, count_by_role: @count_by_role%>
+<%= render "secondary_charts", data_by_age: @data_by_age, shirt_counts: @shirt_count, male_count: @male_count, female_count: @female_count%>
