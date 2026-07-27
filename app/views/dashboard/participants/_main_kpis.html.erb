@@ -1,0 +1,29 @@
+<section class="grid grid-cols-2 lg:flex w-full gap-6">
+  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center  flex-1">
+    <div class="flex gap-3 items-center justify-center">
+      <div class="bg-gray-100 rounded-lg p-2">
+        <%= image_tag ("company.svg"), class: "w-[30px] h-[30px]"%>
+      </div>
+      <h3 class="text-gray-500 ">Total de jovenes</h3>
+    </div>
+    <p class="font-bold text-3xl mt-3"><%= Participant.where(rol: "joven").count %></p>
+  </div>
+  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1 col-span-2 order-1">
+    <div class="flex gap-3 items-center justify-center"">
+      <div class="bg-gray-100 rounded-lg p-2">
+        <%= image_tag ("people.svg"), class: "w-[30px] h-[30px]"%>
+      </div>
+      <h3 class="text-gray-500 ">Total de Personas</h3>
+    </div>
+    <p class="font-bold text-3xl mt-3"><%= participants.count%></p>
+  </div>
+  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1">
+    <div class="flex gap-3 items-center justify-center"">
+      <div class="bg-gray-100 rounded-lg p-2">
+        <%= image_tag ("staff.svg"), class: "w-[30px] h-[30px]"%>
+      </div>
+      <h3 class="text-gray-500 ">Total de Staff</h3>
+    </div>
+    <p class="font-bold text-3xl mt-3"><%= Participant.where(rol: ["logistica", "coordinador", "director", "consejero", "consejero_auxiliar"]).count%></p>
+  </div>
+</section>

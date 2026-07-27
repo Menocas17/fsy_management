@@ -1,0 +1,20 @@
+<div class="overflow-x-auto shadow-md rounded-xl border border-gray-200">
+  <table class="w-full text-left border-collapse">
+    <thead>
+      <tr class="bg-[#095581] text-white text-sm tracking-wider">
+        <th class="py-3 px-4 font-semibold">Talla de Camisa</th>
+        <th class="py-3 px-4 font-semibold text-right">Total Registrados</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 text-sm">
+      <% %w[xs s m l xl].each_with_index do |size, index| %>
+        <tr class="<%= index.even? ? 'bg-white' : 'bg-gray-50' %> hover:bg-gray-100 transition">
+          <td class="py-3 px-4 font-bold text-gray-700 uppercase"><%= size %></td>
+          <td class="py-3 px-4 text-right font-medium text-gray-900">
+            <%= shirt_counts[size] || 0 %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

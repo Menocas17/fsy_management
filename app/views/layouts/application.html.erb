@@ -22,9 +22,9 @@
     <%= render "shared/toast"%>
     <div class="flex h-screen">
       <%= render "shared/aside"%>
-      <div class="flex-1">
+      <div class="flex flex-col flex-1 h-full overflow-hidden">
         <%= render "shared/top_menu"%>
-        <main class="container mx-auto mt-10 px-1 sm:px-2 md:px-0">
+        <main class="container mx-auto mt-5 px-1 sm:px-2 md:px-5 flex-1 overflow-y-auto">
           <%= yield %>
         </main>
       </div>

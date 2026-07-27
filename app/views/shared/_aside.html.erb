@@ -1,8 +1,9 @@
-<aside class="border-r border-gray-300 hidden md:block">
-  <div class="flex items-center justify-center gap-3 border-b border-gray-300 w-full px-10">
+<aside class="border-r border-slate-200 hidden md:block w-64  shrink-0">
+  <div class="flex items-center justify-center gap-3 border-b border-slate-200 w-full h-12.50 px-10">
     <%= image_tag "fsy_letters.svg", class:"w-15 h-15"%>
     <%= image_tag "fsy-logo.svg", class:"w-10 h-10"%>
   </div>
-  <nav>
+  <nav class="mt-8 px-2">
+    <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_participants_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
   </nav>
 </aside>

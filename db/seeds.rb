@@ -1,57 +1,50 @@
-puts "Agregando nuevos participantes de prueba..."
+# puts "🧹 Limpiando base de datos anterior..."
+# Participant.destroy_all
 
-nuevos_participantes_data = [
-  {
-    first_name: "Pedro",
-    last_name: "Gómez",
-    age: 16,
-    rol: "joven",
-    company: 3,
-    room: "C-15",
-    stake: "bello_horizonte",
-    ward: "ducuali",
-    genre: "H",
-    identity_document: "001-050402-1002X",
-    shirt_number: "l",
-    phone_number: "8888-1111",
-    email_address: "pedro.gomez@example.com",
-    emergency_contact_name: "José Gómez",
-    emergency_contact_number: "7777-2222",
-    emergency_contact_relation: "Padre",
-    allergies: "Ninguna",
-    medicines: "Ninguna",
-    diet: "Normal"
-  },
-  {
-    first_name: "Lucía",
-    last_name: "Méndez",
-    age: 15,
-    rol: "joven",
-    company: 4,
-    room: "D-02",
-    stake: "las_americas",
-    ward: "la_maximo_jerez",
-    genre: "M",
-    identity_document: "001-101004-2003Y",
-    shirt_number: "m",
-    phone_number: "8888-3333",
-    email_address: "lucia.mendez@example.com",
-    emergency_contact_name: "Carmen Méndez",
-    emergency_contact_number: "7777-4444",
-    emergency_contact_relation: "Madre",
-    allergies: "Mariscos",
-    medicines: "Ninguna",
-    diet: "Normal"
-  }
-]
+puts "🌱 Generando data de prueba..."
+
+nombres_hombres = [ "Carlos", "Pedro", "José", "Alejandro", "Mateo", "Daniel", "Gabriel", "Samuel", "David", "Lucas", "Juan", "Francisco", "Mauricio", "Eduardo", "Santiago" ]
+nombres_mujeres = [ "María", "Lucía", "Sofía", "Valeria", "Gabriela", "Camila", "Daniela", "Elena", "Victoria", "Sara", "Adriana", "Fernanda", "Paola", "Renata", "Jimena" ]
+apellidos = [ "Gómez", "Méndez", "Pérez", "Rodríguez", "López", "Martínez", "González", "Hernández", "García", "Flores", "Sánchez", "Ramírez", "Torres", "Díaz", "Cruz" ]
+
+stakes_disponibles = Participant.stakes.keys
+wards_disponibles = Participant.wards.keys
+tallas = [ "s", "m", "l", "xl" ]
+dietas = [ "Normal", "Vegetariana", "Sin Gluten" ]
+alergias_opciones = [ "Ninguna", "Ninguna", "Ninguna", "Polen", "Mariscos", "Maní" ]
 
 exitosos = 0
 
-nuevos_participantes_data.each do |data|
+20.times do |i|
+  genre = [ "H", "M" ].sample
+  first_name = genre == "H" ? nombres_hombres.sample : nombres_mujeres.sample
+  last_name = apellidos.sample
+
+  data = {
+    first_name: first_name,
+    last_name: last_name,
+    age: rand(14..19),
+    rol: "logistica",
+    company: rand(1..10),
+    room: "#{[ 'A', 'B', 'C', 'D' ].sample}-#{rand(1..20)}",
+    stake: stakes_disponibles.sample,
+    ward: wards_disponibles.sample,
+    genre: genre,
+    identity_document: "001-#{rand(10..29)}0#{rand(1..9)}0#{rand(10..99)}#{[ 'A', 'B', 'X', 'Y' ].sample}",
+    shirt_number: tallas.sample,
+    phone_number: "8888-#{rand(1000..9999)}",
+    email_address: "#{first_name.downcase}.#{last_name.downcase}#{i}@example.com",
+    emergency_contact_name: "Familiar de #{first_name}",
+    emergency_contact_number: "7777-#{rand(1000..9999)}",
+    emergency_contact_relation: [ "Padre", "Madre", "Tutor" ].sample,
+    allergies: alergias_opciones.sample,
+    medicines: "Ninguna",
+    diet: dietas.sample
+  }
+
   participant = Participant.new(data)
 
   if participant.save
-    puts "✅ Creado con éxito: #{participant.first_name} #{participant.last_name}"
     exitosos += 1
   else
     puts "❌ Error al guardar a #{participant.first_name}:"
@@ -60,5 +53,7 @@ nuevos_participantes_data.each do |data|
 end
 
 puts "-------------------------------------------"
-puts "¡#{exitosos} participantes nuevos agregados!"
-puts "Total actual en la base de datos: #{Participant.count}"
+puts "¡Proceso finalizado con éxito!"
+puts "🗑️ Registros anteriores eliminados."
+puts "✨ #{exitosos} registros agregados correctamente."
+puts "📊 Total actual en la base de datos: #{Participant.count}"

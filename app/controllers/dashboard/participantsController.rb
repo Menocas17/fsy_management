@@ -1,8 +1,12 @@
 class Dashboard::ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy]
 
+
+
+
   def index
     @participants = Participant.all
+    @shirt_counts = Participant.group(:shirt_number).count
   end
 
   def show

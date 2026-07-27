@@ -1,4 +1,4 @@
-<% if @is_submit%>
+<% if @is_submit %>
   <button type="submit" class="<%= styles %>">
     <div class="flex gap-1 items-center justify-center">
       <% if @icon %>
@@ -7,8 +7,8 @@
       <span><%= @text %></span>
     </div>
   </button>
-<%elsif @is_delete%>
-  <%= button_to @url, method: :delete, data: { turbo_confirm: "Etas seguro que deseas borrar? Esta accion es irreversible" }, class: styles do %>
+<% elsif @is_delete %>
+  <%= button_to @url, method: :delete, data: { turbo_confirm: "Esta seguro que deseas borrar? Esta accion es irreversible" }, class: styles do %>
     <div class="flex gap-1 items-center justify-center">
       <% if @icon %>
         <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
@@ -16,22 +16,31 @@
       <span><%= @text %></span>
     </div>
   <% end %>
-<%elsif @is_button%>
+<% elsif @is_button %>
   <button type="button" class="<%= styles %>">
-    <div class="flex gap-1 items-center justify-center ">
+    <div class="flex gap-1 items-center justify-center">
       <% if @icon %>
         <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>
       <% end %>
       <span><%= @text %></span>
     </div>
   </button>
-<%else%>
-  <%= link_to @url, class: styles do %>
+<% elsif @is_nav %>
+  <%= link_to @url, class: "#{active_classes} #{styles}" do %>
     <div class="flex gap-3 items-center">
-      <%if @icon%>
-        <%= image_tag(@icon, class: "w-[20px] h-[20px]") %>
-      <%end%>
+      <% if current_icon.present? %>
+        <%= image_tag(current_icon, class: "w-[20px] h-[20px]") %>
+      <% end %>
       <span><%= @text %></span>
     </div>
-  <%end%>
-<%end%>
+  <% end %>
+<% else %>
+  <%= link_to @url, class: styles do %>
+    <div class="flex gap-3 items-center">
+      <% if @icon %>
+        <%= image_tag(@icon, class: "w-[20px] h-[20px]") %>
+      <% end %>
+      <span><%= @text %></span>
+    </div>
+  <% end %>
+<% end %>
