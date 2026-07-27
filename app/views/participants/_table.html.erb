@@ -18,7 +18,7 @@
         <% participants.each do |participant|%>
           <tr class="odd:bg-gray-100">
             <td class="py-3 px-4 font-medium text-gray-900 underline">
-              <%= link_to participant.full_name, dashboard_participant_path(participant) %>
+              <%= link_to participant.full_name, participant_path(participant) %>
             </td>
             <td class="py-3 px-4">
               <%= participant.stake.titleize%>
@@ -38,7 +38,7 @@
             <td class="py-3 px-4">
               <%= participant.room%>
             </td>
-            <td><%= link_to "Ver registro", dashboard_participant_path(participant), class: "text-gray-900 underline"%>
+            <td><%= link_to "Ver registro", participant_path(participant), class: "text-gray-900 underline"%>
             </td>
           </tr>
         <% end%>

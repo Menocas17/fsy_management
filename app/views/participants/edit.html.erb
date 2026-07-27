@@ -3,7 +3,7 @@
   <%= render "form", participant: @participant%>
   <%# <%if Current.user.role.in?(%w[director coordinador admin])%>
   <div class="absolute bottom-0 left-5">
-    <%= render(ButtonComponent.new(text: "Borrar", type:"delete", url: [:dashboard, @participant] ))%>
+    <%= render(ButtonComponent.new(text: "Borrar", type:"delete", url: @participant))%>
   </div>
   <%# <%end%>
 </div>

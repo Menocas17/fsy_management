@@ -1,4 +1,4 @@
-class Dashboard::ParticipantsController < ApplicationController
+class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy]
 
 
@@ -30,7 +30,7 @@ class Dashboard::ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
-      redirect_to [ :dashboard, @participant ]
+      redirect_to participant_path
     else
       render :edit, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class Dashboard::ParticipantsController < ApplicationController
   # //TODO - Create the destroy method
   def destroy
     @participant.destroy
-    redirect_to dashboard_participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
+    redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
   private
