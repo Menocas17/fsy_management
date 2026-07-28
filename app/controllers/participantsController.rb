@@ -5,8 +5,22 @@ class ParticipantsController < ApplicationController
 
 
   def index
-    @participants = Participant.all
-    @shirt_counts = Participant.group(:shirt_number).count
+  @participants = Participant.jovenes
+                               .search_by_name(params[:query])
+                               .by_stake(params[:stake])
+                               .by_ward(params[:ward])
+                               .by_genre(params[:genre])
+                               .by_company(params[:company])
+  end
+
+  def staff
+    @participants = Participant.staff
+                               .search_by_name(params[:query])
+                               .by_stake(params[:stake])
+                               .by_ward(params[:ward])
+                               .by_genre(params[:genre])
+                               .by_company(params[:company])
+                               .by_role(params[:rol])
   end
 
   def show

@@ -15,6 +15,12 @@ class Participant < ApplicationRecord
 
   scope :jovenes, -> { where(rol: "joven") }
   scope :staff,   -> { where(rol: [ "logistica", "coordinador", "director", "consejero", "consejero_auxiliar" ]) }
+  scope :search_by_name, ->(query) { where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{query}%") if query.present? }
+  scope :by_stake, ->(stake) { where(stake: stake) if stake.present? }
+  scope :by_ward, ->(ward) { where(ward: ward) if ward.present? }
+  scope :by_genre, ->(genre) { where(genre: genre) if genre.present? }
+  scope :by_company, ->(query) { where(company: query) if query.present? }
+  scope :by_role, ->(role) { where(rol: role) if role.present? }
 
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
@@ -60,6 +66,7 @@ class Participant < ApplicationRecord
   def self.shirt_count
     group(:shirt_number).count
   end
+
 
 
 

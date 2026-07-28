@@ -13,5 +13,9 @@ Rails.application.routes.draw do
   # root "posts#index"
   root "pages#index"
     resource :dashboard, only: [ :show ]
-    resources :participants
+    resources :participants do
+      collection do
+        get :staff
+      end
+    end
 end

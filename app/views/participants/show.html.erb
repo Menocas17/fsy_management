@@ -1,4 +1,5 @@
-<div class=" max-w-255 mx-auto min-h-100 rounded-xl border border-gray-200 pb-5 shadow-md">
+<%# //TODO - Separate this view into partilas for better maintenance %>
+<div class=" max-w-255 mx-auto min-h-100 rounded-xl border border-gray-200 pb-5 shadow-md mt-5">
   <%# This is the banner profile photo section %>
   <%# This div contains the thumbnail shpown in the profile but also all the logic for openind a dialog to show the full picture %>
   <div class="relative h-32 w-full bg-fsy-pattern bg-repeat-space bg-center rounded-t-xl shadow-md" data-controller="dialog">
@@ -45,7 +46,7 @@
     <%# This is the contact information section %>
     <section class="border border-gray-200  rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
       <h3 class="font-bold text-lg bg-[#C8E8E5] px-3 py-2 rounded-t-xl">Informacion de Contacto</h3>
-      <dl class="mt-8 grid grid-cols-2 md:grid-cols-4 p-3">
+      <dl class="mt-8 grid grid-cols-2 md:grid-cols-4 p-3 gap-4">
         <%= render(InfoTileComponent.new(title: "Numero", icon: "phone.svg", data: [@participant.phone_number ]))%>
         <%= render(InfoTileComponent.new(title: "Correo", icon: "email.svg", data: [@participant.email_address ]))%>
         <div class="col-span-2  w-full mt-4">
