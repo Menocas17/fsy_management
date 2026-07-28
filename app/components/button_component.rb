@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil)
+  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil)
     @url = url
     @text = text
     @type = type
@@ -13,6 +13,7 @@ class ButtonComponent < ViewComponent::Base
     @secondary_icon = secondary_icon
     @is_nav = is_nav
     @section = section
+    @method = method
   end
 
   def styles

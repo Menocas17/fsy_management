@@ -45,4 +45,16 @@ module ApplicationHelper
       "bg-[#E5EFF9] border border-[#CCE2F8]"
     end
   end
+
+  def current_user_avatar_tag(options = {})
+    css_classes = options[:class] || "w-9 h-9 rounded-full object-cover border-2 border-[#1C7DA5]"
+
+    if Current.user&.participant&.avatar&.attached?
+      image_tag Current.user.participant.avatar, class: css_classes
+    else
+      initials = Current.user&.participant&.full_name&.split&.map(&:first)&.join&.upcase || "FSY"
+
+      content_tag(:div, initials, class: "#{css_classes} bg-blue-600 text-white flex items-center justify-center font-bold text-sm")
+    end
+  end
 end
