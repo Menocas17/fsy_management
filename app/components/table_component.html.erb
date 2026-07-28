@@ -1,0 +1,56 @@
+<section class="mt-5">
+  <div class="overflow-x-auto shadow-md rounded-lg border border-gray-200">
+    <table class="w-full text-left border-collapse bg-white">
+      <thead>
+        <tr class="bg-linear-to-tr from-[#095581] via-[#238db4] to-[#3c9baa] text-center text-white">
+          <th class="py-3 px-4">Nombre Completo</th>
+          <th class="py-3 px-4 hidden sm:table-cell">Estaca</th>
+          <th class="py-3 px-4 hidden lg:table-cell">Barrio</th>
+          <% if @is_staff %>
+            <th class="py-3 px-4">Rol</th>
+          <% end %>
+          <th class="py-3 px-4 hidden lg:table-cell">Edad</th>
+          <th class="py-3 px-4 hidden lg:table-cell">Genero</th>
+          <th class="py-3 px-4">Compania</th>
+          <th class="py-3 px-4 <%= show_cell %>">Cuarto</th>
+          <th class="py-3 px-4 hidden lg:table-cell"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 text-sm text-gray-600 text-center">
+        <% @participants.each do |participant| %>
+          <tr class="odd:bg-gray-100">
+            <td class="py-3 px-4 font-medium text-gray-900 underline">
+              <%= link_to participant.full_name, participant_path(participant), data: { turbo_frame: "_top" } %>
+            </td>
+            <td class="py-3 px-4 hidden sm:table-cell">
+              <%= participant.stake.titleize %>
+            </td>
+            <td class="py-3 px-4 hidden lg:table-cell">
+              <%= participant.ward&.titleize %>
+            </td>
+            <% if @is_staff %>
+              <td class="py-3 px-4">
+                <%= participant.rol&.titleize %>
+              </td>
+            <% end %>
+            <td class="py-3 px-4 hidden lg:table-cell">
+              <%= participant.age %>
+            </td>
+            <td class="py-3 px-4 hidden lg:table-cell">
+              <%= participant.genre.capitalize %>
+            </td>
+            <td class="py-3 px-4">
+              <%= participant.company %>
+            </td>
+            <td class="py-3 px-4 <%= show_cell %>">
+              <%= participant.room %>
+            </td>
+            <td>
+              <%= link_to "Ver registro", participant_path(participant), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>
