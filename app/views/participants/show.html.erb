@@ -25,7 +25,7 @@
         <h2 class="font-bold text-2xl"><%= @participant.full_name %></h2>
         <span class="bg-green-100 py-1.5 px-3 rounded-2xl text-sm text-gray-600"><%= @participant.rol.capitalize %></span>
       </div>
-      <%= render(ButtonComponent.new(text: "Editar", url: edit_participant_path(@participant), type: "muted", icon: "edit.svg")) %>
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_participant_path(@participant, from: params[:from]), type: "muted", icon: "edit.svg")) %>
     </div>
   </section>
   <%# This is the section of the general information %>

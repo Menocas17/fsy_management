@@ -12,4 +12,12 @@ class TableComponent < ViewComponent::Base
       ""
     end
   end
+
+  def from_path
+    if @is_staff
+      "staff"
+    else
+      "jovenes"
+    end
+  end
 end

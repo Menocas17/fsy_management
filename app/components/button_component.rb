@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil)
+  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil)
     @url = url
     @text = text
     @type = type
@@ -12,6 +12,7 @@ class ButtonComponent < ViewComponent::Base
     @is_button = is_button
     @secondary_icon = secondary_icon
     @is_nav = is_nav
+    @section = section
   end
 
   def styles
@@ -40,7 +41,9 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active?
-    helpers.current_page?(@url)
+    return false if @url.nil?
+    return true if current_page?(@url)
+    true if @section.present? && params[:from] == @section
   end
 
   def active_classes

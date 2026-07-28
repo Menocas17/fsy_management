@@ -5,7 +5,7 @@
   </div>
   <nav class="mt-8 px-2 flex flex-col gap-4">
     <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
-    <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , classes: ""))%>
-    <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , classes: ""))%>
+    <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "jovenes"))%>
+    <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "staff"))%>
   </nav>
 </aside>

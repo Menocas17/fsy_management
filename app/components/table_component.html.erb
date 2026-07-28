@@ -20,7 +20,7 @@
         <% @participants.each do |participant| %>
           <tr class="odd:bg-gray-100">
             <td class="py-3 px-4 font-medium text-gray-900 underline">
-              <%= link_to participant.full_name, participant_path(participant), data: { turbo_frame: "_top" } %>
+              <%= link_to participant.full_name, participant_path(participant, from: from_path), data: { turbo_frame: "_top" } %>
             </td>
             <td class="py-3 px-4 hidden sm:table-cell">
               <%= participant.stake.titleize %>
@@ -46,7 +46,7 @@
               <%= participant.room %>
             </td>
             <td>
-              <%= link_to "Ver registro", participant_path(participant), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" %>
+              <%= link_to "Ver registro", participant_path(participant, from: from_path), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" %>
             </td>
           </tr>
         <% end %>
