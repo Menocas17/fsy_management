@@ -30,7 +30,7 @@
             </td>
             <% if @is_staff %>
               <td class="py-3 px-4">
-                <%= participant.rol&.titleize %>
+                <%= render(RoleSpanComponent.new(role: participant.rol))%>
               </td>
             <% end %>
             <td class="py-3 px-4 hidden lg:table-cell">

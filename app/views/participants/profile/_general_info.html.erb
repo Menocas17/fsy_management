@@ -1,0 +1,14 @@
+<div class="mt-7 px-5">
+  <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a]">
+    <h3 class="font-bold text-lg bg-[#A1DFEC] px-3 py-2 rounded-t-xl">Informacion General</h3>
+    <dl class="mt-5 grid grid-cols-2 md:grid-cols-4 p-3">
+      <%= render(InfoTileComponent.new(title: "Compañia", icon: "company.svg", data: [@participant.company ]))%>
+      <%= render(InfoTileComponent.new(title: "Cuarto", icon: "room.svg", data: [@participant.room ] ))%>
+      <%= render(InfoTileComponent.new(title: "Consejeros", icon: "respond_to.svg", data: [@participant.m_person_in_charge, @participant.h_person_in_charge] ))%>
+      <%= render(InfoTileComponent.new(title: "Estaca", icon: "stake.svg", data: [@participant.stake.titleize ] ))%>
+      <%= render(InfoTileComponent.new(title: "Barrio", icon: "ward.svg", data: [@participant.ward&.titleize] ))%>
+      <%= render(InfoTileComponent.new(title: "Genero", icon: "gender.svg", data: [@participant.genre ] ))%>
+      <%= render(InfoTileComponent.new(title: "Identificacion", icon: "id.svg", data: [@participant.identity_document ] ))%>
+      <%= render(InfoTileComponent.new(title: "Camisa", icon: "shirt.svg", data: [@participant.shirt_number.capitalize ] ))%>
+    </dl>
+  </section>

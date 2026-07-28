@@ -44,13 +44,12 @@ class ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
-      redirect_to participant_path
+      redirect_to participant_path(@participant, from: params[:from]), notice: "Actualizado exitosamente."
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
-  # //TODO - Create the destroy method
   def destroy
     @participant.destroy
     redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"

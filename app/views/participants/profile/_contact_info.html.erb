@@ -1,0 +1,15 @@
+<section class="border border-gray-200  rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
+  <h3 class="font-bold text-lg bg-[#C8E8E5] px-3 py-2 rounded-t-xl">Informacion de Contacto</h3>
+  <dl class="mt-8 grid grid-cols-2 md:grid-cols-4 p-3 gap-4">
+    <%= render(InfoTileComponent.new(title: "Numero", icon: "phone.svg", data: [@participant.phone_number ]))%>
+    <%= render(InfoTileComponent.new(title: "Correo", icon: "email.svg", data: [@participant.email_address ]))%>
+    <div class="col-span-2  w-full mt-4">
+      <h4 class="mb-3 text-md font-bold bg-[#FCB446] px-3 rounded-xl">Contacto de Emergencia</h4>
+      <div class="grid grid-cols-2">
+        <%= render(InfoTileComponent.new(title: "Numero", icon: "phone.svg", data: [@participant.emergency_contact_number]))%>
+        <%= render(InfoTileComponent.new(title: "Nombre", icon: "name_emergency.svg", data: [@participant.emergency_contact_name ]))%>
+        <%= render(InfoTileComponent.new(title: "Parentesco", icon: "company.svg", data: [@participant.emergency_contact_relation ]))%>
+      </div>
+    </div>
+  </dl>
+</section>

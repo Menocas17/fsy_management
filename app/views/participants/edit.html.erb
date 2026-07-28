@@ -1,6 +1,6 @@
 <h1 class="text-4xl md:text-3xl font-semibold mb-6"><%= @participant.full_name%></h1>
 <div class="relative">
-  <%= render "form", participant: @participant%>
+  <%= render "participants/form/form", participant: @participant%>
   <%# <%if Current.user.role.in?(%w[director coordinador admin])%>
   <div class="absolute bottom-0 left-5">
     <%= render(ButtonComponent.new(text: "Borrar", type:"delete", url: @participant))%>
