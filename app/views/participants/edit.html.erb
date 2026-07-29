@@ -9,4 +9,12 @@
       <%= render(ButtonComponent.new(text: "Borrar", type:"delete", is_delete:true, url: @participant))%>
     </div>
   <%end%>
+  <%if params[:from] == "myprofile"%>
+    <div class="absolute bottom-0 left-5">
+      <%= button_to "Enviar enlace para restablecer contraseña", 
+                send_password_reset_participant_path(@participant), 
+                method: :post, 
+                class: "border border-gray-200 py-2 px-3 rounded-lg hover:border-gray-600 text-sm font-medium shadow-lg cursor-pointer" %>
+    <%end%>
+  </div>
 </div>

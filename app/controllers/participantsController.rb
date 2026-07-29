@@ -1,5 +1,5 @@
 class ParticipantsController < ApplicationController
-  before_action :set_participant, only: %i[show edit update destroy]
+  before_action :set_participant, only: %i[show edit update destroy send_password_reset]
   before_action :authorize_admin_to_delete!, only: [ :destroy ]
   before_action :require_admin_to_create!, only: [ :new, :create ]
 
@@ -24,6 +24,20 @@ class ParticipantsController < ApplicationController
 
   def myprofile
     @participant = Current.user&.participant
+  end
+
+  def send_password_reset
+    user = @participant.user
+
+    if user
+
+      PasswordsMailer.reset(user).deliver_later
+      flash[:notice] = "Se ha enviado el enlace de recuperación a #{user.email_address}."
+    else
+      flash[:alert] = "Este participante no tiene una cuenta de usuario."
+    end
+
+    redirect_back fallback_location: dashboard_path
   end
 
   def show

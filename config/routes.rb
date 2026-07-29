@@ -13,12 +13,15 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
-  root "pages#index"
-    resource :dashboard, only: [ :show ]
-    resources :participants do
+  root "sessions#new"
+  resource :dashboard, only: [ :show ]
+  resources :participants do
       collection do
         get :staff
         get :myprofile
       end
-    end
+      member do
+        post :send_password_reset
+      end
+  end
 end

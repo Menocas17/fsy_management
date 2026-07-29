@@ -10,7 +10,6 @@
     <%= render "participants/form/medical_info_form", form: form%>
     <%= render "participants/form/note_info_form", form: form%>
     <div class="my-5 flex justify-end px-5 md:px-10 ">
-      <%# <div></div> %>
       <div class="flex gap-3">
         <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: params[:return_to] || dashboard_path))%>
         <%= render(ButtonComponent.new(text: submit_button_text(participant), type:"primary", is_submit: true))%>
