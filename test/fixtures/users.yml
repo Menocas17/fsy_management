@@ -1,9 +1,4 @@
-<% password_digest = BCrypt::Password.create("password") %>
-
 one:
-  email_address: one@example.com
-  password_digest: <%= password_digest %>
-
-two:
-  email_address: two@example.com
-  password_digest: <%= password_digest %>
+  email_address: 'admin@fsy.com'
+  # Este es el hash bcrypt para la contraseña literal "password"
+  password_digest: <%= BCrypt::Password.create("password") %>

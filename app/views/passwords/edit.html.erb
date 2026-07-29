@@ -3,6 +3,16 @@
     <%= image_tag "fsy_letters.svg", class:"w-30 h-30"%>
     <%= image_tag "fsy-logo.svg", class:"w-30 h-30"%>
   </div>
+  <% if @user.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+      <h3 class="text-red-800 font-bold text-sm">La contraseña no cumple con los requisitos:</h3>
+      <ul class="list-disc list-inside text-sm text-red-700 mt-2">
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
   <% if alert = flash[:alert] %>
     <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg block mx-auto text-center" id="alert"><%= alert %></p>
   <% end %>

@@ -3,6 +3,9 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   belongs_to :participant, optional: true
 
+  validates :password, length: { minimum: 8 }, allow_nil: true
+  validate :password_complexity
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   def admin_or_staff_manager?
@@ -12,5 +15,22 @@ class User < ApplicationRecord
 
   def counselers_staff?
     participant&.consejero? || participant&.auxiliar?
+  end
+
+  private
+  def password_complexity
+    return if password.blank?
+
+    unless password.match?(/\d/)
+      errors.add :password, "debe incluir al menos un número."
+    end
+
+    unless password.match?(/[A-Z]/)
+      errors.add :password, "debe incluir al menos una letra mayúscula."
+    end
+
+    unless password.match?(/[[:punct:]]/)
+      errors.add :password, "debe incluir al menos un carácter especial."
+    end
   end
 end

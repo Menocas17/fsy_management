@@ -14,7 +14,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
 
     follow_redirect!
-    assert_notice "reset instructions sent"
+    assert_notice "Se han enviado las instrucciones para restablecer la contraseña."
   end
 
   test "create for an unknown user redirects but sends no mail" do
@@ -23,7 +23,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
 
     follow_redirect!
-    assert_notice "reset instructions sent"
+    assert_notice "Se han enviado las instrucciones para restablecer la contraseña."
   end
 
   test "edit" do
@@ -36,17 +36,17 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_password_path
 
     follow_redirect!
-    assert_notice "reset link is invalid"
+    assert_notice "El enlace para restablecer la contraseña no es válido o ha caducado."
   end
 
   test "update" do
     assert_changes -> { @user.reload.password_digest } do
-      put password_path(@user.password_reset_token), params: { password: "new", password_confirmation: "new" }
+      put password_path(@user.password_reset_token), params: { password: "StrongPassword123!", password_confirmation: "StrongPassword123!" }
       assert_redirected_to new_session_path
     end
 
     follow_redirect!
-    assert_notice "Password has been reset"
+    assert_notice "La contraseña ha sido restablecida."
   end
 
   test "update with non matching passwords" do
@@ -57,7 +57,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     end
 
     follow_redirect!
-    assert_notice "Passwords did not match"
+    assert_notice "Las contraseñas no coinciden."
   end
 
   private
