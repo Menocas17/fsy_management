@@ -9,6 +9,7 @@ module ApplicationHelper
       image_tag("avatar-default.svg")
     end
   end
+  # comment
 
   def check_notes (value)
     @value = value
