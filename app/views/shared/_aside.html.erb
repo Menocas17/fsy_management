@@ -7,5 +7,6 @@
     <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
     <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "jovenes"))%>
     <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "staff"))%>
+    <%= render(ButtonComponent.new(text:"My profile", url: myprofile_participants_path, icon: "profile.svg", secondary_icon: "profile-s.svg", is_nav:true , section: "myprofile"))%>
   </nav>
 </aside>

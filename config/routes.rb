@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     resources :participants do
       collection do
         get :staff
+        get :myprofile
       end
     end
 end

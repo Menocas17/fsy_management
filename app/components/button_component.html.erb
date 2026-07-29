@@ -8,7 +8,7 @@
     </div>
   </button>
 <% elsif @is_delete %>
-  <%= button_to @url, method: :delete, data: { turbo_confirm: "Esta seguro que deseas borrar? Esta accion es irreversible" }, class: styles do %>
+  <%= button_to @url, method: :delete, data: { turbo_confirm: "Estas seguro que deseas borrar? Esta accion es irreversible" }, class: styles do %>
     <div class="flex gap-1 items-center justify-center">
       <% if @icon %>
         <%= image_tag(@icon, class: "w-[15px] h-[15px]") %>

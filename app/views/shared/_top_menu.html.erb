@@ -13,7 +13,9 @@
       </div>
     </div>
     <nav class="flex items-center justify-center gap-3">
-      <%= current_user_avatar_tag%>
+      <%= link_to myprofile_participants_path, class:"cursor-pointer" do%>
+        <%= current_user_avatar_tag%>
+      <%end%>
       <%= button_to "Cerrar sesión", session_path, method: :delete, class: " transition cursor-pointer shadow-md rounded-xl text-sm flex items-center justify-center bg-[#C8E7E9] border border-[#268EB5] font-semibold hidden md:block py-1 px-2 text-gray-600 rounded-lg hover:border-gray-700"%>
     </nav>
   </div>
@@ -33,9 +35,14 @@
         </svg>
       </button>
     </div>
-    <nav class="mt-10 px-3">
-      <%= render(ButtonComponent.new(text:"Inicio", url: participants_path, icon: "home.svg", classes: ""))%>
-      <%= render(ButtonComponent.new(text: "Cerrar Sesion", type: "muted", classes: "bg-[#C8E7E9] !border-[#268EB5] !font-semibold "))%>
+    <nav class="mt-8 px-2 flex flex-col ">
+      <div class="flex flex-col gap-4">
+        <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
+        <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "jovenes"))%>
+        <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "staff"))%>
+        <%= render(ButtonComponent.new(text:"My profile", url: myprofile_participants_path, icon: "profile.svg", secondary_icon: "profile-s.svg", is_nav:true , section: "myprofile"))%>
+      </div>
+      <%= button_to "Cerrar sesión", session_path, method: :delete, class: " transition cursor-pointer shadow-md rounded-xl text-sm justify-center bg-[#C8E7E9] border border-[#268EB5] font-semibold  py-1 px-2 text-gray-600 rounded-lg hover:border-gray-700 w-full mt-[530px]"%>
     </nav>
   </div>
 </div>

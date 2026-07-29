@@ -1,7 +1,7 @@
   <%= form_with model: participant do |form| %>
   <%= hidden_field_tag :from, params[:from] %>
   <% if form.object.errors.any? %>
-    <p class="error"><%= form.object.errors.full_messages.first %></p>
+    <p class="ml-5 text-red-600"><%= form.object.errors.full_messages.first %></p>
   <% end %>
   <div class="md:max-w-3/4">
     <%= render "participants/form/essential_info_form", form: form%>
@@ -12,7 +12,7 @@
     <div class="my-5 flex justify-end px-5 md:px-10 ">
       <%# <div></div> %>
       <div class="flex gap-3">
-        <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: participant_path(@participant, from: params[:from])))%>
+        <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: params[:return_to] || dashboard_path))%>
         <%= render(ButtonComponent.new(text: submit_button_text(participant), type:"primary", is_submit: true))%>
       </div>
     </div>

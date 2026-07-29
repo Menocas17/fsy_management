@@ -1,8 +1,7 @@
 class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy]
-
-
-
+  before_action :authorize_admin_to_delete!, only: [ :destroy ]
+  before_action :require_admin_to_create!, only: [ :new, :create ]
 
   def index
   @participants = Participant.jovenes
@@ -21,6 +20,10 @@ class ParticipantsController < ApplicationController
                                .by_genre(params[:genre])
                                .by_company(params[:company])
                                .by_role(params[:rol])
+  end
+
+  def myprofile
+    @participant = Current.user&.participant
   end
 
   def show
@@ -44,15 +47,29 @@ class ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
-      redirect_to participant_path(@participant, from: params[:from]), notice: "Actualizado exitosamente."
+       target_return = case params[:from]
+       when "staff"
+        staff_participants_path
+       when "jovenes"
+        participants_path
+       else
+        dashboard_path
+       end
+
+       if params[:from] == "myprofile"
+         redirect_to myprofile_participants_path(from: params[:from]), notice: "Actualizado exitosamente."
+       else
+          redirect_to participant_path(@participant, from: params[:from], return_to: target_return), notice: "Actualizado exitosamente."
+       end
+
     else
-      render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @participant.destroy
-    redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
+        @participant.destroy
+        redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
   private
@@ -60,7 +77,9 @@ class ParticipantsController < ApplicationController
     @participant = Participant.find(params[:id])
   end
 
+
+
   def participant_params
-    params.expect(participant: %i[ first_name last_name rol avatar company room stake ward genre identity_document shirt_number phone_number email_address emergency_contact_number emergency_contact_name emergency_contact_relation medical_info allergies medicines diet additional_medical_notes additional_instructions])
+    params.expect(participant: Participant.allowed_attributes_for(Current.user))
   end
 end

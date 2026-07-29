@@ -1,4 +1,9 @@
-<h1 class="font-bold text-2xl mb-5">Staff</h1>
+<div class="flex justify-between mb-5 px-3">
+  <h1 class="font-bold text-2xl">Staff</h1>
+  <%if Current.user&.admin_or_staff_manager?%>
+    <%= render(ButtonComponent.new(text:"Nuevo", url: new_participant_path, type:"primary"))%>
+  <%end%>
+</div>
 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
   <%= form_with url: staff_participants_path, method: :get, data: { turbo_frame: "participants_table", turbo_action: "advance" }, class: "flex flex-wrap gap-4 items-center" do |f| %>
     <div class="flex-1 min-w-50">

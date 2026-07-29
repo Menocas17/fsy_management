@@ -1,0 +1,18 @@
+<% if Current.user&.participant_id.nil?%>
+  <h1>Eres el system admin</h1>
+<%else%>
+  <div class=" max-w-255 mx-auto min-h-100 rounded-xl border border-gray-200 pb-5 shadow-md mt-5">
+    <%= render "participants/profile/profile_banner", participant: @participant%>
+    <%= render "participants/profile/general_info", participant: @participant%>
+    <%= render "participants/profile/contact_info", participant: @participant%>
+    <%= render "participants/profile/medical_info", participant: @participant%>
+    <%# this is the adittional notes section %>
+    <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
+      <h3 class="font-bold text-lg bg-[#0A5681] px-3 py-2 rounded-t-xl text-white">Notas Adicionales</h3>
+      <p class="font-thin italic text-center p-4">
+        <%= check_notes(@participant.additional_instructions)%>
+      </p>
+    </section>
+  </div>
+</div>
+<%end%>

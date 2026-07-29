@@ -1,9 +1,12 @@
-<h1 class="text-4xl md:text-3xl font-semibold mb-6"><%= @participant.full_name%></h1>
+<div class="flex justify-between px-3 md:w-3/4 mb-6">
+  <h1 class="text-4xl md:text-3xl font-semibold "><%= @participant.full_name%></h1>
+  <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: params[:return_to] || dashboard_path))%>
+</div>
 <div class="relative">
   <%= render "participants/form/form", participant: @participant%>
-  <%# <%if Current.user.role.in?(%w[director coordinador admin])%>
-  <div class="absolute bottom-0 left-5">
-    <%= render(ButtonComponent.new(text: "Borrar", type:"delete", url: @participant))%>
-  </div>
-  <%# <%end%>
+  <%if Current.user.admin_or_staff_manager? %>
+    <div class="absolute bottom-0 left-5">
+      <%= render(ButtonComponent.new(text: "Borrar", type:"delete", is_delete:true, url: @participant))%>
+    </div>
+  <%end%>
 </div>

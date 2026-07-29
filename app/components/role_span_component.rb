@@ -11,7 +11,7 @@ class RoleSpanComponent < ViewComponent::Base
     when "consejero"
         "bg-yellow-100"
 
-    when "consejero_auxiliar"
+    when "auxiliar"
         "bg-blue-100"
 
     when "coordinador"
@@ -23,8 +23,8 @@ class RoleSpanComponent < ViewComponent::Base
     when "logistica"
         "bg-cyan-100"
 
-    when "registrado"
-        "bg-amber-100"
+    when "registrador"
+        "bg-red-100"
     end
   end
 end

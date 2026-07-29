@@ -19,7 +19,7 @@ es:
         room: 'Cuarto'
         comapany: 'Compañia'
         m_person_in_charge: 'Persona a cargo (mujer)'
-        h_person_in_charge: 'Perosina a cargo (hombre)'
+        h_person_in_charge: 'Persona a cargo (hombre)'
         allergies: 'Alergias'
         medicines: 'Medicinas'
         diet: 'Dieta'
@@ -33,3 +33,10 @@ es:
         emergency_contact_name: 'Nombre del contacto de emergencia'
         emergency_contact_relation: 'Parentesco del contacto de emergencia'
         avatar: 'Imagen de Perfil'
+    errors:
+      models:
+        participant:
+          attributes:
+            first_name:
+              blank: 'no puede estar en blanco'
+          blank: 'no puede estar en blanco'

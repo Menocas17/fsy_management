@@ -18,11 +18,17 @@
   </dialog>
 </div>
 <section class="mt-20 px-5">
-  <div class="flex justify-between items-center bg-">
+  <div class="flex flex-col md:flex-row gap-8 md:justify-between md:items-center ">
     <div class="flex flex-col gap-1 items-start">
-      <h2 class="font-bold text-2xl"><%= participant.full_name %></h2>
+      <h2 class="font-bold text-2xl mt-5"><%= participant.full_name %></h2>
       <%= render (RoleSpanComponent.new(role: participant.rol))%>
     </div>
-    <%= render(ButtonComponent.new(text: "Editar", url: edit_participant_path(participant, from: params[:from]), type: "muted", icon: "edit.svg")) %>
+    <div class="flex gap-3">
+      <% if !current_page?(myprofile_participants_path)%>
+        <%= render(ButtonComponent.new(text: "Volver", type:"muted", url: params[:return_to] || dashboard_path, icon:"return.svg", classes: "w-2/4 md:w-full"))%>
+      <%end%>
+      <% origin_path = current_page?(myprofile_participants_path) ? "myprofile" : params[:from] %>
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_participant_path(participant, from: origin_path, return_to: request.fullpath), type: "muted", icon: "edit.svg", classes: "w-2/4 md:w-full")) %>
+    </div>
   </div>
 </section>
