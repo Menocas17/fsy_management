@@ -1,17 +1,67 @@
 <section class="px-3 md:px-0 mt-6">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-    <div class="border border-slate-200 p-4 rounded-lg shadow-sm w-full min-w-0 overflow-hidden">
+    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
       <h3 class="text-gray-500 font-semibold mb-2">Participantes por Estaca</h3>
       <%= column_chart count_by_stake,
           colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
-          height: "260px"
+          height: "260px",
+          dataset: {
+              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 }, 
+              borderWidth: 0,
+              barPercentage: 0.4,       
+              categoryPercentage: 0.7   
+            },
+          library: {
+            scales: {
+              x: { 
+                grid: { display: false },
+                border: { display: false }
+              }, 
+              y: { 
+                grid: { color: "rgba(0, 0, 0, 0.05)" },
+                border: { display: false } 
+              }
+            },
+            plugins: {
+              legend: { display: false } 
+            },
+            animation: {
+              duration: 1400,
+              easing: 'easeOutBack' 
+            }
+          }
+ 
+    
       %>
     </div>
-    <div class="border border-slate-200 p-4 rounded-lg shadow-sm w-full min-w-0 overflow-hidden">
+    <div class="border  p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
       <h3 class="text-gray-500 font-semibold mb-2">Distribucion por Rol</h3>
       <%= pie_chart count_by_role, 
           donut: true, 
-          height: "260px" 
+          height: "260px",
+          dataset: {
+        borderWidth: 4,              
+        borderColor: "#ffffff",      
+        borderRadius: 6,            
+        spacing: 2                   
+      },
+      library: {
+        cutout: "75%",              
+        plugins: {
+          legend: {
+            position: 'right',        
+            labels: {
+              usePointStyle: true,    
+              pointStyle: 'circle',
+              
+            }
+          }
+        },
+        animation: {
+          duration: 1500,
+          easing: 'easeOutQuart'      
+        }
+      }
       %>
     </div>
   </div>

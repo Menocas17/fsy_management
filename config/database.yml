@@ -86,7 +86,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: fsy_management_production
+    database: fsy_management_productions
     username: fsy_management
     password: <%= ENV["POSTGRES_PASSWORD"] %>
   cache:

@@ -55,7 +55,7 @@ class Participant < ApplicationRecord
   end
 
   def self.role_count
-    group(:rol).count
+    where.not(rol: nil).group(:rol).count
   end
 
   def self.male_count

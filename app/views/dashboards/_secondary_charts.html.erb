@@ -1,8 +1,8 @@
 <section class="mt-5 pb-10 grid grid-cols-1 lg:grid-cols-3 gap-8 ">
-  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1">
+  <div class="border  inline-block p-4 rounded-lg text-center flex-1 bg-white border-slate-100 shadow-lg">
     <div class="flex gap-3 items-center justify-center">
       <div class="bg-gray-100 rounded-lg p-2">
-        <%= image_tag ("numbers.svg"), class: "w-[30px] h-[30px]"%>
+        <%= icon "chart-no-axes-column-increasing"%>
       </div>
       <h3 class="text-gray-500 ">Jovenes por genero</h3>
     </div>
@@ -22,11 +22,36 @@
     </div>
   </div>
   <%= render "shirt_table", shirt_counts: shirt_counts %>
-  <div class=" border border-slate-200 p-4 rounded-lg shadow-sm flex-1">
+  <div class=" border  p-4 rounded-lg flex-1 bg-white border-slate-100 shadow-lg">
     <h3 class="font-bold text-center">Jovenes por edad</h3>
     <%= bar_chart data_by_age,
       colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
-      height: "180px"
+      height: "180px",
+       dataset: {
+        borderRadius: { topLeft: 0, topRight: 8, bottomLeft: 0, bottomRight: 8 }, # Solo redondea el extremo derecho
+        borderWidth: 0,
+        barPercentage: 0.5,       # Grosor perfecto para lectura horizontal
+        categoryPercentage: 0.8
+      },
+      library: {
+        scales: {
+          x: { 
+            grid: { color: "rgba(0, 0, 0, 0.05)" }, # Cuadrícula vertical tenue
+            border: { display: false }
+          }, 
+          y: { 
+            grid: { display: false }, # Quita líneas horizontales para mejor flujo
+            border: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        },
+        animation: {
+          duration: 1250,
+          easing: 'easeOutQuart' # Expansión horizontal sofisticada y quirúrgica
+        }
+      }
     %>
   </div>
 </section>

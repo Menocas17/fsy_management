@@ -1,28 +1,28 @@
-<section class="grid grid-cols-2 lg:flex w-full gap-6">
-  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center  flex-1">
+<section class="grid grid-cols-2 lg:flex w-full gap-9">
+  <div class="  inline-block p-4 rounded-lg text-center  flex-1 border bg-white border-slate-100 shadow-lg">
     <div class="flex gap-3 items-center justify-center">
-      <div class="bg-gray-100 rounded-lg p-2">
-        <%= image_tag ("company.svg"), class: "w-[30px] h-[30px]"%>
+      <div class="bg-green-100 rounded-lg p-2">
+        <%= icon "user", class: "text-green-700"%>
       </div>
       <h3 class="text-gray-500 ">Total de jovenes</h3>
     </div>
     <p class="font-bold text-3xl mt-3"><%= total_jovenes %></p>
   </div>
-  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1 col-span-2 order-1">
+  <div class=" inline-block p-4 rounded-lg text-center flex-1 col-span-2 order-1 bg-white border-slate-100 shadow-lg">
     <div class="flex gap-3 items-center justify-center"">
-      <div class="bg-gray-100 rounded-lg p-2">
-        <%= image_tag ("people.svg"), class: "w-[30px] h-[30px]"%>
+      <div class="bg-violet-100 rounded-lg p-2">
+        <%= icon "users", class: "text-violet-700"%>
       </div>
-      <h3 class="text-gray-500 ">Total de Personas</h3>
+      <h3 class="text-gray-500 ">Total de personas</h3>
     </div>
     <p class="font-bold text-3xl mt-3"><%= total_participants%></p>
   </div>
-  <div class="border border-slate-200 inline-block p-4 rounded-lg text-center flex-1">
+  <div class=" inline-block p-4 rounded-lg text-center flex-1 bg-white border-slate-100 shadow-lg">
     <div class="flex gap-3 items-center justify-center"">
-      <div class="bg-gray-100 rounded-lg p-2">
-        <%= image_tag ("staff.svg"), class: "w-[30px] h-[30px]"%>
+      <div class="bg-yellow-100 rounded-lg p-2">
+        <%= icon "user-star", class:"text-yellow-700"%>
       </div>
-      <h3 class="text-gray-500 ">Total de Staff</h3>
+      <h3 class="text-gray-500 ">Total de staff</h3>
     </div>
     <p class="font-bold text-3xl mt-3"><%= total_staff%></p>
   </div>
