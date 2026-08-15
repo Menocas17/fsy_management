@@ -1,5 +1,7 @@
 
 class TableComponent < ViewComponent::Base
+  delegate :icon, to: :helpers
+
   def initialize(participants:, is_staff: nil)
     @participants = participants
     @is_staff = is_staff
@@ -19,5 +21,9 @@ class TableComponent < ViewComponent::Base
     else
       "jovenes"
     end
+  end
+
+  def isAdmin?
+    Current.user&.admin_or_staff_manager?
   end
 end

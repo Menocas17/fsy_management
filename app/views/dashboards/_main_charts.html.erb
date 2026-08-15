@@ -1,9 +1,9 @@
 <section class="px-3 md:px-0 mt-6">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
     <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
-      <h3 class="text-gray-500 font-semibold mb-2">Participantes por Estaca</h3>
+      <h3 class="text-gray-500 font-bold mb-10 ml-10">Participantes por estaca</h3>
       <%= column_chart count_by_stake,
-          colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
+          colors: ["#0089B2", "#1C21B4", "#E68A00", "#109618", "#D62B00"],
           height: "260px",
           dataset: {
               borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 }, 
@@ -34,8 +34,8 @@
     
       %>
     </div>
-    <div class="border  p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
-      <h3 class="text-gray-500 font-semibold mb-2">Distribucion por Rol</h3>
+    <div class="border  p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg order-first md:order-last">
+      <h3 class="text-gray-500 font-bold mb-10 ml-10"">Distribución por rol</h3>
       <%= pie_chart count_by_role, 
           donut: true, 
           height: "260px",

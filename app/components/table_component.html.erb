@@ -2,7 +2,7 @@
   <div class="overflow-x-auto shadow-md rounded-lg border border-gray-200">
     <table class="w-full text-left border-collapse bg-white">
       <thead>
-        <tr class="bg-linear-to-tr from-[#095581] via-[#238db4] to-[#3c9baa] text-center text-white">
+        <tr class="bg-primary-gradient text-center text-white">
           <th class="py-3 px-4">Nombre Completo</th>
           <th class="py-3 px-4 hidden sm:table-cell">Estaca</th>
           <th class="py-3 px-4 hidden lg:table-cell">Barrio</th>
@@ -14,12 +14,13 @@
           <th class="py-3 px-4">Compania</th>
           <th class="py-3 px-4 <%= show_cell %>">Cuarto</th>
           <th class="py-3 px-4 hidden lg:table-cell"></th>
+          <th class="py-3 px-4 hidden lg:table-cell"></th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200 text-sm text-gray-600 text-center">
+      <tbody class="divide-y divide-slate-100 text-sm text-gray-600 text-center">
         <% @participants.each do |participant| %>
-          <tr class="odd:bg-gray-100">
-            <td class="py-3 px-4 font-medium text-gray-900 underline">
+          <tr class="">
+            <td class="py-3 px-4 font-medium text-blue-900 underline">
               <%= link_to participant.full_name, participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" } %>
             </td>
             <td class="py-3 px-4 hidden sm:table-cell">
@@ -46,7 +47,16 @@
               <%= participant.room %>
             </td>
             <td>
-              <%= link_to "Ver registro", participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" %>
+              <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" do %>
+                <%= icon "eye", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 transition-all duration-300"%>
+              <%end%>
+            </td>
+            <td>
+              <% if isAdmin?%>
+                <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" do %>
+                  <%= icon "square-pen", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 transition-all duration-300"%>
+                <%end%>
+              <%end%>
             </td>
           </tr>
         <% end %>

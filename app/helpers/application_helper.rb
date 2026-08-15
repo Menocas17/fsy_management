@@ -48,7 +48,7 @@ module ApplicationHelper
   end
 
   def current_user_avatar_tag(options = {})
-    css_classes = options[:class] || "w-9 h-9 rounded-full object-cover border-2 border-[#1C7DA5]"
+    css_classes = options[:class] || "w-[50px] h-[50px] rounded-full object-cover border-2 border-[#1C7DA5]"
 
     if Current.user&.participant&.avatar&.attached?
       image_tag Current.user.participant.avatar, class: css_classes

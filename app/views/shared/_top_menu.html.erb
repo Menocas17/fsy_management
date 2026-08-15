@@ -12,10 +12,14 @@
         <%= image_tag "fsy-logo.svg", class:"w-10 h-10"%>
       </div>
     </div>
-    <nav class="flex items-center justify-center gap-3">
+    <nav class="flex items-center justify-center gap-3 md:mr-10">
       <%= link_to myprofile_participants_path, class:"cursor-pointer" do%>
         <%= current_user_avatar_tag%>
       <%end%>
+      <div>
+        <p class=""><%= Current.user.full_name%></p>
+        <span class="block -mt-1 font-semibold text-gray-400"><%= Current.user.rol.capitalize%></span>
+      </div>
       <%= button_to "Cerrar sesión", session_path, method: :delete, class: " transition cursor-pointer shadow-md rounded-xl text-sm flex items-center justify-center bg-[#C8E7E9] border border-[#268EB5] font-semibold hidden md:block py-1 px-2 text-gray-600 rounded-lg hover:border-gray-700"%>
     </nav>
   </div>

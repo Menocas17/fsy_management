@@ -4,18 +4,18 @@
       <div class="bg-gray-100 rounded-lg p-2">
         <%= icon "chart-no-axes-column-increasing"%>
       </div>
-      <h3 class="text-gray-500 ">Jovenes por genero</h3>
+      <h3 class="text-gray-500 font-bold">Jovenes por genero</h3>
     </div>
     <div class="flex flex-col justify-center items-center mt-8 gap-5">
-      <div class="flex gap-5">
-        <div class="bg-gray-100 rounded-lg p-2">
-          <%= image_tag ("male.svg"), class: "w-[30px] h-[30px]"%>
+      <div class="flex gap-5 items-center">
+        <div class="bg-blue-200 rounded-lg p-2">
+          <%= icon "mars", class: "w-[50px] h-[50px] text-blue-900"%>
         </div>
         <p class="font-bold text-3xl"><%= male_count %></p>
       </div>
-      <div class="flex gap-5">
-        <div class="bg-gray-100 rounded-lg p-2">
-          <%= image_tag ("female.svg"), class: "w-[30px] h-[30px]"%>
+      <div class="flex gap-5 items-center">
+        <div class="bg-pink-200 rounded-lg p-2">
+          <%= icon "venus", class: "w-[50px] h-[50px] text-pink-900"%>
         </div>
         <p class="font-bold text-3xl"><%= female_count %></p>
       </div>
@@ -23,9 +23,9 @@
   </div>
   <%= render "shirt_table", shirt_counts: shirt_counts %>
   <div class=" border  p-4 rounded-lg flex-1 bg-white border-slate-100 shadow-lg">
-    <h3 class="font-bold text-center">Jovenes por edad</h3>
+    <h3 class="font-bold mb-5 ml-10 text-gray-500 ">Jovenes por edad</h3>
     <%= bar_chart data_by_age,
-      colors: ["#095581", "#92C47B", "#FCB446", "#C8E7E9", "#268BB5"],
+      colors: ["#02355E", "#0089B2", "#279618", "#991299", "#FC9902", "#D62B00" ],
       height: "180px",
        dataset: {
         borderRadius: { topLeft: 0, topRight: 8, bottomLeft: 0, bottomRight: 8 }, # Solo redondea el extremo derecho

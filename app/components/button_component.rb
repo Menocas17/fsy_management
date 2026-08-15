@@ -35,7 +35,7 @@ class ButtonComponent < ViewComponent::Base
     when "delete"
       "border py-2 px-4 text-white bg-rose-800 hover:border-gray-600"
     else
-      "block py-2 px-4 rounded-lg ml-2 text-xl"
+      "block py-3 pl-6 rounded-r-3xl mr-4 text-xl font"
     end
 
     [ base_styles, type_styles, @classes ].compact.join(" ")
@@ -48,7 +48,7 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active_classes
-    active? ? "bg-[#1B7DA5] shadow-inner text-white" : " hover:bg-gray-50"
+    active? ? "bg-primary-gradient-right shadow-inner text-white" : " hover:bg-blue-100 transition-all duration-300"
   end
 
   def current_icon

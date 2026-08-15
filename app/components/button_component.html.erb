@@ -27,7 +27,7 @@
   </button>
 <% elsif @is_nav %>
   <%= link_to @url, class: "#{active_classes} #{styles}" do %>
-    <div class="flex gap-3 items-center">
+    <div class="flex gap-4 items-center">
       <% if current_icon.present? %>
         <%= image_tag(current_icon, class: "w-[20px] h-[20px]") %>
       <% end %>

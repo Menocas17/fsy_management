@@ -17,6 +17,14 @@ class User < ApplicationRecord
     participant&.consejero? || participant&.auxiliar?
   end
 
+  def full_name
+    participant&.full_name || "Super Administrado"
+  end
+
+  def rol
+    participant&.rol || "superadmin"
+  end
+
   private
   def password_complexity
     return if password.blank?

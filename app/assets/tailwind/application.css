@@ -1,7 +1,19 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Rails buscará automáticamente la imagen en la carpeta public/ o app/assets/images/ */
   --background-image-fsy-pattern: url('/images/banner.jpg');
   --font-sans: 'Onest', sans-serif;
+
+  /* Color pallete */
+  --color-primary: #003f70;
+  --background-image-primary-gradient: linear-gradient(
+    180deg,
+    #003c6b,
+    #004e89
+  );
+  --background-image-primary-gradient-right: linear-gradient(
+    to right,
+    #003c6b,
+    #005ea8
+  );
 }
