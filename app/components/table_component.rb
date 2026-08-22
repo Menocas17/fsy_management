@@ -15,6 +15,22 @@ class TableComponent < ViewComponent::Base
     end
   end
 
+  def stake_color(participant)
+    case participant.stake
+    when "bello_horizonte"
+      "bg-cyan-100"
+
+    when "las_americas"
+      "bg-indigo-100"
+
+    when "villa_flor"
+      "bg-green-100"
+
+    when "puerto_cabezas"
+      "bg-amber-100"
+    end
+  end
+
   def from_path
     if @is_staff
       "staff"

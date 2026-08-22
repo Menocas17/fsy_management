@@ -1,0 +1,7 @@
+<% if has_avatar?%>
+  <%= image_tag avatar_url, class: "#{@css_class} border border-slate-300", alt: "Avatar de #{@participant.full_name}"%>
+<%else%>
+  <div class=" <%= avatar_colors_for(@participant.full_name)%> flex items-center justify-center font-bold  <%= @css_class%> ">
+    <%= initials%>
+  </div>
+<%end%>
