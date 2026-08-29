@@ -4,7 +4,8 @@ class ParticipantsController < ApplicationController
   before_action :require_admin_to_create!, only: [ :new, :create ]
 
   def index
-  @participants = Participant.jovenes
+    @participants = Participant.jovenes
+                               .includes(:avatar_attachment, :avatar_blob)
                                .search_by_name(params[:query])
                                .by_stake(params[:stake])
                                .by_ward(params[:ward])
@@ -14,6 +15,7 @@ class ParticipantsController < ApplicationController
 
   def staff
     @participants = Participant.staff
+                               .includes(:avatar_attachment, :avatar_blob)
                                .search_by_name(params[:query])
                                .by_stake(params[:stake])
                                .by_ward(params[:ward])
@@ -61,29 +63,24 @@ class ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
-       target_return = case params[:from]
-       when "staff"
-        staff_participants_path
-       when "jovenes"
-        participants_path
-       else
-        dashboard_path
-       end
-
-       if params[:from] == "myprofile"
-         redirect_to myprofile_participants_path(from: params[:from]), notice: "Actualizado exitosamente."
-       else
-          redirect_to participant_path(@participant, from: params[:from], return_to: target_return), notice: "Actualizado exitosamente."
-       end
-
+      if params[:from] == "myprofile"
+        redirect_to myprofile_participants_path(from: params[:from]), notice: "Actualizado exitosamente."
+      else
+        target_return = case params[:from]
+        when "staff" then staff_participants_path
+        when "jovenes" then participants_path
+        else dashboard_path
+        end
+        redirect_to participant_path(@participant, from: params[:from], return_to: target_return), notice: "Actualizado exitosamente."
+      end
     else
-        render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
-        @participant.destroy
-        redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
+    @participant.destroy
+    redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
   private
@@ -91,9 +88,7 @@ class ParticipantsController < ApplicationController
     @participant = Participant.find(params[:id])
   end
 
-
-
   def participant_params
-    params.expect(participant: Participant.allowed_attributes_for(Current.user))
+    params.expect(participant: allowed_participant_attributes)
   end
 end

@@ -20,8 +20,13 @@ default: &default
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  database: fsy_management_development
+  primary: &primary_development
+    <<: *default
+    database: fsy_management_development
+  queue:
+    <<: *primary_development
+    database: fsy_management_development_queue
+    migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.

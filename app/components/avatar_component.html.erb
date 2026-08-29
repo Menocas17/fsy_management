@@ -1,5 +1,13 @@
 <% if has_avatar?%>
-  <%= image_tag avatar_url, class: "#{@css_class} border border-slate-300", alt: "Avatar de #{@participant.full_name}"%>
+  <div class="relative <%= @css_class %>" data-controller="avatar">
+    <div class="<%= avatar_colors_for(@participant.full_name) %> absolute inset-0 flex items-center justify-center font-bold rounded-full">
+      <%= initials %>
+    </div>
+    <%= image_tag avatar_url, width: 40, height: 40,
+          data: { avatar_target: "image", action: "load->avatar#loaded" },
+          class: "absolute inset-0 h-full w-full rounded-full border border-slate-300 object-cover bg-slate-100 opacity-0 transition-opacity duration-200",
+          alt: "Avatar de #{@participant.full_name}" %>
+  </div>
 <%else%>
   <div class=" <%= avatar_colors_for(@participant.full_name)%> flex items-center justify-center font-bold  <%= @css_class%> ">
     <%= initials%>

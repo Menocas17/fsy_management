@@ -28,9 +28,10 @@ class Participant < ApplicationRecord
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
   has_one_attached :avatar do |attachable|
-    attachable.variant :thumb, resize_to_limit: [ 300, 300 ]
-    attachable.variant :preview, resize_to_limit: [ 1200, 1200 ],
-    preprocessed: true
+   attachable.variant :thumb, resize_to_limit: [ 300, 300 ],
+   preprocessed: true
+   attachable.variant :preview, resize_to_limit: [ 1200, 1200 ],
+   preprocessed: true
   end
 
 
@@ -69,31 +70,4 @@ class Participant < ApplicationRecord
   def self.shirt_count
     group(:shirt_number).count
   end
-
-
-  def self.allowed_attributes_for(user)
-    allowed_attributes = []
-
-    if user&.counselers_staff? || user&.admin_or_staff_manager?
-      allowed_attributes += [ :avatar, :room, :shirt_number, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation, :allergies, :medicines, :diet, :additional_medical_notes, :additional_intructions ]
-    end
-
-    if user&.admin_or_staff_manager?
-      allowed_attributes += [ :company, :m_person_in_charge, :h_person_in_charge, :identity_document, :genre, :stake, :ward, :rol ]
-    end
-
-    if user&.participant_id.nil?
-      allowed_attributes = [
-        :avatar, :room, :shirt_number, :phone_number, :email_address, :first_name, :last_name, :age,
-        :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation,
-        :allergies, :medicines, :diet, :additional_medical_notes, :additional_intructions,
-        :company, :m_person_in_charge, :h_person_in_charge,
-        :identity_document, :genre, :stake, :ward, :rol
-      ]
-    end
-
-    allowed_attributes.uniq
-  end
-
-  private
 end
