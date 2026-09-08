@@ -9,7 +9,7 @@ class ParticipantsController < ApplicationController
                                .search_by_name(params[:query])
                                .by_stake(params[:stake])
                                .by_ward(params[:ward])
-                               .by_genre(params[:genre])
+                               .by_gender(params[:gender])
                                .by_company(params[:company])
   end
 
@@ -19,7 +19,7 @@ class ParticipantsController < ApplicationController
                                .search_by_name(params[:query])
                                .by_stake(params[:stake])
                                .by_ward(params[:ward])
-                               .by_genre(params[:genre])
+                               .by_gender(params[:gender])
                                .by_company(params[:company])
                                .by_role(params[:rol])
   end

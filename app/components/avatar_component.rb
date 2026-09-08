@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class AvatarComponent < ViewComponent::Base
-  def initialize (participant:, css_class: "w-10 h-10 rounded-full shrink-0")
+  def initialize (participant:, is_profile: false)
     @participant = participant
-    @css_class = css_class
+    @is_profile = is_profile
   end
 
   private
@@ -18,6 +18,14 @@ class AvatarComponent < ViewComponent::Base
 
   def initials
     "#{@participant.first_name&.chr}#{@participant.last_name&.chr}".upcase
+  end
+
+  def css_classes
+    if @is_profile
+      "w-25 h-25 rounded-full shrink-0 text-3xl border-3 border-white"
+    else
+      "w-10 h-10 rounded-full shrink-0"
+    end
   end
 
   def avatar_colors_for(name)

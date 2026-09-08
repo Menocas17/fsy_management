@@ -3,8 +3,8 @@
   <fieldset class="flex-1">
     <% if Current.user.admin_or_staff_manager?%>
       <div class="mb-4">
-        <%= form.label :company, class:" font-semibold block mb-1"%>
-        <%= form.number_field :company, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4" %>
+        <%= form.label :company_id, class:" font-semibold block mb-1"%>
+        <%= form.select :company_id, Company.order(:name).map { |c| [c.name, c.id] }, { prompt: "Selecciona una compañía", include_blank: "Sin compañía" }, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4" %>
       </div>
     <%end%>
     <div class="mb-4">
@@ -21,8 +21,8 @@
         <%= form.select :ward, Participant.wards.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"}%>
       </div>
       <div class="mb-4">
-        <%= form.label :genre, class:" font-semibold block mb-1"%>
-        <%= form.select :genre, Participant.genres.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
+        <%= form.label :gender, class:" font-semibold block mb-1"%>
+        <%= form.select :gender, Participant.genders.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
       </div>
       <div class="mb-4">
         <%= form.label :age, class:" font-semibold block mb-1"%>

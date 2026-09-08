@@ -5,7 +5,7 @@ juan:
   stake: 'bello_horizonte'
   ward: 'ducuali'
   shirt_number: 'm'
-  genre: 'H'
+  gender: 'H'
   rol: 'joven'
 
 maria:
@@ -15,5 +15,5 @@ maria:
   stake: 'las_americas'
   ward: 'ciudad_jardin'
   shirt_number: 's'
-  genre: 'M'
+  gender: 'M'
   rol: 'consejero'

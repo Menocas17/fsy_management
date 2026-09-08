@@ -28,7 +28,7 @@ class ButtonComponent < ViewComponent::Base
     when "muted"
       "border py-1 px-2 border-gray-200 text-gray-600 rounded-lg hover:border-gray-400 font-normal"
     when "primary"
-      "border py-2 px-4 text-white bg-[#095581] hover:border-gray-600"
+      "border py-2 px-4 text-white bg-primary-600 hover:border-gray-600"
 
     when "cancel"
       "border border-gray-300 text-gray-600 hover:border-gray-600 py-1 px-2 "

@@ -16,6 +16,21 @@ Rails.application.routes.draw do
   # root "posts#index"
   root "sessions#new"
   resource :dashboard, only: [ :show ]
+  resources :auxiliar_companies do
+    member do
+      post :assign_staff
+      delete :remove_staff
+    end
+  end
+  resources :companies do
+    collection do
+      get :overview
+    end
+    member do
+      post :assign_staff
+      delete :remove_staff
+    end
+  end
   resources :participants do
       collection do
         get :staff

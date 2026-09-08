@@ -1,0 +1,93 @@
+<div class="px-3 md:px-7 pt-10">
+  <div class="flex justify-between mb-5 px-3">
+    <h1 class="font-bold text-2xl">Vista general de Compañías</h1>
+    <%= render(ButtonComponent.new(text: "Ver compañías", url: companies_path, type: "muted")) %>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
+      <p class="text-gray-500 font-bold">Compañías auxiliares</p>
+      <p class="font-bold text-3xl mt-3"><%= @auxiliar_companies.count %></p>
+    </div>
+    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
+      <p class="text-gray-500 font-bold">Compañías estándar</p>
+      <p class="font-bold text-3xl mt-3"><%= @companies.count %></p>
+    </div>
+    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
+      <p class="text-gray-500 font-bold">Consejeros</p>
+      <p class="font-bold text-3xl mt-3"><%= @companies.sum { |c| c.counselors.count } %></p>
+    </div>
+    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
+      <p class="text-gray-500 font-bold">Jóvenes asignados</p>
+      <p class="font-bold text-3xl mt-3"><%= @companies.sum { |c| c.participants.count } %></p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
+      <h3 class="text-gray-500 font-bold mb-6 ml-2">Jóvenes por compañía</h3>
+      <%= column_chart @companies.map { |c| [ c.name, c.participants.count ] },
+          colors: ["#0089B2"], height: "260px" %>
+    </div>
+    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
+      <h3 class="text-gray-500 font-bold mb-6 ml-2">Personal (consejeros + auxiliares) por compañía</h3>
+      <%= column_chart @companies.map { |c| [ c.name, c.counselors.count + c.auxiliars.count ] },
+          colors: ["#109618"], height: "260px" %>
+    </div>
+  </div>
+
+  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <h3 class="font-bold text-xl mb-4">Detalle por compañía</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="text-gray-500 border-b border-gray-200">
+            <th class="py-2 px-2">Compañía</th>
+            <th class="py-2 px-2">Auxiliar</th>
+            <th class="py-2 px-2">Consejeros</th>
+            <th class="py-2 px-2">Auxiliares</th>
+            <th class="py-2 px-2">Jóvenes</th>
+            <th class="py-2 px-2">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @auxiliar_companies.each do |ac| %>
+            <tr class="border-b border-gray-100 font-semibold bg-slate-50">
+              <td class="py-2 px-2 text-blue-950"><%= link_to ac.name, ac %></td>
+              <td class="py-2 px-2"><%= ac.coordinator_name %></td>
+              <td class="py-2 px-2" colspan="4"></td>
+            </tr>
+            <% ac.companies.each do |c| %>
+              <tr class="border-b border-gray-100">
+                <td class="py-2 px-2 pl-6"><%= link_to c.name, c, class: "text-blue-950 hover:underline" %></td>
+                <td class="py-2 px-2 text-gray-500"><%= c.auxiliar_company&.name %></td>
+                <td class="py-2 px-2"><%= c.counselors.count %>/2</td>
+                <td class="py-2 px-2"><%= c.auxiliars.count %>/2</td>
+                <td class="py-2 px-2"><%= c.participants.count %></td>
+                <td class="py-2 px-2">
+                  <span class="<%= c.staff_complete? ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %> px-2 py-0.5 rounded-full text-xs">
+                    <%= c.staff_complete? ? "Completa" : "Incompleta" %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+          <% @orphan_companies.each do |c| %>
+            <tr class="border-b border-gray-100">
+              <td class="py-2 px-2"><%= link_to c.name, c, class: "text-blue-950 hover:underline" %></td>
+              <td class="py-2 px-2 text-gray-400">Sin auxiliar</td>
+              <td class="py-2 px-2"><%= c.counselors.count %>/2</td>
+              <td class="py-2 px-2"><%= c.auxiliars.count %>/2</td>
+              <td class="py-2 px-2"><%= c.participants.count %></td>
+              <td class="py-2 px-2">
+                <span class="<%= c.staff_complete? ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %> px-2 py-0.5 rounded-full text-xs">
+                  <%= c.staff_complete? ? "Completa" : "Incompleta" %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

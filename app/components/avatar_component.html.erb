@@ -1,6 +1,6 @@
 <% if has_avatar?%>
-  <div class="relative <%= @css_class %>" data-controller="avatar">
-    <div class="<%= avatar_colors_for(@participant.full_name) %> absolute inset-0 flex items-center justify-center font-bold rounded-full">
+    <div class="<%= css_classes %> relative overflow-hidden" data-controller="avatar">
+    <div class="<%= avatar_colors_for(@participant.full_name) %> absolute inset-0 flex items-center justify-center font-bold rounded-full ">
       <%= initials %>
     </div>
     <%= image_tag avatar_url, width: 40, height: 40,
@@ -9,7 +9,7 @@
           alt: "Avatar de #{@participant.full_name}" %>
   </div>
 <%else%>
-  <div class=" <%= avatar_colors_for(@participant.full_name)%> flex items-center justify-center font-bold  <%= @css_class%> ">
+  <div class=" <%= avatar_colors_for(@participant.full_name)%> flex items-center justify-center font-bold  <%= css_classes%>">
     <%= initials%>
   </div>
 <%end%>

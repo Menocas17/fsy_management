@@ -32,6 +32,17 @@
 󱪉 ?? app/views/participants/_filters.html.erb        (nuevo - filtros compartidos)
 ```
 
+**➕ (Rediseño multi-nivel, ver tarea 11):** migraciones nuevas `db/migrate/20260829*`
+(`genre→gender`, `auxiliar_companies`, `companies`, `memberships`, `company int→FK`),
+modelos nuevos `app/models/{company,auxiliar_company,membership}.rb`,
+cambios en `participant.rb`, `participants_controller.rb`, `authorization.rb`,
+vistas filtros/form/perfil/tabla, `es.yml`, fixtures, `participant_test.rb`, `schema.rb`.
+
+**➕ (Vistas de compañías, ver tarea 12):** controladores `auxiliar_companies_controller.rb`
+y `companies_controller.rb` (CRUD + `overview` + `assign_staff`/`remove_staff`), método de
+autorización por rol en `concerns/authorization.rb` (helper methods), vistas `app/views/{auxiliar_companies,companies}/*`,
+nav "Compañías" en `_aside` y `_top_menu`, rutas nuevas en `routes.rb`.
+
 > **⚠️ NOTA (reversión):** La paginación con Pagy fue **revertida por decisión del usuario**
 > (`git checkout HEAD` en Gemfile, Gemfile.lock, application_controller, application_helper,
 > application.css) y se eliminaron `config/initializers/pagy.rb` y `_pagination.html.erb`.
@@ -94,8 +105,11 @@ y se veía un espacio vacío con borde. Se implementó un skeleton con las inici
   `relative` con `data-controller="avatar"` que muestra:
   - las **iniciales** como fondo (absoluto inset-0, reutiliza `initials` + `avatar_colors_for`)
   - la **imagen** superpuesta (absoluto inset-0) con `opacity-0` que se revela al cargar.
-- `app/javascript/controllers/avatar_controller.js` (nuevo): controller Stimulus con target `image`
-  y acción `load -> loaded` que quita la clase `opacity-0` (`transition-opacity duration-200`).
+- `app/javascript/controllers/avatar_controller.js` (nuevo): controller Stimulus con target `image`.
+  Añadido `.connect()` con check `image.complete && image.naturalWidth > 0` → si la imagen ya está
+  en caché (caso de navegación Turbo entre páginas), se muestra al instante sin reproducir el fade,
+  evitando el blink entre iniciales y avatar. `load -> loaded` sigue como respaldo para cargas reales.
+  Ambos delegan en el método privado `#show` (quita `opacity-0`; `transition-opacity duration-200`).
 - Se reutiliza la lógica existente de iniciales y colores del componente Ruby (sin duplicar).
 - `test/components/avatar_component_test.rb`: reemplazados los tests scaffold vacíos por 2 tests
   reales (iniciales sin avatar / controller+img+target con avatar).
@@ -134,11 +148,39 @@ y se veía un espacio vacío con borde. Se implementó un skeleton con las inici
 - Reemplazado el README boilerplate por documentación real: stack, requisitos, setup local
   (incluye BD de cola y worker), verificación de calidad, modelos, deploy con Kamal y estructura.
 
+### ✅ 11. Rediseño del esquema multi-nivel (Companies / Memberships) + `genre` → `gender`
+- **Migraciones nuevas (5):**
+  - `20260829000001` `rename_column :participants, :genre, :gender` (sin data migration; cambia nombre de columna).
+  - `20260829000002` crea `auxiliar_companies` (uuid; `name`, `coordinator_id → participants` nullable).
+  - `20260829000003` crea `companies` (uuid; `name`, `auxiliar_company_id → auxiliar_companies`).
+  - `20260829000004` crea `memberships` (polimórfico `associable` Company|AuxiliarCompany, `participant_id`, `role`, `gender`; índice único `(associable_type,associable_id,role,gender)` = máx 1H+1M por rol/compañía).
+  - `20260829000005` migra `participants.company` (int) → `company_id` (uuid FK a `companies`): crea una `Company` por valor int distinto, reasigna y elimina la columna int.
+- **Modelos nuevos:** `Company`, `AuxiliarCompany`, `Membership`. `Participant` ahora `belongs_to :company` (opcional), `has_many :memberships`, scopes de acceso (`auxiliar_companies_with_counselors` para coordinador, `auxiliar_scope`, `counselor_scope`).
+- **Restricciones 1M/1F:** doble capa — validación app en `Membership#within_staffing_limit` (máx 2 por rol/compañía) + índice único de BD. `role` y `gender` del membership se derivan del participante (`before_validation`).
+- **Rename transversal:** actualizados controller (`by_gender`, query param `gender`), concern `Authorization` (`:gender`, se quitó el atributo int `:company`), vistas (`_filters`, `_general_info_form` con select de compañías, `profile/_general_info`, `table_component`), locales (`gender`/`company_id`), fixtures y `participant_test`.
+- Verificado: `by_gender`/`by_company`/asociaciones/scopes funcionan; rubocop 0 ofensas; tests 25 OK.
+
+### ✅ 12. Vistas de gestión de compañías (list/detail/CRUD/staffing/KPIs)
+- **Controladores:** `AuxiliarCompaniesController` y `CompaniesController` (index/show/new/create/edit/update/destroy + `overview` y `assign_staff`/`remove_staff`).
+- **Rutas:** `resources :auxiliar_companies` y `resources :companies` (con `get :overview` en collection y `post :assign_staff` + `delete :remove_staff` en member). Total rutas 68 → 89.
+- **Autorización por rol** en `concerns/authorization.rb`: helper methods públicos `can_view_companies?`, `full_company_access?`, `can_edit_auxiliar_company?`, `can_edit_company?`, `can_manage_staff?`.
+  - **Lectura:** cualquier usuario autenticado.
+  - **Edición total:** superadmin (`participant_id` nil), `coordinador`, `director`.
+  - **Auxiliar:** edita su AC y las compañías estándar de sus consejeros (`auxiliar_scope`).
+  - **Consejero:** edita solo su compañía estándar (`counselor_scope`).
+  - `logistica`/`registrador`: solo lectura.
+- **Vistas:** `app/views/auxiliar_companies/{index,show,new,edit,_form,_staff}` y `app/views/companies/{index,show,overview,new,edit,_form,_staff,_company_card}`.
+  - `show` muestra plantilla 1M/1F de consejeros y auxiliares + jóvenes; panel de asignación con slots "Vacante".
+  - `overview` (KPIs): cards + Chartkick (jóvenes y personal por compañía) + tabla de detalle con estado Completa/Incompleta.
+- **Nav:** item "Compañías" agregado a `_aside` y `_top_menu` (desktop + mobile).
+- **Fix:** `Participant#auxiliar_scope` tolera el caso sin AC asociado (antes `nil.flat_map` fallaba).
+- Verificado: render de todas las vistas (incl. con datos poblados), matriz de autorización (superadmin/coord/auxiliar/consejero), rubocop 0 ofensas, tests 25 OK, 89 rutas.
+
 ---
 
 ## Verificación (todo pasa)
-- ✅ Boot OK: `bin/rails runner "...Routes: 68"`
-- ✅ Rubocop: 69 archivos, 0 ofensas (con `bin/rubocop --no-server`)
+- ✅ Boot OK: `bin/rails runner "...Routes: 89"`
+- ✅ Rubocop: 79 archivos, 0 ofensas (con `bin/rubocop --no-server`)
 - ✅ Tests: `bin/rails test` → 25 runs, 0 failures, 0 errors
   - Incluye 2 tests reales del `AvatarComponent` (antes eran scaffold vacíos).
   - Nota: hay warnings preexistentes "Test is missing assertions" en otros tests scaffold de componentes (info_tile, form, stake_span, role_span, button, table). No están relacionados con nuestros cambios.
@@ -156,7 +198,10 @@ y se veía un espacio vacío con borde. Se implementó un skeleton con las inici
 - Tests: Minitest + Capybara/Selenium
 
 ### Modelos
-- `Participant`: enums (rol, stake, ward, shirt_number, genre), columnas jsonb via `store_accessor` (contact_info, person_in_charge, medical_info), avatar con variantes, scopes de filtrado, `allowed_attributes_for(user)` (lógica de permisos de atributos)
+- `Participant`: enums (rol, stake, ward, shirt_number, gender), columnas jsonb via `store_accessor` (contact_info, person_in_charge, medical_info), avatar con variantes, scopes de filtrado, `belongs_to :company` (opcional), `has_many :memberships`, scopes de acceso (coordinador/auxiliar/consejero)
+- `Company`: compañía estándar, `belongs_to :auxiliar_company`, `has_many :counselors/:auxiliars/:participants` via `memberships` (polimórfico)
+- `AuxiliarCompany`: supervisada por `coordinator` (rol coordinador), agrupa `companies` y gestiona consejeros/auxiliares via `memberships`
+- `Membership`: unión polimórfica `associable` (Company|AuxiliarCompany)↔`participant`; `role` y `gender` derivados del participante; índice único `(associable, role, gender)` = 1H+1M por rol/compañía
 - `User`: `has_secure_password`, belongs_to `participant` (opcional), methods `admin_or_staff_manager?`, `counselers_staff?`
 - `Session`: belongs_to user
 

@@ -1,0 +1,34 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3">
+  <div class="flex items-start justify-between">
+    <div>
+      <h3 class="font-bold text-lg text-blue-950"><%= link_to c.name, c %></h3>
+      <p class="text-sm text-gray-500 mt-1">
+        <% if c.auxiliar_company %>
+          <span class="font-medium">Auxiliar:</span> <%= c.auxiliar_company.name %>
+        <% else %>
+          <span class="text-gray-400">Sin compañía auxiliar</span>
+        <% end %>
+      </p>
+    </div>
+    <%= image_tag "people.svg", class: "w-9 h-9 opacity-70" %>
+  </div>
+
+  <div class="flex flex-wrap gap-2 text-xs mt-1">
+    <span class="<%= c.counselors.any? ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500' %> px-2 py-1 rounded-full">
+      Consejeros <%= c.counselors.count %>/2
+    </span>
+    <span class="<%= c.auxiliars.any? ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500' %> px-2 py-1 rounded-full">
+      Auxiliares <%= c.auxiliars.count %>/2
+    </span>
+    <span class="bg-violet-100 text-violet-800 px-2 py-1 rounded-full">
+      Jóvenes <%= c.participants.count %>
+    </span>
+  </div>
+
+  <div class="flex items-center justify-end gap-2 mt-1">
+    <%= render(ButtonComponent.new(text: "Ver", url: c, type: "muted")) %>
+    <% if can_edit_company?(c) %>
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_company_path(c), type: "muted")) %>
+    <% end %>
+  </div>
+</div>

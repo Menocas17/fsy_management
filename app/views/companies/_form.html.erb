@@ -1,0 +1,24 @@
+<%= form_with model: company, url: url, class: "bg-white rounded-xl shadow-sm border border-gray-100 p-6" do |f| %>
+  <% if company.errors.any? %>
+    <div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-lg p-3 mb-4">
+      <% company.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mb-4">
+    <%= f.label :name, "Nombre", class: "block font-semibold mb-1" %>
+    <%= f.text_field :name, class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
+  </div>
+
+  <div class="mb-6">
+    <%= f.label :auxiliar_company_id, "Compañía auxiliar", class: "block font-semibold mb-1" %>
+    <%= f.select :auxiliar_company_id,
+        options_from_collection_for_select(AuxiliarCompany.order(:name), :id, :name, company.auxiliar_company_id),
+        { include_blank: "Sin compañía auxiliar" },
+        class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
+  </div>
+
+  <%= f.submit "Guardar", class: "bg-primary-600 text-white py-2 px-5 rounded-lg text-sm font-bold cursor-pointer" %>
+<% end %>

@@ -1,11 +1,15 @@
 @import 'tailwindcss';
 
 @theme {
-  --background-image-fsy-pattern: url('/images/banner.jpg');
+  --background-image-fsy-pattern: url('top-header-4.png');
   --font-sans: 'Onest', sans-serif;
 
   /* Color pallete */
   --color-primary: #003f70;
+  --color-primary-100: #c8e7e9;
+  --color-primary-500: #268eb5;
+  --color-primary-600: #095581;
+  --color-primary-700: #0a5681;
   --background-image-primary-gradient: linear-gradient(
     180deg,
     #003c6b,

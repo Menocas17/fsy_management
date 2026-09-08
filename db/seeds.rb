@@ -16,8 +16,8 @@
 # exitosos = 0
 
 # 20.times do |i|
-#   genre = [ "H", "M" ].sample
-#   first_name = genre == "H" ? nombres_hombres.sample : nombres_mujeres.sample
+#   gender = [ "H", "M" ].sample
+#   first_name = gender == "H" ? nombres_hombres.sample : nombres_mujeres.sample
 #   last_name = apellidos.sample
 
 #   data = {
@@ -29,7 +29,7 @@
 #     room: "#{[ 'A', 'B', 'C', 'D' ].sample}-#{rand(1..20)}",
 #     stake: stakes_disponibles.sample,
 #     ward: wards_disponibles.sample,
-#     genre: genre,
+#     gender: gender,
 #     identity_document: "001-#{rand(10..29)}0#{rand(1..9)}0#{rand(10..99)}#{[ 'A', 'B', 'X', 'Y' ].sample}",
 #     shirt_number: tallas.sample,
 #     phone_number: "8888-#{rand(1000..9999)}",

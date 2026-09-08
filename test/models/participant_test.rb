@@ -10,7 +10,7 @@ class ParticipantTest < ActiveSupport::TestCase
       age: 20,
       stake: "bello_horizonte",
       shirt_number: "m",
-      genre: "H"
+      gender: "H"
     )
 
     # 2 & 3. Actuar y Afirmar (Act & Assert)
@@ -27,7 +27,7 @@ class ParticipantTest < ActiveSupport::TestCase
   test "es inválido con una edad fuera de rango" do
     participant = Participant.new(
       first_name: "Juan", last_name: "Pérez", age: 150, # ¡Edad irreal!
-      stake: "bello_horizonte", shirt_number: "m", genre: "H"
+      stake: "bello_horizonte", shirt_number: "m", gender: "H"
     )
 
     assert_not participant.valid?

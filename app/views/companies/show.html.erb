@@ -1,0 +1,74 @@
+<div class="max-w-255 mx-auto px-3 md:px-7 pt-10">
+  <div class="flex justify-between mb-5 items-center px-3">
+    <div>
+      <h1 class="font-bold text-2xl"><%= @company.name %></h1>
+      <p class="text-gray-500 text-sm">
+        <% if @company.auxiliar_company %>
+          Compañía auxiliar: <span class="font-medium text-blue-950"><%= link_to @company.auxiliar_company.name, @company.auxiliar_company %></span>
+        <% else %>
+          Sin compañía auxiliar asignada
+        <% end %>
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <%= render(ButtonComponent.new(text: "Editar", url: edit_company_path(@company), type: "muted")) if can_edit_company?(@company) %>
+      <%= render(ButtonComponent.new(text: "Atrás", url: companies_path, type: "cancel")) %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [ "#{@company.counselors.count}/2" ])) %>
+    <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [ "#{@company.auxiliars.count}/2" ])) %>
+    <%= render(InfoTileComponent.new(title: "Jóvenes", icon: "people.svg", data: [ @company.participants.count ])) %>
+  </div>
+
+  <% if can_manage_staff? || can_edit_company?(@company) %>
+    <%= render "companies/staff", c: @company %>
+  <% end %>
+
+  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <h3 class="font-bold text-xl mb-4">Consejeros</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <% [ @company.male_counselor, @company.female_counselor ].each do |p| %>
+        <div class="border border-gray-200 rounded-lg p-3 flex items-center gap-3">
+          <%= render(AvatarComponent.new(participant: p)) if p %>
+          <div>
+            <p class="font-semibold"><%= p ? p.full_name : "Vacante" %></p>
+            <p class="text-sm text-gray-500"><%= p ? "Consejero · #{p.gender}" : "Sin asignar" %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <h3 class="font-bold text-xl mb-4">Auxiliares</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <% [ @company.male_auxiliar, @company.female_auxiliar ].each do |p| %>
+        <div class="border border-gray-200 rounded-lg p-3 flex items-center gap-3">
+          <%= render(AvatarComponent.new(participant: p)) if p %>
+          <div>
+            <p class="font-semibold"><%= p ? p.full_name : "Vacante" %></p>
+            <p class="text-sm text-gray-500"><%= p ? "Auxiliar · #{p.gender}" : "Sin asignar" %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <h3 class="font-bold text-xl mb-4">Jóvenes (<%= @company.participants.count %>)</h3>
+    <% if @company.participants.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <% @company.participants.each do |p| %>
+          <div class="flex items-center gap-2 border border-gray-100 rounded-lg px-2 py-1.5">
+            <%= render(AvatarComponent.new(participant: p)) %>
+            <%= link_to p.full_name, p, class: "text-sm text-blue-950 hover:underline" %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500">Sin jóvenes asignados.</p>
+    <% end %>
+  </section>
+</div>

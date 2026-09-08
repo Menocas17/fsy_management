@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_28_173027) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -43,15 +43,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_173027) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "auxiliar_companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "coordinator_id"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["coordinator_id"], name: "index_auxiliar_companies_on_coordinator_id"
+  end
+
+  create_table "companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "auxiliar_company_id"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["auxiliar_company_id"], name: "index_companies_on_auxiliar_company_id"
+  end
+
+  create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "associable_id", null: false
+    t.string "associable_type", null: false
+    t.datetime "created_at", null: false
+    t.integer "gender", null: false
+    t.uuid "participant_id", null: false
+    t.integer "role", null: false
+    t.datetime "updated_at", null: false
+    t.index ["associable_type", "associable_id", "role", "gender"], name: "idx_memberships_gender_uniqueness", unique: true
+    t.index ["associable_type", "associable_id"], name: "index_memberships_on_associable"
+    t.index ["participant_id"], name: "index_memberships_on_participant_id"
+  end
+
   create_table "participants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "additional_instructions"
     t.integer "age"
-    t.integer "company"
+    t.uuid "company_id"
     t.jsonb "contact_info"
     t.datetime "created_at", null: false
     t.date "date_of_inscription"
     t.string "first_name"
-    t.integer "genre"
+    t.integer "gender"
     t.integer "identity_document"
     t.string "last_name"
     t.jsonb "medical_info"
@@ -62,6 +91,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_173027) do
     t.integer "stake"
     t.datetime "updated_at", null: false
     t.integer "ward"
+    t.index ["company_id"], name: "index_participants_on_company_id"
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -85,6 +115,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_173027) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
+  add_foreign_key "companies", "auxiliar_companies"
+  add_foreign_key "memberships", "participants"
+  add_foreign_key "participants", "companies"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "participants"
 end

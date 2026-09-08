@@ -65,9 +65,18 @@ bin/rubocop --no-server        # lint (Rails Omakase)
 
 ## Modelos principales
 
-- **Participant** — joven o personal; enums para `rol`, `stake` (estaca), `ward` (barrio), `shirt_number` (talla), `genre`; columnas `jsonb` vía `store_accessor` (contacto, responsable, médico) y avatar con variantes (`thumb`/`preview`, preprocesadas).
+- **Participant** — joven o personal; enums para `rol`, `stake` (estaca), `ward` (barrio), `shirt_number` (talla), `gender` (género); columnas `jsonb` vía `store_accessor` (contacto, responsable, médico) y avatar con variantes (`thumb`/`preview`, preprocesadas). Pertenece a una `Company` opcional y participa en `memberships`.
+- **Company / AuxiliarCompany** — estructura jerárquica: una `AuxiliarCompany` está supervisada por un `Coordinator` (rol del participante) y agrupa *N* `Company` estándar. Cada `Company` pertence a su `AuxiliarCompany` (`auxiliar_company_id`) y se cubre con consejeros/auxiliares.
+- **Membership** — unión polimórfica (`associable`: `Company` o `AuxiliarCompany`) entre una compañía y un `Participant`. Guarda `role` (derivado de `participant.rol`) y `gender` (copia de `participant.gender`); el índice único `(associable_type, associable_id, role, gender)` impide más de un hombre y una mujer por rol/compañía.
 - **User** — cuenta con `has_secure_password`, vinculada a un `Participant` (opcional). Roles derivados del participante.
 - **Session** — sesión persistente por usuario.
+
+## Secciones de gestión
+
+- **`/companies`** (CompaniesController) — listado de compañías estándar agrupadas por AC (+ "sin compañía auxiliar"), detalle con plantilla 1M/1F de consejeros/auxiliares y jóvenes, CRUD y panel de asignación de personal (`assign_staff`/`remove_staff`).
+- **`/auxiliar_companies`** (AuxiliarCompaniesController) — CRUD de auxiliar companies y asignación de su coordinador.
+- **`/companies/overview`** (KPIs) — cards + Chartkick (jóvenes y personal por compañía) y tabla de estado Completa/Incompleta.
+- **Autorización por rol:** cualquier usuario autenticado ve; **editan** superadmin, `coordinador` y `director` (todo); `auxiliar` su AC y las compañías de sus consejeros; `consejero` su propia compañía; `logistica`/`registrador` solo lectura.
 
 ## Deploy (Kamal)
 

@@ -1,0 +1,49 @@
+<div class="max-w-255 mx-auto px-3 md:px-7 pt-10">
+  <div class="flex justify-between mb-5 items-center px-3">
+    <h1 class="font-bold text-2xl"><%= @auxiliar_company.name %></h1>
+    <div class="flex gap-2">
+      <div class="flex gap-2">
+        <%= render(ButtonComponent.new(text: "Editar", url: edit_auxiliar_company_path(@auxiliar_company), type: "muted")) if can_edit_auxiliar_company?(@auxiliar_company) %>
+        <%= render(ButtonComponent.new(text: "Atrás", url: auxiliar_companies_path, type: "cancel")) %>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <div class="flex items-center gap-4">
+      <%= image_tag "company.svg", class: "w-12 h-12 opacity-70" %>
+      <div>
+        <p class="text-sm text-gray-500">Coordinador</p>
+        <p class="font-semibold text-lg text-blue-950"><%= @auxiliar_company.coordinator_name %></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 mt-5 max-w-xl">
+      <%= render(InfoTileComponent.new(title: "Compañías estándar", icon: "company.svg", data: [@auxiliar_company.companies.count])) %>
+      <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [@auxiliar_company.auxiliar_count])) %>
+      <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [@auxiliar_company.counselor_count])) %>
+    </div>
+  </div>
+
+  <% if can_manage_staff? || can_edit_auxiliar_company?(@auxiliar_company) %>
+    <%= render "auxiliar_companies/staff", ac: @auxiliar_company %>
+  <% end %>
+
+  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <h3 class="font-bold text-xl mb-4">Compañías estándar</h3>
+    <% if @auxiliar_company.companies.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% @auxiliar_company.companies.each do |c| %>
+          <%= link_to c, class: "block" do %>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all">
+              <p class="font-semibold text-blue-950"><%= c.name %></p>
+              <p class="text-sm text-gray-500">Consejeros: <%= c.counselors.count %> · Auxiliares: <%= c.auxiliars.count %> · Jóvenes: <%= c.participants.count %></p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500">Esta compañía auxiliar aún no tiene compañías estándar.</p>
+    <% end %>
+  </section>
+</div>

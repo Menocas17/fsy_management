@@ -6,6 +6,12 @@
   </div>
   <%= render "filters", form_url: participants_path %>
   <%= turbo_frame_tag "participants_table" do %>
-    <%= render(TableComponent.new(participants: @participants)) %>
+    <% if @participants.any? %>
+      <%= render(TableComponent.new(participants: @participants)) %>
+    <% else %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center">
+        <p class="text-gray-500">No hay jóvenes que coincidan con la búsqueda.</p>
+      </div>
+    <% end %>
   <% end %>
 </div>

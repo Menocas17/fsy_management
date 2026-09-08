@@ -12,7 +12,7 @@
       <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Ingrese su correo electronico", value: params[:email_address], class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
     </div>
     <div class="inline">
-      <%= form.submit "Enviar correo con instrucciones", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-[#015581] hover:bg-[#0376af] text-white inline-block font-medium cursor-pointer" %>
+      <%= form.submit "Enviar correo con instrucciones", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white inline-block font-medium cursor-pointer" %>
     </div>
   <% end %>
 </div>

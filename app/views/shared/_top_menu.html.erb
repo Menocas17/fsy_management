@@ -20,14 +20,14 @@
         <p class=""><%= Current.user.full_name%></p>
         <span class="block -mt-1 font-semibold text-gray-400"><%= Current.user.rol.capitalize%></span>
       </div>
-      <%= button_to "Cerrar sesión", session_path, method: :delete, class: " transition cursor-pointer shadow-md rounded-xl text-sm flex items-center justify-center bg-[#C8E7E9] border border-[#268EB5] font-semibold hidden md:block py-1 px-2 text-gray-600 rounded-lg hover:border-gray-700"%>
+      <%= button_to "Cerrar sesión", session_path, method: :delete, class: "transition cursor-pointer shadow-md rounded-lg text-sm flex items-center justify-center bg-primary-100 border border-primary-500 font-semibold hidden md:block py-1 px-2 text-gray-600 hover:border-primary-700"%>
     </nav>
   </div>
   <%# backdrop %>
   <div class="fixed inset-0 z-100 bg-black/50 transition-opacity hidden" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
   </div>
   <%# slide mobile menu%>
-  <div class="fixed inset-y-0 left-0 bg-white h-screen w-3/5 z-200 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-xl" data-mobile-menu-target="menu">
+  <div class="fixed inset-y-0 left-0 bg-white h-screen w-3/5 z-200 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-xl flex flex-col" data-mobile-menu-target="menu">
     <div class="flex items-center justify-between px-3 pt-3">
       <div class="flex gap-3 items-center">
         <%= image_tag "fsy_letters.svg", class:"w-15 h-15"%>
@@ -39,14 +39,16 @@
         </svg>
       </button>
     </div>
-    <nav class="mt-8 px-2 flex flex-col ">
+    <nav class="mt-8 px-2 flex flex-col flex-1 pb-6">
       <div class="flex flex-col gap-4">
         <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
         <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "jovenes"))%>
         <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "staff"))%>
+        <%= render(ButtonComponent.new(text:"Compañías", url: companies_path, icon: "company.svg", secondary_icon: "company.svg", is_nav:true , section: "companies"))%>
         <%= render(ButtonComponent.new(text:"My profile", url: myprofile_participants_path, icon: "profile.svg", secondary_icon: "profile-s.svg", is_nav:true , section: "myprofile"))%>
       </div>
-      <%= button_to "Cerrar sesión", session_path, method: :delete, class: " transition cursor-pointer shadow-md rounded-xl text-sm justify-center bg-[#C8E7E9] border border-[#268EB5] font-semibold  py-1 px-2 text-gray-600 rounded-lg hover:border-gray-700 w-full mt-[530px]"%>
+      <div class="flex-1"></div>
+      <%= button_to "Cerrar sesión", session_path, method: :delete, class: "transition cursor-pointer shadow-md rounded-lg text-sm justify-center bg-primary-100 border border-primary-500 font-semibold py-1 px-2 text-gray-600 hover:border-primary-700 w-full"%>
     </nav>
   </div>
 </div>

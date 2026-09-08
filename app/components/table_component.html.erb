@@ -43,24 +43,24 @@
               <%= participant.age %>
             </td>
             <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.genre.capitalize %>
+              <%= participant.gender.capitalize %>
             </td>
             <td class="py-3 px-4 <%= show_cell %>">
-              Comp. <%= participant.company %>
+              Comp. <%= participant.company&.name %>
             </td>
             <td class="py-3 px-4  hidden lg:table-cell">
               <div class="rounded-xl border border-slate-300 2xl:max-w-[60%] m-auto bg-slate-100 ">
                 <%= participant.room %>
               </div>
             </td>
-            <td>
-              <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" do %>
+            <td class="hidden lg:table-cell">
+              <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline" do %>
                 <%= icon "eye", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 transition-all duration-300"%>
               <%end%>
             </td>
-            <td>
+            <td class="hidden lg:table-cell">
               <% if isAdmin?%>
-                <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" do %>
+                <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline" do %>
                   <%= icon "square-pen", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 transition-all duration-300"%>
                 <%end%>
               <%end%>
