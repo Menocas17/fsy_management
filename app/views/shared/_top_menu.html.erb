@@ -13,14 +13,36 @@
       </div>
     </div>
     <nav class="flex items-center justify-center gap-3 md:mr-10">
-      <%= link_to myprofile_participants_path, class:"cursor-pointer" do%>
-        <%= current_user_avatar_tag%>
-      <%end%>
-      <div>
-        <p class=""><%= Current.user.full_name%></p>
-        <span class="block -mt-1 font-semibold text-gray-400"><%= Current.user.rol.capitalize%></span>
+      <div data-controller="dropdown" class="relative">
+        <button type="button"
+                class="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1 hover:bg-gray-100 transition"
+                data-action="click->dropdown#toggle click@window->dropdown#hide"
+                aria-haspopup="true">
+          <%= current_user_avatar_tag %>
+          <div class="hidden md:block text-left">
+            <p><%= Current.user.full_name %></p>
+            <span class="flex items-center gap-1 -mt-1 font-semibold text-gray-400">
+              <%= Current.user.rol.capitalize %>
+              <%= icon "chevron-down", class: "w-4 h-4 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
+            </span>
+          </div>
+          <%= icon "chevron-down", class: "w-4 h-4 text-gray-400 transition-transform duration-200 md:hidden", data: { dropdown_target: "chevron" } %>
+        </button>
+
+        <div class="hidden absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50"
+             data-dropdown-target="menu">
+          <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+            <%= icon "settings", class: "w-4 h-4" %>
+            Configuración
+          </a>
+          <%= link_to myprofile_participants_path, class: "flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 transition-all duration-300" do %>
+            <%= icon "user", class: "w-4 h-4" %>
+            Mi perfil
+          <% end %>
+          <div class="border-t border-slate-100 my-1"></div>
+          <%= button_to "Cerrar sesión", session_path, method: :delete, class: "flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 transition-all duration-300 cursor-pointer" %>
+        </div>
       </div>
-      <%= button_to "Cerrar sesión", session_path, method: :delete, class: "transition cursor-pointer shadow-md rounded-lg text-sm flex items-center justify-center bg-primary-100 border border-primary-500 font-semibold hidden md:block py-1 px-2 text-gray-600 hover:border-primary-700"%>
     </nav>
   </div>
   <%# backdrop %>
