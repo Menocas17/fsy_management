@@ -1,0 +1,15 @@
+<label for="<%= @id %>" class="flex items-center justify-between gap-4 cursor-pointer">
+  <span class="pr-4">
+    <span class="block text-sm font-semibold text-gray-700 dark:text-slate-200"><%= @label %></span>
+    <% if @description.present? %>
+      <span class="block text-xs text-gray-500 dark:text-slate-400 mt-0.5"><%= @description %></span>
+    <% end %>
+  </span>
+  <span class="relative inline-flex items-center shrink-0">
+    <%= tag.input type: "checkbox", id: @id, class: "sr-only peer", data: input_data %>
+    <span class="w-11 h-6 bg-gray-200 dark:bg-slate-600 rounded-full peer peer-checked:bg-primary-600
+                 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500
+                 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full
+                 after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></span>
+  </span>
+</label>

@@ -9,6 +9,23 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('fsy:theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+          if (localStorage.getItem('fsy:reduce-motion') === 'true') {
+            document.documentElement.classList.add('reduce-motion');
+          }
+          if (localStorage.getItem('fsy:text-size') === 'large') {
+            document.documentElement.classList.add('text-lg-mode');
+          }
+        } catch (e) {
+          // localStorage unavailable (private browsing) — fall back to defaults
+        }
+      })();
+    </script>
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
     <link rel="icon" href="/icon.png" type="image/png">
@@ -27,7 +44,7 @@
       <%= render "shared/aside"%>
       <div class="flex flex-col flex-1 h-full overflow-hidden">
         <%= render "shared/top_menu"%>
-        <main class=" w-full overflow-y-auto bg-slate-100">
+        <main class=" w-full overflow-y-auto bg-slate-100 dark:bg-slate-900">
           <%= yield %>
         </main>
       </div>

@@ -1,29 +1,29 @@
 <section class="mt-5 pb-10 grid grid-cols-1 lg:grid-cols-3 gap-8 ">
-  <div class="border  inline-block p-4 rounded-lg text-center flex-1 bg-white border-slate-100 shadow-lg">
+  <div class="border  inline-block p-4 rounded-lg text-center flex-1 bg-white border-slate-100 shadow-lg dark:bg-slate-800 dark:border-slate-700">
     <div class="flex gap-3 items-center justify-center">
-      <div class="bg-gray-100 rounded-lg p-2">
+      <div class="bg-gray-100 dark:bg-slate-700 rounded-lg p-2">
         <%= icon "chart-no-axes-column-increasing"%>
       </div>
-      <h3 class="text-gray-500 font-bold">Jovenes por genero</h3>
+      <h3 class="text-gray-500 dark:text-slate-400 font-bold">Jovenes por genero</h3>
     </div>
     <div class="flex flex-col justify-center items-center mt-8 gap-5">
       <div class="flex gap-5 items-center">
-        <div class="bg-blue-200 rounded-lg p-2">
+        <div class="bg-blue-200 dark:bg-blue-900/30 rounded-lg p-2">
           <%= icon "mars", class: "w-[50px] h-[50px] text-blue-900"%>
         </div>
-        <p class="font-bold text-3xl"><%= male_count %></p>
+        <p class="font-bold text-3xl text-gray-900 dark:text-slate-100"><%= male_count %></p>
       </div>
       <div class="flex gap-5 items-center">
-        <div class="bg-pink-200 rounded-lg p-2">
+        <div class="bg-pink-200 dark:bg-pink-900/30 rounded-lg p-2">
           <%= icon "venus", class: "w-[50px] h-[50px] text-pink-900"%>
         </div>
-        <p class="font-bold text-3xl"><%= female_count %></p>
+        <p class="font-bold text-3xl text-gray-900 dark:text-slate-100"><%= female_count %></p>
       </div>
     </div>
   </div>
   <%= render "shirt_table", shirt_counts: shirt_counts %>
-  <div class=" border  p-4 rounded-lg flex-1 bg-white border-slate-100 shadow-lg">
-    <h3 class="font-bold mb-5 ml-10 text-gray-500 ">Jovenes por edad</h3>
+  <div class=" border  p-4 rounded-lg flex-1 bg-white border-slate-100 shadow-lg dark:bg-slate-800 dark:border-slate-700">
+    <h3 class="font-bold mb-5 ml-10 text-gray-500 dark:text-slate-400">Jovenes por edad</h3>
     <%= bar_chart data_by_age,
       colors: ["#02355E", "#0089B2", "#279618", "#991299", "#FC9902", "#D62B00" ],
       height: "180px",

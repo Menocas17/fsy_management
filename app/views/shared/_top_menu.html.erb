@@ -1,8 +1,8 @@
 <div data-controller="mobile-menu" class="relative">
   <%# Main nav bar %>
-  <div class="border-b border-slate-200 py-0 px-5 h-15.25 flex items-center justify-between md:justify-end">
+  <div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 py-0 px-5 h-15.25 flex items-center justify-between md:justify-end">
     <div class="flex gap-3 md:hidden">
-      <button type="button" class="text-gray-700 hover:text-gray-700 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#toggle">
+      <button type="button" class="text-gray-700 hover:text-gray-700 dark:text-slate-300 dark:hover:text-slate-100 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#toggle">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -15,12 +15,12 @@
     <nav class="flex items-center justify-center gap-3 md:mr-10">
       <div data-controller="dropdown" class="relative">
         <button type="button"
-                class="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1 hover:bg-gray-100 transition"
+                class="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-slate-700 transition"
                 data-action="click->dropdown#toggle click@window->dropdown#hide"
                 aria-haspopup="true">
           <%= current_user_avatar_tag %>
           <div class="hidden md:block text-left">
-            <p><%= Current.user.full_name %></p>
+            <p class="dark:text-slate-100"><%= Current.user.full_name %></p>
             <span class="flex items-center gap-1 -mt-1 font-semibold text-gray-400">
               <%= Current.user.rol.capitalize %>
               <%= icon "chevron-down", class: "w-4 h-4 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
@@ -29,18 +29,18 @@
           <%= icon "chevron-down", class: "w-4 h-4 text-gray-400 transition-transform duration-200 md:hidden", data: { dropdown_target: "chevron" } %>
         </button>
 
-        <div class="hidden absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50"
+        <div class="hidden absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-lg shadow-lg py-1 z-50 dark:bg-slate-800 dark:border-slate-700"
              data-dropdown-target="menu">
-          <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+          <%= link_to settings_path, class: "flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 dark:text-slate-300 dark:hover:bg-slate-700 transition-all duration-300" do %>
             <%= icon "settings", class: "w-4 h-4" %>
             Configuración
-          </a>
-          <%= link_to myprofile_participants_path, class: "flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 transition-all duration-300" do %>
+          <% end %>
+          <%= link_to myprofile_participants_path, class: "flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 dark:text-slate-300 dark:hover:bg-slate-700 transition-all duration-300" do %>
             <%= icon "user", class: "w-4 h-4" %>
             Mi perfil
           <% end %>
-          <div class="border-t border-slate-100 my-1"></div>
-          <%= button_to "Cerrar sesión", session_path, method: :delete, class: "flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 transition-all duration-300 cursor-pointer" %>
+          <div class="border-t border-slate-100 dark:border-slate-700 my-1"></div>
+          <%= button_to "Cerrar sesión", session_path, method: :delete, class: "flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-blue-100 dark:text-slate-300 dark:hover:bg-slate-700 transition-all duration-300 cursor-pointer" %>
         </div>
       </div>
     </nav>
@@ -49,13 +49,13 @@
   <div class="fixed inset-0 z-100 bg-black/50 transition-opacity hidden" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
   </div>
   <%# slide mobile menu%>
-  <div class="fixed inset-y-0 left-0 bg-white h-screen w-3/5 z-200 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-xl flex flex-col" data-mobile-menu-target="menu">
+  <div class="fixed inset-y-0 left-0 bg-white dark:bg-slate-800 h-screen w-3/5 z-200 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-xl flex flex-col" data-mobile-menu-target="menu">
     <div class="flex items-center justify-between px-3 pt-3">
       <div class="flex gap-3 items-center">
         <%= image_tag "fsy_letters.svg", class:"w-15 h-15"%>
         <%= image_tag "fsy-logo.svg", class:"w-10 h-10"%>
       </div>
-      <button type="button" class="text-gray-700 hover:text-gray-700 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#close">
+      <button type="button" class="text-gray-700 hover:text-gray-700 dark:text-slate-300 dark:hover:text-slate-100 focus:outline-none p-2 rounded-md cursor-pointer" data-action="click->mobile-menu#close">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>

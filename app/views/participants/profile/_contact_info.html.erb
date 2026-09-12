@@ -1,6 +1,6 @@
 <section class="bg-white border border-slate-100 rounded-lg shadow-lg">
   <h3 class="font-bold text-lg bg-primary-gradient text-white px-3 py-2 rounded-t-lg">Información de Contacto</h3>
-  <dl class="mt-8 grid grid-cols-1 sm:grid-cols-2 p-3 gap-4">
+  <dl class="mt-8 grid grid-cols-1  p-3 gap-4 w-full">
     <%= render(InfoTileComponent.new(title: "Numero", icon: "phone.svg", data: [@participant.phone_number ]))%>
     <%= render(InfoTileComponent.new(title: "Correo", icon: "email.svg", data: [@participant.email_address ]))%>
     <div class="col-span-1 sm:col-span-2 w-full mt-4">

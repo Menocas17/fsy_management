@@ -26,12 +26,12 @@ class ButtonComponent < ViewComponent::Base
 
     type_styles = case @type
     when "muted"
-      "border py-1 px-2 border-gray-200 text-gray-600 rounded-lg hover:border-gray-400 font-normal"
+      "border py-1 px-2 border-gray-200 text-gray-600 rounded-lg hover:border-gray-400 font-normal dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-400"
     when "primary"
       "border py-2 px-4 text-white bg-primary-600 hover:border-gray-600"
 
     when "cancel"
-      "border border-gray-300 text-gray-600 hover:border-gray-600 py-1 px-2 "
+      "border border-gray-300 text-gray-600 hover:border-gray-600 py-1 px-2 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-400"
     when "delete"
       "border py-2 px-4 text-white bg-rose-800 hover:border-gray-600"
     else
@@ -48,7 +48,7 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active_classes
-    active? ? "bg-primary-gradient-right shadow-inner text-white" : " hover:bg-blue-100 transition-all duration-300"
+    active? ? "bg-primary-gradient-right shadow-inner text-white" : "text-gray-700 hover:bg-blue-100 dark:text-slate-200 dark:hover:bg-slate-700 transition-all duration-300"
   end
 
   def current_icon

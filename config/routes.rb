@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   # root "posts#index"
   root "sessions#new"
   resource :dashboard, only: [ :show ]
+  resource :settings, only: [ :show ] do
+    post :send_password_reset
+  end
   resources :auxiliar_companies do
     member do
       post :assign_staff

@@ -1,0 +1,50 @@
+<% content_for :title, "Configuración" %>
+
+<div class="max-w-255 mx-auto pb-5 mt-5 px-4 md:px-10" data-controller="preferences">
+  <h1 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-5">Configuración</h1>
+
+  <div class="grid grid-cols-1 gap-4">
+    <section class="bg-white border border-slate-100 rounded-lg shadow-lg dark:bg-slate-800 dark:border-slate-700">
+      <h3 class="font-bold text-lg bg-primary-gradient text-white px-3 py-2 rounded-t-lg">Cuenta</h3>
+      <div class="p-4 flex flex-col gap-4">
+        <div>
+          <p class="text-sm text-gray-500 dark:text-slate-400">Correo electrónico</p>
+          <p class="font-medium text-gray-900 dark:text-slate-100"><%= Current.user.email_address %></p>
+        </div>
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">Contraseña</p>
+            <p class="text-xs text-gray-500 dark:text-slate-400">Te enviaremos un enlace para restablecer tu contraseña.</p>
+          </div>
+          <%= button_to "Cambiar contraseña", send_password_reset_settings_path, method: :post,
+                class: "transition cursor-pointer shadow-md rounded-lg text-sm font-bold border py-2 px-4 text-white bg-primary-600 hover:border-gray-600" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white border border-slate-100 rounded-lg shadow-lg dark:bg-slate-800 dark:border-slate-700">
+      <h3 class="font-bold text-lg bg-primary-gradient text-white px-3 py-2 rounded-t-lg">Apariencia</h3>
+      <div class="p-4">
+        <%= render(ToggleComponent.new(id: "theme-toggle", label: "Modo oscuro",
+              description: "Cambia la apariencia de la aplicación a un tema oscuro.",
+              action: "toggleTheme", target: "themeToggle")) %>
+      </div>
+    </section>
+
+    <section class="bg-white border border-slate-100 rounded-lg shadow-lg dark:bg-slate-800 dark:border-slate-700">
+      <h3 class="font-bold text-lg bg-primary-gradient text-white px-3 py-2 rounded-t-lg">Accesibilidad</h3>
+      <div class="p-4 flex flex-col divide-y divide-slate-100 dark:divide-slate-700">
+        <div class="py-3 first:pt-0 last:pb-0">
+          <%= render(ToggleComponent.new(id: "reduce-motion-toggle", label: "Reducir movimiento",
+                description: "Minimiza las animaciones y transiciones en toda la aplicación.",
+                action: "toggleMotion", target: "motionToggle")) %>
+        </div>
+        <div class="py-3 first:pt-0 last:pb-0">
+          <%= render(ToggleComponent.new(id: "text-size-toggle", label: "Texto grande",
+                description: "Aumenta el tamaño del texto para facilitar la lectura.",
+                action: "toggleTextSize", target: "textSizeToggle")) %>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

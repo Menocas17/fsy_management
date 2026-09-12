@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --background-image-fsy-pattern: url('top-header-4.png');
   --font-sans: 'Onest', sans-serif;
@@ -25,4 +27,17 @@
   --color-puerto-cabezas: #e68a00;
   --color-las-americas: #1c21b4;
   --color-bello-horizonte: #0089b2;
+}
+
+/* Accessibility: reduce motion */
+:where(.reduce-motion, .reduce-motion *) {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Accessibility: larger text */
+html.text-lg-mode {
+  font-size: 112.5%;
 }
