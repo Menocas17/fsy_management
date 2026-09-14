@@ -1,73 +1,69 @@
-<section class="mt-5 pb-5">
-  <div class="overflow-x-auto shadow-md rounded-lg border border-gray-200 dark:border-slate-700">
-    <table class="w-full text-left border-collapse bg-white dark:bg-slate-800">
+<div class="bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md overflow-hidden">
+  <div class="overflow-x-auto px-7">
+    <table class="w-full text-left border-collapse">
       <thead>
-        <tr class="bg-primary-gradient text-center text-white">
-          <th class="py-3 pl-5 md:pl-10 text-left">Nombre Completo</th>
-          <th class="py-3 px-4 hidden sm:table-cell">Estaca</th>
-          <th class="py-3 px-4 hidden lg:table-cell">Barrio</th>
+        <tr class="border-b border-line-soft dark:border-slate-700">
+          <th class="<%= header_cell_classes %>">Nombre completo</th>
+          <th class="<%= header_cell_classes %>">Estaca</th>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
           <% if @is_staff %>
-            <th class="py-3 px-4">Rol</th>
+            <th class="<%= header_cell_classes %>">Rol</th>
           <% end %>
-          <th class="py-3 px-4 hidden lg:table-cell">Edad</th>
-          <th class="py-3 px-4 hidden lg:table-cell">Genero</th>
-          <th class="py-3 px-4 <%= show_cell %>">Compania</th>
-          <th class="py-3 px-4  hidden lg:table-cell">Cuarto</th>
-          <th class="py-3 px-4 hidden lg:table-cell"></th>
-          <% if isAdmin?%>
-            <th class="py-3 px-4 hidden lg:table-cell"></th>
-          <%end%>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Edad</th>
+          <th class="<%= header_cell_classes %> hidden xl:table-cell">Género</th>
+          <th class="<%= header_cell_classes %>">Compañía</th>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Cuarto</th>
+          <th class="<%= header_cell_classes %>"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-sm text-gray-600 dark:text-slate-300 text-center">
+      <tbody class="divide-y divide-line-soft dark:divide-slate-700">
         <% @participants.each do |participant| %>
-          <tr class="">
-            <td class="py-3 px-4 font-medium text-blue-950 dark:text-slate-100 md:pl-10 ">
-              <div class="flex items-center gap-2 ">
-                <%= render (AvatarComponent.new(participant: participant)) %>
-                <%= link_to participant.full_name, participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" } %>
+          <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors">
+            <td class="<%= cell_classes %>">
+              <div class="flex items-center gap-3">
+                <%= render(AvatarComponent.new(participant: participant)) %>
+                <%= link_to participant.full_name,
+                      participant_path(participant, from: from_path, return_to: request.fullpath),
+                      data: { turbo_frame: "_top" },
+                      class: "font-semibold text-ink-900 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-300" %>
               </div>
             </td>
-            <td class="py-3 px-4 hidden sm:table-cell">
+            <td class="<%= cell_classes %>">
               <%= render(StakeSpanComponent.new(stake: participant.stake)) %>
             </td>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.ward&.titleize %>
-            </td>
+            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.ward&.titleize || "—" %></td>
             <% if @is_staff %>
-              <td class="py-3 px-4">
-                <%= render(RoleSpanComponent.new(role: participant.rol))%>
+              <td class="<%= cell_classes %>">
+                <%= render(RoleSpanComponent.new(role: participant.rol)) %>
               </td>
             <% end %>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.age %>
+            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.age %></td>
+            <td class="<%= cell_classes %> hidden xl:table-cell"><%= gender_label(participant) %></td>
+            <td class="<%= cell_classes %>"><%= company_name(participant) %></td>
+            <td class="<%= cell_classes %> hidden lg:table-cell">
+              <% if participant.room.present? %>
+                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-canvas dark:bg-slate-700 border border-line dark:border-slate-600 text-xs font-semibold"><%= participant.room %></span>
+              <% else %>
+                —
+              <% end %>
             </td>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.gender.capitalize %>
-            </td>
-            <td class="py-3 px-4 <%= show_cell %>">
-              Comp. <%= participant.company&.name %>
-            </td>
-            <td class="py-3 px-4  hidden lg:table-cell">
-              <div class="rounded-xl border border-slate-300 dark:border-slate-600 2xl:max-w-[60%] m-auto bg-slate-100 dark:bg-slate-700">
-                <%= participant.room %>
+            <td class="py-2">
+              <div class="flex justify-end gap-1">
+                <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath),
+                      data: { turbo_frame: "_top" }, class: row_button_classes, title: "Ver perfil" do %>
+                  <%= icon "eye", class: "w-[17px] h-[17px]" %>
+                <% end %>
+                <% if admin? %>
+                  <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath),
+                        data: { turbo_frame: "_top" }, class: row_button_classes, title: "Editar" do %>
+                    <%= icon "square-pen", class: "w-[17px] h-[17px]" %>
+                  <% end %>
+                <% end %>
               </div>
-            </td>
-            <td class="hidden lg:table-cell">
-              <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline" do %>
-                <%= icon "eye", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 transition-all duration-300"%>
-              <%end%>
-            </td>
-            <td class="hidden lg:table-cell">
-              <% if isAdmin?%>
-                <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline" do %>
-                  <%= icon "square-pen", class: "text-gray-600 w-[22px] h-[22px] hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 transition-all duration-300"%>
-                <%end%>
-              <%end%>
             </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
-</section>
+</div>

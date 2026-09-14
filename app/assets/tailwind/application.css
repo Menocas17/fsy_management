@@ -27,6 +27,10 @@
     oklch(39% 0.105 258),
     oklch(54% 0.12 253)
   );
+  --background-image-hero:
+    radial-gradient(120% 160% at 10% 0%, oklch(54% 0.12 253) 0%, transparent 45%),
+    radial-gradient(90% 140% at 95% 100%, oklch(55% 0.16 275) 0%, transparent 50%),
+    linear-gradient(155deg, oklch(27% 0.085 258), oklch(22% 0.075 258));
 
   --color-ink-900: oklch(24% 0.02 260);
   --color-ink-700: oklch(40% 0.018 260);
@@ -52,6 +56,22 @@
   --color-puerto-cabezas: #e68a00;
   --color-las-americas: #1c21b4;
   --color-bello-horizonte: #0089b2;
+}
+
+/* Pagy's series_nav emits bare anchors; style them by their ARIA state. */
+@layer components {
+  .pagy.series-nav {
+    @apply flex items-center gap-1.5;
+  }
+  .pagy.series-nav a {
+    @apply min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-[10px] border border-line text-[13px] font-bold text-ink-700 transition hover:bg-primary-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700;
+  }
+  .pagy.series-nav a[aria-current="page"] {
+    @apply bg-primary-700 border-transparent text-white hover:bg-primary-700 dark:hover:bg-primary-700;
+  }
+  .pagy.series-nav a[aria-disabled="true"]:not([aria-current]) {
+    @apply text-ink-300 cursor-default hover:bg-transparent dark:text-slate-600 dark:hover:bg-transparent;
+  }
 }
 
 /* Accessibility: reduce motion */

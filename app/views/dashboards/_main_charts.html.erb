@@ -1,68 +1,39 @@
-<section class="px-3 md:px-0 mt-6">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg dark:bg-slate-800 dark:border-slate-700">
-      <h3 class="text-gray-500 dark:text-slate-400 font-bold mb-10 ml-10">Participantes por estaca</h3>
-      <%= column_chart count_by_stake,
-          colors: ["#0089B2", "#1C21B4", "#E68A00", "#109618", "#D62B00"],
-          height: "260px",
+<section class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-4 md:gap-5">
+  <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6 md:px-7">
+    <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Distribución</p>
+    <h2 class="mt-0.5 mb-5 text-base font-bold text-ink-900 dark:text-slate-100">Participantes por estaca</h2>
+    <%= column_chart count_by_stake,
+          colors: [ "#0093c5", "#5965cd", "#369e4e", "#dc932e", "#d14a5f" ],
+          height: "240px",
           dataset: {
-              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 }, 
-              borderWidth: 0,
-              barPercentage: 0.4,       
-              categoryPercentage: 0.7   
-            },
+            borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 4, bottomRight: 4 },
+            borderWidth: 0,
+            barPercentage: 0.45,
+            categoryPercentage: 0.7
+          },
           library: {
             scales: {
-              x: { 
-                grid: { display: false },
-                border: { display: false }
-              }, 
-              y: { 
-                grid: { color: "rgba(0, 0, 0, 0.05)" },
-                border: { display: false } 
-              }
+              x: { grid: { display: false }, border: { display: false } },
+              y: { grid: { color: "rgba(0, 0, 0, 0.05)" }, border: { display: false } }
             },
+            plugins: { legend: { display: false } },
+            animation: { duration: 1400, easing: "easeOutBack" }
+          } %>
+  </div>
+  <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6 md:px-7">
+    <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Personal</p>
+    <h2 class="mt-0.5 mb-5 text-base font-bold text-ink-900 dark:text-slate-100">Distribución por rol</h2>
+    <%= pie_chart count_by_role,
+          donut: true,
+          height: "240px",
+          colors: [ "#5965cd", "#dc932e", "#369e4e", "#90b5dc", "#0093c5", "#d14a5f", "#1d447c" ],
+          dataset: { borderWidth: 4, borderColor: "#ffffff", borderRadius: 6, spacing: 2 },
+          library: {
+            cutout: "72%",
             plugins: {
-              legend: { display: false } 
+              legend: { position: "right", labels: { usePointStyle: true, pointStyle: "circle" } }
             },
-            animation: {
-              duration: 1400,
-              easing: 'easeOutBack' 
-            }
-          }
- 
-    
-      %>
-    </div>
-    <div class="border  p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg dark:bg-slate-800 dark:border-slate-700 order-first md:order-last">
-      <h3 class="text-gray-500 dark:text-slate-400 font-bold mb-10 ml-10"">Distribución por rol</h3>
-      <%= pie_chart count_by_role, 
-          donut: true, 
-          height: "260px",
-          dataset: {
-        borderWidth: 4,              
-        borderColor: "#ffffff",      
-        borderRadius: 6,            
-        spacing: 2                   
-      },
-      library: {
-        cutout: "75%",              
-        plugins: {
-          legend: {
-            position: 'right',        
-            labels: {
-              usePointStyle: true,    
-              pointStyle: 'circle',
-              
-            }
-          }
-        },
-        animation: {
-          duration: 1500,
-          easing: 'easeOutQuart'      
-        }
-      }
-      %>
-    </div>
+            animation: { duration: 1500, easing: "easeOutQuart" }
+          } %>
   </div>
 </section>

@@ -4,24 +4,26 @@ class ParticipantsController < ApplicationController
   before_action :require_admin_to_create!, only: [ :new, :create ]
 
   def index
-    @participants = Participant.jovenes
-                               .includes(:avatar_attachment, :avatar_blob)
-                               .search_by_name(params[:query])
-                               .by_stake(params[:stake])
-                               .by_ward(params[:ward])
-                               .by_gender(params[:gender])
-                               .by_company(params[:company])
+    @pagy, @participants = pagy(Participant.jovenes
+                                           .includes(:company, :avatar_attachment, :avatar_blob)
+                                           .search_by_name(params[:query])
+                                           .by_stake(params[:stake])
+                                           .by_ward(params[:ward])
+                                           .by_gender(params[:gender])
+                                           .by_company(params[:company])
+                                           .order(:first_name, :last_name, :id))
   end
 
   def staff
-    @participants = Participant.staff
-                               .includes(:avatar_attachment, :avatar_blob)
-                               .search_by_name(params[:query])
-                               .by_stake(params[:stake])
-                               .by_ward(params[:ward])
-                               .by_gender(params[:gender])
-                               .by_company(params[:company])
-                               .by_role(params[:rol])
+    @pagy, @participants = pagy(Participant.staff
+                                           .includes(:company, :avatar_attachment, :avatar_blob)
+                                           .search_by_name(params[:query])
+                                           .by_stake(params[:stake])
+                                           .by_ward(params[:ward])
+                                           .by_gender(params[:gender])
+                                           .by_company(params[:company])
+                                           .by_role(params[:rol])
+                                           .order(:first_name, :last_name, :id))
   end
 
   def myprofile

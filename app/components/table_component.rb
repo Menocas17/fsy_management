@@ -1,45 +1,38 @@
-
 class TableComponent < ViewComponent::Base
   delegate :icon, to: :helpers
 
-  def initialize(participants:, is_staff: nil)
+  GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
+
+  def initialize(participants:, is_staff: false)
     @participants = participants
     @is_staff = is_staff
   end
 
-  def show_cell
-    if @is_staff
-      "hidden lg:table-cell"
-    else
-      ""
-    end
-  end
-
-  def stake_color(participant)
-    case participant.stake
-    when "bello_horizonte"
-      "bg-cyan-100"
-
-    when "las_americas"
-      "bg-indigo-100"
-
-    when "villa_flor"
-      "bg-green-100"
-
-    when "puerto_cabezas"
-      "bg-amber-100"
-    end
-  end
-
   def from_path
-    if @is_staff
-      "staff"
-    else
-      "jovenes"
-    end
+    @is_staff ? "staff" : "jovenes"
   end
 
-  def isAdmin?
+  def admin?
     Current.user&.admin_or_staff_manager?
+  end
+
+  def gender_label(participant)
+    GENDER_LABELS.fetch(participant.gender, participant.gender)
+  end
+
+  def company_name(participant)
+    participant.company&.name.presence || "—"
+  end
+
+  def header_cell_classes
+    "pt-5 pb-3 pr-5 text-[11px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500"
+  end
+
+  def cell_classes
+    "py-3.5 pr-5 text-[13.5px] text-ink-700 dark:text-slate-300"
+  end
+
+  def row_button_classes
+    "w-9 h-9 rounded-[10px] inline-flex items-center justify-center text-ink-300 hover:bg-primary-50 hover:text-primary-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition"
   end
 end

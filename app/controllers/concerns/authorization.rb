@@ -79,20 +79,20 @@ module Authorization
       user = Current.user
 
       if user&.counselers_staff? || user&.admin_or_staff_manager?
-        allowed_attributes += [ :avatar, :room, :shirt_number, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation, :allergies, :medicines, :diet, :additional_medical_notes, :additional_intructions ]
+        allowed_attributes += [ :avatar, :room, :shirt_number, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation, :allergies, :medicines, :diet, :additional_medical_notes, :additional_instructions ]
       end
 
       if user&.admin_or_staff_manager?
-        allowed_attributes += [ :m_person_in_charge, :h_person_in_charge, :identity_document, :gender, :stake, :ward, :rol ]
+        allowed_attributes += [ :m_person_in_charge, :h_person_in_charge, :identity_document, :gender, :stake, :ward, :rol, :company_id ]
       end
 
       if user&.participant_id.nil?
         allowed_attributes = [
           :avatar, :room, :shirt_number, :phone_number, :email_address, :first_name, :last_name, :age,
           :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation,
-          :allergies, :medicines, :diet, :additional_medical_notes, :additional_intructions,
+          :allergies, :medicines, :diet, :additional_medical_notes, :additional_instructions,
           :m_person_in_charge, :h_person_in_charge,
-          :identity_document, :gender, :stake, :ward, :rol
+          :identity_document, :gender, :stake, :ward, :rol, :company_id
         ]
       end
 
