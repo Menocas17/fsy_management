@@ -7,21 +7,46 @@
   --font-sans: 'Onest', sans-serif;
 
   /* Color pallete */
-  --color-primary: #003f70;
-  --color-primary-100: #c8e7e9;
-  --color-primary-500: #268eb5;
-  --color-primary-600: #095581;
-  --color-primary-700: #0a5681;
+  --color-primary: oklch(33% 0.095 258);
+  --color-primary-50: oklch(97% 0.012 245);
+  --color-primary-100: oklch(93% 0.025 245);
+  --color-primary-300: oklch(76% 0.07 250);
+  --color-primary-500: oklch(54% 0.12 253);
+  --color-primary-600: oklch(46% 0.115 255);
+  --color-primary-700: oklch(39% 0.105 258);
+  --color-primary-800: oklch(33% 0.095 258);
+  --color-primary-900: oklch(27% 0.085 258);
+  --color-primary-950: oklch(22% 0.075 258);
   --background-image-primary-gradient: linear-gradient(
-    180deg,
-    #003c6b,
-    #004e89
+    155deg,
+    oklch(27% 0.085 258),
+    oklch(22% 0.075 258)
   );
   --background-image-primary-gradient-right: linear-gradient(
-    to right,
-    #003c6b,
-    #005ea8
+    100deg,
+    oklch(39% 0.105 258),
+    oklch(54% 0.12 253)
   );
+
+  --color-ink-900: oklch(24% 0.02 260);
+  --color-ink-700: oklch(40% 0.018 260);
+  --color-ink-500: oklch(56% 0.015 260);
+  --color-ink-300: oklch(78% 0.01 260);
+
+  --color-surface: oklch(99% 0.003 260);
+  --color-canvas: oklch(96.5% 0.006 258);
+  --color-line: oklch(90% 0.008 258);
+  --color-line-soft: oklch(93.5% 0.006 258);
+
+  --color-cat-blue: oklch(62% 0.13 230);
+  --color-cat-indigo: oklch(55% 0.16 275);
+  --color-cat-green: oklch(62% 0.15 148);
+  --color-cat-amber: oklch(72% 0.14 70);
+  --color-cat-rose: oklch(60% 0.17 15);
+
+  --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
+  --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);
+  --shadow-lg: 0 20px 40px -12px oklch(20% 0.05 260 / 0.22);
 
   --color-villa-flor: #109618;
   --color-puerto-cabezas: #e68a00;

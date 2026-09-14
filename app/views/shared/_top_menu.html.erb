@@ -63,11 +63,9 @@
     </div>
     <nav class="mt-8 px-2 flex flex-col flex-1 pb-6">
       <div class="flex flex-col gap-4">
-        <%= render(ButtonComponent.new(text:"Inicio", url: dashboard_path, icon: "home.svg", secondary_icon: "home-s.svg", is_nav:true , classes: ""))%>
-        <%= render(ButtonComponent.new(text:"Jovenes", url: participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "jovenes"))%>
-        <%= render(ButtonComponent.new(text:"Staff", url: staff_participants_path, icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav:true , section: "staff"))%>
-        <%= render(ButtonComponent.new(text:"Compañías", url: companies_path, icon: "company.svg", secondary_icon: "company.svg", is_nav:true , section: "companies"))%>
-        <%= render(ButtonComponent.new(text:"My profile", url: myprofile_participants_path, icon: "profile.svg", secondary_icon: "profile-s.svg", is_nav:true , section: "myprofile"))%>
+        <% nav_items.each do |item| %>
+          <%= render(ButtonComponent.new(**item)) %>
+        <% end %>
       </div>
       <div class="flex-1"></div>
       <%= button_to "Cerrar sesión", session_path, method: :delete, class: "transition cursor-pointer shadow-md rounded-lg text-sm justify-center bg-primary-100 border border-primary-500 font-semibold py-1 px-2 text-gray-600 hover:border-primary-700 w-full"%>

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil)
+  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false)
     @url = url
+    @disabled = disabled
     @text = text
     @type = type
     @icon = icon
@@ -41,8 +42,12 @@ class ButtonComponent < ViewComponent::Base
     [ base_styles, type_styles, @classes ].compact.join(" ")
   end
 
+  def disabled?
+    @disabled
+  end
+
   def active?
-    return false if @url.nil?
+    return false if disabled? || @url.nil?
     return true if current_page?(@url)
     true if @section.present? && params[:from] == @section
   end
