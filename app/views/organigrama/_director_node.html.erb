@@ -1,0 +1,11 @@
+<div class="inline-block w-full md:w-auto md:min-w-60 text-left rounded-2xl bg-primary-gradient px-5 py-4 text-white shadow-lg" data-node="direccion">
+  <p class="text-[10px] font-bold tracking-[.08em] uppercase text-white/75">Dirección · FSY 2026</p>
+  <% if directors.any? %>
+    <div class="mt-2 flex items-center gap-2.5">
+      <%= render "organigrama/people", people: directors, ring: "ring-primary-900" %>
+      <p class="text-[14px] font-bold leading-snug"><%= directors.map(&:full_name).join(" & ") %></p>
+    </div>
+  <% else %>
+    <p class="mt-2 text-[13.5px] font-semibold text-white/80">Sin director asignado</p>
+  <% end %>
+</div>

@@ -1,46 +1,54 @@
-<section class="flex flex-col md:flex-row gap-5 md:gap-30 border-b-2 justify-left py-4 mx-3 border-gray-300 ">
-  <legend class="font-bold mt-5 text-3xl md:text-xl">General</legend>
-  <fieldset class="flex-1">
-    <% if Current.user.admin_or_staff_manager?%>
-      <div class="mb-4">
-        <%= form.label :company_id, class:" font-semibold block mb-1"%>
-        <%= form.select :company_id, Company.order(:name).map { |c| [c.name, c.id] }, { prompt: "Selecciona una compañía", include_blank: "Sin compañía" }, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4" %>
+<% admin = Current.user&.admin_or_staff_manager? %>
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Información general", "layers" %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <% if admin %>
+      <div>
+        <%= form.label :company_id, "Compañía", class: field_label_classes %>
+        <%= form.select :company_id, Company.order(:name).map { |c| [ c.name, c.id ] },
+              { include_blank: "Sin compañía" }, class: field_select_classes %>
       </div>
-    <%end%>
-    <div class="mb-4">
-      <%= form.label :room, class:" font-semibold block mb-1"%>
-      <%= form.text_field :room, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"%>
+      <% if form.object.new_record? || form.object.logistica? || form.object.director_logistica? %>
+        <div>
+          <%= form.label :logistics_area_id, "Área de logística", class: field_label_classes %>
+          <%= form.select :logistics_area_id, LogisticsArea.order(:name).map { |area| [ area.name, area.id ] },
+                { include_blank: "Sin área" }, class: field_select_classes %>
+        </div>
+      <% end %>
+    <% end %>
+    <div>
+      <%= form.label :room, "Cuarto", class: field_label_classes %>
+      <%= form.text_field :room, class: field_input_classes, placeholder: "Ej. 204" %>
     </div>
-    <% if Current.user.admin_or_staff_manager?%>
-      <div class="mb-4">
-        <%= form.label :stake, class:" font-semibold block mb-1"%>
-        <%= form.select :stake, Participant.stakes.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"}%>
+    <% if admin %>
+      <div>
+        <%= form.label :stake, "Estaca", class: field_label_classes %>
+        <%= form.select :stake, Participant.stakes.keys.map { |key| [ key.titleize, key ] },
+              { prompt: "Selecciona una estaca" }, class: field_select_classes %>
       </div>
-      <div class="mb-4">
-        <%= form.label :ward, class:" font-semibold block mb-1"%>
-        <%= form.select :ward, Participant.wards.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"}%>
+      <div>
+        <%= form.label :ward, "Barrio", class: field_label_classes %>
+        <%= form.select :ward, Participant.wards.keys.map { |key| [ key.titleize, key ] },
+              { prompt: "Selecciona un barrio" }, class: field_select_classes %>
       </div>
-      <div class="mb-4">
-        <%= form.label :gender, class:" font-semibold block mb-1"%>
-        <%= form.select :gender, Participant.genders.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
+      <div>
+        <%= form.label :gender, "Género", class: field_label_classes %>
+        <%= form.select :gender, Participant::GENDER_LABELS.map { |key, label| [ label, key ] },
+              { prompt: "Selecciona uno" }, class: field_select_classes %>
       </div>
-      <div class="mb-4">
-        <%= form.label :age, class:" font-semibold block mb-1"%>
-        <%= form.number_field :age, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"%>
+      <div>
+        <%= form.label :age, "Edad", class: field_label_classes %>
+        <%= form.number_field :age, class: field_input_classes, min: 1, max: 79 %>
       </div>
-      <div class="mb-4">
-        <%= form.label :identity_document, class:" font-semibold block mb-1"%>
-        <%= form.text_field :identity_document, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm  md:max-w-3/4"%>
+      <div class="sm:col-span-2">
+        <%= form.label :identity_document, "Documento de identidad", class: field_label_classes %>
+        <%= form.text_field :identity_document, class: field_input_classes %>
       </div>
-    <%end%>
-    <div class="mb-4">
-      <%= form.label :shirt_number, class:" font-semibold block mb-1"%>
-      <%= form.select :shirt_number, Participant.shirt_numbers.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4 md:max-w-1/4"}%>
+    <% end %>
+    <div>
+      <%= form.label :shirt_number, "Talla de camisa", class: field_label_classes %>
+      <%= form.select :shirt_number, Participant.shirt_numbers.keys.map { |key| [ key.upcase, key ] },
+            { prompt: "Selecciona una talla" }, class: field_select_classes %>
     </div>
-    <%# This will be present when creating extra tables for managin the stakes and wards %>
-    <%# <div class="mb-4"> %>
-    <%# <%= form.label :ward, class:" font-semibold block mb-1"%>
-    <%# <%= form.select :ward, Participant.wards.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona uno"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm max-w-3/4"}%>
-    <%# </div> %>
-  </fieldset>
+  </div>
 </section>

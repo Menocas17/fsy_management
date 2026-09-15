@@ -1,20 +1,12 @@
-<section class="bg-white border border-slate-100 rounded-lg shadow-lg">
-  <h3 class="font-bold text-lg  text-gray-500 px-3 py-2 rounded-t-lg ">Información General</h3>
-  
-  <dl class="mt-5 grid grid-cols-1 sgap-4 sm:gap-7 p-3">
-    <dt>
-      <div class="flex gap-1 items-center">
-        <%= image_tag('respond_to.svg', class: "w-[25px] h-[25px]")%>
-        <span class="text-gray-600 text-sm">Consejeros</span>
-      </div>
-    </dt>
-    <%= render(InfoTileComponent.new(title: "Compañía", icon: "company.svg", data: [@participant.company&.name]))%>
-    <%= render(InfoTileComponent.new(title: "Cuarto", icon: "room.svg", data: [@participant.room]))%>
-    <%= render(InfoTileComponent.new(title: "Consejeros", icon: "respond_to.svg", data: [@participant.m_person_in_charge, @participant.h_person_in_charge]))%>
-    <%= render(InfoTileComponent.new(title: "Estaca", icon: "stake.svg", data: [@participant.stake&.titleize]))%>
-    <%= render(InfoTileComponent.new(title: "Barrio", icon: "ward.svg", data: [@participant.ward&.titleize]))%>
-    <%= render(InfoTileComponent.new(title: "Género", icon: "gender.svg", data: [@participant.gender]))%>
-    <%= render(InfoTileComponent.new(title: "Identificación", icon: "id.svg", data: [@participant.identity_document]))%>
-    <%= render(InfoTileComponent.new(title: "Camisa", icon: "shirt.svg", data: [@participant.shirt_number&.capitalize]))%>
-  </dl>
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Información general", "layers" %>
+  <div>
+    <%= info_row "Compañía asignada", "building-2", participant.company&.name %>
+    <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
+    <%= info_row "Cuarto", "door-open", participant.room %>
+    <%= info_row "Consejeros a cargo", "users", [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
+    <%= info_row "Identificación", "id-card", participant.identity_document %>
+    <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>
+    <%= info_row "Talla de camisa", "shirt", participant.shirt_number&.upcase %>
+  </div>
 </section>

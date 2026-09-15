@@ -1,19 +1,16 @@
-<% if Current.user&.participant_id.nil?%>
-  <h1>Eres el system admin</h1>
-<%else%>
-  <div class="max-w-255 mx-auto pb-5 mt-5">
-    <%= render "participants/profile/profile_banner", participant: @participant%>
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1fr_2fr] px-4 md:px-10 gap-4">
-      <%= render "participants/profile/general_info", participant: @participant%>
-      <%= render "participants/profile/contact_info", participant: @participant%>
-      <%= render "participants/profile/medical_info", participant: @participant%>
+<% content_for :title, "Mi perfil" %>
+<% content_for :eyebrow, "Cuenta" %>
+<% content_for :page_h1, "true" %>
+<% if @participant %>
+  <%= render "participants/profile/profile", participant: @participant, show_back: false, edit_from: "myprofile" %>
+<% else %>
+  <div class="px-4 md:px-8 pt-10 pb-10 max-w-xl mx-auto">
+    <div class="<%= card_classes("p-8 text-center") %>">
+      <span class="mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100">
+        <%= icon "key-round", class: "w-5 h-5" %>
+      </span>
+      <h1 class="mt-4 text-lg font-bold text-ink-900 dark:text-slate-100">Administrador del sistema</h1>
+      <p class="mt-1.5 text-sm text-ink-500 dark:text-slate-400">Esta cuenta no tiene un perfil de participante vinculado.</p>
     </div>
-    <%# this is the adittional notes section %>
-    <section class="bg-white border border-slate-100 rounded-lg shadow-lg mt-3 mx-4 md:mx-10">
-      <h3 class="font-bold text-lg bg-primary-gradient text-white px-3 py-2 rounded-t-lg">Notas Adicionales</h3>
-      <p class="font-thin italic text-center p-4">
-        <%= check_notes(@participant.additional_instructions)%>
-      </p>
-    </section>
   </div>
-<%end%>
+<% end %>

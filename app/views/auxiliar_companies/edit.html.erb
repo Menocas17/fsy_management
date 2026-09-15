@@ -1,6 +1,7 @@
-<div class="max-w-2xl mx-auto px-3 md:px-7 pt-10">
-  <div class="flex justify-between items-center mb-5">
-    <h1 class="font-bold text-2xl">Editar <%= @auxiliar_company.name %></h1>
+<% content_for :title, "Editar #{@auxiliar_company.name}" %>
+<% content_for :eyebrow, "Compañías" %>
+<div class="max-w-2xl mx-auto px-3 md:px-7 pt-8">
+  <div class="flex justify-end mb-5">
     <%= render(ButtonComponent.new(text: "Atrás", url: @auxiliar_company, type: "cancel")) %>
   </div>
   <%= render "auxiliar_companies/form", auxiliar_company: @auxiliar_company, url: auxiliar_company_path(@auxiliar_company) %>

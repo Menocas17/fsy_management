@@ -1,0 +1,28 @@
+<div class="<%= card_classes("px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div class="flex flex-wrap items-center gap-2">
+    <% if participant.persisted? && Current.user&.admin_or_staff_manager? %>
+      <%= button_to participant_path(participant), method: :delete,
+            form: { data: { turbo_confirm: "¿Seguro que deseas borrar este registro? Esta acción es irreversible." } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-[11px] text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar participante
+      <% end %>
+    <% end %>
+    <% if participant.persisted? && params[:from] == "myprofile" %>
+      <%= button_to send_password_reset_participant_path(participant), method: :post,
+            class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition cursor-pointer" do %>
+        <%= icon "key-round", class: "w-4 h-4" %>
+        Enviar enlace para restablecer contraseña
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", safe_return_to(dashboard_path),
+          class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+    <button type="submit" form="participant-form"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
+      <%= icon "check", class: "w-4 h-4" %>
+      <%= submit_button_text(participant) %>
+    </button>
+  </div>
+</div>

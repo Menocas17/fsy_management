@@ -1,3 +1,6 @@
+<% content_for :title, "Vista general" %>
+<% content_for :eyebrow, "Compañías" %>
+<% content_for :page_h1, "true" %>
 <div class="px-3 md:px-7 pt-10">
   <div class="flex justify-between mb-5 px-3">
     <h1 class="font-bold text-2xl">Vista general de Compañías</h1>
@@ -26,13 +29,23 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
     <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
       <h3 class="text-gray-500 font-bold mb-6 ml-2">Jóvenes por compañía</h3>
-      <%= column_chart @companies.map { |c| [ c.name, c.participants.count ] },
-          colors: ["#0089B2"], height: "260px" %>
+      <% jovenes_by_company = @companies.to_h { |c| [ c.name, c.participants.count ] } %>
+      <%= tag.div role: "img", aria: { label: "Jóvenes por compañía. #{chart_summary(jovenes_by_company.keys, jovenes_by_company.values)}" },
+            data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Jóvenes",
+                    chart_labels_value: jovenes_by_company.keys, chart_series_value: jovenes_by_company.values,
+                    chart_colors_value: [ "#0093c5" ], chart_radius_value: 8, chart_column_width_value: "55%", chart_height_value: 260 } do %>
+        <div data-chart-target="canvas" class="min-h-[260px]"></div>
+      <% end %>
     </div>
     <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
       <h3 class="text-gray-500 font-bold mb-6 ml-2">Personal (consejeros + auxiliares) por compañía</h3>
-      <%= column_chart @companies.map { |c| [ c.name, c.counselors.count + c.auxiliars.count ] },
-          colors: ["#109618"], height: "260px" %>
+      <% staff_by_company = @companies.to_h { |c| [ c.name, c.counselors.count + c.auxiliars.count ] } %>
+      <%= tag.div role: "img", aria: { label: "Personal por compañía. #{chart_summary(staff_by_company.keys, staff_by_company.values)}" },
+            data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Personal",
+                    chart_labels_value: staff_by_company.keys, chart_series_value: staff_by_company.values,
+                    chart_colors_value: [ "#369e4e" ], chart_radius_value: 8, chart_column_width_value: "55%", chart_height_value: 260 } do %>
+        <div data-chart-target="canvas" class="min-h-[260px]"></div>
+      <% end %>
     </div>
   </div>
 

@@ -1,3 +1,7 @@
+<% content_for :title, @auxiliar_company.name %>
+<% content_for :eyebrow, "Compañías" %>
+<% content_for :heading, "Compañía auxiliar" %>
+<% content_for :page_h1, "true" %>
 <div class="max-w-255 mx-auto px-3 md:px-7 pt-10">
   <div class="flex justify-between mb-5 items-center px-3">
     <h1 class="font-bold text-2xl"><%= @auxiliar_company.name %></h1>
@@ -11,7 +15,7 @@
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex items-center gap-4">
-      <%= image_tag "company.svg", class: "w-12 h-12 opacity-70" %>
+      <%= icon "building-2", class: "w-12 h-12 text-primary-500 dark:text-primary-300" %>
       <div>
         <p class="text-sm text-gray-500">Coordinador</p>
         <p class="font-semibold text-lg text-blue-950"><%= @auxiliar_company.coordinator_name %></p>
@@ -19,9 +23,9 @@
     </div>
 
     <div class="grid grid-cols-3 gap-4 mt-5 max-w-xl">
-      <%= render(InfoTileComponent.new(title: "Compañías estándar", icon: "company.svg", data: [@auxiliar_company.companies.count])) %>
-      <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [@auxiliar_company.auxiliar_count])) %>
-      <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [@auxiliar_company.counselor_count])) %>
+      <%= render(InfoTileComponent.new(title: "Compañías estándar", icon: "building-2", data: [@auxiliar_company.companies.count])) %>
+      <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "users", data: [@auxiliar_company.auxiliar_count])) %>
+      <%= render(InfoTileComponent.new(title: "Consejeros", icon: "users", data: [@auxiliar_company.counselor_count])) %>
     </div>
   </div>
 

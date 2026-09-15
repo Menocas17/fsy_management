@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -43,20 +43,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "audit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "action", null: false
+    t.uuid "actor_id"
+    t.string "actor_name", null: false
+    t.integer "category", null: false
+    t.datetime "created_at", null: false
+    t.string "summary", null: false
+    t.uuid "target_id"
+    t.string "target_name"
+    t.string "target_type"
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_audit_logs_on_actor_id"
+    t.index ["category"], name: "index_audit_logs_on_category"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
+    t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
+  end
+
   create_table "auxiliar_companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "coordinator_id"
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.uuid "second_coordinator_id"
     t.datetime "updated_at", null: false
     t.index ["coordinator_id"], name: "index_auxiliar_companies_on_coordinator_id"
+    t.index ["second_coordinator_id"], name: "index_auxiliar_companies_on_second_coordinator_id"
   end
 
   create_table "companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "auxiliar_company_id"
     t.datetime "created_at", null: false
+    t.integer "dining_hall"
     t.string "name", null: false
+    t.string "nickname"
+    t.integer "number"
     t.datetime "updated_at", null: false
     t.index ["auxiliar_company_id"], name: "index_companies_on_auxiliar_company_id"
+    t.index ["number"], name: "index_companies_on_number", unique: true
+  end
+
+  create_table "logistics_areas", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_logistics_areas_on_name", unique: true
   end
 
   create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -83,6 +114,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
     t.integer "gender"
     t.integer "identity_document"
     t.string "last_name"
+    t.uuid "logistics_area_id"
     t.jsonb "medical_info"
     t.jsonb "person_in_charge"
     t.integer "rol"
@@ -92,6 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
     t.datetime "updated_at", null: false
     t.integer "ward"
     t.index ["company_id"], name: "index_participants_on_company_id"
+    t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -115,10 +148,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000005) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "audit_logs", "participants", column: "actor_id", on_delete: :nullify
   add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
+  add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id"
   add_foreign_key "companies", "auxiliar_companies"
   add_foreign_key "memberships", "participants"
   add_foreign_key "participants", "companies"
+  add_foreign_key "participants", "logistics_areas", on_delete: :nullify
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "participants"
 end

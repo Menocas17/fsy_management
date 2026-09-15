@@ -1,3 +1,6 @@
-<h1 class="mb-5 pl-5 font-bold text-3xl md:text-2xl">Nuevo Registro</h1>
-<%= render "participants/form/form", participant: @participant
-%>
+<% content_for :title, "Nuevo participante" %>
+<% content_for :eyebrow, "Participantes" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto space-y-5">
+  <%= render "participants/form/form", participant: @participant %>
+  <%= render "participants/form/form_actions", participant: @participant %>
+</div>

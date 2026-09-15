@@ -21,6 +21,25 @@ class ButtonComponentTest < ViewComponent::TestCase
     end
   end
 
+  test "nav item stays active on nested pages listed in active_paths" do
+    with_request_url "/companies/123" do
+      component = render_inline(ButtonComponent.new(text: "Compañías", url: "/companies", lucide_icon: "building-2", is_nav: true, active_paths: [ "/companies" ]))
+
+      link = component.css("a[href='/companies']").first
+      assert_equal "page", link["aria-current"]
+      assert_includes link["class"], "bg-primary-gradient-right"
+    end
+  end
+
+  test "nav item can use a Lucide icon instead of an image asset" do
+    with_request_url "/dashboard" do
+      component = render_inline(ButtonComponent.new(text: "Organigrama", url: "/organigrama", lucide_icon: "network", is_nav: true))
+
+      assert component.css("a[href='/organigrama'] svg").present?
+      assert_empty component.css("img")
+    end
+  end
+
   test "disabled nav item renders as inert text, not a link" do
     with_request_url "/dashboard" do
       component = render_inline(ButtonComponent.new(text: "Reportes", secondary_icon: "stake.svg", is_nav: true, disabled: true))

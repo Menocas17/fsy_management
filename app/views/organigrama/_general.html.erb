@@ -1,0 +1,103 @@
+<%
+  logistics = @logistics.any? || @logistics_directors.any?
+  branches = @auxiliar_companies.any? || @orphan_companies.any? || logistics
+  by_number = ->(companies) { companies.sort_by { |company| [ company.number || Float::INFINITY, company.name ] } }
+  logistics_title = @logistics_directors.map(&:full_name).join(" · ").presence || "Logística"
+  logistics_groups = @logistics.group_by(&:logistics_area).sort_by { |area, _| area&.name || "~" }
+%>
+
+<% if branches || @directors.any? %>
+  <div class="hidden md:block overflow-x-auto pb-4">
+    <div class="org-tree min-w-max px-4">
+      <ul>
+        <li>
+          <%= render "organigrama/director_node", directors: @directors %>
+          <% if branches %>
+            <ul>
+              <% @auxiliar_companies.each do |auxiliar_company| %>
+                <li>
+                  <%= render "organigrama/coordinator_node", auxiliar_company: auxiliar_company %>
+                  <% if auxiliar_company.companies.any? %>
+                    <ul>
+                      <% by_number.(auxiliar_company.companies).each do |company| %>
+                        <li><%= render "organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0) %></li>
+                      <% end %>
+                    </ul>
+                  <% end %>
+                </li>
+              <% end %>
+              <% if @orphan_companies.any? %>
+                <li>
+                  <%= render "organigrama/group_node", eyebrow: "Sin coordinación", title: "Sin compañía auxiliar", tone: "text-ink-500 dark:text-slate-400" %>
+                  <ul>
+                    <% @orphan_companies.each do |company| %>
+                      <li><%= render "organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0) %></li>
+                    <% end %>
+                  </ul>
+                </li>
+              <% end %>
+              <% if logistics %>
+                <li>
+                  <%= render "organigrama/group_node", eyebrow: "Dirección de logística", title: logistics_title, tone: "text-amber-700 dark:text-cat-amber" %>
+                  <% if logistics_groups.any? %>
+                    <ul>
+                      <% logistics_groups.each do |area, members| %>
+                        <li><%= render "organigrama/logistics_area_node", area: area, members: members %></li>
+                      <% end %>
+                    </ul>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="md:hidden space-y-4">
+    <%= render "organigrama/director_node", directors: @directors %>
+    <% if branches %>
+      <div class="ml-4 pl-4 border-l-2 border-line dark:border-slate-600 space-y-4">
+        <% @auxiliar_companies.each do |auxiliar_company| %>
+          <div>
+            <%= render "organigrama/coordinator_node", auxiliar_company: auxiliar_company %>
+            <% if auxiliar_company.companies.any? %>
+              <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+                <% by_number.(auxiliar_company.companies).each do |company| %>
+                  <%= render "organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0) %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        <% if @orphan_companies.any? %>
+          <div>
+            <%= render "organigrama/group_node", eyebrow: "Sin coordinación", title: "Sin compañía auxiliar", tone: "text-ink-500 dark:text-slate-400" %>
+            <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+              <% @orphan_companies.each do |company| %>
+                <%= render "organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0) %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <% if logistics %>
+          <div>
+            <%= render "organigrama/group_node", eyebrow: "Dirección de logística", title: logistics_title, tone: "text-amber-700 dark:text-cat-amber" %>
+            <% if logistics_groups.any? %>
+              <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+                <% logistics_groups.each do |area, members| %>
+                  <%= render "organigrama/logistics_area_node", area: area, members: members %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="<%= card_classes("p-10 text-center") %>">
+    <p class="text-ink-500 dark:text-slate-400">Aún no hay compañías ni personal registrados.</p>
+  </div>
+<% end %>

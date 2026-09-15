@@ -1,10 +1,8 @@
 <% content_for :title, "Staff" %>
+<% content_for :eyebrow, "Participantes" %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
-  <div class="flex items-end justify-between gap-4 mb-5">
-    <div>
-      <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Participantes</p>
-      <h1 class="text-xl md:text-2xl font-bold text-ink-900 dark:text-slate-100">Staff</h1>
-    </div>
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <p class="text-[13px] font-medium text-ink-500 dark:text-slate-400"><%= pluralize(@pagy.count, "miembro del staff", plural: "miembros del staff") %></p>
     <% if Current.user&.admin_or_staff_manager? %>
       <%= link_to new_participant_path, class: "inline-flex items-center gap-2 rounded-[11px] bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
         <%= icon "plus", class: "w-4 h-4" %>

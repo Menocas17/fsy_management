@@ -1,0 +1,9 @@
+<% content_for :title, "Historial" %>
+<% content_for :eyebrow, "Gestión" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
+  <p class="mb-5 text-[13px] font-medium text-ink-500 dark:text-slate-400">Quién cambió qué y cuándo.</p>
+  <%= render "audit_logs/filters" %>
+  <%= turbo_frame_tag "audit_logs_table" do %>
+    <%= render "audit_logs/results", audit_logs: @audit_logs, pagy: @pagy %>
+  <% end %>
+</div>

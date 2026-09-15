@@ -1,3 +1,6 @@
+<% content_for :title, "Compañías auxiliares" %>
+<% content_for :eyebrow, "Gestión" %>
+<% content_for :page_h1, "true" %>
 <div class="px-3 md:px-7 pt-10">
   <div class="flex justify-between mb-5 px-3">
     <h1 class="font-bold text-2xl">Compañías Auxiliares</h1>
@@ -17,13 +20,13 @@
               <%= ac.coordinator_name %>
             </p>
           </div>
-          <%= image_tag "company.svg", class: "w-10 h-10 opacity-70" %>
+          <%= icon "building-2", class: "w-10 h-10 text-primary-500 dark:text-primary-300" %>
         </div>
 
         <div class="grid grid-cols-3 gap-3 text-center text-sm mt-2">
-          <%= render(InfoTileComponent.new(title: "Compañías", icon: "company.svg", data: [ac.companies.count])) %>
-          <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [ac.auxiliar_count])) %>
-          <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [ac.counselor_count])) %>
+          <%= render(InfoTileComponent.new(title: "Compañías", icon: "building-2", data: [ac.companies.count])) %>
+          <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "users", data: [ac.auxiliar_count])) %>
+          <%= render(InfoTileComponent.new(title: "Consejeros", icon: "users", data: [ac.counselor_count])) %>
         </div>
 
         <div class="flex items-center justify-end gap-2 mt-2">

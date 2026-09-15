@@ -57,6 +57,12 @@ module Authorization
       end
     end
 
+    def require_staff_manager!
+      unless Current.user&.admin_or_staff_manager?
+        redirect_to dashboard_path, alert: "Acceso no autorizado"
+      end
+    end
+
     def authorize_admin_to_delete!
       unless Current.user&.admin_or_staff_manager?
         redirect_to participants_path, alert: "No estas autorizado para borrar registros"
@@ -83,7 +89,7 @@ module Authorization
       end
 
       if user&.admin_or_staff_manager?
-        allowed_attributes += [ :m_person_in_charge, :h_person_in_charge, :identity_document, :gender, :stake, :ward, :rol, :company_id ]
+        allowed_attributes += [ :m_person_in_charge, :h_person_in_charge, :identity_document, :gender, :stake, :ward, :rol, :company_id, :logistics_area_id ]
       end
 
       if user&.participant_id.nil?
@@ -92,7 +98,7 @@ module Authorization
           :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation,
           :allergies, :medicines, :diet, :additional_medical_notes, :additional_instructions,
           :m_person_in_charge, :h_person_in_charge,
-          :identity_document, :gender, :stake, :ward, :rol, :company_id
+          :identity_document, :gender, :stake, :ward, :rol, :company_id, :logistics_area_id
         ]
       end
 

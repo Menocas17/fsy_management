@@ -1,0 +1,18 @@
+<%= link_to notifications_path, aria: { label: "Notificaciones" },
+      class: "md:hidden w-8 h-8 rounded-[9px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300" do %>
+  <%= icon "bell", class: "w-[17px] h-[17px]" %>
+<% end %>
+<div data-controller="dropdown" class="relative hidden md:block">
+  <button type="button" data-notifications-trigger aria-label="Notificaciones" aria-haspopup="true"
+          data-action="click->dropdown#toggle click@window->dropdown#hide"
+          class="w-10 h-10 rounded-[11px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300 hover:text-ink-900 dark:hover:text-slate-100 cursor-pointer transition">
+    <%= icon "bell", class: "w-5 h-5" %>
+  </button>
+  <div class="hidden absolute right-0 top-full mt-2 w-96 z-50 overflow-hidden bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[16px] shadow-lg"
+       data-dropdown-target="menu">
+    <div class="px-5 py-4 border-b border-line-soft dark:border-slate-700">
+      <p class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Notificaciones</p>
+    </div>
+    <%= render "notifications/empty_state" %>
+  </div>
+</div>

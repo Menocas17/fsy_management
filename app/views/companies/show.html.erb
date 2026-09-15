@@ -1,3 +1,7 @@
+<% content_for :title, @company.name %>
+<% content_for :eyebrow, "Compañías" %>
+<% content_for :heading, "Perfil de la compañía" %>
+<% content_for :page_h1, "true" %>
 <div class="max-w-255 mx-auto px-3 md:px-7 pt-10">
   <div class="flex justify-between mb-5 items-center px-3">
     <div>
@@ -17,9 +21,9 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [ "#{@company.counselors.count}/2" ])) %>
-    <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [ "#{@company.auxiliars.count}/2" ])) %>
-    <%= render(InfoTileComponent.new(title: "Jóvenes", icon: "people.svg", data: [ @company.participants.count ])) %>
+    <%= render(InfoTileComponent.new(title: "Consejeros", icon: "users", data: [ "#{@company.counselors.count}/2" ])) %>
+    <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "users", data: [ "#{@company.auxiliars.count}/2" ])) %>
+    <%= render(InfoTileComponent.new(title: "Jóvenes", icon: "users", data: [ @company.participants.count ])) %>
   </div>
 
   <% if can_manage_staff? || can_edit_company?(@company) %>

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class AvatarComponent < ViewComponent::Base
-  def initialize (participant:, is_profile: false)
+  def initialize (participant:, is_profile: false, size: nil)
     @participant = participant
     @is_profile = is_profile
+    @size = size
   end
 
   private
@@ -22,7 +23,9 @@ class AvatarComponent < ViewComponent::Base
 
   def css_classes
     if @is_profile
-      "w-25 h-25 rounded-full shrink-0 text-3xl border-3 border-white"
+      "w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-[20px] md:rounded-[24px] shrink-0 text-2xl md:text-[28px] border-4 border-surface dark:border-slate-800"
+    elsif @size == :sm
+      "w-7 h-7 rounded-full shrink-0 text-[10px]"
     else
       "w-10 h-10 rounded-full shrink-0"
     end

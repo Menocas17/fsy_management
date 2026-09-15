@@ -12,11 +12,19 @@
     <%= f.text_field :name, class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
   </div>
 
-  <div class="mb-6">
+  <div class="mb-4">
     <%= f.label :coordinator_id, "Coordinador", class: "block font-semibold mb-1" %>
     <%= f.select :coordinator_id,
         options_from_collection_for_select(Participant.coordinators, :id, :full_name, auxiliar_company.coordinator_id),
         { include_blank: "Sin coordinador" },
+        class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
+  </div>
+
+  <div class="mb-6">
+    <%= f.label :second_coordinator_id, "Segundo coordinador", class: "block font-semibold mb-1" %>
+    <%= f.select :second_coordinator_id,
+        options_from_collection_for_select(Participant.coordinators, :id, :full_name, auxiliar_company.second_coordinator_id),
+        { include_blank: "Sin segundo coordinador" },
         class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
   </div>
 

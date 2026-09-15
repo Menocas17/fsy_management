@@ -19,6 +19,14 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{new_participant_path}']", text: /Nuevo participante/
   end
 
+  test "renders ApexCharts mounts with their data and a text alternative" do
+    get dashboard_path
+
+    assert_select "[data-controller='chart'][data-chart-kind-value='columns']", 2
+    assert_select "[data-controller='chart'][data-chart-kind-value='donut'][role='img'][aria-label^='Distribución por rol']", 1
+    assert_select "[data-controller='chart'] [data-chart-target='canvas']", 3
+  end
+
   test "counts shirt sizes, defaulting missing sizes to zero" do
     get dashboard_path
 

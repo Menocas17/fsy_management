@@ -54,6 +54,7 @@ class ParticipantsController < ApplicationController
   def create
     @participant = Participant.new(participant_params)
     if @participant.save
+      record_audit!(category: :asignaciones, action: "created", target: @participant, summary: "Registró a #{@participant.full_name}")
       redirect_to @participant
     else
       render :new, status: :unprocessable_entity
@@ -65,6 +66,7 @@ class ParticipantsController < ApplicationController
 
   def update
     if @participant.update(participant_params)
+      audit_participant_update
       if params[:from] == "myprofile"
         redirect_to myprofile_participants_path(from: params[:from]), notice: "Actualizado exitosamente."
       else
@@ -82,10 +84,27 @@ class ParticipantsController < ApplicationController
 
   def destroy
     @participant.destroy
+    record_audit!(category: :asignaciones, action: "destroyed", target: @participant, summary: "Eliminó el registro de #{@participant.full_name}")
     redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
   private
+  FIELD_LABELS = {
+    "first_name" => "nombre", "last_name" => "apellido", "age" => "edad", "rol" => "rol", "stake" => "estaca",
+    "ward" => "barrio", "gender" => "género", "shirt_number" => "talla", "identity_document" => "identificación",
+    "room" => "cuarto", "company_id" => "compañía", "contact_info" => "contacto", "medical_info" => "información médica",
+    "person_in_charge" => "consejeros", "additional_instructions" => "notas", "logistics_area_id" => "área de logística"
+  }.freeze
+
+  def audit_participant_update
+    fields = changed_field_labels(@participant, FIELD_LABELS)
+    fields << "foto" if params.dig(:participant, :avatar).present?
+    return if fields.empty?
+
+    record_audit!(category: :asignaciones, action: "updated", target: @participant,
+                  summary: "Actualizó #{spanish_list(fields)} de #{@participant.full_name}")
+  end
+
   def set_participant
     @participant = Participant.find(params[:id])
   end

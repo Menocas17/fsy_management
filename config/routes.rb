@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   # root "posts#index"
   root "sessions#new"
   resource :dashboard, only: [ :show ]
+  resource :organigrama, only: [ :show ], controller: "organigrama"
+  resources :audit_logs, only: [ :index ], path: "historial"
+  resources :notifications, only: [ :index ], path: "notificaciones"
   resource :settings, only: [ :show ] do
     post :send_password_reset
   end

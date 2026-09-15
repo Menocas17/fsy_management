@@ -1,0 +1,15 @@
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
+  <%= render "participants/profile/profile_banner", participant: participant, show_back: show_back, edit_from: edit_from %>
+
+  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] gap-5 items-start">
+    <div class="space-y-5">
+      <%= render "participants/profile/general_info", participant: participant %>
+      <%= render "participants/profile/asignaciones" %>
+      <%= render "participants/profile/registro", participant: participant %>
+    </div>
+    <div class="space-y-5">
+      <%= render "participants/profile/contact_info", participant: participant %>
+      <%= render "participants/profile/medical_info", participant: participant %>
+    </div>
+  </div>
+</div>

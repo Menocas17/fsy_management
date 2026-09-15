@@ -25,22 +25,12 @@
   <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6">
     <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Edad</p>
     <h2 class="mt-0.5 mb-4 text-[15px] font-bold text-ink-900 dark:text-slate-100">Jóvenes por edad</h2>
-    <%= bar_chart data_by_age,
-          colors: [ "#1d447c", "#3671b2", "#0093c5", "#369e4e", "#dc932e", "#d14a5f" ],
-          height: "180px",
-          dataset: {
-            borderRadius: { topLeft: 0, topRight: 8, bottomLeft: 0, bottomRight: 8 },
-            borderWidth: 0,
-            barPercentage: 0.5,
-            categoryPercentage: 0.8
-          },
-          library: {
-            scales: {
-              x: { grid: { color: "rgba(0, 0, 0, 0.05)" }, border: { display: false } },
-              y: { grid: { display: false }, border: { display: false } }
-            },
-            plugins: { legend: { display: false } },
-            animation: { duration: 1250, easing: "easeOutQuart" }
-          } %>
+    <% ages = data_by_age.reject { |age, _| age.nil? }.sort.to_h %>
+    <%= tag.div role: "img", aria: { label: "Jóvenes por edad. #{chart_summary(ages.keys, ages.values)}" },
+          data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",
+                  chart_labels_value: ages.keys.map(&:to_s), chart_series_value: ages.values,
+                  chart_colors_value: age_bar_colors(ages.values), chart_radius_value: 6, chart_column_width_value: "70%", chart_height_value: 170 } do %>
+      <div data-chart-target="canvas" class="min-h-[170px]"></div>
+    <% end %>
   </div>
 </section>

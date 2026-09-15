@@ -1,39 +1,40 @@
+<%# "Personal" only charts staff roles; jóvenes already have their own KPI card. %>
+<% staff_roles = count_by_role.except("joven").select { |_, count| count.positive? } %>
 <section class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-4 md:gap-5">
   <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6 md:px-7">
     <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Distribución</p>
-    <h2 class="mt-0.5 mb-5 text-base font-bold text-ink-900 dark:text-slate-100">Participantes por estaca</h2>
-    <%= column_chart count_by_stake,
-          colors: [ "#0093c5", "#5965cd", "#369e4e", "#dc932e", "#d14a5f" ],
-          height: "240px",
-          dataset: {
-            borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 4, bottomRight: 4 },
-            borderWidth: 0,
-            barPercentage: 0.45,
-            categoryPercentage: 0.7
-          },
-          library: {
-            scales: {
-              x: { grid: { display: false }, border: { display: false } },
-              y: { grid: { color: "rgba(0, 0, 0, 0.05)" }, border: { display: false } }
-            },
-            plugins: { legend: { display: false } },
-            animation: { duration: 1400, easing: "easeOutBack" }
-          } %>
+    <h2 class="mt-0.5 mb-4 text-base font-bold text-ink-900 dark:text-slate-100">Participantes por estaca</h2>
+    <%= tag.div role: "img", aria: { label: "Participantes por estaca. #{chart_summary(count_by_stake.keys, count_by_stake.values)}" },
+          data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",
+                  chart_labels_value: count_by_stake.keys.map(&:split), chart_series_value: count_by_stake.values,
+                  chart_colors_value: ChartsHelper::CATEGORY_COLORS, chart_gradient_value: true, chart_height_value: 220 } do %>
+      <div data-chart-target="canvas" class="min-h-[220px]"></div>
+    <% end %>
   </div>
-  <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6 md:px-7">
+  <div class="min-w-0 flex flex-col bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6 md:px-7">
     <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Personal</p>
     <h2 class="mt-0.5 mb-5 text-base font-bold text-ink-900 dark:text-slate-100">Distribución por rol</h2>
-    <%= pie_chart count_by_role,
-          donut: true,
-          height: "240px",
-          colors: [ "#5965cd", "#dc932e", "#369e4e", "#90b5dc", "#0093c5", "#d14a5f", "#1d447c" ],
-          dataset: { borderWidth: 4, borderColor: "#ffffff", borderRadius: 6, spacing: 2 },
-          library: {
-            cutout: "72%",
-            plugins: {
-              legend: { position: "right", labels: { usePointStyle: true, pointStyle: "circle" } }
-            },
-            animation: { duration: 1500, easing: "easeOutQuart" }
-          } %>
+    <% if staff_roles.any? %>
+      <div class="flex flex-col sm:flex-row items-center gap-6 flex-1">
+        <%= tag.div class: "w-[180px] shrink-0", role: "img",
+              aria: { label: "Distribución por rol. #{chart_summary(staff_roles.keys.map { |role| role_chart_label(role) }, staff_roles.values)}" },
+              data: { controller: "chart", chart_kind_value: "donut",
+                      chart_labels_value: staff_roles.keys.map { |role| role_chart_label(role) }, chart_series_value: staff_roles.values,
+                      chart_colors_value: staff_roles.keys.map { |role| role_chart_color(role) }, chart_height_value: 180 } do %>
+          <div data-chart-target="canvas" class="min-h-[180px]"></div>
+        <% end %>
+        <ul class="w-full sm:w-auto flex flex-col gap-[9px]" aria-hidden="true">
+          <% staff_roles.each do |role, count| %>
+            <li class="flex items-center gap-2 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background: <%= role_chart_color(role) %>"></span>
+              <%= role_chart_label(role) %>
+              <span class="ml-auto pl-4 tabular-nums text-ink-500 dark:text-slate-400"><%= count %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <p class="flex-1 flex items-center justify-center text-sm text-ink-500 dark:text-slate-400">Aún no hay personal registrado.</p>
+    <% end %>
   </div>
 </section>

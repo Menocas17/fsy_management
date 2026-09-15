@@ -10,7 +10,7 @@ class User < ApplicationRecord
 
   def admin_or_staff_manager?
     return true if participant_id.nil?
-    participant&.coordinador? || participant&.director? || participant&.logistica?
+    participant&.coordinador? || participant&.director? || participant&.logistica? || participant&.director_logistica?
   end
 
   def counselers_staff?
@@ -23,6 +23,10 @@ class User < ApplicationRecord
 
   def rol
     participant&.rol || "superadmin"
+  end
+
+  def role_label
+    participant ? participant.role_label : "Superadmin"
   end
 
   private

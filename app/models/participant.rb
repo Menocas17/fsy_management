@@ -1,16 +1,24 @@
 class Participant < ApplicationRecord
   has_one :user, dependent: :nullify
   belongs_to :company, optional: true
+  belongs_to :logistics_area, optional: true
 
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
 
-  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, registrador: 4, logistica: 5, joven: 6 }
+  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, registrador: 4, logistica: 5, joven: 6, director_logistica: 7 }
+
+  ROLE_LABELS = {
+    "director" => "Director", "coordinador" => "Coordinador", "auxiliar" => "Auxiliar", "consejero" => "Consejero",
+    "registrador" => "Registrador", "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
+  }.freeze
   enum :stake, { bello_horizonte: 0, las_americas: 1, villa_flor: 2, puerto_cabezas: 3 }
   enum :ward, { bello_horizonte_b: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6 }
   enum :shirt_number, { xs: 0, s: 1, m: 2, l: 3, xl: 4 }
   enum :gender, { M: 0, H: 1 }
+
+  GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
 
   # With this you can access to the structure of the jsonb columns and treat them as they were actual columns
   store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation
@@ -23,7 +31,7 @@ class Participant < ApplicationRecord
   after_save :sync_membership_gender
 
   scope :jovenes, -> { where(rol: "joven") }
-  scope :staff,   -> { where(rol: [ "logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
+  scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
   scope :search_by_name, ->(query) { where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{query}%") if query.present? }
   scope :by_stake, ->(stake) { where(stake: stake) if stake.present? }
   scope :by_ward, ->(ward) { where(ward: ward) if ward.present? }
@@ -42,6 +50,14 @@ class Participant < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def self.role_label(rol)
+    ROLE_LABELS.fetch(rol.to_s, rol.to_s.humanize)
+  end
+
+  def role_label
+    self.class.role_label(rol)
   end
 
   def self.data_by_age

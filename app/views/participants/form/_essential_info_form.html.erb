@@ -1,23 +1,57 @@
-<section class="flex flex-col md:flex-row gap-5 md:gap-30 border-t-2 border-b-2 justify-left py-4 mx-3  border-gray-300 ">
-  <legend class="font-bold mt-5 text-3xl md:text-xl">Esencial</legend>
-  <fieldset class="flex-1">
-    <% if Current.user.admin_or_staff_manager?%>
-      <div class="mb-4">
-        <%= form.label :first_name, class:" font-semibold block mb-1"%>
-        <%= form.text_field :first_name, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4" %>
+<%
+  participant = form.object
+  initials = "#{participant.first_name&.first}#{participant.last_name&.first}".upcase
+  saved_avatar = participant.avatar_attachment&.persisted?
+%>
+<section class="<%= card_classes("p-6 md:p-7") %>" data-controller="avatar-preview">
+  <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+    <div class="flex md:flex-col items-center gap-4 md:gap-2.5 shrink-0">
+      <label for="participant_avatar" class="relative block cursor-pointer" aria-label="Cambiar foto">
+        <span class="block w-24 h-24 rounded-3xl overflow-hidden border-4 border-surface dark:border-slate-800 shadow-md bg-linear-to-br from-cat-green to-green-800 text-white">
+          <% if saved_avatar %>
+            <%= image_tag participant.avatar.variant(:thumb), alt: "Foto de #{participant.full_name}",
+                  class: "w-full h-full object-cover", data: { avatar_preview_target: "image" } %>
+          <% else %>
+            <span class="w-full h-full flex items-center justify-center text-3xl font-extrabold" data-avatar-preview-target="placeholder">
+              <%= initials.presence || icon("user-round", class: "w-10 h-10") %>
+            </span>
+            <img alt="" class="hidden w-full h-full object-cover" data-avatar-preview-target="image">
+          <% end %>
+        </span>
+        <span class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary-700 border-[3px] border-surface dark:border-slate-800 text-white flex items-center justify-center shadow-sm">
+          <%= icon "camera", class: "w-4 h-4" %>
+        </span>
+      </label>
+      <div class="md:text-center">
+        <label for="participant_avatar" class="text-[12.5px] font-bold text-primary-600 dark:text-primary-300 cursor-pointer hover:underline">Cambiar foto</label>
+        <p class="mt-0.5 text-[11px] text-ink-300 dark:text-slate-500">JPG o PNG</p>
       </div>
-      <div class="mb-4">
-        <%= form.label :last_name, class:" font-semibold block mb-1"%>
-        <%= form.text_field :last_name, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4"%>
-      </div>
-      <div class="mb-4">
-        <%= form.label :rol, class:" font-semibold block mb-1"%>
-        <%= form.select :rol, Participant.rols.keys.map { |key| [key.titleize, key]}, {prompt: "Seleciona un rol"}, {class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4"}%>
-      </div>
-    <%end%>
-    <div class="mb-4">
-      <%= form.label :avatar, class:" font-semibold block mb-3"%>
-      <%= form.file_field :avatar, accept: "image/*", class: "block w-full text-sm text-gray-500 md:max-w-3/4 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:border-gray-200 file:text-sm file:font-semibold file:bg-gray-100 file:text-black hover:file:bg-gray-300 transition file:cursor-pointer" %>
+      <%= form.file_field :avatar, accept: "image/*", class: "sr-only",
+            data: { avatar_preview_target: "input", action: "change->avatar-preview#preview" } %>
     </div>
-  </fieldset>
+
+    <div class="flex-1 min-w-0">
+      <%= section_heading "Esencial", "id-card" %>
+      <% if Current.user&.admin_or_staff_manager? %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= form.label :first_name, "Nombre", class: field_label_classes %>
+            <%= form.text_field :first_name, class: field_input_classes, autocomplete: "given-name" %>
+          </div>
+          <div>
+            <%= form.label :last_name, "Apellido", class: field_label_classes %>
+            <%= form.text_field :last_name, class: field_input_classes, autocomplete: "family-name" %>
+          </div>
+          <div class="sm:max-w-xs">
+            <%= form.label :rol, "Rol", class: field_label_classes %>
+            <%= form.select :rol, Participant.rols.keys.map { |key| [ Participant.role_label(key), key ] },
+                  { prompt: "Selecciona un rol" }, class: field_select_classes %>
+          </div>
+        </div>
+      <% else %>
+        <p class="text-xl font-extrabold text-ink-900 dark:text-slate-100"><%= participant.full_name %></p>
+        <div class="mt-2"><%= render(RoleSpanComponent.new(role: participant.rol)) %></div>
+      <% end %>
+    </div>
+  </div>
 </section>

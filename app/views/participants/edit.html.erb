@@ -1,20 +1,14 @@
-<div class="flex justify-between px-3 md:w-3/4 mb-6">
-  <h1 class="text-4xl md:text-3xl font-semibold "><%= @participant.full_name%></h1>
-  <%= render(ButtonComponent.new(text: "Cancelar", type:"cancel", url: params[:return_to] || dashboard_path))%>
-</div>
-<div class="relative">
-  <%= render "participants/form/form", participant: @participant%>
-  <%if Current.user.admin_or_staff_manager? %>
-    <div class="absolute bottom-0 left-5">
-      <%= render(ButtonComponent.new(text: "Borrar", type:"delete", is_delete:true, url: @participant))%>
-    </div>
-  <%end%>
-  <%if params[:from] == "myprofile"%>
-    <div class="absolute bottom-0 left-5">
-      <%= button_to "Enviar enlace para restablecer contraseña", 
-                send_password_reset_participant_path(@participant), 
-                method: :post, 
-                class: "border border-gray-200 py-2 px-3 rounded-lg hover:border-gray-600 text-sm font-medium shadow-lg cursor-pointer" %>
-    <%end%>
+<% content_for :title, "Editar participante" %>
+<% content_for :eyebrow, "Participantes" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto space-y-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="min-w-0 text-[13px] text-ink-500 dark:text-slate-400 truncate">Editando el registro de <span class="font-semibold text-ink-700 dark:text-slate-200"><%= @participant.full_name %></span></p>
+    <%= link_to safe_return_to(dashboard_path),
+          class: "inline-flex items-center gap-2 text-[13px] font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100" do %>
+      <%= icon "arrow-left", class: "w-4 h-4" %>
+      Volver
+    <% end %>
   </div>
+  <%= render "participants/form/form", participant: @participant %>
+  <%= render "participants/form/form_actions", participant: @participant %>
 </div>

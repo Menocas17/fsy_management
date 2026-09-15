@@ -1,3 +1,6 @@
+<% content_for :title, "Compañías" %>
+<% content_for :eyebrow, "Gestión" %>
+<% content_for :page_h1, "true" %>
 <div class="px-3 md:px-7 pt-10">
   <div class="flex justify-between mb-5 px-3">
     <h1 class="font-bold text-2xl">Compañías</h1>
@@ -9,7 +12,7 @@
   <% @auxiliar_companies.each do |ac| %>
     <section class="mb-8">
       <div class="flex items-center gap-2 mb-3 px-1">
-        <%= image_tag "company.svg", class: "w-6 h-6 opacity-70" %>
+        <%= icon "building-2", class: "w-6 h-6 text-primary-500 dark:text-primary-300" %>
         <h2 class="font-bold text-xl text-blue-950"><%= link_to ac.name, ac %></h2>
         <span class="text-sm text-gray-500">· <%= ac.companies.count %> compañía(s)</span>
       </div>

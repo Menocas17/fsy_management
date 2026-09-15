@@ -49,6 +49,6 @@ CI (`.github/workflows`) runs scan_ruby (brakeman, bundler-audit), scan_js (impo
 
 **Dashboard:** `DashboardFacade` (`app/facades/dashboard_facade.rb`) aggregates `Participant` class-method counts/groupings (by age, stake, role, gender, shirt size, jovenes vs. staff) for `DashboardsController` — add new KPI aggregations here rather than in the controller or view.
 
-**Frontend:** ViewComponents in `app/components/` (table, avatar, buttons, spans, info tiles) pair `.rb` + `.html.erb`. Stimulus controllers in `app/javascript/controllers/` (avatar fade-in, confirm, dialog, mobile_menu, toast). Charts via Chartkick, icons via Rails Icons (Lucide).
+**Frontend:** ViewComponents in `app/components/` (table, avatar, buttons, spans, info tiles) pair `.rb` + `.html.erb`. Stimulus controllers in `app/javascript/controllers/` (avatar fade-in, chart, confirm, dialog, mobile_menu, toast). Charts via ApexCharts (importmap pin, rendered by `chart_controller.js` from `data-chart-*` values; colors must be hex, see `ChartsHelper`), icons via Rails Icons (Lucide).
 
 **Deploy:** Kamal + Docker to a VPS (`config/deploy.yml`), Postgres as a Kamal accessory with separate primary/cache/queue/cable databases in production.

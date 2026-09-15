@@ -23,11 +23,11 @@
           options_for_select(Participant.wards.keys.map { |k| [ k.titleize, k ] }, params[:ward]),
           { include_blank: "Barrio" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <%= f.select :gender,
-          options_for_select([ [ "Hombre", "H" ], [ "Mujer", "M" ] ], params[:gender]),
+          options_for_select(Participant::GENDER_LABELS.map { |key, label| [ label, key ] }, params[:gender]),
           { include_blank: "Género" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% if show_role %>
       <%= f.select :rol,
-            options_for_select(staff_roles.map { |k| [ k.titleize, k ] }, params[:rol]),
+            options_for_select(staff_roles.map { |k| [ Participant.role_label(k), k ] }, params[:rol]),
             { include_blank: "Rol" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% end %>
     <%= f.text_field :company,

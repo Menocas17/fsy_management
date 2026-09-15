@@ -38,18 +38,18 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body>
+  <body class="h-dvh overflow-hidden bg-canvas text-ink-900 dark:bg-slate-900 dark:text-slate-100">
     <%= render "shared/toast"%>
-    <div class="flex h-screen">
+    <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
+    <div class="flex h-full">
       <%= render "shared/aside"%>
-      <div class="flex flex-col flex-1 h-full overflow-hidden">
+      <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <%= render "shared/top_menu"%>
-        <main class=" w-full overflow-y-auto bg-slate-100 dark:bg-slate-900">
+        <main class="flex-1 min-h-0 overflow-y-auto bg-canvas dark:bg-slate-900">
           <%= yield %>
         </main>
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>
   </body>
-</html>
 </html>

@@ -1,8 +1,6 @@
 class TableComponent < ViewComponent::Base
   delegate :icon, to: :helpers
 
-  GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
-
   def initialize(participants:, is_staff: false)
     @participants = participants
     @is_staff = is_staff
@@ -17,7 +15,7 @@ class TableComponent < ViewComponent::Base
   end
 
   def gender_label(participant)
-    GENDER_LABELS.fetch(participant.gender, participant.gender)
+    Participant::GENDER_LABELS.fetch(participant.gender, participant.gender)
   end
 
   def company_name(participant)
