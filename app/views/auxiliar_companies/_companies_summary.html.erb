@@ -1,0 +1,25 @@
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Compañías", "building-2" %>
+  <% if companies.any? %>
+    <ul class="space-y-1.5">
+      <% companies.each do |company| %>
+        <li>
+          <%= link_to company_path(company), class: "flex items-center gap-2.5 rounded-xl -mx-2 px-2 py-1.5 hover:bg-canvas dark:hover:bg-slate-700/50 transition" do %>
+            <span class="w-8 h-8 shrink-0 rounded-[10px] bg-brand-tile text-white text-[13px] font-extrabold flex items-center justify-center"><%= company.number || "–" %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= company.name %></span>
+              <span class="block truncate text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= company.nickname.presence || "Sin nombre elegido" %></span>
+            </span>
+            <span class="shrink-0 text-[11.5px] font-bold text-ink-500 dark:text-slate-400 tabular-nums"><%= company.counselors.size %>/2</span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-[13px] text-ink-500 dark:text-slate-400">Sin compañías asignadas.</p>
+  <% end %>
+  <p class="mt-4 flex gap-2 rounded-[13px] px-3.5 py-3 bg-primary-50 text-primary-700 dark:bg-primary-700/25 dark:text-primary-100 text-[12.5px] font-semibold leading-snug">
+    <%= icon "info", class: "w-4 h-4 mt-0.5 shrink-0" %>
+    <span>Para mover una compañía a esta rama, cambia su compañía auxiliar desde la edición de la compañía.</span>
+  </p>
+</section>

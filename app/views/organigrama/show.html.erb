@@ -1,23 +1,27 @@
 <% content_for :title, "Organigrama" %>
+<% content_for :eyebrow, "Gestión" %>
 <%
-  toggle_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] transition"
+  toggle_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
   active_toggle = "#{toggle_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900 dark:text-slate-100"
   idle_toggle = "#{toggle_base} font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100"
+  views = [
+    [ "todo", "Todo", "network", organigrama_path ],
+    [ "companias", "Compañías", "building-2", organigrama_path(scope: "companias") ],
+    [ "logistica", "Logística", "truck", organigrama_path(scope: "logistica") ],
+    [ "mi_compania", "Mi compañía", "target", organigrama_path(scope: "mi_compania") ]
+  ]
 %>
-<% content_for :eyebrow, "Gestión" %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
-  <div class="flex sm:justify-end mb-7">
-    <nav class="inline-flex p-1 gap-0.5 rounded-[11px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-700" aria-label="Vista del organigrama">
-      <%= link_to organigrama_path, class: @mine ? idle_toggle : active_toggle, aria: { current: (@mine ? nil : "page") } do %>
-        <%= icon "network", class: "w-3.5 h-3.5" %>
-        General
-      <% end %>
-      <%= link_to organigrama_path(scope: "mi_compania"), class: @mine ? active_toggle : idle_toggle, aria: { current: (@mine ? "page" : nil) } do %>
-        <%= icon "target", class: "w-3.5 h-3.5" %>
-        Mi compañía
+  <div class="flex sm:justify-end mb-5 overflow-x-auto">
+    <nav class="inline-flex shrink-0 p-1 gap-0.5 rounded-[11px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-700" aria-label="Vista del organigrama">
+      <% views.each do |key, label, icon_name, path| %>
+        <%= link_to path, class: @view == key ? active_toggle : idle_toggle, aria: { current: (@view == key ? "page" : nil) }, data: { org_view: key } do %>
+          <%= icon icon_name, class: "w-3.5 h-3.5" %>
+          <%= label %>
+        <% end %>
       <% end %>
     </nav>
   </div>
 
-  <%= render(@mine ? "organigrama/mine" : "organigrama/general") %>
+  <%= render(@view == "mi_compania" ? "organigrama/mine" : "organigrama/general") %>
 </div>

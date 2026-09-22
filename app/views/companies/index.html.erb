@@ -1,44 +1,36 @@
 <% content_for :title, "Compañías" %>
 <% content_for :eyebrow, "Gestión" %>
-<% content_for :page_h1, "true" %>
-<div class="px-3 md:px-7 pt-10">
-  <div class="flex justify-between mb-5 px-3">
-    <h1 class="font-bold text-2xl">Compañías</h1>
-    <% if full_company_access? %>
-      <%= render(ButtonComponent.new(text: "Nueva", url: new_company_path, type: "primary")) %>
+<% secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
+  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
+    <%= form_with url: companies_path, method: :get, role: "search", class: "relative w-full lg:w-[320px] lg:shrink-0",
+          data: { turbo_frame: "companies_grid", turbo_action: "advance" } do |form| %>
+      <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
+      <%= form.search_field :query, value: params[:query], autocomplete: "off",
+            placeholder: "Buscar por número, nombre o consejero…", aria: { label: "Buscar compañías" },
+            class: "w-full h-10 pl-10 pr-3 rounded-[11px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+            oninput: "this.form.requestSubmit()" %>
     <% end %>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to auxiliar_companies_path, class: secondary_link do %>
+        <%= icon "network", class: "w-4 h-4" %>
+        Compañías auxiliares
+      <% end %>
+      <%= link_to overview_companies_path, class: secondary_link do %>
+        <%= icon "chart-column", class: "w-4 h-4" %>
+        Vista general
+      <% end %>
+      <% if full_company_access? %>
+        <%= link_to new_company_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Nueva compañía
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <% @auxiliar_companies.each do |ac| %>
-    <section class="mb-8">
-      <div class="flex items-center gap-2 mb-3 px-1">
-        <%= icon "building-2", class: "w-6 h-6 text-primary-500 dark:text-primary-300" %>
-        <h2 class="font-bold text-xl text-blue-950"><%= link_to ac.name, ac %></h2>
-        <span class="text-sm text-gray-500">· <%= ac.companies.count %> compañía(s)</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% ac.companies.each do |c| %>
-          <%= render "companies/company_card", c: c %>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
-
-  <% if @orphan_companies.any? %>
-    <section class="mb-8">
-      <h2 class="font-bold text-xl text-blue-950 mb-3 px-1">Sin compañía auxiliar</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% @orphan_companies.each do |c| %>
-          <%= render "companies/company_card", c: c %>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
-
-  <% if @auxiliar_companies.empty? && @orphan_companies.empty? %>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center text-gray-500">
-      No hay compañías aún.
-    </div>
+  <%= turbo_frame_tag "companies_grid" do %>
+    <%= render "companies/grid", companies: @companies, jovenes_counts: @jovenes_counts,
+                                 room_counts: @room_counts, total_companies: @total_companies %>
   <% end %>
 </div>

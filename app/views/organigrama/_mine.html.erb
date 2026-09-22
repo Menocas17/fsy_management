@@ -23,7 +23,10 @@
           <%= icon "arrow-down", class: "w-5 h-5 text-ink-300 dark:text-slate-500 md:hidden" %>
           <%= icon "arrow-right", class: "w-5 h-5 text-ink-300 dark:text-slate-500 hidden md:block" %>
           <% if company.auxiliar_company %>
-            <%= render "organigrama/coordinator_node", auxiliar_company: company.auxiliar_company %>
+            <%= render "organigrama/coordination_node", coordinators: company.auxiliar_company.coordinators %>
+            <%= icon "arrow-down", class: "w-5 h-5 text-ink-300 dark:text-slate-500 md:hidden" %>
+            <%= icon "arrow-right", class: "w-5 h-5 text-ink-300 dark:text-slate-500 hidden md:block" %>
+            <%= render "organigrama/auxiliar_node", auxiliar_company: company.auxiliar_company %>
             <%= icon "arrow-down", class: "w-5 h-5 text-ink-300 dark:text-slate-500 md:hidden" %>
             <%= icon "arrow-right", class: "w-5 h-5 text-ink-300 dark:text-slate-500 hidden md:block" %>
           <% end %>

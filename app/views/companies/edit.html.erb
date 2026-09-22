@@ -1,8 +1,15 @@
 <% content_for :title, "Editar #{@company.name}" %>
 <% content_for :eyebrow, "Compañías" %>
-<div class="max-w-2xl mx-auto px-3 md:px-7 pt-8">
-  <div class="flex justify-end mb-5">
-    <%= render(ButtonComponent.new(text: "Atrás", url: @company, type: "cancel")) %>
+<% content_for :heading, "Editar compañía" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
+  <%= render "companies/form_banner", company: @company %>
+  <%= render "companies/form", company: @company %>
+
+  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
+    <%= render "companies/staff", company: @company, counselors: @counselors, auxiliars: @auxiliars,
+               membership_ids: @counselor_membership_ids, candidates: @counselor_candidates %>
+    <%= render "companies/jovenes_summary", company: @company %>
   </div>
-  <%= render "companies/form", company: @company, url: company_path(@company) %>
+
+  <%= render "companies/form_actions", company: @company %>
 </div>

@@ -1,7 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 import ApexCharts from 'apexcharts';
 
-// Renders a column or donut chart with ApexCharts from server-provided data.
+// Renders a column, stacked column or donut chart with ApexCharts from server-provided data.
+// Columns and donuts take a flat series of numbers; stacked charts take [{ name, data }, …].
 // Colors arrive as hex (ApexCharts can't parse OKLCH); axis and tooltip colors follow the dark-mode class on <html>.
 export default class extends Controller {
   static targets = ['canvas'];
@@ -60,6 +61,7 @@ export default class extends Controller {
     const base = {
       chart: {
         type: this.kindValue === 'donut' ? 'donut' : 'bar',
+        stacked: this.kindValue === 'stacked',
         height: this.heightValue,
         fontFamily: 'Onest, sans-serif',
         parentHeightOffset: 0,
@@ -72,9 +74,38 @@ export default class extends Controller {
       tooltip: { theme: this.dark ? 'dark' : 'light' },
     };
 
-    return this.kindValue === 'donut'
-      ? { ...base, ...this.donutOptions() }
-      : { ...base, ...this.columnOptions() };
+    if (this.kindValue === 'donut') return { ...base, ...this.donutOptions() };
+    if (this.kindValue === 'stacked') return { ...base, ...this.stackedOptions() };
+    return { ...base, ...this.columnOptions() };
+  }
+
+  stackedOptions() {
+    return {
+      ...this.columnOptions(),
+      series: this.seriesValue,
+      plotOptions: {
+        bar: {
+          columnWidth: this.columnWidthValue,
+          borderRadius: this.radiusValue,
+          borderRadiusApplication: 'end',
+          borderRadiusWhenStacked: 'last',
+        },
+      },
+      fill: { type: 'solid', opacity: 1 },
+      legend: this.legendOptions(),
+      tooltip: { theme: this.dark ? 'dark' : 'light', shared: true, intersect: false },
+    };
+  }
+
+  legendOptions() {
+    return {
+      show: true,
+      position: 'top',
+      horizontalAlign: 'left',
+      fontSize: '12px',
+      fontWeight: 600,
+      labels: { colors: this.mutedText },
+    };
   }
 
   columnOptions() {
@@ -133,6 +164,7 @@ export default class extends Controller {
     } else {
       theme.xaxis = { labels: { style: this.axisLabelStyle() } };
     }
+    if (this.kindValue === 'stacked') theme.legend = this.legendOptions();
     return theme;
   }
 }

@@ -1,45 +1,50 @@
-<section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
-  <h3 class="font-bold text-xl mb-4">Asignación de personal</h3>
+<% subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500" %>
+<section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
+  <%= section_heading "Líderes", "user-check" %>
+  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">Los cambios de líderes se guardan al instante · 1 hombre y 1 mujer por rol.</p>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <% [ "consejero", "auxiliar", "participant" ].each do |role| %>
-      <div>
-        <p class="font-semibold text-gray-600 mb-2 capitalize"><%= role %></p>
-        <div class="flex flex-col gap-2">
-          <% c.memberships.includes(:participant).where(role: role).each do |m| %>
-            <div class="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2 text-sm">
-              <span class="truncate">
-                <%= m.participant.full_name %>
-                <span class="text-gray-400">(<%= m.participant.gender %>)</span>
-              </span>
-              <%= button_to "Quitar", remove_staff_company_path(c, membership_id: m.id), method: :delete, class: "text-rose-700 text-xs underline cursor-pointer shrink-0" %>
-            </div>
-          <% end %>
-          <% remaining = (role != "participant" ? 2 : 0) - c.memberships.where(role: role).count %>
-          <% [ remaining, 0 ].max.times do %>
-            <div class="border border-dashed border-gray-300 rounded-lg px-3 py-2 text-gray-400 text-sm">Vacante</div>
-          <% end %>
-          <% if c.memberships.where(role: role).empty? && role == "participant" %>
-            <div class="border border-dashed border-gray-300 rounded-lg px-3 py-2 text-gray-400 text-sm">Sin jóvenes</div>
-          <% end %>
-        </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div>
+      <p class="<%= subheading %>">Consejeros · <%= counselors.size %>/2</p>
+      <div class="space-y-2">
+        <% %w[H M].each do |gender| %>
+          <% person = counselors.find { |counselor| counselor.gender == gender } %>
+          <%= render "companies/leader_slot", person: person, role: "consejero", gender: gender,
+                     remove_url: person && remove_staff_company_path(company, membership_id: membership_ids[person.id]) %>
+        <% end %>
       </div>
-    <% end %>
+    </div>
+    <div>
+      <p class="<%= subheading %>">Auxiliares · <%= auxiliars.size %>/2</p>
+      <div class="space-y-2">
+        <% %w[H M].each do |gender| %>
+          <%= render "companies/leader_slot", person: auxiliars.find { |auxiliar| auxiliar.gender == gender }, role: "auxiliar", gender: gender %>
+        <% end %>
+      </div>
+      <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+        <% if company.auxiliar_company %>
+          Se asignan desde <%= link_to company.auxiliar_company.name, company.auxiliar_company, class: "font-semibold text-primary-600 dark:text-primary-300 hover:underline" %>.
+        <% else %>
+          Asigna una compañía auxiliar para ver sus auxiliares.
+        <% end %>
+      </p>
+    </div>
   </div>
 
-  <div class="mt-5 border-t border-gray-100 pt-4">
-    <h4 class="font-semibold text-gray-600 mb-2">Agregar miembro</h4>
-    <%= form_with url: assign_staff_company_path(c), method: :post, class: "flex gap-3 items-end" do |f| %>
-      <div class="flex-1">
-        <%= f.label :participant_id, "Participante", class: "block text-sm font-medium mb-1" %>
-        <%= f.select :participant_id,
-            options_for_select(
-              Participant.staff.map { |p| [ "#{p.full_name} · #{p.rol} · #{p.gender}", p.id ] }
-            ),
-            { prompt: "Selecciona un participante" },
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
+  <% if counselors.size < 2 %>
+    <%= form_with url: assign_staff_company_path(company), method: :post, class: "mt-5 pt-5 border-t border-line-soft dark:border-slate-700" do |form| %>
+      <%= form.label :participant_id, "Agregar consejero", class: field_label_classes %>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= form.select :participant_id, candidates.map { |candidate| [ "#{candidate.full_name} · #{Participant::GENDER_LABELS[candidate.gender]}", candidate.id ] },
+              { prompt: candidates.any? ? "Selecciona un consejero disponible…" : "No hay consejeros disponibles" },
+              required: true, disabled: candidates.none?, class: "#{field_select_classes} sm:flex-1" %>
+        <%= tag.button type: "submit", disabled: candidates.none?,
+              class: "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Asignar
+        <% end %>
       </div>
-      <%= f.submit "Asignar", class: "bg-primary-600 text-white py-2 px-4 rounded-lg text-sm font-bold cursor-pointer" %>
+      <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Solo aparecen consejeros sin compañía que llenan un espacio vacante.</p>
     <% end %>
-  </div>
+  <% end %>
 </section>

@@ -1,8 +1,16 @@
-<% content_for :title, "Editar #{@auxiliar_company.name}" %>
+<% content_for :title, "Editar #{@auxiliar_company.name_was}" %>
 <% content_for :eyebrow, "Compañías" %>
-<div class="max-w-2xl mx-auto px-3 md:px-7 pt-8">
-  <div class="flex justify-end mb-5">
-    <%= render(ButtonComponent.new(text: "Atrás", url: @auxiliar_company, type: "cancel")) %>
+<% content_for :heading, "Editar compañía auxiliar" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
+  <%= render "shared/edit_banner", back_path: auxiliar_company_path(@auxiliar_company), back_label: "Volver a la compañía auxiliar",
+             editing: @auxiliar_company.name_was %>
+  <%= render "auxiliar_companies/form", auxiliar_company: @auxiliar_company %>
+
+  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
+    <%= render "auxiliar_companies/staff", auxiliar_company: @auxiliar_company, auxiliars: @auxiliars,
+               membership_ids: @auxiliar_membership_ids, candidates: @auxiliar_candidates %>
+    <%= render "auxiliar_companies/companies_summary", companies: @companies %>
   </div>
-  <%= render "auxiliar_companies/form", auxiliar_company: @auxiliar_company, url: auxiliar_company_path(@auxiliar_company) %>
+
+  <%= render "auxiliar_companies/form_actions", auxiliar_company: @auxiliar_company %>
 </div>

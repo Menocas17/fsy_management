@@ -1,7 +1,7 @@
 <% categories = [ [ "", "Todos" ] ] + AuditLog::CATEGORY_LABELS.to_a %>
 <%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance" },
-      class: "flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5" do |f| %>
-  <div class="relative w-full lg:max-w-xs">
+      class: "flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5" do |f| %>
+  <div class="relative w-full lg:w-72 lg:shrink-0">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
     <%= f.text_field :query,
           value: params[:query],
@@ -10,7 +10,7 @@
           class: "w-full h-10 pl-10 pr-3 rounded-[11px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           oninput: "this.form.requestSubmit()" %>
   </div>
-  <fieldset class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+  <fieldset class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:justify-end">
     <legend class="sr-only">Categoría</legend>
     <% categories.each do |value, label| %>
       <label class="shrink-0 cursor-pointer">

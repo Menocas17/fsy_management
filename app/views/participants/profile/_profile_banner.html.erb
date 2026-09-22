@@ -1,15 +1,5 @@
 <div data-controller="dialog">
-  <div class="relative h-32 md:h-[150px] rounded-[22px] overflow-hidden bg-hero shadow-lg">
-    <div class="h-full flex items-center justify-center pb-11 md:pb-[52px]" data-banner-wordmark>
-      <p class="flex items-baseline gap-2.5">
-        <span class="text-[30px] md:text-[38px] font-extrabold leading-none tracking-[-.01em] text-[oklch(88%_0.03_230)]">fsy</span>
-        <span>
-          <span class="block text-lg md:text-2xl font-extrabold leading-none text-[oklch(74%_0.02_250)]">2026</span>
-          <span class="block mt-[3px] text-[10px] md:text-[11px] font-semibold tracking-[.02em] text-[oklch(66%_0.02_250)]">Managua-Caribe</span>
-        </span>
-      </p>
-    </div>
-  </div>
+  <%= render "shared/event_banner" %>
 
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">
     <%# flex-wrap (instead of a breakpoint switch) lets the buttons drop below the name whenever they don't fit, so they never overlap on tablet widths. %>

@@ -1,0 +1,32 @@
+<%
+  gender_label = Participant::GENDER_LABELS[gender]
+  role_label = role == "consejero" ? (gender == "M" ? "Consejera" : "Consejero") : "Auxiliar"
+  remove_url = local_assigns[:remove_url]
+%>
+<% if person %>
+  <div class="flex items-center gap-3 px-3 py-2.5 rounded-[13px] bg-canvas dark:bg-slate-900/60 border border-line-soft dark:border-slate-700"
+       data-leader-slot="<%= role %>-<%= gender %>">
+    <%= render(AvatarComponent.new(participant: person)) %>
+    <div class="min-w-0 flex-1">
+      <%= link_to person.full_name, participant_path(person, return_to: request.fullpath), data: { turbo_frame: "_top" },
+            class: "block truncate text-[13.5px] font-bold text-ink-900 dark:text-slate-100 hover:underline" %>
+      <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= role_label %> · <%= gender_label %></p>
+    </div>
+    <% if remove_url %>
+      <%= button_to "Quitar", remove_url, method: :delete,
+            form: { data: { turbo_confirm: "¿Quitar a #{person.full_name} de esta compañía?" } },
+            class: "shrink-0 px-1 text-[12px] font-bold text-cat-rose hover:underline cursor-pointer" %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="flex items-center gap-3 px-3 py-2.5 rounded-[13px] border-[1.5px] border-dashed border-line dark:border-slate-600"
+       data-leader-slot="<%= role %>-<%= gender %>" data-vacant>
+    <span class="w-10 h-10 shrink-0 rounded-full border-[1.5px] border-dashed border-line dark:border-slate-600 flex items-center justify-center text-ink-300 dark:text-slate-500">
+      <%= icon "plus", class: "w-4 h-4" %>
+    </span>
+    <div>
+      <p class="text-[13px] font-semibold text-ink-500 dark:text-slate-400">Vacante</p>
+      <p class="text-[11.5px] font-semibold text-ink-300 dark:text-slate-500"><%= role == "consejero" ? "Consejero" : "Auxiliar" %> · <%= gender_label %></p>
+    </div>
+  </div>
+<% end %>

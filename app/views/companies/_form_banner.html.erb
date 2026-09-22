@@ -1,0 +1,5 @@
+<% if company.persisted? %>
+  <%= render "shared/edit_banner", back_path: company_path(company), back_label: "Volver a la compañía", editing: company.name %>
+<% else %>
+  <%= render "shared/edit_banner", back_path: companies_path, back_label: "Volver a compañías", caption: "Nueva compañía" %>
+<% end %>

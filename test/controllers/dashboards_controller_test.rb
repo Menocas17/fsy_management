@@ -27,6 +27,16 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller='chart'] [data-chart-target='canvas']", 3
   end
 
+  test "age and gender charts only count jóvenes, not staff" do
+    get dashboard_path
+
+    assert_select "[data-kpi='male_count']", "1"
+    assert_select "[data-kpi='female_count']", "0"
+    age_chart = css_select("[data-controller='chart'][aria-label^='Jóvenes por edad']").first
+    assert_includes age_chart["aria-label"], "20: 1"
+    refute_includes age_chart["aria-label"], "25"
+  end
+
   test "counts shirt sizes, defaulting missing sizes to zero" do
     get dashboard_path
 

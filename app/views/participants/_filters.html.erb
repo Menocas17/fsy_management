@@ -6,8 +6,8 @@
   chip_classes = "h-10 pl-3 pr-8 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
 %>
 <%= form_with url: form_url, method: :get, data: { turbo_frame: "participants_table", turbo_action: "advance" },
-      class: "flex flex-col lg:flex-row lg:items-center gap-3 mb-5" do |f| %>
-  <div class="relative w-full lg:max-w-xs">
+      class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-5" do |f| %>
+  <div class="relative w-full lg:w-72 lg:shrink-0">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
     <%= f.text_field :query,
           value: params[:query],
@@ -15,7 +15,8 @@
           class: "w-full h-10 pl-10 pr-3 rounded-[11px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           oninput: "this.form.requestSubmit()" %>
   </div>
-  <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap">
+  <%# Chips scroll sideways on phones and wrap on wide screens; both toolbars align to the top so a wrapped second row stays flush. %>
+  <div class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:flex-1 lg:min-w-0">
     <%= f.select :stake,
           options_for_select(Participant.stakes.keys.map { |k| [ k.titleize, k ] }, params[:stake]),
           { include_blank: "Estaca" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>

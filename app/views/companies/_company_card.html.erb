@@ -1,34 +1,51 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3">
-  <div class="flex items-start justify-between">
-    <div>
-      <h3 class="font-bold text-lg text-blue-950"><%= link_to c.name, c %></h3>
-      <p class="text-sm text-gray-500 mt-1">
-        <% if c.auxiliar_company %>
-          <span class="font-medium">Auxiliar:</span> <%= c.auxiliar_company.name %>
+<%
+  counselors = company.counselors.sort_by { |counselor| counselor.gender == "H" ? 0 : 1 }
+  stats = [
+    [ jovenes_counts.fetch(company.id, 0), "Jóvenes" ],
+    [ room_counts.fetch(company.id, 0), "Cuartos" ],
+    [ company.dining_hall_label&.delete_prefix("Salón ") || "—", "Salón" ]
+  ]
+%>
+<%= link_to company_path(company), data: { turbo_frame: "_top", company_card: company.number },
+      class: card_classes("group block px-5 pt-[18px] pb-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500/30") do %>
+  <div class="flex items-center gap-3">
+    <span class="w-11 h-11 shrink-0 rounded-[13px] bg-brand-tile text-white text-[17px] font-extrabold flex items-center justify-center shadow-sm"><%= company.number || "–" %></span>
+    <div class="min-w-0 flex-1">
+      <p class="text-[15.5px] font-extrabold text-ink-900 dark:text-slate-100 truncate"><%= company.name %></p>
+      <p class="mt-px text-[12px] font-semibold text-ink-500 dark:text-slate-400 truncate">
+        <% if company.nickname.present? %>
+          <span class="text-primary-600 dark:text-primary-300"><%= company.nickname %></span>
         <% else %>
-          <span class="text-gray-400">Sin compañía auxiliar</span>
+          <span class="text-ink-300 dark:text-slate-500">Sin nombre elegido</span>
         <% end %>
+        · <%= company.auxiliar_company&.name || "Sin compañía auxiliar" %>
       </p>
     </div>
-    <%= icon "users", class: "w-9 h-9 text-primary-500 dark:text-primary-300" %>
+    <%= render "companies/staff_status", company: company %>
   </div>
 
-  <div class="flex flex-wrap gap-2 text-xs mt-1">
-    <span class="<%= c.counselors.any? ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500' %> px-2 py-1 rounded-full">
-      Consejeros <%= c.counselors.count %>/2
-    </span>
-    <span class="<%= c.auxiliars.any? ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500' %> px-2 py-1 rounded-full">
-      Auxiliares <%= c.auxiliars.count %>/2
-    </span>
-    <span class="bg-violet-100 text-violet-800 px-2 py-1 rounded-full">
-      Jóvenes <%= c.participants.count %>
-    </span>
-  </div>
-
-  <div class="flex items-center justify-end gap-2 mt-1">
-    <%= render(ButtonComponent.new(text: "Ver", url: c, type: "muted")) %>
-    <% if can_edit_company?(c) %>
-      <%= render(ButtonComponent.new(text: "Editar", url: edit_company_path(c), type: "muted")) %>
+  <div class="flex items-center gap-2 mt-3.5 min-h-7">
+    <% if counselors.any? %>
+      <span class="flex shrink-0">
+        <% counselors.each_with_index do |counselor, index| %>
+          <span class="rounded-full ring-2 ring-surface dark:ring-slate-800 <%= "-ml-2" if index.positive? %>">
+            <%= render(AvatarComponent.new(participant: counselor, size: :sm)) %>
+          </span>
+        <% end %>
+      </span>
+      <span class="text-[12px] font-semibold text-ink-700 dark:text-slate-300 truncate"><%= counselors.map(&:full_name).join(" · ") %></span>
+    <% else %>
+      <span class="w-7 h-7 shrink-0 rounded-full border-[1.5px] border-dashed border-line dark:border-slate-600"></span>
+      <span class="text-[12px] font-semibold text-ink-300 dark:text-slate-500">Consejeros por asignar</span>
     <% end %>
   </div>
-</div>
+
+  <div class="grid grid-cols-3 gap-2 mt-3.5">
+    <% stats.each do |value, label| %>
+      <div class="px-1 py-2 rounded-[11px] bg-canvas dark:bg-slate-900/60 text-center">
+        <p class="<%= value.is_a?(String) ? "text-[12.5px] leading-[22px]" : "text-[15px] leading-[22px]" %> font-extrabold text-ink-900 dark:text-slate-100 truncate"><%= value %></p>
+        <p class="text-[10.5px] font-semibold text-ink-500 dark:text-slate-400"><%= label %></p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

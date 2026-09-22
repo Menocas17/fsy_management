@@ -1,48 +1,29 @@
-<section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
-  <h3 class="font-bold text-xl mb-4">Personal</h3>
+<section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
+  <%= section_heading "Auxiliares", "user-check" %>
+  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">Los cambios se guardan al instante · 1 hombre y 1 mujer. Los consejeros se asignan en cada compañía.</p>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <p class="font-semibold text-gray-600 mb-2">Auxiliares (máx 2)</p>
-      <div class="flex flex-col gap-2">
-        <% ac.auxiliars.each do |p| %>
-          <div class="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2">
-            <span><%= p.full_name %> <span class="text-gray-400 text-sm">(<%= p.gender %>)</span></span>
-            <%= button_to "Quitar", remove_staff_auxiliar_company_path(ac, membership_id: ac.memberships.find_by(participant: p).id), method: :delete, class: "text-rose-700 text-sm underline cursor-pointer" %>
-          </div>
-        <% end %>
-        <% (2 - ac.auxiliar_count).times do %>
-          <div class="border border-dashed border-gray-300 rounded-lg px-3 py-2 text-gray-400 text-sm">Vacante</div>
-        <% end %>
-      </div>
-    </div>
-
-    <div>
-      <p class="font-semibold text-gray-600 mb-2">Consejeros</p>
-      <div class="flex flex-col gap-2">
-        <% ac.counselors.each do |p| %>
-          <div class="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2">
-            <span><%= p.full_name %> <span class="text-gray-400 text-sm">(<%= p.gender %>)</span></span>
-            <%= button_to "Quitar", remove_staff_auxiliar_company_path(ac, membership_id: ac.memberships.find_by(participant: p).id), method: :delete, class: "text-rose-700 text-sm underline cursor-pointer" %>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-5 border-t border-gray-100 pt-4">
-    <h4 class="font-semibold text-gray-600 mb-2">Agregar personal</h4>
-    <%= form_with url: assign_staff_auxiliar_company_path(ac), method: :post, class: "flex gap-3 items-end" do |f| %>
-      <div class="flex-1">
-        <%= f.label :participant_id, "Participante", class: "block text-sm font-medium mb-1" %>
-        <%= f.select :participant_id,
-            options_for_select(
-              Participant.staff.map { |p| [ "#{p.full_name} · #{p.rol} · #{p.gender}", p.id ] }
-            ),
-            { prompt: "Selecciona un participante" },
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
-      </div>
-      <%= f.submit "Asignar", class: "bg-primary-600 text-white py-2 px-4 rounded-lg text-sm font-bold cursor-pointer" %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <% %w[H M].each do |gender| %>
+      <% person = auxiliars.find { |auxiliar| auxiliar.gender == gender } %>
+      <%= render "companies/leader_slot", person: person, role: "auxiliar", gender: gender,
+                 remove_url: person && remove_staff_auxiliar_company_path(auxiliar_company, membership_id: membership_ids[person.id]) %>
     <% end %>
   </div>
+
+  <% if auxiliars.size < 2 %>
+    <%= form_with url: assign_staff_auxiliar_company_path(auxiliar_company), method: :post, class: "mt-5 pt-5 border-t border-line-soft dark:border-slate-700" do |form| %>
+      <%= form.label :participant_id, "Agregar auxiliar", class: field_label_classes %>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= form.select :participant_id, candidates.map { |candidate| [ "#{candidate.full_name} · #{Participant::GENDER_LABELS[candidate.gender]}", candidate.id ] },
+              { prompt: candidates.any? ? "Selecciona un auxiliar disponible…" : "No hay auxiliares disponibles" },
+              required: true, disabled: candidates.none?, class: "#{field_select_classes} sm:flex-1" %>
+        <%= tag.button type: "submit", disabled: candidates.none?,
+              class: "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Asignar
+        <% end %>
+      </div>
+      <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Solo aparecen auxiliares sin compañía auxiliar que llenan un espacio vacante.</p>
+    <% end %>
+  <% end %>
 </section>

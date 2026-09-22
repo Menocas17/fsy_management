@@ -57,6 +57,12 @@ module Authorization
       end
     end
 
+    def require_full_company_access!
+      unless full_company_access?
+        redirect_to companies_path, alert: "No estás autorizado para realizar esta acción"
+      end
+    end
+
     def require_staff_manager!
       unless Current.user&.admin_or_staff_manager?
         redirect_to dashboard_path, alert: "Acceso no autorizado"

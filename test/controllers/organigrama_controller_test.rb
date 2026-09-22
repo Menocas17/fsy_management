@@ -24,7 +24,41 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
     end
     assert_select "[data-company-id='#{@company.id}'] [data-jovenes-count='1']"
     assert_select "[data-logistics-area='Tecnología']", text: /Sergio Prueba/
-    assert_select "a[href='#{participants_path(company: "Alfa 3")}']", text: /Ver participantes/
+    assert_select "a[href='#{company_path(@company)}']", text: /Ver compañía/
+  end
+
+  test "general view heads both branches with the director couple inside the pan and zoom canvas" do
+    get organigrama_path
+
+    assert_select "[data-controller='org-chart'] [data-org-chart-target='viewport']" do
+      assert_select "[data-node='direccion']", 1
+      assert_select "[data-node='coordinacion']", 1
+      assert_select "[data-node='logistica']", 1
+      assert_select "[data-node='auxiliar']", text: /Auxiliar Alfa/
+      assert_select "ul.org-stack [data-company-id='#{@company.id}']"
+      assert_select "button[data-action='org-chart#fit']"
+    end
+  end
+
+  test "the companies and logistics views each keep the directors at the head" do
+    get organigrama_path(scope: "logistica")
+    assert_select "[data-org-view='logistica'][aria-current='page']"
+    assert_includes response.body, "Roberto Prueba"
+    assert_includes response.body, "Sergio Prueba"
+    refute_includes response.body, "Alfa 3"
+
+    get organigrama_path(scope: "companias")
+    assert_includes response.body, "Roberto Prueba"
+    assert_includes response.body, "Alfa 3"
+    refute_includes response.body, "Sergio Prueba"
+  end
+
+  test "an unknown view falls back to the full chart" do
+    get organigrama_path(scope: "otra")
+
+    assert_select "[data-org-view='todo'][aria-current='page']"
+    assert_includes response.body, "Sergio Prueba"
+    assert_includes response.body, "Alfa 3"
   end
 
   test "mi compañía narrows to the signed-in counselor's chain" do

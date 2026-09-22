@@ -102,13 +102,12 @@ class Participant < ApplicationRecord
     AuxiliarCompany.for_coordinator(self)
   end
 
-  # 2) Auxiliar: the AuxiliarCompany it belongs to, all its counselors, and all
-  #    the standard Companies managed by those counselors.
+  # 2) Auxiliar: the AuxiliarCompany it belongs to, its standard Companies, and
+  #    the counselors staffed in those companies.
   def auxiliar_scope
     company = auxiliar_companies.first
-    counselors = company ? company.counselors.to_a : []
-    companies = counselors.flat_map(&:companies).uniq
-    { auxiliar_company: company, counselors: counselors, companies: companies }
+    companies = company ? company.companies.to_a : []
+    { auxiliar_company: company, counselors: companies.flat_map(&:counselors).uniq, companies: companies }
   end
 
   # 3) Counselor: only the standard Company directly assigned.
