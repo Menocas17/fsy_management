@@ -7,7 +7,7 @@
 </p>
 
 <% if companies.any? %>
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
     <%= render partial: "companies/company_card", collection: companies, as: :company,
                locals: { jovenes_counts: jovenes_counts, room_counts: room_counts } %>
   </div>

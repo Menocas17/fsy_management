@@ -3,7 +3,7 @@
 <% content_for :heading, "Perfil de la compañía" %>
 <% content_for :page_h1, "true" %>
 <% counselor_names = @company.counselor_names %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl 2xl:max-w-[1500px] mx-auto">
   <%= render "shared/event_banner" %>
 
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">
@@ -47,7 +47,7 @@
     </div>
   </div>
 
-  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] gap-5 items-start">
+  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-5 items-start">
     <div class="space-y-5">
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Información general", "layers" %>
