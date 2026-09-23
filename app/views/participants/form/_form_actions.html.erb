@@ -1,6 +1,6 @@
 <div class="<%= card_classes("px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
   <div class="flex flex-wrap items-center gap-2">
-    <% if participant.persisted? && Current.user&.admin_or_staff_manager? %>
+    <% if participant.persisted? && can_delete_participant?(participant) %>
       <%= button_to participant_path(participant), method: :delete,
             form: { data: { turbo_confirm: "¿Seguro que deseas borrar este registro? Esta acción es irreversible." } },
             class: "inline-flex items-center gap-2 h-10 px-3 rounded-[11px] text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 transition cursor-pointer" do %>

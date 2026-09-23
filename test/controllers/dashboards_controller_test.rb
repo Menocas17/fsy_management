@@ -21,6 +21,46 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{new_participant_path}']", text: /Nuevo participante/
   end
 
+  test "the QR shortcut sits next to it, still inert" do
+    get dashboard_path
+
+    assert_select "[data-shortcut='qr'][aria-disabled='true']", text: /Escanear QR/
+    assert_select "a[data-shortcut='my-company']", false
+  end
+
+  test "a consejero only gets a shortcut to the company they staff" do
+    company = Company.create!(number: 7)
+    Membership.create!(associable: company, participant: participants(:maria))
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
+
+    get dashboard_path
+
+    assert_select "a[data-shortcut='my-company'][href='#{company_path(company)}']", text: /Ver mi compañía/
+    assert_select "a[href='#{new_participant_path}']", false
+    assert_select "[data-shortcut='qr']", false
+  end
+
+  test "an auxiliar is sent to their auxiliar company instead" do
+    auxiliar = participants(:maria).dup
+    auxiliar.update!(rol: :auxiliar, first_name: "Ana")
+    auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar 1")
+    Membership.create!(associable: auxiliar_company, participant: auxiliar)
+    sign_in_as(User.create!(email_address: "ana@fsy.com", password: "Auxiliar1!", participant: auxiliar))
+
+    get dashboard_path
+
+    assert_select "a[data-shortcut='my-company'][href='#{auxiliar_company_path(auxiliar_company)}']"
+  end
+
+  test "someone without a company gets no shortcut at all" do
+    sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
+
+    get dashboard_path
+
+    assert_select "a[data-shortcut='my-company']", false
+    assert_select "a[href='#{new_participant_path}']", false
+  end
+
   test "renders ApexCharts mounts with their data and a text alternative" do
     get dashboard_path
 

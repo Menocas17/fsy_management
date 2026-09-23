@@ -1,7 +1,8 @@
 class ParticipantsController < ApplicationController
   before_action :set_participant, only: %i[show edit update destroy send_password_reset]
-  before_action :authorize_admin_to_delete!, only: [ :destroy ]
-  before_action :require_admin_to_create!, only: [ :new, :create ]
+  before_action :require_participant_delete!, only: [ :destroy ]
+  before_action :require_participant_create!, only: %i[new create]
+  before_action :require_participant_edit!, only: %i[edit update send_password_reset]
 
   def index
     @pagy, @participants = pagy(Participant.jovenes
@@ -53,6 +54,9 @@ class ParticipantsController < ApplicationController
 
   def create
     @participant = Participant.new(participant_params)
+    # El registrador inscribe jóvenes y el director de logística a su comité: nadie registra fuera de su alcance.
+    return redirect_to(participants_path, alert: "No estás autorizado para registrar este tipo de participante") unless can_edit_participant?(@participant)
+
     if @participant.save
       record_audit!(category: :asignaciones, action: "created", target: @participant, summary: "Registró a #{@participant.full_name}")
       redirect_to @participant
@@ -65,7 +69,11 @@ class ParticipantsController < ApplicationController
   end
 
   def update
-    if @participant.update(participant_params)
+    @participant.assign_attributes(participant_params)
+    # Un cambio no puede sacar la ficha del alcance de quien lo hace (cambiarle el rol para escalar, por ejemplo).
+    return redirect_to(participant_path(@participant), alert: "No estás autorizado para realizar este cambio") unless can_edit_participant?(@participant)
+
+    if @participant.save
       audit_participant_update
       if params[:from] == "myprofile"
         redirect_to myprofile_participants_path(from: params[:from]), notice: "Actualizado exitosamente."
@@ -110,6 +118,6 @@ class ParticipantsController < ApplicationController
   end
 
   def participant_params
-    params.expect(participant: allowed_participant_attributes)
+    params.expect(participant: allowed_participant_attributes(@participant))
   end
 end

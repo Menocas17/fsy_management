@@ -19,6 +19,25 @@ module DashboardHelper
     }
   end
 
+  # Shortcut for whoever can't register participants: the company they belong to. A joven goes to their own
+  # company, a consejero to the company of jóvenes they staff, an auxiliar to the auxiliar company that groups
+  # their counselors. Logística and registradores have no company, so they get no shortcut.
+  def my_company_link
+    participant = Current.user&.participant
+    return nil if participant.nil?
+
+    case participant.rol.to_s
+    when "auxiliar"
+      auxiliar_company = participant.auxiliar_scope[:auxiliar_company]
+      auxiliar_company && auxiliar_company_path(auxiliar_company)
+    when "consejero"
+      company = participant.counselor_scope.first
+      company && company_path(company)
+    else
+      participant.company && company_path(participant.company)
+    end
+  end
+
   def event_start_label
     "#{SpanishDates.long(Rails.configuration.x.event_start_on)} de #{Rails.configuration.x.event_start_on.year}"
   end

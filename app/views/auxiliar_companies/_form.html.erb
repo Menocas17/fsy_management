@@ -23,6 +23,7 @@
           <%= form.text_field :name, required: true, maxlength: 60, placeholder: "Ej. Auxiliar Alfa", class: field_input_classes %>
           <p class="<%= hint %>">Las compañías se asignan a esta rama desde la edición de cada compañía.</p>
         </div>
+        <% if auxiliar_company.new_record? || auxiliar_company_edit_level(auxiliar_company) == :full %>
         <% coordinator_options = Participant.coordinators.order(:first_name, :last_name).map { |coordinator| [ coordinator.full_name, coordinator.id ] } %>
         <div>
           <%= form.label :coordinator_id, "Coordinador", class: field_label_classes %>
@@ -33,6 +34,7 @@
           <%= form.select :second_coordinator_id, coordinator_options, { include_blank: "Sin segundo coordinador" }, class: field_select_classes %>
           <p class="<%= hint %>">Ambos coordinadores supervisan esta compañía auxiliar.</p>
         </div>
+        <% end %>
       </div>
     </div>
   </div>

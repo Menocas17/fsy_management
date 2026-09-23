@@ -6,18 +6,20 @@ module NavigationHelper
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" }
       ] },
       { label: "Participantes", items: [
-        { text: "Jóvenes", url: participants_path, lucide_icon: "users", section: "jovenes" },
-        { text: "Staff", url: staff_participants_path, lucide_icon: "user-check", section: "staff" }
+        { text: "Jóvenes", url: participants_path, lucide_icon: "users", section: "jovenes",
+          active_paths: [ participants_path ], except_paths: [ staff_participants_path, myprofile_participants_path ] },
+        { text: "Staff", url: staff_participants_path, lucide_icon: "user-check", section: "staff",
+          active_paths: [ staff_participants_path ] }
       ] },
       { label: "Gestión", items: [
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
         { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
-        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days" },
+        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
         { text: "Librería", lucide_icon: "library", disabled: true },
         { text: "Logística", lucide_icon: "truck", disabled: true },
         { text: "Reportes", lucide_icon: "file-text", disabled: true },
         { text: "Finanzas", lucide_icon: "wallet", disabled: true },
-        ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone" } if Current.user&.alert_manager?),
+        ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]

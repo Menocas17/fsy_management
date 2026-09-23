@@ -2,6 +2,7 @@ class CompaniesController < ApplicationController
   before_action :set_company, only: %i[show edit update destroy assign_staff remove_staff]
   before_action :require_full_company_access!, only: %i[new create destroy]
   before_action :require_company_edit!, only: %i[edit update assign_staff remove_staff]
+  before_action :require_company_staffing!, only: %i[assign_staff remove_staff]
 
   FIELD_LABELS = { "number" => "número", "nickname" => "nombre elegido", "auxiliar_company_id" => "compañía auxiliar", "dining_hall" => "comedor" }.freeze
   ROLE_LABELS = { "consejero" => "consejero", "auxiliar" => "auxiliar", "participant" => "joven" }.freeze
@@ -111,9 +112,15 @@ class CompaniesController < ApplicationController
                                          .order(:first_name, :last_name)
     end
 
-    # The company number is set once at creation and never edited afterwards.
+    # The company number is set once at creation and never edited afterwards; the rest depends on who is editing:
+    # el consejero solo cambia el nombre elegido, el auxiliar todo salvo mover la compañía de rama.
     def company_params
-      fields = [ :nickname, :auxiliar_company_id, :dining_hall ]
+      level = action_name == "create" ? :full : company_edit_level(@company)
+      fields = case level
+      when :full   then [ :nickname, :auxiliar_company_id, :dining_hall ]
+      when :branch then [ :nickname, :dining_hall ]
+      else [ :nickname ]
+      end
       fields << :number if action_name == "create"
       params.expect(company: fields)
     end

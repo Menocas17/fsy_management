@@ -1,3 +1,5 @@
+<%# Asignar auxiliares es cosa de la coordinación; el auxiliar solo renombra su rama. %>
+<% staffing = can_edit_auxiliar_company_staffing?(auxiliar_company) %>
 <section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
   <%= section_heading "Auxiliares", "user-check" %>
   <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">Los cambios se guardan al instante · 1 hombre y 1 mujer. Los consejeros se asignan en cada compañía.</p>
@@ -6,11 +8,11 @@
     <% %w[H M].each do |gender| %>
       <% person = auxiliars.find { |auxiliar| auxiliar.gender == gender } %>
       <%= render "companies/leader_slot", person: person, role: "auxiliar", gender: gender,
-                 remove_url: person && remove_staff_auxiliar_company_path(auxiliar_company, membership_id: membership_ids[person.id]) %>
+                 remove_url: staffing && person && remove_staff_auxiliar_company_path(auxiliar_company, membership_id: membership_ids[person.id]) %>
     <% end %>
   </div>
 
-  <% if auxiliars.size < 2 %>
+  <% if staffing && auxiliars.size < 2 %>
     <%= form_with url: assign_staff_auxiliar_company_path(auxiliar_company), method: :post, class: "mt-5 pt-5 border-t border-line-soft dark:border-slate-700" do |form| %>
       <%= form.label :participant_id, "Agregar auxiliar", class: field_label_classes %>
       <div class="flex flex-col sm:flex-row gap-3">

@@ -32,7 +32,7 @@
 
     <div class="flex-1 min-w-0">
       <%= section_heading "Esencial", "id-card" %>
-      <% if Current.user&.admin_or_staff_manager? %>
+      <% if can_edit_full_profile?(participant) %>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <%= form.label :first_name, "Nombre", class: field_label_classes %>

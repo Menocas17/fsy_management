@@ -10,8 +10,9 @@ class TableComponent < ViewComponent::Base
     @is_staff ? "staff" : "jovenes"
   end
 
-  def admin?
-    Current.user&.admin_or_staff_manager?
+  # El lápiz solo aparece en las fichas que esta persona manda: la cadena la resuelve Authorization.
+  def editable?(participant)
+    helpers.can_edit_participant?(participant)
   end
 
   def gender_label(participant)

@@ -31,6 +31,27 @@ class ButtonComponentTest < ViewComponent::TestCase
     end
   end
 
+  test "a sibling under the same prefix doesn't light up" do
+    with_request_url "/participants/staff" do
+      component = render_inline(ButtonComponent.new(text: "Jóvenes", url: "/participants", lucide_icon: "users", is_nav: true,
+                                                    active_paths: [ "/participants" ], except_paths: [ "/participants/staff" ]))
+
+      assert_nil component.css("a").first["aria-current"]
+    end
+  end
+
+  test "coming from a list keeps that list highlighted, not the one matching the path" do
+    with_request_url "/participants/42/edit?from=staff" do
+      jovenes = render_inline(ButtonComponent.new(text: "Jóvenes", url: "/participants", lucide_icon: "users", is_nav: true,
+                                                  section: "jovenes", active_paths: [ "/participants" ]))
+      assert_nil jovenes.css("a").first["aria-current"]
+
+      staff = render_inline(ButtonComponent.new(text: "Staff", url: "/participants/staff", lucide_icon: "user-check", is_nav: true,
+                                                section: "staff", active_paths: [ "/participants/staff" ]))
+      assert_equal "page", staff.css("a").first["aria-current"]
+    end
+  end
+
   test "nav item can use a Lucide icon instead of an image asset" do
     with_request_url "/dashboard" do
       component = render_inline(ButtonComponent.new(text: "Organigrama", url: "/organigrama", lucide_icon: "network", is_nav: true))

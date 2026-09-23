@@ -1,4 +1,4 @@
-<% admin = Current.user&.admin_or_staff_manager? %>
+<% admin = can_edit_full_profile?(form.object) %>
 <section class="<%= card_classes("p-6") %>">
   <%= section_heading "Información general", "layers" %>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

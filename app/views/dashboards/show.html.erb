@@ -33,12 +33,30 @@
           <figcaption class="mt-2.5 text-[11px] font-bold tracking-[.05em] uppercase text-white/70">Moisés 6:34</figcaption>
         </figure>
       </div>
-      <% if Current.user&.admin_or_staff_manager? %>
-        <%= link_to new_participant_path, class: "inline-flex items-center justify-center gap-2 rounded-[11px] bg-white px-5 py-2.5 text-sm font-semibold text-primary-800 shadow-sm hover:bg-primary-50 transition shrink-0" do %>
-          <%= icon "plus", class: "w-4 h-4" %>
-          Nuevo participante
+      <%
+        # En móvil los atajos se apilan a lo ancho, así los dos quedan del mismo tamaño.
+        shortcut_base = "inline-flex items-center justify-center gap-2 w-full sm:w-auto rounded-[11px] px-5 py-2.5 text-sm font-semibold transition"
+        shortcut_primary = "#{shortcut_base} bg-white text-primary-800 shadow-sm hover:bg-primary-50"
+      %>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0">
+        <% if can_create_participants? %>
+          <%= link_to new_participant_path, class: shortcut_primary do %>
+            <%= icon "plus", class: "w-4 h-4" %>
+            Nuevo participante
+          <% end %>
+          <%# El escáner todavía no existe: se muestra inerte, igual que Logística o Reportes en el menú lateral. %>
+          <span aria-disabled="true" data-shortcut="qr"
+                class="<%= shortcut_base %> border border-white/20 bg-white/10 text-white/60 cursor-not-allowed">
+            <%= icon "scan-qr-code", class: "w-4 h-4" %>
+            Escanear QR
+          </span>
+        <% elsif (my_company = my_company_link) %>
+          <%= link_to my_company, data: { shortcut: "my-company" }, class: shortcut_primary do %>
+            <%= icon "building-2", class: "w-4 h-4" %>
+            Ver mi compañía
+          <% end %>
         <% end %>
-      <% end %>
+      </div>
     </div>
   </section>
 

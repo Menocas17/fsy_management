@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [])
+  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [], except_paths: [])
     @url = url
     @disabled = disabled
     @lucide_icon = lucide_icon
     @active_paths = active_paths
+    @except_paths = except_paths
     @text = text
     @type = type
     @icon = icon
@@ -48,12 +49,16 @@ class ButtonComponent < ViewComponent::Base
     @disabled
   end
 
-  # active_paths lets a section stay highlighted on its nested pages (e.g. a company's show page).
+  # A nav item stays highlighted on its nested pages (new, edit, show) through active_paths;
+  # except_paths keeps a sibling from lighting up too (Jóvenes vs Staff, both under /participants).
   def active?
     return false if disabled? || @url.nil?
+    # A ?from= param says which list the person came from, and that wins over path matching.
+    return @section.present? && params[:from] == @section if params[:from].present?
     return true if current_page?(@url)
-    return true if @active_paths.any? { |path| request.path.start_with?(path) }
-    @section.present? && params[:from] == @section
+    return false if @except_paths.any? { |path| request.path.start_with?(path) }
+
+    @active_paths.any? { |path| request.path.start_with?(path) }
   end
 
   def active_classes

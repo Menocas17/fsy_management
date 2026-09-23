@@ -1,7 +1,17 @@
-<% subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500" %>
+<%
+  subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500"
+  # El consejero ve a sus líderes pero no cambia la plantilla de su propia compañía.
+  staffing = can_edit_company_staffing?(company)
+%>
 <section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
   <%= section_heading "Líderes", "user-check" %>
-  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">Los cambios de líderes se guardan al instante · 1 hombre y 1 mujer por rol.</p>
+  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">
+    <% if staffing %>
+      Los cambios de líderes se guardan al instante · 1 hombre y 1 mujer por rol.
+    <% else %>
+      1 hombre y 1 mujer por rol · los asigna tu coordinación.
+    <% end %>
+  </p>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div>
@@ -10,7 +20,7 @@
         <% %w[H M].each do |gender| %>
           <% person = counselors.find { |counselor| counselor.gender == gender } %>
           <%= render "companies/leader_slot", person: person, role: "consejero", gender: gender,
-                     remove_url: person && remove_staff_company_path(company, membership_id: membership_ids[person.id]) %>
+                     remove_url: staffing && person && remove_staff_company_path(company, membership_id: membership_ids[person.id]) %>
         <% end %>
       </div>
     </div>
@@ -31,7 +41,7 @@
     </div>
   </div>
 
-  <% if counselors.size < 2 %>
+  <% if staffing && counselors.size < 2 %>
     <%= form_with url: assign_staff_company_path(company), method: :post, class: "mt-5 pt-5 border-t border-line-soft dark:border-slate-700" do |form| %>
       <%= form.label :participant_id, "Agregar consejero", class: field_label_classes %>
       <div class="flex flex-col sm:flex-row gap-3">
