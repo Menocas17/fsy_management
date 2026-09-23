@@ -1,7 +1,37 @@
 <% content_for :title, "Notificaciones" %>
 <% content_for :eyebrow, "Actividad" %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
-  <div class="<%= card_classes %>">
-    <%= render "notifications/empty_state" %>
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <p class="text-[13px] font-medium text-ink-500 dark:text-slate-400">
+      <%= @alerts.any? ? pluralize(@pagy.count, "alerta", plural: "alertas") : "Sin alertas por ahora" %>
+    </p>
+    <% if can_manage_alerts? %>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to alerts_path, class: "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+          <%= icon "megaphone", class: "w-4 h-4" %>
+          Alertas enviadas
+        <% end %>
+        <%= link_to new_alert_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Nueva alerta
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="<%= card_classes("overflow-hidden") %>">
+    <% if @alerts.any? %>
+      <div class="divide-y divide-line-soft dark:divide-slate-700">
+        <%= render partial: "alerts/alert", collection: @alerts, as: :alert, locals: { unread: false } %>
+      </div>
+      <% if @pagy.last > 1 %>
+        <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-line-soft dark:border-slate-700">
+          <p class="text-[12.5px] font-medium text-ink-500 dark:text-slate-400">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
+          <%== @pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %>
+        </div>
+      <% end %>
+    <% else %>
+      <%= render "notifications/empty_state" %>
+    <% end %>
   </div>
 </div>

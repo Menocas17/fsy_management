@@ -31,10 +31,14 @@
             options_for_select(staff_roles.map { |k| [ Participant.role_label(k), k ] }, params[:rol]),
             { include_blank: "Rol" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% end %>
+    <%# Companies are searched by their number, so a narrow field is enough and "Limpiar" stays on the same row. %>
     <%= f.text_field :company,
           value: params[:company],
-          placeholder: "Compañía…",
-          class: "h-10 w-36 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
+          placeholder: "N.º",
+          inputmode: "numeric",
+          aria: { label: "Filtrar por compañía" },
+          title: "Número o nombre de la compañía",
+          class: "h-10 w-20 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
           oninput: "this.form.requestSubmit()" %>
     <%= link_to "Limpiar", clear_url,
           class: "h-10 inline-flex items-center px-3 rounded-[10px] text-[13px] font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100 shrink-0" %>

@@ -3,6 +3,7 @@ class Participant < ApplicationRecord
   belongs_to :company, optional: true
   belongs_to :logistics_area, optional: true
 
+  has_many :assignments, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
@@ -36,7 +37,17 @@ class Participant < ApplicationRecord
   scope :by_stake, ->(stake) { where(stake: stake) if stake.present? }
   scope :by_ward, ->(ward) { where(ward: ward) if ward.present? }
   scope :by_gender, ->(gender) { where(gender: gender) if gender.present? }
-  scope :by_company, ->(query) { joins(:company).where("companies.name ILIKE :q", q: "%#{query}%") if query.present? }
+  # A bare number matches that company number exactly ("1" no longer matches "Compañía 10"); other text matches its names.
+  scope :by_company, ->(query) {
+    term = query.to_s.strip
+    next if term.blank?
+
+    if term.match?(/\A\d+\z/)
+      joins(:company).where(companies: { number: term.to_i })
+    else
+      joins(:company).where("companies.name ILIKE :q OR companies.nickname ILIKE :q", q: "%#{sanitize_sql_like(term)}%")
+    end
+  }
   scope :by_role, ->(role) { where(rol: role) if role.present? }
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile

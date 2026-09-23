@@ -1,0 +1,41 @@
+<%# Phones: each activity opens in place, so nobody has to scroll to a separate panel. %>
+<div class="flex flex-col gap-4">
+  <% days.each do |day| %>
+    <% activities = @activities_by_day.fetch(day, []) %>
+    <div class="<%= card_classes("overflow-hidden") %>">
+      <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-line-soft dark:border-slate-700">
+        <p class="text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= spanish_date(day) %></p>
+        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= pluralize(activities.size, "actividad", plural: "actividades") %></p>
+      </div>
+
+      <% if activities.any? %>
+        <div class="divide-y divide-line-soft dark:divide-slate-700">
+          <% activities.each do |activity| %>
+            <details class="group" data-activity-id="<%= activity.id %>" <%= "open" if @activity&.id == activity.id && params[:activity_id].present? %>>
+              <summary class="flex items-center gap-3 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden border-l-[3px] <%= activity.styles[:block] %>">
+                <span class="w-12 shrink-0 text-[11.5px] font-extrabold tabular-nums"><%= activity.starts_at.strftime("%H:%M") %></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-[13px] font-bold"><%= activity.title %></span>
+                  <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+                    <%= [ activity.location.presence, activity.time_range ].compact.join(" · ") %>
+                  </span>
+                </span>
+                <%= icon "chevron-down", class: "w-4 h-4 shrink-0 transition-transform group-open:rotate-180" %>
+              </summary>
+              <div class="px-4 pb-4 pt-1 bg-surface dark:bg-slate-800">
+                <%= render "agenda/details", activity: activity %>
+              </div>
+            </details>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-6 py-8 text-center">
+          <p class="text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Sin actividades este día</p>
+          <% if can_manage_agenda? %>
+            <%= link_to "Agregar una actividad", new_activity_path(date: day), class: "mt-2 inline-block text-[13px] font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

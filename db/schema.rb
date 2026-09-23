@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -41,6 +41,71 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_000003) do
     t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.integer "audience", default: 0, null: false
+    t.integer "category", default: 0, null: false
+    t.text "counselors_notes"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "ends_at", null: false
+    t.string "location"
+    t.text "logistics_notes"
+    t.datetime "starts_at", null: false
+    t.string "target_roles", default: [], null: false, array: true
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.text "youth_notes"
+    t.index ["starts_at"], name: "index_activities_on_starts_at"
+  end
+
+  create_table "activity_responsibles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "activity_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "participant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_id", "participant_id"], name: "index_activity_responsibles_on_activity_id_and_participant_id", unique: true
+    t.index ["activity_id"], name: "index_activity_responsibles_on_activity_id"
+    t.index ["participant_id"], name: "index_activity_responsibles_on_participant_id"
+  end
+
+  create_table "alerts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "activity_id"
+    t.integer "audience", default: 0, null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.integer "priority", default: 0, null: false
+    t.uuid "recipient_id"
+    t.boolean "send_email", default: false, null: false
+    t.uuid "sender_id"
+    t.string "sender_name", null: false
+    t.integer "source", default: 0, null: false
+    t.string "target_roles", default: [], null: false, array: true
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_id"], name: "index_alerts_on_activity_id"
+    t.index ["created_at"], name: "index_alerts_on_created_at"
+    t.index ["recipient_id"], name: "index_alerts_on_recipient_id"
+    t.index ["sender_id"], name: "index_alerts_on_sender_id"
+    t.index ["target_roles"], name: "index_alerts_on_target_roles", using: :gin
+  end
+
+  create_table "assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "activity_id"
+    t.uuid "assigned_by_id"
+    t.string "assigned_by_name", null: false
+    t.datetime "created_at", null: false
+    t.text "details"
+    t.string "location"
+    t.uuid "participant_id", null: false
+    t.datetime "starts_at"
+    t.integer "status", default: 0, null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["activity_id"], name: "index_assignments_on_activity_id"
+    t.index ["assigned_by_id"], name: "index_assignments_on_assigned_by_id"
+    t.index ["participant_id"], name: "index_assignments_on_participant_id"
   end
 
   create_table "audit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -137,6 +202,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_000003) do
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "alerts_read_at"
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.uuid "participant_id"
@@ -148,6 +214,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_000003) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_responsibles", "activities"
+  add_foreign_key "activity_responsibles", "participants"
+  add_foreign_key "alerts", "activities", on_delete: :nullify
+  add_foreign_key "alerts", "participants", column: "recipient_id", on_delete: :cascade
+  add_foreign_key "alerts", "participants", column: "sender_id", on_delete: :nullify
+  add_foreign_key "assignments", "activities", on_delete: :nullify
+  add_foreign_key "assignments", "participants"
+  add_foreign_key "assignments", "participants", column: "assigned_by_id", on_delete: :nullify
   add_foreign_key "audit_logs", "participants", column: "actor_id", on_delete: :nullify
   add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
   add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id"

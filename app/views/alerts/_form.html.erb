@@ -1,0 +1,100 @@
+<% hint = "mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400" %>
+<%= form_with model: alert, id: "alert-form" do |form| %>
+  <% if alert.errors.any? %>
+    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose" role="alert">
+      <% alert.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] gap-5 items-start">
+    <section class="<%= card_classes("px-5 py-6 md:px-7") %>">
+      <%= section_heading "Mensaje", "megaphone" %>
+      <div class="flex flex-col gap-5">
+        <div>
+          <%= form.label :title, "Título", class: field_label_classes %>
+          <%= form.text_field :title, required: true, maxlength: 120, placeholder: "Ej. Cambio de hora del devocional", class: field_input_classes %>
+        </div>
+        <div>
+          <%= form.label :body, "Mensaje", class: field_label_classes %>
+          <%= form.text_area :body, required: true, rows: 10, placeholder: "Escribe el aviso completo…", class: field_textarea_classes %>
+        </div>
+        <div>
+          <%= form.label :images, "Imágenes (opcional)", class: field_label_classes %>
+          <%= form.file_field :images, multiple: true, accept: "image/*", class: "block w-full text-[13px] text-ink-700 dark:text-slate-300 file:mr-3 file:h-9 file:px-3.5 file:rounded-[10px] file:border-0 file:bg-primary-700 file:text-white file:text-[13px] file:font-semibold file:cursor-pointer" %>
+          <p class="<%= hint %>">Por ejemplo un mapa, un horario o una foto del lugar.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col gap-5 min-w-0">
+      <section class="<%= card_classes("px-5 py-6 md:px-6") %>">
+        <%= section_heading "¿Quién la recibe?", "users" %>
+        <div class="flex flex-col gap-3">
+          <label class="flex items-start gap-3 px-4 py-3 rounded-[13px] border border-line dark:border-slate-600 cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
+            <%= form.radio_button :audience, "todos", class: "mt-1 accent-primary-700" %>
+            <span>
+              <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Todos los participantes</span>
+              <span class="block text-[12px] text-ink-500 dark:text-slate-400">Jóvenes, consejeros, logística y dirección.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-3 px-4 py-3 rounded-[13px] border border-line dark:border-slate-600 cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
+            <%= form.radio_button :audience, "por_roles", class: "mt-1 accent-primary-700" %>
+            <span>
+              <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Solo ciertos roles</span>
+              <span class="block text-[12px] text-ink-500 dark:text-slate-400">Marca abajo los roles que deben recibirla.</span>
+            </span>
+          </label>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <% Participant.rols.keys.each do |role| %>
+            <label class="flex items-center gap-2 px-3 py-2 rounded-[11px] border border-line dark:border-slate-600 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300 cursor-pointer has-checked:border-primary-500 has-checked:text-primary-700 dark:has-checked:text-primary-300">
+              <%= check_box_tag "alert[target_roles][]", role, alert.target_roles.include?(role), id: "alert_target_roles_#{role}", class: "accent-primary-700" %>
+              <%= Participant.role_label(role) %>
+            </label>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="<%= card_classes("px-5 py-6 md:px-6") %>">
+        <%= section_heading "Importancia", "triangle-alert" %>
+        <div class="flex flex-col gap-3">
+          <% Alert::PRIORITY_LABELS.each do |value, label| %>
+            <label class="flex items-start gap-3 px-4 py-3 rounded-[13px] border border-line dark:border-slate-600 cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
+              <%= form.radio_button :priority, value, class: "mt-1 accent-primary-700" %>
+              <span>
+                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100"><%= label %></span>
+                <span class="block text-[12px] text-ink-500 dark:text-slate-400">
+                  <%= { "informativa" => "Aviso normal en la campana.",
+                        "importante" => "Se destaca en la campana.",
+                        "critica" => "Se destaca y puede enviarse también por correo." }[value] %>
+                </span>
+              </span>
+            </label>
+          <% end %>
+        </div>
+
+        <label class="mt-4 flex items-start gap-3 px-4 py-3 rounded-[13px] bg-canvas dark:bg-slate-900/60 cursor-pointer">
+          <%= form.check_box :send_email, class: "mt-1 accent-primary-700" %>
+          <span>
+            <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Enviar también por correo</span>
+            <span class="block text-[12px] text-ink-500 dark:text-slate-400">Solo para alertas críticas, y solo llega a quienes tienen cuenta.</span>
+          </span>
+        </label>
+      </section>
+
+      <%# Full-width buttons so the label never gets cut off in this column. %>
+      <section class="<%= card_classes("px-5 py-5 lg:sticky lg:top-4") %>">
+        <button type="submit"
+                class="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
+          <%= icon "send", class: "w-4 h-4 shrink-0" %>
+          Enviar alerta
+        </button>
+        <%= link_to "Cancelar", notifications_path,
+              class: "mt-2.5 w-full inline-flex items-center justify-center h-11 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+        <p class="mt-3 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">La alerta aparece de inmediato en la campana de quienes la reciben.</p>
+      </section>
+    </div>
+  </div>
+<% end %>

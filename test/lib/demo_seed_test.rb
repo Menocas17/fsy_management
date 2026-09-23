@@ -21,6 +21,20 @@ class DemoSeedTest < ActiveSupport::TestCase
       assert_equal %w[H M], auxiliar_company.auxiliars.map(&:gender).sort
     end
 
+    assert Activity.count >= 25, "the six event days should be on the agenda"
+    assert_equal [ Rails.configuration.x.event_start_on, Rails.configuration.x.event_end_on ],
+                 [ Activity.chronological.first.day, Activity.chronological.last.day ],
+                 "the agenda covers only the days of the event"
+
+    service = Activity.find_by!(title: "Servicio comunitario")
+    assert_equal Rails.configuration.x.event_start_on + 1, service.day
+    assert service.logistics_notes.present?, "the service activity carries notes for each role"
+    assert service.responsibles.any?
+
+    assert Assignment.count >= 4, "some profiles start with assignments"
+    assert Assignment.where.not(activity_id: nil).any?, "taken from the agenda"
+    assert Assignment.where(activity_id: nil).any?, "and one outside it"
+
     assert_equal 2, Participant.director.count
     assert_equal 1, Participant.director_logistica.count
     assert Participant.logistica.count.between?(16, 20)

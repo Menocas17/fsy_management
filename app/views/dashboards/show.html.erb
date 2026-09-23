@@ -7,7 +7,25 @@
     <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
       <div class="max-w-xl">
         <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase">FSY 2026 · Managua-Caribe</span>
-        <h1 class="mt-4 text-2xl md:text-[32px] font-extrabold leading-tight tracking-tight text-white">Todo el registro del evento, en un solo lugar</h1>
+        <% countdown = event_countdown %>
+        <h1 class="mt-4" data-controller="countdown" data-countdown-starts-at-value="<%= event_start_at.iso8601 %>">
+          <% if countdown[:started] %>
+            <span class="block text-2xl md:text-[32px] font-extrabold leading-tight tracking-tight text-white">¡El FSY ya comenzó!</span>
+          <% else %>
+            <span class="sr-only">Faltan <%= countdown[:days] %> días, <%= countdown[:hours] %> horas y <%= countdown[:minutes] %> minutos para el inicio del FSY</span>
+            <span class="block text-[13px] md:text-sm font-bold tracking-[.08em] uppercase text-white/75">Faltan para el inicio</span>
+            <span class="mt-2.5 flex flex-wrap gap-x-6 gap-y-3" aria-hidden="true">
+              <% [ [ :days, "Días" ], [ :hours, "Horas" ], [ :minutes, "Minutos" ], [ :seconds, "Segundos" ] ].each do |key, label| %>
+                <span class="flex flex-col items-center text-center">
+                  <span class="text-[34px] md:text-[44px] font-extrabold leading-none tracking-tight text-white tabular-nums"
+                        data-countdown-target="<%= key %>"><%= key == :days ? countdown[key] : format("%02d", countdown[key]) %></span>
+                  <span class="mt-1.5 text-[11px] font-bold tracking-[.08em] uppercase text-white/70"><%= label %></span>
+                </span>
+              <% end %>
+            </span>
+          <% end %>
+        </h1>
+        <p class="mt-3 text-[13px] font-semibold text-white/80">Comienza el <%= event_start_label %></p>
         <figure class="mt-4 rounded-[14px] bg-white/10 border border-white/15 px-5 py-4">
           <blockquote class="text-[13px] md:text-[14.5px] leading-relaxed italic text-white/90">
             “He aquí mi Espíritu reposa sobre ti; por consiguiente justificaré todas tus palabras; y las montañas huirán de tu presencia, y los ríos se desviarán de su cauce; y tú permanecerás en mí, y yo en ti; por tanto, anda conmigo.”

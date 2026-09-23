@@ -49,6 +49,17 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame[id^='participants_page_2']", count: 0
   end
 
+  test "filters jóvenes by company number without mixing up similar numbers" do
+    participants(:juan).update!(company: Company.create!(number: 1))
+    Participant.create!(first_name: "Ana", last_name: "Diez", age: 15, stake: "villa_flor", shirt_number: "s",
+                        gender: "M", rol: "joven", company: Company.create!(number: 10))
+
+    get participants_path(company: "1")
+
+    assert_includes response.body, "Juan Pérez"
+    refute_includes response.body, "Ana Diez"
+  end
+
   test "staff list paginates staff only" do
     create_participants(21, prefix: "Staff", rol: "consejero")
 
@@ -102,13 +113,15 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=file][name='participant[avatar]'][data-avatar-preview-target=input]"
   end
 
-  test "edit shows assignments as a disabled preview that submits nothing" do
-    get edit_participant_path(participants(:juan))
+  test "edit counts the assignments and sends you to the profile to change them" do
+    juan = participants(:juan)
+    juan.assignments.create!(title: "Primera oración", assigned_by_name: "Marta Jiménez")
 
-    assert_select "fieldset[disabled]" do
-      assert_select "input"
-      assert_select "input[name]", count: 0
-    end
+    get edit_participant_path(juan)
+
+    assert_select "a[href='#{participant_path(juan, anchor: "asignaciones")}']", text: /Ver asignaciones en el perfil/
+    assert_includes response.body, "1 asignación registrada"
+    assert_select "form#participant-form input[name^='assignment']", 0
   end
 
   test "edit offers delete to admins, and password reset only when coming from Mi perfil" do

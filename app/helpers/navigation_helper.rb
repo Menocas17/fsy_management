@@ -12,16 +12,20 @@ module NavigationHelper
       { label: "Gestión", items: [
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
         { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
+        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days" },
+        { text: "Librería", lucide_icon: "library", disabled: true },
         { text: "Logística", lucide_icon: "truck", disabled: true },
         { text: "Reportes", lucide_icon: "file-text", disabled: true },
         { text: "Finanzas", lucide_icon: "wallet", disabled: true },
+        ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone" } if Current.user&.alert_manager?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
-      ] },
-      { label: "Cuenta", items: [
-        { text: "Mi perfil", url: myprofile_participants_path, lucide_icon: "user-round", section: "myprofile" }
       ] }
     ]
-    sections.map { |section| section.merge(items: section[:items].compact.map { |item| item.merge(is_nav: true) }) }
+    # "Mi perfil" lives in the account menu of the top bar; a section with no items is dropped.
+    sections.filter_map do |section|
+      items = section[:items].compact.map { |item| item.merge(is_nav: true) }
+      section.merge(items: items) if items.any?
+    end
   end
 
   def nav_items

@@ -10,7 +10,7 @@ const PAN_STEP = 60;
 // Drag (mouse or touch) to move, pinch or Ctrl/⌘ + wheel to zoom, plain wheel/trackpad to pan,
 // and the toolbar or keyboard (arrows, + / −, 0 to fit) for everything else.
 export default class extends Controller {
-  static targets = ['viewport', 'canvas', 'zoomLabel', 'fullscreenButton'];
+  static targets = ['viewport', 'canvas', 'zoomLabel', 'fullscreenButton', 'branch', 'toggleAllButton', 'toggleAllLabel'];
 
   connect() {
     this.scale = 1;
@@ -66,6 +66,33 @@ export default class extends Controller {
     this.y = Math.max((viewport.clientHeight - height * this.scale) / 2, 0);
     this.fitted = true;
     this.apply();
+  }
+
+  // Collapsible branches -------------------------------------------------
+
+  toggleBranch(event) {
+    const branch = this.branchTargets.find((element) => element.id === event.currentTarget.dataset.branch);
+    if (branch) this.setBranch(branch, branch.hidden);
+  }
+
+  toggleAll() {
+    const expand = this.branchTargets.some((branch) => branch.hidden);
+    this.branchTargets.forEach((branch) => this.setBranch(branch, expand));
+
+    if (this.hasToggleAllLabelTarget) {
+      this.toggleAllLabelTarget.textContent = expand ? 'Ocultar compañías' : 'Mostrar compañías';
+    }
+    this.toggleAllButtonTarget?.setAttribute('aria-pressed', String(expand));
+    requestAnimationFrame(() => this.fit());
+  }
+
+  setBranch(branch, expanded) {
+    branch.hidden = !expanded;
+    const button = this.element.querySelector(`[data-branch="${branch.id}"]`);
+    if (!button) return;
+
+    button.setAttribute('aria-expanded', String(expanded));
+    button.querySelector('svg')?.classList.toggle('rotate-180', expanded);
   }
 
   toggleFullscreen() {

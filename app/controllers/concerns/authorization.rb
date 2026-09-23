@@ -2,7 +2,7 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    helper_method :can_view_companies?, :full_company_access?, :can_edit_auxiliar_company?, :can_edit_company?, :can_manage_staff?
+    helper_method :can_view_companies?, :full_company_access?, :can_edit_auxiliar_company?, :can_edit_company?, :can_manage_staff?, :can_manage_alerts?, :can_manage_agenda?, :can_assign_to?
   end
 
   def can_view_companies?
@@ -50,10 +50,53 @@ module Authorization
     full_company_access?
   end
 
+  def can_manage_alerts?
+    Current.user&.alert_manager? || false
+  end
+
+  def can_manage_agenda?
+    Current.user&.agenda_manager? || false
+  end
+
+  # Assignments follow the same chain of command as the companies: the director couple and the coordinators
+  # reach everybody, an auxiliar reaches their branch, a consejero their own company, and the logistics
+  # director their own team.
+  def can_assign_to?(participant)
+    return false if Current.user.nil? || participant.nil?
+    return true if full_company_access?
+
+    actor = Current.user.participant
+    return false if actor.nil?
+
+    case actor.rol.to_s
+    when "director_logistica"
+      participant.logistica? || participant.director_logistica?
+    when "auxiliar"
+      scope = actor.auxiliar_scope
+      scope[:companies].map(&:id).include?(participant.company_id) || scope[:counselors].include?(participant)
+    when "consejero"
+      actor.counselor_scope.map(&:id).include?(participant.company_id)
+    else
+      false
+    end
+  end
+
   private
     def require_admin_to_create!
       unless Current.user&.admin_or_staff_manager?
         redirect_to dashboard_path, alert: "Acceso no autorizado"
+      end
+    end
+
+    def require_agenda_manager!
+      unless can_manage_agenda?
+        redirect_to agenda_path, alert: "No estás autorizado para editar la agenda"
+      end
+    end
+
+    def require_alert_manager!
+      unless can_manage_alerts?
+        redirect_to notifications_path, alert: "No estás autorizado para enviar alertas"
       end
     end
 

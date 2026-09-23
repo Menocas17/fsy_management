@@ -13,6 +13,23 @@ class User < ApplicationRecord
     participant&.coordinador? || participant&.director? || participant&.logistica? || participant&.director_logistica?
   end
 
+  # Who may send alerts and edit the agenda: the director couple, the coordinators, the logistics director
+  # and the superadmin.
+  def alert_manager?
+    return true if participant_id.nil?
+    participant&.director? || participant&.coordinador? || participant&.director_logistica?
+  end
+
+  # The agenda is edited by the director couple, the coordinators and the superadmin.
+  def agenda_manager?
+    return true if participant_id.nil?
+    participant&.director? || participant&.coordinador?
+  end
+
+  def unread_alerts_count
+    Alert.visible_to(participant).unread_for(self).count
+  end
+
   def counselers_staff?
     participant&.consejero? || participant&.auxiliar?
   end

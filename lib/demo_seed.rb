@@ -88,6 +88,8 @@ class DemoSeed
       coordinators = create_coordinators
       create_logistics
       create_companies(coordinators)
+      create_agenda
+      create_assignments
       link_logins
     end
     report
@@ -97,6 +99,10 @@ class DemoSeed
     def wipe!
       log "Limpiando datos anteriores…"
       AuditLog.delete_all
+      # destroy, not delete: alerts purge their images and activities release their responsibles.
+      Alert.destroy_all
+      Assignment.delete_all
+      Activity.destroy_all
       Membership.delete_all
       User.where.not(participant_id: nil).update_all(participant_id: nil)
       # companies → auxiliary companies → participants reference each other, so break the links before deleting.
@@ -184,6 +190,88 @@ class DemoSeed
       end
     end
 
+    # Five days of agenda: a daily backbone of meals and devotionals plus the activity that defines each day.
+    def create_agenda
+      hosts = [ @demo["director"], @demo["coordinador"] ].compact
+      days = agenda_days
+
+      days.each_with_index do |(day, midday, evening), index|
+        closing_day = index == days.size - 1
+        activity(day, "07:00", "08:00", "Desayuno", :comida, "Comedores")
+        activity(day, *midday, hosts: hosts)
+        unless closing_day
+          activity(day, "08:30", "09:50", "Devocional", :devocional, "Auditorio", hosts: hosts)
+          activity(day, "12:30", "13:30", "Almuerzo", :comida, "Comedores")
+          activity(day, "14:00", "15:50", "Clases FSY", :clase, "Aulas 1-6")
+          activity(day, "18:00", "19:00", "Cena", :comida, "Comedores")
+        end
+        activity(day, *evening, hosts: hosts)
+      end
+
+      Activity.find_by(title: "Servicio comunitario")&.update!(
+        description: "Pintura y limpieza del parque comunitario. Las compañías se dividen en cuatro frentes de trabajo.",
+        logistics_notes: "30 galones de pintura, 40 brochas y 6 bidones de agua. Montaje 8:00 a.m. · 5 buses · enfermería en sitio.",
+        counselors_notes: "Participan las compañías 1 a 11. Pasar lista antes de abordar; cada compañía lleva su bandera y botiquín.",
+        youth_notes: "Ropa que se pueda manchar, gorra y botella de agua. Salida puntual a las 10:00."
+      )
+    end
+
+    # The six days of the event, taken from the dates the app counts down to.
+    def agenda_days
+      first_day = Rails.configuration.x.event_start_on
+
+      [
+        [ first_day,
+          [ "10:00", "12:00", "Talleres por compañía", :clase, "Aulas 1-6" ],
+          [ "19:30", "21:30", "Noche de talentos", :especial, "Auditorio" ] ],
+        [ first_day + 1,
+          [ "10:00", "12:30", "Servicio comunitario", :servicio, "Barrio La Rotonda" ],
+          [ "19:30", "21:30", "Baile FSY", :actividad, "Gimnasio" ] ],
+        [ first_day + 2,
+          [ "10:00", "12:00", "Clases FSY", :clase, "Aulas 1-6" ],
+          [ "19:30", "21:00", "Devocional nocturno", :devocional, "Auditorio" ] ],
+        [ first_day + 3,
+          [ "10:00", "12:00", "Olimpiadas FSY", :actividad, "Canchas" ],
+          [ "19:30", "21:30", "Fogata y testimonios", :especial, "Explanada" ] ],
+        [ first_day + 4,
+          [ "10:00", "12:00", "Talleres electivos", :clase, "Aulas 1-6" ],
+          [ "19:30", "22:00", "Noche de gala", :especial, "Salón principal" ] ],
+        [ first_day + 5,
+          [ "09:00", "10:30", "Sesión de clausura", :devocional, "Auditorio" ],
+          [ "13:00", "14:00", "Despedida y salida", :especial, "Explanada" ] ]
+      ]
+    end
+
+    # A few assignments so the profiles don't look empty; the alerts for these go out from the app itself.
+    def create_assignments
+      service = Activity.find_by(title: "Servicio comunitario")
+      talents = Activity.find_by(title: "Noche de talentos")
+      assigner = @demo["coordinador"]
+      assigner_name = assigner&.full_name || "Administrador del sistema"
+      jovenes = Participant.joven.order(:first_name, :last_name).limit(3).to_a
+
+      jovenes.each_with_index do |joven, index|
+        Assignment.create!(participant: joven, activity: service, assigned_by: assigner, assigned_by_name: assigner_name,
+                           status: index.zero? ? :confirmada : :pendiente,
+                           details: "Frente de trabajo #{index + 1}: pintura del parque.")
+      end
+
+      Assignment.create!(participant: jovenes.first, assigned_by: assigner, assigned_by_name: assigner_name,
+                         title: "Primera oración en el devocional", status: :confirmada,
+                         starts_at: Time.zone.local(agenda_days.first.first.year, 1, 12, 8, 30), location: "Auditorio",
+                         details: "Llega diez minutos antes con el consejero de tu compañía.")
+
+      Assignment.create!(participant: @owner, activity: talents, assigned_by: assigner, assigned_by_name: assigner_name,
+                         status: :pendiente, details: "Presentar a los grupos y cuidar los tiempos entre números.")
+    end
+
+    def activity(day, start_time, end_time, title, category, location, hosts: [])
+      record = Activity.create!(title: title, category: category, location: location,
+                                date: day.to_s, start_time: start_time, end_time: end_time)
+      hosts.each { |host| record.responsibles << host }
+      record
+    end
+
     def create_owner
       @used_names << "Rodolfo Jose Menocal Castillo"
       @owner = Participant.create!(profile_attributes(rol: "consejero", gender: "H", age: 25, stake: "bello_horizonte")
@@ -236,6 +324,7 @@ class DemoSeed
       log "✔ #{Participant.joven.count} jóvenes, #{Participant.consejero.count} consejeros, #{Participant.auxiliar.count} auxiliares"
       log "✔ #{Participant.director.count} directores y #{Participant.coordinador.count} coordinadores"
       log "✔ Logística: #{Participant.director_logistica.count} director(a) y #{Participant.logistica.count} miembros en #{LogisticsArea.count} áreas"
+      log "✔ Agenda: #{Activity.count} actividades del #{Rails.configuration.x.event_start_on.day} al #{Rails.configuration.x.event_end_on.day} de enero, con #{Assignment.count} asignaciones"
       log "Cuentas (las nuevas usan la contraseña #{DEMO_PASSWORD}):"
       @logins.each do |email, participant, created|
         log "  #{email} → #{participant.full_name} (#{participant.role_label})#{' · ya existía, contraseña sin cambios' unless created}"

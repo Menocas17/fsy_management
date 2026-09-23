@@ -1,0 +1,166 @@
+<%
+  hint = "mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400"
+  chip_classes = "inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-[11px] bg-canvas dark:bg-slate-900/60 border border-line-soft dark:border-slate-700"
+  selected = activity.responsibles.to_a
+%>
+<%= form_with model: activity, id: "activity-form" do |form| %>
+  <% if activity.errors.any? %>
+    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose" role="alert">
+      <% activity.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] gap-5 items-start">
+    <div class="flex flex-col gap-5 min-w-0">
+      <section class="<%= card_classes("px-5 py-6 md:px-7") %>">
+        <%= section_heading "Actividad", "calendar-days" %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+          <div>
+            <%= form.label :title, "Título", class: field_label_classes %>
+            <%= form.text_field :title, required: true, maxlength: 120, placeholder: "Ej. Servicio comunitario", class: field_input_classes %>
+          </div>
+          <div>
+            <%= form.label :category, "Tipo", class: field_label_classes %>
+            <%= form.select :category, Activity::CATEGORY_LABELS.map { |key, label| [ label, key ] }, {}, class: field_select_classes %>
+          </div>
+          <div>
+            <%= form.label :location, "Lugar", class: field_label_classes %>
+            <%= form.text_field :location, placeholder: "Ej. Auditorio principal", class: field_input_classes %>
+          </div>
+          <div>
+            <%= form.label :date, "Fecha", class: field_label_classes %>
+            <%= form.date_field :date, required: true, min: Activity.event_days.first, max: Activity.event_days.last, class: field_input_classes %>
+            <p class="<%= hint %>">Del <%= Activity.event_days.first.day %> al <%= Activity.event_days.last.day %> de <%= SpanishDates.month(Activity.event_days.last) %>.</p>
+          </div>
+          <div>
+            <%= form.label :start_time, "Inicio", class: field_label_classes %>
+            <%= form.time_field :start_time, required: true, class: field_input_classes %>
+          </div>
+          <div>
+            <%= form.label :end_time, "Fin", class: field_label_classes %>
+            <%= form.time_field :end_time, required: true, class: field_input_classes %>
+          </div>
+          <div class="sm:col-span-2">
+            <%= form.label :description, "Descripción", class: field_label_classes %>
+            <%= form.text_area :description, rows: 3, placeholder: "De qué se trata la actividad…", class: field_textarea_classes %>
+          </div>
+        </div>
+      </section>
+
+      <section class="<%= card_classes("px-5 py-6 md:px-7") %>">
+        <%= section_heading "Notas por rol", "list" %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-x-4 gap-y-5">
+          <div>
+            <%= form.label :logistics_notes, "Logística", class: field_label_classes %>
+            <%= form.text_area :logistics_notes, rows: 5, placeholder: "Materiales, montaje, transporte…", class: field_textarea_classes %>
+          </div>
+          <div>
+            <%= form.label :counselors_notes, "Consejeros y auxiliares", class: field_label_classes %>
+            <%= form.text_area :counselors_notes, rows: 5, placeholder: "Qué debe hacer cada compañía, qué compañías o edades participan…", class: field_textarea_classes %>
+          </div>
+          <div class="lg:col-span-2 2xl:col-span-1">
+            <%= form.label :youth_notes, "Jóvenes", class: field_label_classes %>
+            <%= form.text_area :youth_notes, rows: 5, placeholder: "Qué llevar, dónde presentarse…", class: field_textarea_classes %>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="flex flex-col gap-5 min-w-0">
+      <section class="<%= card_classes("px-5 py-6 md:px-6") %>">
+        <%= section_heading "¿A quién se le avisa?", "megaphone" %>
+        <div class="flex flex-col gap-3">
+          <label class="flex items-start gap-3 px-4 py-3 rounded-[13px] border border-line dark:border-slate-600 cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
+            <%= form.radio_button :audience, "todos", class: "mt-1 accent-primary-700" %>
+            <span>
+              <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Todos los participantes</span>
+              <span class="block text-[12px] text-ink-500 dark:text-slate-400">La alerta del cambio llega a todo el evento.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-3 px-4 py-3 rounded-[13px] border border-line dark:border-slate-600 cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
+            <%= form.radio_button :audience, "por_roles", class: "mt-1 accent-primary-700" %>
+            <span>
+              <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100">Solo ciertos roles</span>
+              <span class="block text-[12px] text-ink-500 dark:text-slate-400">Si es por compañías o por edades, escribe el detalle en las notas.</span>
+            </span>
+          </label>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <% Participant.rols.keys.each do |role| %>
+            <label class="flex items-center gap-2 px-3 py-2 rounded-[11px] border border-line dark:border-slate-600 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300 cursor-pointer has-checked:border-primary-500 has-checked:text-primary-700 dark:has-checked:text-primary-300">
+              <%= check_box_tag "activity[target_roles][]", role, activity.target_roles.include?(role), id: "activity_target_roles_#{role}", class: "accent-primary-700" %>
+              <%= Participant.role_label(role) %>
+            </label>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="<%= card_classes("px-5 py-6 md:px-6") %>" data-controller="participant-picker">
+        <%= section_heading "Responsables", "user-check" %>
+        <%# One empty value so removing everybody still submits an empty list. %>
+        <%= hidden_field_tag "activity[responsible_ids][]", "" %>
+
+        <label for="responsible-search" class="<%= field_label_classes %>">Buscar en el staff</label>
+        <div class="relative">
+          <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
+          <input type="search" id="responsible-search" autocomplete="off" placeholder="Busca por nombre…"
+                 data-participant-picker-target="query"
+                 data-action="input->participant-picker#filter keydown->participant-picker#keydown"
+                 class="<%= field_input_classes %> pl-10">
+        </div>
+        <p class="<%= hint %>" data-participant-picker-target="status" role="status" aria-live="polite"></p>
+
+        <ul class="mt-1.5 max-h-56 overflow-y-auto rounded-[11px] border border-line dark:border-slate-600 divide-y divide-line-soft dark:divide-slate-700"
+            data-participant-picker-target="results" hidden>
+          <% Participant.staff.order(:first_name, :last_name).each do |member| %>
+            <li data-participant-picker-target="option" data-id="<%= member.id %>"
+                data-search="<%= "#{member.full_name} #{Participant.role_label(member.rol)}" %>" hidden>
+              <button type="button" data-action="participant-picker#add"
+                      data-id="<%= member.id %>" data-name="<%= member.full_name %>" data-role="<%= Participant.role_label(member.rol) %>"
+                      class="w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+                <span class="text-[13px] font-semibold text-ink-900 dark:text-slate-100"><%= member.full_name %></span>
+                <span class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= Participant.role_label(member.rol) %></span>
+              </button>
+            </li>
+          <% end %>
+        </ul>
+
+        <div class="mt-2.5 rounded-[13px] border border-dashed border-line dark:border-slate-600 px-3 py-3">
+          <p class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500">Seleccionados</p>
+          <p class="mt-1.5 text-[12.5px] text-ink-500 dark:text-slate-400" data-participant-picker-target="empty" <%= "hidden" if selected.any? %>>
+            Nadie seleccionado todavía.
+          </p>
+          <div class="mt-2 flex flex-wrap gap-2" data-participant-picker-target="selected">
+            <% selected.each do |member| %>
+              <span class="<%= chip_classes %>" data-picked data-id="<%= member.id %>">
+                <span class="text-[12.5px] font-bold text-ink-900 dark:text-slate-100" data-name><%= member.full_name %></span>
+                <span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400" data-role><%= Participant.role_label(member.rol) %></span>
+                <%= hidden_field_tag "activity[responsible_ids][]", member.id, id: nil %>
+                <button type="button" data-action="participant-picker#remove" aria-label="Quitar a <%= member.full_name %>"
+                        class="w-6 h-6 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition">
+                  <%= icon "x", class: "w-3.5 h-3.5" %>
+                </button>
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <template data-participant-picker-target="template"><span class="<%= chip_classes %>" data-picked><span class="text-[12.5px] font-bold text-ink-900 dark:text-slate-100" data-name></span><span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400" data-role></span><input type="hidden" name="activity[responsible_ids][]"><button type="button" data-action="participant-picker#remove" aria-label="Quitar" class="w-6 h-6 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition"><%= icon "x", class: "w-3.5 h-3.5" %></button></span></template>
+      </section>
+
+      <%# Full-width buttons so "Crear y avisar" never gets cut off in this column. %>
+      <section class="<%= card_classes("px-5 py-5 lg:sticky lg:top-4") %>">
+        <button type="submit"
+                class="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
+          <%= icon "check", class: "w-4 h-4 shrink-0" %>
+          <%= activity.persisted? ? "Guardar y avisar" : "Crear y avisar" %>
+        </button>
+        <%= link_to "Cancelar", agenda_path(date: activity.persisted? ? activity.day : activity.date),
+              class: "mt-2.5 w-full inline-flex items-center justify-center h-11 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+        <p class="mt-3 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Al guardar se envía una alerta automática a quienes participan.</p>
+      </section>
+    </div>
+  </div>
+<% end %>

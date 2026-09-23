@@ -1,5 +1,5 @@
 class OrganigramaController < ApplicationController
-  VIEWS = %w[todo companias logistica mi_compania].freeze
+  VIEWS = %w[todo logistica mi_compania].freeze
 
   def show
     @view = VIEWS.include?(params[:scope]) ? params[:scope] : "todo"
@@ -12,9 +12,9 @@ class OrganigramaController < ApplicationController
                                        auxiliar_company: { coordinator: :avatar_attachment, second_coordinator: :avatar_attachment, auxiliars: :avatar_attachment })
                              .by_number
     else
-      # Both branches hang from the director couple; the companias/logistica views show just one of them.
-      @show_companies = @view != "logistica"
-      @show_logistics = @view != "companias"
+      # Both branches hang from the director couple; the logistica view narrows to that branch.
+      @show_companies = @view == "todo"
+      @show_logistics = true
       load_company_branch if @show_companies
       load_logistics_branch if @show_logistics
     end

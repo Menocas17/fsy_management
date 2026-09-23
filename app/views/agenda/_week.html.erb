@@ -1,0 +1,50 @@
+<%
+  hour_height = 54
+  first_hour = @hours.first
+  offset_for = ->(time) { ((time.hour - first_hour) * 60 + time.min) * hour_height / 60.0 }
+  columns = "grid-template-columns: 56px repeat(#{days.size}, minmax(0, 1fr));"
+%>
+<div class="<%= card_classes("overflow-hidden") %>">
+  <div class="overflow-x-auto">
+    <div class="<%= days.size > 2 ? "min-w-[680px]" : "" %>">
+      <div class="grid border-b border-line-soft dark:border-slate-700" style="<%= columns %>">
+        <div></div>
+        <% days.each do |day| %>
+          <%= link_to agenda_path(date: day, view: @view),
+                class: "px-2 py-2.5 text-center border-l border-line-soft dark:border-slate-700 #{"bg-primary-50 dark:bg-primary-700/20" if day == @selected_day}" do %>
+            <span class="block text-[10.5px] font-bold tracking-[.06em] uppercase <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-300 dark:text-slate-500" %>"><%= spanish_day_abbr(day) %></span>
+            <span class="block text-[17px] font-extrabold tabular-nums <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-900 dark:text-slate-100" %>"><%= day.day %></span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="grid" style="<%= columns %>">
+        <div>
+          <% @hours.each do |hour| %>
+            <div class="h-[54px] border-t border-line-soft dark:border-slate-700 first:border-t-0 pr-2 text-right">
+              <span class="text-[10.5px] font-semibold text-ink-300 dark:text-slate-500 tabular-nums"><%= format("%02d:00", hour) %></span>
+            </div>
+          <% end %>
+        </div>
+
+        <% days.each do |day| %>
+          <div class="relative border-l border-line-soft dark:border-slate-700 <%= "bg-primary-50/50 dark:bg-primary-700/10" if day == @selected_day && days.size > 1 %>">
+            <% @hours.each do %>
+              <div class="h-[54px] border-t border-line-soft dark:border-slate-700 first:border-t-0"></div>
+            <% end %>
+
+            <% @activities_by_day.fetch(day, []).each do |activity| %>
+              <%= link_to agenda_path(date: day, view: @view, activity_id: activity.id),
+                    style: "top: #{offset_for.(activity.starts_at).round}px; height: #{[ (activity.duration_minutes * hour_height / 60.0).round, 26 ].max}px;",
+                    class: "absolute left-1 right-1 overflow-hidden rounded-[10px] border-l-[3px] px-2 py-1 #{activity.styles[:block]} #{"ring-2 ring-primary-500" if @activity&.id == activity.id}",
+                    data: { activity_id: activity.id, turbo_action: "advance" } do %>
+                <span class="block text-[11.5px] font-bold leading-tight truncate"><%= activity.title %></span>
+                <span class="block text-[10.5px] font-semibold opacity-80 tabular-nums truncate"><%= activity.starts_at.strftime("%H:%M") %><%= " · #{activity.location}" if activity.location.present? %></span>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

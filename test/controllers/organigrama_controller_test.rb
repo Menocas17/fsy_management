@@ -35,22 +35,27 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
       assert_select "[data-node='coordinacion']", 1
       assert_select "[data-node='logistica']", 1
       assert_select "[data-node='auxiliar']", text: /Auxiliar Alfa/
-      assert_select "ul.org-stack [data-company-id='#{@company.id}']"
       assert_select "button[data-action='org-chart#fit']"
     end
   end
 
-  test "the companies and logistics views each keep the directors at the head" do
+  test "companies start collapsed under their auxiliary company, with a toggle for each branch and one for all" do
+    get organigrama_path
+
+    branch = "branch-#{@auxiliar_company.id}"
+    assert_select "ul.org-stack##{branch}[hidden] [data-company-id='#{@company.id}']"
+    assert_select "button[data-action='org-chart#toggleBranch'][aria-controls='#{branch}'][aria-expanded='false']"
+    assert_select "button[data-action='org-chart#toggleAll']", text: /Mostrar compañías/
+  end
+
+  test "the logistics view keeps the directors at the head and drops the companies branch" do
     get organigrama_path(scope: "logistica")
+
     assert_select "[data-org-view='logistica'][aria-current='page']"
+    assert_select "[data-org-view='companias']", 0
     assert_includes response.body, "Roberto Prueba"
     assert_includes response.body, "Sergio Prueba"
     refute_includes response.body, "Alfa 3"
-
-    get organigrama_path(scope: "companias")
-    assert_includes response.body, "Roberto Prueba"
-    assert_includes response.body, "Alfa 3"
-    refute_includes response.body, "Sergio Prueba"
   end
 
   test "an unknown view falls back to the full chart" do
