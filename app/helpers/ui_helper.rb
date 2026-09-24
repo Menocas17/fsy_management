@@ -14,6 +14,15 @@ module UiHelper
     INPUT_CLASSES
   end
 
+  # Las pantallas de acceso van siempre en claro y el formulario es todo el contenido: campos algo más altos.
+  def auth_input_classes
+    "w-full h-11 px-3.5 rounded-[11px] bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"
+  end
+
+  def auth_button_classes
+    "w-full inline-flex items-center justify-center gap-2 h-11 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-md hover:bg-primary-800 transition cursor-pointer"
+  end
+
   def field_select_classes
     "#{INPUT_CLASSES} pr-9"
   end

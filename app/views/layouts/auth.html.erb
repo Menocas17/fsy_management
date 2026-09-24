@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
     <title><%= content_for(:title) || "Fsy Management" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,8 +9,6 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
     <%# El .ico va primero: es el que los navegadores pintan en la pestaña sin reescalar el de 512. %>
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon.png" type="image/png" sizes="512x512">
@@ -18,13 +16,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body>
-    <main class="container mx-auto mt-5 px-1 sm:px-2 md:px-5 flex-1 overflow-y-auto">
+  <%# Las pantallas de acceso van siempre en claro: no cargan el tema guardado, así el primer contacto con la app es el mismo para todos. %>
+  <body class="min-h-dvh bg-canvas text-ink-900 antialiased">
+    <main class="min-h-dvh flex items-center justify-center px-4 py-8 md:py-12">
       <%= yield %>
     </main>
-  </html>
+  </body>
 </html>
