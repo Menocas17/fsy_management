@@ -36,6 +36,7 @@ Rails.application.routes.draw do
       get :participants, path: "participantes"
       get :rooms, path: "cuartos"
       get :agenda
+      get :badges, path: "gafetes"
       get :inventory, path: "inventario"
       get :labels, path: "etiquetas"
     end
