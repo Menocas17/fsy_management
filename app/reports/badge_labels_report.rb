@@ -66,28 +66,21 @@ class BadgeLabelsReport < ApplicationReport
       end
     end
 
-    # Frente: franja con la marca del evento, el nombre grande y la compañía debajo.
+    # Frente: el nombre grande y la compañía debajo, centrados en la etiqueta.
     def front(pdf, participant)
-      band = 34
+      padding = 22
       pdf.fill_color NAVY
-      pdf.fill_rectangle [ 0, pdf.bounds.top ], LABEL_WIDTH, band
-      pdf.image mark_path, at: [ 10, pdf.bounds.top - 6 ], fit: [ 22, 22 ]
-      pdf.fill_color "FFFFFF"
-      pdf.text_box EVENT, at: [ 40, pdf.bounds.top - 12 ], width: LABEL_WIDTH - 50, height: 14,
-                   size: 8.5, style: :bold, overflow: :shrink_to_fit
-
-      pdf.fill_color NAVY
-      pdf.text_box participant.first_name.to_s, at: [ 12, pdf.bounds.top - band - 14 ], width: LABEL_WIDTH - 24,
+      pdf.text_box participant.first_name.to_s, at: [ 12, pdf.bounds.top - padding - 14 ], width: LABEL_WIDTH - 24,
                    height: 30, size: 24, style: :bold, align: :center, overflow: :shrink_to_fit
-      pdf.text_box participant.last_name.to_s, at: [ 12, pdf.bounds.top - band - 46 ], width: LABEL_WIDTH - 24,
+      pdf.text_box participant.last_name.to_s, at: [ 12, pdf.bounds.top - padding - 46 ], width: LABEL_WIDTH - 24,
                    height: 18, size: 13, align: :center, overflow: :shrink_to_fit
 
       pdf.fill_color LINE
-      pdf.fill_rectangle [ 40, pdf.bounds.top - band - 72 ], LABEL_WIDTH - 80, 1
+      pdf.fill_rectangle [ 40, pdf.bounds.top - padding - 72 ], LABEL_WIDTH - 80, 1
       pdf.fill_color SLATE
-      pdf.text_box company_label(participant), at: [ 12, pdf.bounds.top - band - 80 ], width: LABEL_WIDTH - 24,
+      pdf.text_box company_label(participant), at: [ 12, pdf.bounds.top - padding - 80 ], width: LABEL_WIDTH - 24,
                    height: 16, size: 11, style: :bold, align: :center, overflow: :shrink_to_fit
-      pdf.text_box participant.role_label, at: [ 12, pdf.bounds.top - band - 96 ], width: LABEL_WIDTH - 24,
+      pdf.text_box participant.role_label, at: [ 12, pdf.bounds.top - padding - 96 ], width: LABEL_WIDTH - 24,
                    height: 12, size: 8.5, align: :center, overflow: :shrink_to_fit
     end
 
@@ -95,16 +88,19 @@ class BadgeLabelsReport < ApplicationReport
     def back(pdf, participant)
       pdf.image qr_for(participant), at: [ 14, pdf.bounds.top - (LABEL_HEIGHT - QR_SIZE) / 2 ], fit: [ QR_SIZE, QR_SIZE ]
       text_left = QR_SIZE + 26
-      # El texto fluye: un nombre largo en tres líneas empuja la compañía hacia abajo en vez de pisarla.
-      pdf.bounding_box([ text_left, pdf.bounds.top - 30 ], width: LABEL_WIDTH - text_left - 10, height: LABEL_HEIGHT - 50) do
-        pdf.fill_color NAVY
-        pdf.text participant.full_name, size: 10, style: :bold, leading: 1
-        pdf.move_down 5
-        pdf.fill_color SLATE
-        pdf.text company_label(participant), size: 8
-        pdf.move_down 10
-        pdf.text "Escaneá para abrir la ficha", size: 7, style: :italic
-      end
+      # Un nombre largo empuja la compañía hacia abajo, pero nunca sale de la etiqueta.
+      width = LABEL_WIDTH - text_left - 10
+      top = pdf.bounds.top - 30
+      name_height = [ pdf.height_of(participant.full_name, width: width, size: 10, style: :bold), 50 ].min
+      pdf.fill_color NAVY
+      pdf.text_box participant.full_name, at: [ text_left, top ], width: width, height: name_height,
+                   size: 10, style: :bold, overflow: :shrink_to_fit
+      top -= name_height + 5
+      pdf.fill_color SLATE
+      pdf.text_box company_label(participant), at: [ text_left, top ], width: width, height: 20,
+                   size: 8, overflow: :shrink_to_fit
+      pdf.text_box "Escaneá para abrir la ficha", at: [ text_left, top - 26 ], width: width, height: 10,
+                   size: 7, style: :italic, overflow: :shrink_to_fit
     end
 
     # Los jóvenes tienen compañía propia; consejeros y auxiliares la tienen por su membresía.

@@ -49,6 +49,14 @@ class BadgeLabelsReportTest < ActiveSupport::TestCase
     assert_equal "Sin compañía", report.send(:company_label, participants(:juan).tap { |juan| juan.company = nil })
   end
 
+  test "a very long name stays inside its label instead of spilling onto a new page" do
+    participants(:juan).update!(first_name: "Maximiliano Alejandro José",
+                                last_name: "de la Concepción Rodríguez Santamaría del Carmen")
+    pdf = BadgeLabelsReport.new(qr_url: @qr_url).render
+
+    assert_equal 1, pdf.scan(%r{/Type /Page\b}).size
+  end
+
   private
     def people(report)
       report.send(:participants)
