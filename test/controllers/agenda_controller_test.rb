@@ -11,6 +11,14 @@ class AgendaControllerTest < ActionDispatch::IntegrationTest
                                  logistics_notes: "30 galones de pintura", youth_notes: "Llevar gorra")
   end
 
+  test "the colour legend sits above the agenda, not under it" do
+    get agenda_path(date: @day)
+
+    assert_select "[data-agenda-legend]", 1
+    assert_operator response.body.index("data-agenda-legend"), :<, response.body.index("data-activity-id"),
+                    "la leyenda se lee antes de recorrer la agenda"
+  end
+
   test "shows the days of the event with the detail of the selected activity" do
     get agenda_path(date: @day)
 

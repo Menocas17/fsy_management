@@ -66,11 +66,8 @@
 
   <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
     <div class="min-w-0">
-      <%# Desktop shows the grid and a side panel; on phones each activity opens in place. %>
-      <div class="hidden md:block"><%= render "agenda/week", days: @visible_days %></div>
-      <div class="md:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
-
-      <div class="<%= card_classes("mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3") %>">
+      <%# La leyenda va antes de la agenda: los colores se entienden al llegar, no después de recorrerla. %>
+      <div class="<%= card_classes("mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5") %>" data-agenda-legend>
         <span class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500">Tipos</span>
         <% Activity::CATEGORY_LABELS.each do |key, label| %>
           <span class="inline-flex items-center gap-2 text-[12px] font-semibold text-ink-700 dark:text-slate-300">
@@ -79,6 +76,10 @@
           </span>
         <% end %>
       </div>
+
+      <%# Desktop shows the grid and a side panel; on phones each activity opens in place. %>
+      <div class="hidden md:block"><%= render "agenda/week", days: @visible_days %></div>
+      <div class="md:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
     </div>
 
     <div class="hidden md:block"><%= render "agenda/detail", activity: @activity %></div>

@@ -3,8 +3,8 @@
   # Quitar un filtro navega de verdad (sin frame) para que los selectores de arriba queden en su sitio.
   list_path = is_staff ? staff_participants_path : participants_path
 
+  # La búsqueda no lleva ficha: ya se ve lo escrito en la barra, y una etiqueta que aparece letra por letra estorba.
   active = []
-  active << { key: "query", label: "«#{params[:query]}»" } if params[:query].present?
   active << { key: "stake", label: "Estaca #{params[:stake].titleize}" } if params[:stake].present?
   active << { key: "ward", label: "Barrio #{params[:ward].titleize}" } if params[:ward].present?
   active << { key: "gender", label: Participant::GENDER_LABELS[params[:gender]] } if Participant::GENDER_LABELS.key?(params[:gender])
@@ -17,7 +17,8 @@
     rest.any? ? "#{list_path}?#{rest.to_query}" : list_path
   end
 %>
-<% if active.any? %>
+<%# Buscando sin más filtros igual se muestra la barra: el conteo es lo que uno quiere ver al escribir. %>
+<% if active.any? || params[:query].present? %>
   <div class="flex flex-wrap items-center gap-2 mb-4" data-active-filters>
     <span class="text-[12px] font-bold text-ink-500 dark:text-slate-400"><%= pluralize(pagy.count, "resultado") %></span>
     <% active.each do |filter| %>

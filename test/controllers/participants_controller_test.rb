@@ -222,6 +222,14 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-active-filters]", 0
   end
 
+  test "searching shows the count but no chip: the text is already in the box" do
+    get participants_path(query: "jua")
+
+    assert_select "[data-active-filters]", 1
+    assert_select "[data-active-filter='query']", 0
+    assert_select "[data-active-filters]", text: /resultado/
+  end
+
   test "the filter bar works on the staff list too, and lives inside the table frame" do
     get staff_participants_path(rol: "consejero", stake: "las_americas")
 
