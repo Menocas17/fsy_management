@@ -55,4 +55,4 @@ CI (`.github/workflows`) runs scan_ruby (brakeman, bundler-audit), scan_js (impo
 
 **Frontend:** ViewComponents in `app/components/` (table, avatar, buttons, spans, info tiles) pair `.rb` + `.html.erb`. Stimulus controllers in `app/javascript/controllers/` (avatar fade-in, chart, confirm, dialog, mobile_menu, toast). Charts via ApexCharts (importmap pin, rendered by `chart_controller.js` from `data-chart-*` values; colors must be hex, see `ChartsHelper`), icons via Rails Icons (Lucide).
 
-**Deploy:** Kamal + Docker to a VPS (`config/deploy.yml`), Postgres as a Kamal accessory with separate primary/cache/queue/cable databases in production.
+**Deploy:** Kamal + Docker to an Oracle Cloud Always Free instance (Ampere A1, ARM64, user `ubuntu`) — `config/deploy.yml` reads `ORACLE_SERVER_IP`/`APP_HOST` from the env, kamal-proxy terminates SSL (so `force_ssl` is on), Postgres runs as a Kamal accessory with separate primary/cache/queue/cable databases. Server prep lives in `script/oracle/setup_server.sh`, the runbook in `docs/deploy_oracle.md`.
