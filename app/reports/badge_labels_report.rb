@@ -112,8 +112,9 @@ class BadgeLabelsReport < ApplicationReport
       participant.joven? ? "Sin compañía" : "Staff FSY"
     end
 
+    # Solo el número: el nombre que elige la compañía se decide durante la semana.
     def company_name(company)
-      [ company.name, company.nickname.presence ].compact.join(" · ")
+      company.number ? "Compañía #{company.number}" : company.name
     end
 
     def qr_for(participant)

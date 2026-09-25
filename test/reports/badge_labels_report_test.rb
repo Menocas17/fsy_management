@@ -35,8 +35,8 @@ class BadgeLabelsReportTest < ActiveSupport::TestCase
   test "the front label shows the company, from the participant or from the membership" do
     report = BadgeLabelsReport.new(qr_url: @qr_url)
 
-    assert_equal "Compañía 3 · Guerreros", report.send(:company_label, participants(:juan))
-    assert_equal "Compañía 3 · Guerreros", report.send(:company_label, participants(:maria))
+    assert_equal "Compañía 3", report.send(:company_label, participants(:juan))
+    assert_equal "Compañía 3", report.send(:company_label, participants(:maria))
   end
 
   test "someone without a company still gets a badge" do
