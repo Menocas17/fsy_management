@@ -4,9 +4,13 @@
 <% content_for :page_h1, true %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 space-y-5 md:space-y-6">
   <section class="relative overflow-hidden rounded-[22px] bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9">
+    <%# El lockup oficial ocupa el aire de la derecha; donde no cabe, el mismo texto queda en la píldora. %>
+    <%= image_tag "fsy-lettering.png", alt: "FSY 2026 · Nicaragua Managua - Caribe", aria: { hidden: true },
+          data: { hero_lettering: true },
+          class: "hidden lg:block absolute top-10 right-12 xl:top-10 xl:right-12 w-[220px] xl:w-[270px] opacity-50 pointer-events-none select-none" %>
     <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
       <div class="max-w-xl">
-        <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase">FSY 2026 · Managua-Caribe</span>
+        <span class="lg:hidden inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase">FSY 2026 · Managua-Caribe</span>
         <% countdown = event_countdown %>
         <h1 class="mt-4" data-controller="countdown" data-countdown-starts-at-value="<%= event_start_at.iso8601 %>">
           <% if countdown[:started] %>
@@ -61,6 +65,11 @@
   </section>
 
   <%= render "main_kpis", total_jovenes: @dashboard.total_jovenes, total_participants: @dashboard.total_participants, total_staff: @dashboard.total_staff %>
+  <%# Primero lo que viene y lo que la cocina necesita saber; después el análisis. %>
+  <%= render "next_up", next_activities: @dashboard.next_activities %>
+  <% if can_view_reports? || can_view_inventory? %>
+    <%= render "care", special_care: @dashboard.special_care, dining_halls: @dashboard.jovenes_by_dining_hall %>
+  <% end %>
   <%= render "main_charts", count_by_stake: @dashboard.count_by_stake, count_by_role: @dashboard.count_by_role %>
   <%= render "secondary_charts", data_by_age: @dashboard.participants_by_age, shirt_counts: @dashboard.shirt_count, male_count: @dashboard.male_count, female_count: @dashboard.female_count %>
 </div>

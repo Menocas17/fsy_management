@@ -2,4 +2,5 @@
 <% content_for :eyebrow, "Participantes" %>
 <% content_for :heading, "Perfil del participante" %>
 <% content_for :page_h1, "true" %>
-<%= render "participants/profile/profile", participant: @participant, show_back: true, edit_from: params[:from] %>
+<% participants_back %>
+<%= render "participants/profile/profile", participant: @participant, edit_from: params[:from] %>

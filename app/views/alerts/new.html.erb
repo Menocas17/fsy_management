@@ -1,5 +1,6 @@
 <% content_for :title, "Nueva alerta" %>
 <% content_for :eyebrow, "Gestión" %>
+<% back_to "Alertas", alerts_path %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-7xl mx-auto">
   <%= render "alerts/form", alert: @alert %>
 </div>

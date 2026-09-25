@@ -2,6 +2,7 @@
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Perfil de la compañía" %>
 <% content_for :page_h1, "true" %>
+<% back_to "Compañías", companies_path %>
 <% counselor_names = @company.counselor_names %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl 2xl:max-w-[1500px] mx-auto">
   <%= render "shared/event_banner" %>

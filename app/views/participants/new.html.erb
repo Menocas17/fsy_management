@@ -1,5 +1,6 @@
 <% content_for :title, "Nuevo participante" %>
 <% content_for :eyebrow, "Participantes" %>
+<% back_to "Jóvenes", participants_path %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto space-y-5">
   <%= render "participants/form/form", participant: @participant %>
   <%= render "participants/form/form_actions", participant: @participant %>

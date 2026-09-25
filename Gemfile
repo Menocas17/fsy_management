@@ -75,3 +75,15 @@ gem "view_component"
 gem "rails_icons", "~> 1.9"
 
 gem "pagy", "~> 43.6"
+
+# PDF de los reportes imprimibles y los QR del inventario
+gem "prawn", "~> 2.5"
+gem "rqrcode", "~> 3.1"
+gem "prawn-table", "~> 0.2.2"
+
+# Lectura de los Excel para la carga masiva de participantes
+# csv salió de la librería estándar en Ruby 3.4 y roo lo necesita.
+gem "roo", "~> 3.0"
+gem "csv", "~> 3.3"
+# json 3.0 rompe ActiveSupport::JSON.decode (y con él todas las columnas jsonb): nos quedamos en la 2.x parcheada.
+gem "json", "~> 2.21", ">= 2.21.2"

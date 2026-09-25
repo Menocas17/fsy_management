@@ -7,6 +7,10 @@
               data-action="click->mobile-menu#toggle">
         <%= icon "menu", class: "w-[22px] h-[22px]" %>
       </button>
+      <%# En móvil no va aquí: al lado del botón de menú se confunden dos iconos de navegación. Baja al contenido. %>
+      <% if content_for?(:back) %>
+        <div data-page-back class="hidden sm:block mr-0.5"><%= yield :back %></div>
+      <% end %>
       <div class="min-w-0" data-page-header>
         <p class="text-[9.5px] md:text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300 truncate"><%= page_eyebrow %></p>
         <%= content_tag page_heading_tag, page_heading, class: "mt-px text-sm md:text-[19px] leading-tight font-bold text-ink-900 dark:text-slate-100 truncate" %>

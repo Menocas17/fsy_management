@@ -19,6 +19,12 @@ module SpanishDates
     MONTH_NAMES[date.month - 1]
   end
 
+  # "23 de septiembre, 9:12" — el sello de cada movimiento del inventario.
+  def short_with_time(time)
+    zoned = time.in_time_zone
+    "#{zoned.day} de #{MONTH_NAMES[zoned.month - 1]}, #{zoned.strftime('%H:%M')}"
+  end
+
   def range(first_day, last_day)
     if first_day.month == last_day.month
       "#{first_day.day} – #{last_day.day} de #{month(first_day)}, #{last_day.year}"

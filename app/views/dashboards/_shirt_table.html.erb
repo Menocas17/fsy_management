@@ -1,7 +1,7 @@
 <div class="bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md pt-6 pb-2 overflow-hidden">
   <div class="px-6 pb-4">
-    <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Tallas</p>
-    <h2 class="mt-0.5 text-[15px] font-bold text-ink-900 dark:text-slate-100">Camisas registradas</h2>
+    <%= render "dashboards/card_heading", eyebrow: "Tallas", title: "Camisas registradas",
+               icon_name: "shirt", tone: "bg-cat-amber/20 text-amber-700 dark:text-cat-amber", size: "sm" %>
   </div>
   <table class="w-full text-[12.5px] font-semibold">
     <caption class="sr-only">Camisas registradas por talla</caption>

@@ -90,6 +90,7 @@ class DemoSeed
       create_companies(coordinators)
       create_agenda
       create_assignments
+      create_inventories
       link_logins
     end
     report
@@ -112,6 +113,9 @@ class DemoSeed
       # destroy (not delete) so Active Storage also purges their photos.
       Participant.find_each(&:destroy!)
       LogisticsArea.delete_all
+      InventoryMovement.delete_all
+      InventoryItem.delete_all
+      Inventory.delete_all
     end
 
     def create_directors
@@ -272,6 +276,41 @@ class DemoSeed
       record
     end
 
+    # Inventarios de ejemplo con algo de historial, para que el módulo no se vea vacío.
+    INVENTORY_DEMO = {
+      "Materiales" => { icon: "package", color: "primary", description: "Camisetas, manillas, papelería",
+        items: [ [ "Camisetas talla M", "u", 50, 248 ], [ "Camisetas talla L", "u", 50, 180 ],
+                 [ "Manillas de tela", "u", 80, 62 ], [ "Cuadernos FSY", "u", 100, 460 ],
+                 [ "Marcadores permanentes", "u", 12, 0 ], [ "Gafetes", "u", 60, 470 ] ] },
+      "Comida" => { icon: "utensils", color: "amber", description: "Refrigerios y bebidas",
+        items: [ [ "Botellas de agua 600ml", "u", 200, 1240 ], [ "Galletas", "cajas", 10, 34 ],
+                 [ "Jugos", "cajas", 15, 8 ], [ "Café", "libras", 5, 22 ] ] },
+      "Medicinas" => { icon: "pill", color: "rose", description: "Botiquín y enfermería",
+        items: [ [ "Acetaminofén 500mg", "tabletas", 100, 480 ], [ "Suero oral", "sobres", 40, 36 ],
+                 [ "Curitas", "cajas", 6, 14 ], [ "Alcohol gel", "litros", 4, 9 ] ] },
+      "Decoración" => { icon: "sparkles", color: "indigo", description: "Escenario y salones",
+        items: [ [ "Telas de fondo", "metros", 20, 85 ], [ "Globos", "bolsas", 10, 26 ],
+                 [ "Luces LED", "u", 8, 18 ] ] }
+    }.freeze
+
+    def create_inventories
+      staff = Participant.where(rol: [ :logistica, :director_logistica ]).to_a
+
+      INVENTORY_DEMO.each do |name, data|
+        inventory = Inventory.create!(name: name, icon: data[:icon], color: data[:color], description: data[:description])
+
+        data[:items].each do |item_name, unit, minimum, quantity|
+          item = inventory.items.create!(name: item_name, unit: unit, minimum: minimum,
+                                         location: "Bodega #{rand(1..3)}")
+          next if quantity.zero?
+
+          # Una compra inicial y, a veces, una entrega: así el historial tiene de dónde agarrarse.
+          item.adjust!(delta: quantity + 20, participant: pick(staff), reason: :inicial)
+          item.adjust!(delta: -20, participant: pick(staff), reason: :entrega) if staff.any?
+        end
+      end
+    end
+
     def create_owner
       @used_names << "Rodolfo Jose Menocal Castillo"
       @owner = Participant.create!(profile_attributes(rol: "consejero", gender: "H", age: 25, stake: "bello_horizonte")
@@ -325,6 +364,7 @@ class DemoSeed
       log "✔ #{Participant.director.count} directores y #{Participant.coordinador.count} coordinadores"
       log "✔ Logística: #{Participant.director_logistica.count} director(a) y #{Participant.logistica.count} miembros en #{LogisticsArea.count} áreas"
       log "✔ Agenda: #{Activity.count} actividades del #{Rails.configuration.x.event_start_on.day} al #{Rails.configuration.x.event_end_on.day} de enero, con #{Assignment.count} asignaciones"
+      log "✔ Inventario: #{InventoryItem.count} artículos en #{Inventory.count} inventarios, con #{InventoryMovement.count} movimientos"
       log "Cuentas (las nuevas usan la contraseña #{DEMO_PASSWORD}):"
       @logins.each do |email, participant, created|
         log "  #{email} → #{participant.full_name} (#{participant.role_label})#{' · ya existía, contraseña sin cambios' unless created}"

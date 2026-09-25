@@ -50,6 +50,22 @@ class Participant < ApplicationRecord
   }
   scope :by_role, ->(role) { where(rol: role) if role.present? }
 
+  # "Ninguna" o "Sin restricciones" es la forma de decir que no hay nada que atender: no cuenta.
+  MEDICAL_NONE = [ "ninguna", "ninguno", "ninguna.", "sin restricciones", "sin restriccion", "sin alergias",
+                   "sin dieta", "n/a", "na", "no", "-", "--" ].freeze
+
+  CARE_FILTERS = { "allergies" => "Con alergias", "diet" => "Con dieta especial", "medicines" => "Toman medicinas" }.freeze
+
+  # El filtro que llega desde el panel de cocina y salud.
+  scope :by_care, ->(field) { with_medical_note(field) if CARE_FILTERS.key?(field.to_s) }
+
+  # Quiénes necesitan atención especial en cocina o enfermería.
+  scope :with_medical_note, ->(field) {
+    where("btrim(coalesce(medical_info ->> :field, '')) <> ''", field: field.to_s)
+      .where("lower(btrim(medical_info ->> :field)) <> ALL (ARRAY[:none]::text[])", field: field.to_s, none: MEDICAL_NONE)
+  }
+
+
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
   has_one_attached :avatar do |attachable|
    attachable.variant :thumb, resize_to_limit: [ 300, 300 ],

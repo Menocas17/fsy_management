@@ -1,0 +1,34 @@
+<%
+  # Va dentro del turbo frame de la tabla: así se redibuja con cada filtro, no solo al cargar la página.
+  # Quitar un filtro navega de verdad (sin frame) para que los selectores de arriba queden en su sitio.
+  list_path = is_staff ? staff_participants_path : participants_path
+
+  active = []
+  active << { key: "query", label: "«#{params[:query]}»" } if params[:query].present?
+  active << { key: "stake", label: "Estaca #{params[:stake].titleize}" } if params[:stake].present?
+  active << { key: "ward", label: "Barrio #{params[:ward].titleize}" } if params[:ward].present?
+  active << { key: "gender", label: Participant::GENDER_LABELS[params[:gender]] } if Participant::GENDER_LABELS.key?(params[:gender])
+  active << { key: "rol", label: Participant.role_label(params[:rol]) } if params[:rol].present?
+  active << { key: "company", label: "Compañía #{params[:company]}" } if params[:company].present?
+  active << { key: "care", label: Participant::CARE_FILTERS[params[:care]] } if Participant::CARE_FILTERS.key?(params[:care])
+
+  without = ->(key) do
+    rest = request.query_parameters.except(key, "page")
+    rest.any? ? "#{list_path}?#{rest.to_query}" : list_path
+  end
+%>
+<% if active.any? %>
+  <div class="flex flex-wrap items-center gap-2 mb-4" data-active-filters>
+    <span class="text-[12px] font-bold text-ink-500 dark:text-slate-400"><%= pluralize(pagy.count, "resultado") %></span>
+    <% active.each do |filter| %>
+      <%= link_to without.(filter[:key]), data: { turbo_frame: "_top", active_filter: filter[:key] },
+            title: "Quitar este filtro",
+            class: "inline-flex items-center gap-1.5 h-8 pl-3 pr-2 rounded-full bg-primary-50 dark:bg-primary-700/30 text-[12.5px] font-bold text-primary-700 dark:text-primary-100 hover:bg-primary-100 dark:hover:bg-primary-700/50 transition" do %>
+        <%= filter[:label] %>
+        <%= icon "x", class: "w-3.5 h-3.5" %>
+      <% end %>
+    <% end %>
+    <%= link_to "Limpiar todo", list_path, data: { turbo_frame: "_top", clear_filters: true },
+          class: "h-8 inline-flex items-center px-2.5 rounded-full text-[12.5px] font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100 transition" %>
+  </div>
+<% end %>

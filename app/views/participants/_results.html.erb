@@ -1,4 +1,5 @@
 <% list_path = is_staff ? staff_participants_path : participants_path %>
+<%= render "participants/active_filters", is_staff: is_staff, pagy: pagy %>
 <% if participants.load.any? %>
   <div class="hidden md:block">
     <%= render(TableComponent.new(participants: participants, is_staff: is_staff)) %>

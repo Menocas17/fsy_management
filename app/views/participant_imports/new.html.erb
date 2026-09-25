@@ -1,0 +1,79 @@
+<% content_for :title, "Carga de participantes" %>
+<% content_for :eyebrow, "Reportes" %>
+<% back_to "Reportes", reports_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto space-y-5">
+  <% if @import && !@import.fatal %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-import-result>
+      <%= section_heading "Resultado de la carga", "clipboard-check" %>
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="rounded-[13px] border border-cat-green/25 bg-cat-green/10 px-4 py-3">
+          <p class="text-[26px] font-extrabold leading-none text-cat-green tabular-nums" data-import="imported"><%= @import.imported_count %></p>
+          <p class="mt-1 text-[12px] font-bold text-cat-green">creados</p>
+        </div>
+        <div class="rounded-[13px] border border-line dark:border-slate-600 px-4 py-3">
+          <p class="text-[26px] font-extrabold leading-none text-ink-700 dark:text-slate-300 tabular-nums" data-import="skipped"><%= @import.skipped_count %></p>
+          <p class="mt-1 text-[12px] font-bold text-ink-500 dark:text-slate-400">omitidos</p>
+        </div>
+      </div>
+
+      <% if @import.skipped.any? %>
+        <p class="mb-2 text-[12px] font-bold text-ink-700 dark:text-slate-300">Filas que no entraron</p>
+        <ul class="divide-y divide-line-soft dark:divide-slate-700 border border-line-soft dark:border-slate-700 rounded-[13px] overflow-hidden">
+          <% @import.skipped.each do |row| %>
+            <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5 text-[13px]">
+              <span class="font-bold text-ink-900 dark:text-slate-100 tabular-nums">Fila <%= row.number %></span>
+              <span class="font-semibold text-ink-700 dark:text-slate-300"><%= row.name %></span>
+              <span class="text-ink-500 dark:text-slate-400">· <%= row.reason %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <% if @import.imported_count.positive? %>
+        <%= link_to participants_path, class: "mt-5 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+          <%= icon "users", class: "w-4 h-4" %>
+          Ver los jóvenes
+        <% end %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Subir archivo", "upload" %>
+      <%= form_with url: participant_import_path, multipart: true, class: "space-y-4" do |form| %>
+        <div>
+          <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
+          <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
+                class: "w-full text-[13px] text-ink-700 dark:text-slate-300 file:mr-3 file:h-10 file:px-4 file:rounded-[11px] file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-[13px] file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
+          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+            La primera fila tiene que ser la de los títulos de columna.
+          </p>
+        </div>
+        <%= tag.button type: "submit", class: "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer" do %>
+          <%= icon "upload", class: "w-4 h-4" %>
+          Cargar participantes
+        <% end %>
+      <% end %>
+    </section>
+
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Columnas que reconoce", "table" %>
+      <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400">
+        No importan mayúsculas, acentos ni el orden. Las columnas que no aparezcan acá se ignoran, y lo que falte
+        se puede completar después desde la ficha.
+      </p>
+      <div class="flex flex-wrap gap-1.5">
+        <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Teléfono Correo
+              Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
+          <span class="px-2.5 py-1 rounded-lg bg-canvas dark:bg-slate-900/60 border border-line-soft dark:border-slate-700 text-[11.5px] font-semibold text-ink-700 dark:text-slate-300"><%= column %></span>
+        <% end %>
+      </div>
+      <ul class="mt-4 space-y-1.5 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400 list-disc list-inside">
+        <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
+        <li><strong>Compañía</strong> se busca por número; si no existe, la ficha queda sin compañía.</li>
+        <li>Se omiten las filas repetidas: manda la cédula y, si no viene, el nombre completo.</li>
+      </ul>
+    </section>
+  </div>
+</div>

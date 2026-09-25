@@ -1,6 +1,7 @@
 <% content_for :title, "Editar #{@auxiliar_company.name_was}" %>
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Editar compañía auxiliar" %>
+<% back_to @auxiliar_company.name_was, auxiliar_company_path(@auxiliar_company) %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
   <%= render "shared/edit_banner", back_path: auxiliar_company_path(@auxiliar_company), back_label: "Volver a la compañía auxiliar",
              editing: @auxiliar_company.name_was %>

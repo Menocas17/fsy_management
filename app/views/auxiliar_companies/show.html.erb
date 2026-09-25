@@ -2,6 +2,7 @@
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Compañía auxiliar" %>
 <% content_for :page_h1, "true" %>
+<% back_to "Compañías auxiliares", auxiliar_companies_path %>
 <%
   counselor_total = @companies.sum { |company| company.counselors.size }
   counselor_capacity = @companies.size * 2

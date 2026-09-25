@@ -1,0 +1,57 @@
+<%= form_with model: inventory, class: "space-y-5" do |form| %>
+  <% if inventory.errors.any? %>
+    <div class="rounded-[14px] border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose" role="alert">
+      <% inventory.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Datos del inventario", "boxes" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :name, "Nombre", class: field_label_classes %>
+        <%= form.text_field :name, required: true, maxlength: 60, placeholder: "Ej. Materiales", class: field_input_classes %>
+        <% if inventory.persisted? %>
+          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+            Los códigos ya impresos siguen siendo <span class="font-mono"><%= inventory.code_prefix %>-0000</span>: el prefijo no cambia.
+          </p>
+        <% else %>
+          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">De aquí sale el prefijo de los códigos QR (Materiales → MAT-0001).</p>
+        <% end %>
+      </div>
+      <div>
+        <%= form.label :description, "Descripción", class: field_label_classes %>
+        <%= form.text_field :description, maxlength: 90, placeholder: "Ej. Camisetas, manillas, papelería", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :icon, "Icono", class: field_label_classes %>
+        <%= form.select :icon, Inventory::ICONS.map { |name| [ name, name ] }, {}, class: field_select_classes %>
+      </div>
+      <div>
+        <%= form.label :color, "Color", class: field_label_classes %>
+        <%= form.select :color, Inventory::COLORS.map { |key, label| [ label, key ] }, {}, class: field_select_classes %>
+      </div>
+    </div>
+  </section>
+
+  <div class="<%= card_classes("px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+    <div>
+      <% if inventory.persisted? %>
+        <%= button_to inventory_path(inventory), method: :delete,
+              form: { data: { turbo_confirm: "Esto borra el inventario y todos sus artículos. ¿Seguro?" } },
+              class: "inline-flex items-center gap-2 h-10 px-3 rounded-[11px] text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 transition cursor-pointer" do %>
+          <%= icon "trash-2", class: "w-4 h-4" %>
+          Borrar inventario
+        <% end %>
+      <% end %>
+    </div>
+    <div class="flex gap-2.5 sm:justify-end">
+      <%= link_to "Cancelar", inventory.persisted? ? inventory : inventories_path,
+            class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+      <%= form.submit inventory.persisted? ? "Guardar cambios" : "Crear inventario",
+            class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer" %>
+    </div>
+  </div>
+<% end %>

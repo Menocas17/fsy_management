@@ -1,0 +1,45 @@
+<%
+  # Alergias, dietas y medicinas viven en cada ficha; sumadas aquí, la cocina y la enfermería las ven de un vistazo.
+  cells = [
+    { key: "allergies", value: special_care[:allergies], label: "con alergias", icon: "heart-pulse", tone: "text-cat-rose" },
+    { key: "diet", value: special_care[:diet], label: "con dieta especial", icon: "salad", tone: "text-cat-green" },
+    { key: "medicines", value: special_care[:medicines], label: "toman medicinas", icon: "pill", tone: "text-cat-blue" }
+  ]
+%>
+<section class="<%= card_classes("p-5 md:p-6") %>" data-care>
+  <%= render "dashboards/card_heading", eyebrow: "Cocina y salud", title: "Atenciones especiales",
+             icon_name: "heart-pulse", tone: "bg-cat-rose/15 text-cat-rose", spacing: "mb-4", size: "sm" %>
+
+  <%# Cada número abre la lista de jóvenes ya filtrada: de la cifra a los nombres en un clic. %>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <% cells.each do |cell| %>
+      <%= link_to participants_path(care: cell[:key]), data: { care_link: cell[:key] },
+            class: "group rounded-[14px] bg-canvas dark:bg-slate-900/60 px-4 py-3.5 hover:bg-line-soft/70 dark:hover:bg-slate-700/60 transition" do %>
+        <span class="flex items-center justify-between">
+          <%= icon cell[:icon], class: "w-[18px] h-[18px] #{cell[:tone]}" %>
+          <%= icon "arrow-right", class: "w-4 h-4 text-ink-300 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition" %>
+        </span>
+        <span class="block mt-2 text-[26px] font-extrabold leading-none tabular-nums text-ink-900 dark:text-slate-100" data-care-count="<%= cell[:key] %>"><%= cell[:value] %></span>
+        <span class="block mt-1 text-[12px] font-semibold text-ink-500 dark:text-slate-400"><%= cell[:label] %></span>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if dining_halls.any? %>
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <% dining_halls.each do |hall, count| %>
+        <div class="flex items-center gap-3 rounded-[14px] border border-line-soft dark:border-slate-700 px-4 py-3" data-dining-hall="<%= hall %>">
+          <span class="w-8 h-8 shrink-0 rounded-[10px] flex items-center justify-center bg-primary-50 dark:bg-primary-700/30 text-primary-600 dark:text-primary-100">
+            <%= icon "hand-platter", class: "w-4 h-4" %>
+          </span>
+          <p class="text-[18px] font-extrabold tabular-nums text-ink-900 dark:text-slate-100"><%= count %></p>
+          <p class="text-[12px] font-semibold text-ink-500 dark:text-slate-400 truncate"><%= hall %></p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <p class="mt-3 text-[11.5px] font-medium text-ink-300 dark:text-slate-500">
+    Cuenta a los jóvenes cuya ficha trae algo que atender; «Ninguna» o «Sin restricciones» no suman.
+  </p>
+</section>

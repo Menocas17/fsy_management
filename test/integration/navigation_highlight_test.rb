@@ -41,6 +41,33 @@ class NavigationHighlightTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "detail pages carry a way back in the top bar" do
+    {
+      participant_path(@participant) => "Jóvenes",
+      participant_path(@participant, from: "staff") => "Staff",
+      new_participant_path => "Jóvenes",
+      company_path(@company) => "Compañías",
+      edit_company_path(@company) => @company.name,
+      new_activity_path => "Agenda",
+      edit_activity_path(@activity) => "Agenda",
+      alert_path(@alert) => "Alertas",
+      settings_path => "Inicio"
+    }.each do |path, label|
+      get path
+
+      assert_response :success, path
+      assert_select "[data-page-back] a", { text: /#{Regexp.escape(label)}/, count: 1 }, "#{path} debería ofrecer volver a #{label}"
+    end
+  end
+
+  test "the lists in the sidebar need no way back" do
+    [ dashboard_path, participants_path, companies_path, agenda_path ].each do |path|
+      get path
+
+      assert_select "[data-page-back]", { count: 0 }, "#{path} ya está en el menú lateral"
+    end
+  end
+
   test "pages outside the sidebar highlight nothing" do
     get myprofile_participants_path
 

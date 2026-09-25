@@ -35,4 +35,22 @@ class DashboardFacade
   def shirt_count
     @shirt_count ||= Participant.shirt_count
   end
+
+  # Cocina y enfermería: lo que cada ficha trae y que, si no se suma aquí, hay que ir a buscar de a una.
+  def special_care
+    @special_care ||= {
+      allergies: Participant.jovenes.with_medical_note(:allergies).count,
+      diet: Participant.jovenes.with_medical_note(:diet).count,
+      medicines: Participant.jovenes.with_medical_note(:medicines).count
+    }
+  end
+
+  def jovenes_by_dining_hall
+    @jovenes_by_dining_hall ||= Company.jovenes_by_dining_hall
+  end
+
+  # Lo que sigue en la agenda: durante el evento son las dos próximas del día.
+  def next_activities(limit = 2)
+    @next_activities ||= Activity.where(starts_at: Time.current..).order(:starts_at).limit(limit).to_a
+  end
 end

@@ -1,3 +1,5 @@
+require "rqrcode"
+
 module UiHelper
   CARD_CLASSES = "bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md".freeze
   INPUT_CLASSES = "w-full h-10 px-3.5 rounded-[11px] bg-surface dark:bg-slate-900 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
@@ -29,6 +31,18 @@ module UiHelper
 
   def field_textarea_classes
     INPUT_CLASSES.sub("h-10", "min-h-20 py-2.5 leading-relaxed resize-y")
+  end
+
+  # QR en SVG, sin archivos intermedios: lo usan el inventario y las fichas de participante.
+  def qr_svg_tag(payload, label:, size: 132, classes: nil)
+    svg = RQRCode::QRCode.new(payload, level: :m).as_svg(
+      module_size: 4, use_path: true, standalone: true, viewbox: true, color: "1D2B4A",
+      svg_attributes: { role: "img", aria: { label: label } }
+    )
+    # La declaración XML que antepone rqrcode no va dentro de un documento HTML.
+    tag.div(svg.sub(/\A<\?xml.*?\?>/, "").html_safe,
+            class: [ "bg-white rounded-xl p-2.5 inline-block [&>svg]:block [&>svg]:w-full [&>svg]:h-auto", classes ].compact.join(" "),
+            style: "width: #{size}px")
   end
 
   def section_heading(title, icon_name)

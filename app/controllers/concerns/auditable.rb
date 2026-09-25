@@ -11,10 +11,17 @@ module Auditable
         action: action,
         category: category,
         summary: summary,
-        target_type: target.class.name,
-        target_id: target.id,
-        target_name: target.respond_to?(:full_name) ? target.full_name : target.name
+        target_type: target&.class&.name,
+        target_id: target&.id,
+        target_name: target_name_for(target)
       )
+    end
+
+    # Una carga masiva no apunta a un solo registro: la entrada queda sin objetivo.
+    def target_name_for(target)
+      return nil if target.nil?
+
+      target.respond_to?(:full_name) ? target.full_name : target.name
     end
 
     def changed_field_labels(record, labels)

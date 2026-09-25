@@ -5,7 +5,7 @@
     <%# flex-wrap (instead of a breakpoint switch) lets the buttons drop below the name whenever they don't fit, so they never overlap on tablet widths. %>
     <div class="flex flex-wrap items-center justify-between gap-x-5 gap-y-4">
       <div class="flex items-center gap-4 md:gap-[18px] min-w-0 flex-1 basis-72">
-        <button type="button" data-action="click->dialog#open" aria-label="Ver fotografía"
+        <button type="button" data-action="click->dialog#open" data-dialog-name="photo" aria-label="Ver fotografía"
                 class="-mt-10 md:-mt-[46px] shrink-0 rounded-[20px] md:rounded-[24px] shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
           <%= render(AvatarComponent.new(participant: participant, is_profile: true)) %>
         </button>
@@ -20,13 +20,12 @@
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0" data-profile-actions>
-        <% if show_back %>
-          <%= link_to safe_return_to(dashboard_path),
-                class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
-            <%= icon "arrow-left", class: "w-4 h-4" %>
-            Volver
-          <% end %>
-        <% end %>
+        <%# El volver vive en la barra superior; acá va el QR de la persona, que es lo propio de esta ficha. %>
+        <button type="button" data-action="click->dialog#open" data-dialog-name="qr" data-profile-qr
+                class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+          <%= icon "qr-code", class: "w-4 h-4" %>
+          Código QR
+        </button>
         <% if can_edit_participant?(participant) %>
           <%= link_to edit_participant_path(participant, from: edit_from, return_to: request.fullpath),
                 class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
@@ -37,7 +36,7 @@
       </div>
     </div>
 
-    <dialog data-dialog-target="modal" data-action="click->dialog#clickOutside" aria-modal="true"
+    <dialog data-dialog-target="modal" data-dialog-name="photo" data-action="click->dialog#clickOutside" aria-modal="true"
             class="p-0 m-auto w-full max-w-lg rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
       <div class="relative p-4 bg-surface dark:bg-slate-800 rounded-2xl">
         <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
@@ -50,6 +49,24 @@
         <% else %>
           <p class="px-2 pb-2 text-sm text-ink-500 dark:text-slate-400">Este participante aún no tiene fotografía.</p>
         <% end %>
+      </div>
+    </dialog>
+
+    <%# El QR lleva a esta misma ficha: se escanea desde el gafete y se abre el perfil. %>
+    <dialog data-dialog-target="modal" data-dialog-name="qr" data-action="click->dialog#clickOutside" aria-modal="true"
+            class="p-0 m-auto w-full max-w-xs rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+      <div class="relative p-5 bg-surface dark:bg-slate-800 rounded-2xl text-center">
+        <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
+                class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+          <%= icon "x", class: "w-4 h-4" %>
+        </button>
+        <h2 class="mb-4 text-[15px] font-bold text-ink-900 dark:text-slate-100">Código de <%= participant.full_name %></h2>
+        <%= qr_svg_tag participant_url(participant), label: "Código QR de #{participant.full_name}", size: 200 %>
+        <p class="mt-3 text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= participant.full_name %></p>
+        <p class="mt-0.5 text-[12px] font-semibold text-ink-500 dark:text-slate-400">
+          <%= [ participant.role_label, participant.company&.name, participant.room.presence && "Cuarto #{participant.room}" ].compact.join(" · ") %>
+        </p>
+        <p class="mt-3 text-[11.5px] text-ink-500 dark:text-slate-400">Al escanearlo se abre esta ficha.</p>
       </div>
     </dialog>
   </div>

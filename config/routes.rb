@@ -18,6 +18,29 @@ Rails.application.routes.draw do
   resource :dashboard, only: [ :show ]
   resource :organigrama, only: [ :show ], controller: "organigrama"
   resources :audit_logs, only: [ :index ], path: "historial"
+  resources :inventories, only: %i[index show new create edit update destroy], path: "inventario" do
+    collection do
+      get :scan, path: "escanear"
+    end
+    resources :items, only: %i[new create], controller: "inventory_items", path: "articulos"
+  end
+  # El código del artículo es su identificador en la URL, así el QR lleva directo a su ficha.
+  resources :inventory_items, only: %i[show edit update], path: "articulos" do
+    collection do
+      get :lookup, path: "buscar"
+    end
+    resources :movements, only: [ :create ], controller: "inventory_movements", path: "movimientos"
+  end
+  resources :reports, only: [ :index ], path: "reportes" do
+    collection do
+      get :participants, path: "participantes"
+      get :rooms, path: "cuartos"
+      get :agenda
+      get :inventory, path: "inventario"
+      get :labels, path: "etiquetas"
+    end
+  end
+  resource :participant_import, only: [ :new, :create ], path: "carga-de-participantes"
   resources :notifications, only: [ :index ], path: "notificaciones"
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"

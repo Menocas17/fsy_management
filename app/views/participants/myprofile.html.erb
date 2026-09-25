@@ -1,8 +1,9 @@
 <% content_for :title, "Mi perfil" %>
 <% content_for :eyebrow, "Cuenta" %>
 <% content_for :page_h1, "true" %>
+<% back_to "Inicio", dashboard_path %>
 <% if @participant %>
-  <%= render "participants/profile/profile", participant: @participant, show_back: false, edit_from: "myprofile" %>
+  <%= render "participants/profile/profile", participant: @participant, edit_from: "myprofile" %>
 <% else %>
   <div class="px-4 md:px-8 pt-10 pb-10 max-w-xl mx-auto">
     <div class="<%= card_classes("p-8 text-center") %>">

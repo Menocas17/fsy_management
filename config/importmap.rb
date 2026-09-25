@@ -7,3 +7,4 @@ pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin "apexcharts" # @7.3.0
 pin "apexcharts/core", to: "apexcharts--core.js" # @7.3.0
+pin "jsqr" # @1.4.0

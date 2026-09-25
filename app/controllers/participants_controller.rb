@@ -12,6 +12,7 @@ class ParticipantsController < ApplicationController
                                            .by_ward(params[:ward])
                                            .by_gender(params[:gender])
                                            .by_company(params[:company])
+                                           .by_care(params[:care])
                                            .order(:first_name, :last_name, :id))
   end
 

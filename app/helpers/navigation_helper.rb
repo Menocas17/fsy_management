@@ -16,8 +16,19 @@ module NavigationHelper
         { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
         { text: "Librería", lucide_icon: "library", disabled: true },
-        { text: "Logística", lucide_icon: "truck", disabled: true },
-        { text: "Reportes", lucide_icon: "file-text", disabled: true },
+        (if Current.user&.inventory_member?
+           { text: "Inventario", url: inventories_path, lucide_icon: "boxes",
+             # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
+             active_paths: [ inventories_path, "/articulos" ] }
+         else
+           { text: "Inventario", lucide_icon: "boxes", disabled: true }
+         end),
+        (if Current.user&.reports_viewer?
+           { text: "Reportes", url: reports_path, lucide_icon: "file-text",
+             active_paths: [ reports_path, new_participant_import_path ] }
+         else
+           { text: "Reportes", lucide_icon: "file-text", disabled: true }
+         end),
         { text: "Finanzas", lucide_icon: "wallet", disabled: true },
         ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
@@ -32,6 +43,28 @@ module NavigationHelper
 
   def nav_items
     nav_sections.flat_map { |section| section[:items] }
+  end
+
+  # Cada vista de detalle dice a dónde vuelve y la barra superior lo pinta siempre en el mismo lugar,
+  # así nadie depende de las flechas del navegador.
+  def back_to(label, url)
+    content_for :back do
+      link_to url, title: "Volver a #{label}", class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do
+        safe_join([
+          icon("arrow-left", class: "w-4 h-4 shrink-0"),
+          tag.span(label, class: "max-w-[180px] truncate text-[12.5px] font-semibold")
+        ])
+      end
+    end
+  end
+
+  # La ficha de un participante vuelve a la lista de la que vino.
+  def participants_back
+    if params[:from] == "staff"
+      back_to "Staff", safe_return_to(staff_participants_path)
+    else
+      back_to "Jóvenes", safe_return_to(participants_path)
+    end
   end
 
   def page_eyebrow

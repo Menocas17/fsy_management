@@ -1,5 +1,6 @@
 <% content_for :title, "Nueva compañía auxiliar" %>
 <% content_for :eyebrow, "Compañías" %>
+<% back_to "Compañías auxiliares", auxiliar_companies_path %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
   <%= render "shared/edit_banner", back_path: auxiliar_companies_path, back_label: "Volver a compañías auxiliares", caption: "Nueva compañía auxiliar" %>
   <%= render "auxiliar_companies/form", auxiliar_company: @auxiliar_company %>

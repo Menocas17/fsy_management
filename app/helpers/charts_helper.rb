@@ -1,20 +1,22 @@
 module ChartsHelper
-  # ApexCharts can't parse OKLCH, so these are hex equivalents of the cat-* and primary-* theme tokens.
-  CATEGORY_COLORS = %w[#0093c5 #5965cd #369e4e #dc932e #d14a5f].freeze
+  # Paleta "Viva": saturada y con los tonos bien separados entre sí, que es lo que hace distinguible una
+  # barra de la otra. Van en hexadecimal porque ApexCharts no entiende OKLCH.
+  CATEGORY_COLORS = %w[#2563ff #7c3aed #00b878 #ff9500 #ff3b6b].freeze
 
+  # Cada rol conserva su color en todas las pantallas; el orden sigue a los roles más numerosos.
   ROLE_CHART = {
-    "coordinador" => [ "Coordinador", "#5965cd" ],
-    "consejero" => [ "Consejero", "#dc932e" ],
-    "auxiliar" => [ "Auxiliar", "#369e4e" ],
-    "logistica" => [ "Logística", "#90b5dc" ],
-    "director" => [ "Director", "#1d447c" ],
-    "director_logistica" => [ "Director de logística", "#255896" ],
-    "registrador" => [ "Registrador", "#d14a5f" ],
-    "joven" => [ "Joven", "#0093c5" ]
+    "consejero" => [ "Consejero", "#2563ff" ],
+    "logistica" => [ "Logística", "#7c3aed" ],
+    "auxiliar" => [ "Auxiliar", "#00b878" ],
+    "coordinador" => [ "Coordinador", "#ff9500" ],
+    "director" => [ "Director", "#ff3b6b" ],
+    "director_logistica" => [ "Director de logística", "#00c2d7" ],
+    "registrador" => [ "Registrador", "#facc15" ],
+    "joven" => [ "Joven", "#38bdf8" ]
   }.freeze
 
-  AGE_SHADES = [ [ 0.9, "#1d447c" ], [ 0.65, "#255896" ], [ 0.45, "#3671b2" ], [ 0.3, "#90b5dc" ] ].freeze
-  AGE_LIGHTEST = "#c5d5e8".freeze
+  AGE_SHADES = [ [ 0.9, "#123fb8" ], [ 0.65, "#2563ff" ], [ 0.45, "#5586ff" ], [ 0.3, "#8fb0ff" ] ].freeze
+  AGE_LIGHTEST = "#c9d8ff".freeze
 
   def role_chart_label(role)
     ROLE_CHART.dig(role, 0) || Participant.role_label(role)

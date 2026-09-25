@@ -33,6 +33,16 @@ class User < ApplicationRecord
     participant&.director? || participant&.coordinador?
   end
 
+  # El inventario lo mueve logística entera, más el acceso total.
+  def inventory_member?
+    full_access? || participant&.logistica? || participant&.director_logistica? || false
+  end
+
+  # Quién entra al módulo de reportes: el acceso total y el director de logística (solo su sección).
+  def reports_viewer?
+    full_access? || participant&.director_logistica? || false
+  end
+
   def unread_alerts_count
     Alert.visible_to(participant).unread_for(self).count
   end

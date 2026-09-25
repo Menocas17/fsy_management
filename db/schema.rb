@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -147,6 +147,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_000005) do
     t.index ["number"], name: "index_companies_on_number", unique: true
   end
 
+  create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "code_prefix", null: false
+    t.string "color", default: "primary", null: false
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.string "icon", default: "package", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code_prefix"], name: "index_inventories_on_code_prefix", unique: true
+    t.index ["name"], name: "index_inventories_on_name", unique: true
+  end
+
+  create_table "inventory_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.uuid "inventory_id", null: false
+    t.string "location"
+    t.integer "minimum", default: 0, null: false
+    t.string "name", null: false
+    t.text "notes"
+    t.integer "quantity", default: 0, null: false
+    t.string "unit", default: "u", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_inventory_items_on_code", unique: true
+    t.index ["inventory_id", "name"], name: "index_inventory_items_on_inventory_id_and_name"
+    t.index ["inventory_id"], name: "index_inventory_items_on_inventory_id"
+  end
+
+  create_table "inventory_movements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "delta", null: false
+    t.uuid "inventory_item_id", null: false
+    t.string "note"
+    t.uuid "participant_id"
+    t.string "participant_name", null: false
+    t.integer "reason", default: 0, null: false
+    t.integer "source", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_item_id", "created_at"], name: "index_inventory_movements_on_inventory_item_id_and_created_at"
+    t.index ["inventory_item_id"], name: "index_inventory_movements_on_inventory_item_id"
+    t.index ["participant_id"], name: "index_inventory_movements_on_participant_id"
+  end
+
   create_table "logistics_areas", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "description"
@@ -226,6 +269,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_000005) do
   add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
   add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id"
   add_foreign_key "companies", "auxiliar_companies"
+  add_foreign_key "inventory_items", "inventories"
+  add_foreign_key "inventory_movements", "inventory_items"
+  add_foreign_key "inventory_movements", "participants"
   add_foreign_key "memberships", "participants"
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify

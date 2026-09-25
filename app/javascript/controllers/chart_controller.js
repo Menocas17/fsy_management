@@ -16,6 +16,9 @@ export default class extends Controller {
     radius: { type: Number, default: 10 },
     columnWidth: { type: String, default: '45%' },
     gradient: Boolean,
+    // Valor encima de cada barra, y número grande en el centro del donut.
+    showValues: Boolean,
+    total: String,
   };
 
   connect() {
@@ -55,6 +58,10 @@ export default class extends Controller {
 
   get surface() {
     return this.dark ? '#1e293b' : '#fcfcfd';
+  }
+
+  get headingColor() {
+    return this.dark ? '#f1f5f9' : '#1d2b4a';
   }
 
   options() {
@@ -118,7 +125,14 @@ export default class extends Controller {
         labels: { style: this.axisLabelStyle() },
       },
       yaxis: { show: false },
-      grid: { show: false, padding: { left: 0, right: 0, top: -10 } },
+      grid: { show: false, padding: { left: 0, right: 0, top: this.showValuesValue ? 10 : -10 } },
+      dataLabels: this.showValuesValue
+        ? {
+            enabled: true,
+            offsetY: -22,
+            style: { fontSize: '11px', fontWeight: 700, colors: [this.mutedText] },
+          }
+        : { enabled: false },
       plotOptions: {
         bar: {
           distributed: true,
@@ -147,9 +161,26 @@ export default class extends Controller {
       series: this.seriesValue,
       labels: this.labelsValue,
       stroke: { width: 3, colors: [this.surface] },
+      fill: this.gradientValue ? { type: 'gradient' } : { type: 'solid', opacity: 1 },
       plotOptions: {
-        pie: { expandOnClick: false, donut: { size: '72%', labels: { show: false } } },
+        pie: {
+          expandOnClick: false,
+          donut: { size: '70%', labels: this.donutCenter() },
+        },
       },
+    };
+  }
+
+  // El total va en el hueco del donut: se lee como una sola pieza en vez de un aro suelto.
+  donutCenter() {
+    if (!this.totalValue) return { show: false };
+
+    const style = { fontSize: '28px', fontWeight: 800, color: this.headingColor };
+    return {
+      show: true,
+      name: { show: false },
+      value: { show: true, offsetY: 7, ...style },
+      total: { show: true, showAlways: true, label: '', formatter: () => this.totalValue, ...style },
     };
   }
 
@@ -161,8 +192,12 @@ export default class extends Controller {
     const theme = { tooltip: { theme: this.dark ? 'dark' : 'light' } };
     if (this.kindValue === 'donut') {
       theme.stroke = { width: 3, colors: [this.surface] };
+      theme.plotOptions = { pie: { donut: { labels: this.donutCenter() } } };
     } else {
       theme.xaxis = { labels: { style: this.axisLabelStyle() } };
+      if (this.showValuesValue) {
+        theme.dataLabels = { style: { fontSize: '11px', fontWeight: 700, colors: [this.mutedText] } };
+      }
     }
     if (this.kindValue === 'stacked') theme.legend = this.legendOptions();
     return theme;

@@ -2,7 +2,7 @@ require "test_helper"
 
 class NavigationHelperTest < ActionView::TestCase
   test "lists the sections in sidebar order" do
-    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Librería", "Logística", "Reportes", "Finanzas" ],
+    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Librería", "Inventario", "Reportes", "Finanzas" ],
                  nav_items.map { |item| item[:text] }
   end
 
@@ -25,14 +25,14 @@ class NavigationHelperTest < ActionView::TestCase
   test "not-yet-built sections are disabled and have no destination" do
     disabled = nav_items.select { |item| item[:disabled] }
 
-    assert_equal [ "Librería", "Logística", "Reportes", "Finanzas" ], disabled.map { |item| item[:text] }
+    assert_equal [ "Librería", "Inventario", "Reportes", "Finanzas" ], disabled.map { |item| item[:text] }
     assert disabled.all? { |item| item[:url].nil? }
   end
 
   test "groups items under the sidebar categories" do
     assert_equal [ nil, "Participantes", "Gestión" ], nav_sections.map { |section| section[:label] },
                  "Mi perfil moved to the account menu, so the Cuenta section is gone"
-    assert_equal [ "Compañías", "Organigrama", "Agenda", "Librería", "Logística", "Reportes", "Finanzas" ],
+    assert_equal [ "Compañías", "Organigrama", "Agenda", "Librería", "Inventario", "Reportes", "Finanzas" ],
                  nav_sections.third[:items].map { |item| item[:text] }
   end
 

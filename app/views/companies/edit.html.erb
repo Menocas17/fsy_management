@@ -1,6 +1,7 @@
 <% content_for :title, "Editar #{@company.name}" %>
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Editar compañía" %>
+<% back_to @company.name, company_path(@company) %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
   <%= render "companies/form_banner", company: @company %>
   <%= render "companies/form", company: @company %>

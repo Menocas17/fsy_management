@@ -61,6 +61,92 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{new_participant_path}']", false
   end
 
+  test "the hero shows the FSY lockup, with the pill as its small-screen stand-in" do
+    get dashboard_path
+
+    assert_select "[data-hero-lettering][class*='lg:block']", 1
+    assert_select "span[class*='lg:hidden']", text: /FSY 2026 · Managua-Caribe/
+  end
+
+  test "every card heading carries its own icon tile" do
+    get dashboard_path
+
+    # Lo que viene, cocina, estaca, rol, género, tallas y edad; los tres totales no llevan cabecera.
+    assert_select "section h2", 7
+    %w[map-pin user-cog venus-and-mars shirt cake].each do |lucide|
+      assert_select "[data-card-icon='#{lucide}'] svg", { count: 1 }, "falta la baldosa con el icono #{lucide}"
+    end
+  end
+
+  test "before the event it lists the trainings that are left and the start" do
+    get dashboard_path
+
+    assert_select "[data-next-up]", 1
+    assert_select "[data-next-item='training-2026-10-17']", text: /17 de octubre/
+    assert_select "[data-next-item='training-2026-11-17']", text: /17 de noviembre/
+    assert_select "[data-next-item='event']", text: /Comienza el evento/
+    assert_select "[data-next-item='training-2026-12-17']", 0, "solo las dos próximas capacitaciones"
+  end
+
+  test "a training that already happened drops off the list" do
+    travel_to Date.new(2026, 10, 18) do
+      get dashboard_path
+
+      assert_select "[data-next-item='training-2026-10-17']", 0
+      assert_select "[data-next-item='training-2026-11-17']", 1
+      assert_select "[data-next-item='training-2026-12-17']", 1, "entra la siguiente de la fila"
+    end
+  end
+
+  test "during the event week it shows the next two activities of the agenda" do
+    day = Rails.configuration.x.event_start_on + 1
+    [ [ "Desayuno", "07:00", "08:00" ], [ "Clases FSY", "10:00", "12:00" ], [ "Cena", "18:00", "19:00" ] ].each do |title, from, to|
+      Activity.create!(title: title, category: :comida, location: "Comedores",
+                       date: day.to_s, start_time: from, end_time: to)
+    end
+
+    travel_to Time.zone.local(day.year, day.month, day.day, 6) do
+      get dashboard_path
+
+      assert_select "[data-next-item^='activity-']", 2, "durante la semana manda la agenda"
+      assert_select "[data-next-up]", text: /Desayuno/
+      assert_select "[data-next-up]", text: /Clases FSY/
+      assert_select "[data-next-up]", { text: /Cena/, count: 0 }, "solo las dos próximas"
+      assert_select "[data-next-item='event']", 0
+    end
+  end
+
+  test "kitchen and infirmary see what each ficha needs, ignoring the ninguna answers" do
+    participants(:juan).update!(allergies: "Maní", diet: "Sin restricciones", medicines: "Ninguna")
+    participants(:maria).update!(rol: :joven, allergies: "Ninguna", diet: "Vegetariana")
+
+    get dashboard_path
+
+    assert_select "[data-care-count='allergies']", text: "1"
+    assert_select "[data-care-count='diet']", { text: "1" }, "«Sin restricciones» no cuenta como dieta especial"
+    assert_select "[data-care-count='medicines']", text: "0"
+  end
+
+  test "the totals and the kitchen figures are doors into their lists" do
+    get dashboard_path
+
+    assert_select "a[data-kpi-link='total_jovenes'][href='#{participants_path}']"
+    assert_select "a[data-kpi-link='total_staff'][href='#{staff_participants_path}']"
+    Participant::CARE_FILTERS.each_key do |care|
+      assert_select "a[data-care-link='#{care}'][href='#{participants_path(care: care)}']"
+    end
+  end
+
+  test "a consejero sees the agenda card but not the kitchen one" do
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
+
+    get dashboard_path
+
+    assert_response :success
+    assert_select "[data-care]", 0
+    assert_select "[data-next-up]", 1, "la agenda sí la ve todo el mundo"
+  end
+
   test "renders ApexCharts mounts with their data and a text alternative" do
     get dashboard_path
 

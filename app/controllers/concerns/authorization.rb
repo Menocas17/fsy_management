@@ -6,7 +6,9 @@ module Authorization
                   :can_edit_company_staffing?, :can_edit_auxiliar_company_staffing?, :company_edit_level,
                   :auxiliar_company_edit_level,
                   :can_manage_staff?, :can_manage_alerts?, :can_manage_agenda?, :can_assign_to?,
-                  :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?
+                  :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
+                  :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
+                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -107,6 +109,39 @@ module Authorization
     full_company_access?
   end
 
+  # Inventario ------------------------------------------------------------------
+  # Cualquier miembro de logística ve y ajusta existencias; crear o borrar un inventario entero
+  # queda para el acceso total y el director de logística.
+  def can_view_inventory?
+    Current.user&.inventory_member? || false
+  end
+
+  def can_adjust_inventory?
+    can_view_inventory?
+  end
+
+  def can_manage_inventories?
+    full_company_access? || Current.user&.participant&.director_logistica? || false
+  end
+
+  # Reportes -------------------------------------------------------------------
+  # El acceso total imprime todo; el director de logística entra solo a lo suyo (inventario y gastos).
+  def can_view_reports?
+    Current.user&.reports_viewer? || false
+  end
+
+  def can_view_participant_reports?
+    full_company_access?
+  end
+
+  def can_view_logistics_reports?
+    full_company_access? || Current.user&.participant&.director_logistica? || false
+  end
+
+  def can_import_participants?
+    full_company_access? || Current.user&.participant&.registrador? || false
+  end
+
   def can_manage_alerts?
     Current.user&.alert_manager? || false
   end
@@ -147,6 +182,42 @@ module Authorization
     # Quién es la persona y dónde encaja en el evento.
     IDENTITY_ATTRIBUTES = %i[first_name last_name age m_person_in_charge h_person_in_charge identity_document
                              gender stake ward rol company_id logistics_area_id].freeze
+
+    def require_inventory_access!
+      unless can_view_inventory?
+        redirect_to dashboard_path, alert: "No estás autorizado para ver el inventario"
+      end
+    end
+
+    def require_inventory_management!
+      unless can_manage_inventories?
+        redirect_to inventories_path, alert: "Solo la dirección de logística puede crear o cambiar inventarios"
+      end
+    end
+
+    def require_reports_access!
+      unless can_view_reports?
+        redirect_to dashboard_path, alert: "No estás autorizado para ver los reportes"
+      end
+    end
+
+    def require_logistics_reports!
+      unless can_view_logistics_reports?
+        redirect_to reports_path, alert: "No estás autorizado para ver este reporte"
+      end
+    end
+
+    def require_participant_reports!
+      unless can_view_participant_reports?
+        redirect_to reports_path, alert: "No estás autorizado para ver este reporte"
+      end
+    end
+
+    def require_participant_import!
+      unless can_import_participants?
+        redirect_to dashboard_path, alert: "No estás autorizado para cargar participantes"
+      end
+    end
 
     def require_participant_create!
       unless can_create_participants?

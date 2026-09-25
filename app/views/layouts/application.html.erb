@@ -47,6 +47,10 @@
       <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <%= render "shared/top_menu"%>
         <main class="flex-1 min-h-0 overflow-y-auto bg-canvas dark:bg-slate-900">
+          <%# En pantallas chicas el volver encabeza el contenido, lejos del botón de menú y con su etiqueta visible. %>
+          <% if content_for?(:back) %>
+            <div data-page-back-mobile class="sm:hidden px-4 pt-4 -mb-1"><%= yield :back %></div>
+          <% end %>
           <%= yield %>
         </main>
       </div>

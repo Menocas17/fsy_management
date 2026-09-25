@@ -174,7 +174,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Primera oración"
   end
 
-  test "Mi perfil shows the signed-in participant without a back button" do
+  test "Mi perfil shows the signed-in participant, their QR and the way back home" do
     sign_out
     sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
 
@@ -182,7 +182,8 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", text: "María García"
-    assert_select "a", text: /Volver/, count: 0
+    assert_select "[data-page-back] a[href='#{dashboard_path}']", text: /Inicio/
+    assert_select "[data-profile-qr]", text: /Código QR/
     assert_select "a[href*='from=myprofile']", text: /Editar/
   end
 
@@ -193,12 +194,67 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "no tiene un perfil de participante"
   end
 
-  test "profile back link ignores unsafe return_to values" do
+  test "the kitchen filter narrows the list and says so" do
+    participants(:juan).update!(allergies: "Maní")
+    Participant.create!(first_name: "Sin", last_name: "Alergias", age: 15, stake: "las_americas",
+                        shirt_number: "m", gender: "M", rol: :joven, allergies: "Ninguna")
+
+    get participants_path(care: "allergies")
+
+    assert_response :success
+    assert_select "[data-active-filters] [data-active-filter='care']", text: /Con alergias/
+    assert_select "tbody tr", 1
+    assert_includes response.body, "Juan"
+    refute_includes response.body, "Sin Alergias"
+  end
+
+  test "each active filter can be dropped on its own, keeping the rest" do
+    get participants_path(care: "allergies", gender: "M", query: "jua")
+
+    assert_select "[data-active-filter='care'][href*='gender=M']"
+    assert_select "[data-active-filter='care'][href*='care=']", 0, "el enlace quita justo ese filtro"
+    assert_select "[data-active-filter='gender'][href*='care=allergies']"
+  end
+
+  test "with no filters there is no filter bar to clear" do
+    get participants_path
+
+    assert_select "[data-active-filters]", 0
+  end
+
+  test "the filter bar works on the staff list too, and lives inside the table frame" do
+    get staff_participants_path(rol: "consejero", stake: "las_americas")
+
+    assert_response :success
+    assert_select "turbo-frame#participants_table [data-active-filters]", 1, "debe redibujarse al filtrar"
+    assert_select "[data-active-filter='rol']", text: /Consejero/
+    assert_select "[data-active-filter='stake'][href*='rol=consejero']"
+    assert_select "a[data-clear-filters][href='#{staff_participants_path}']"
+  end
+
+  test "removing a filter navigates the whole page, so the dropdowns follow" do
+    get participants_path(gender: "M")
+
+    assert_select "[data-active-filter='gender'][data-turbo-frame='_top']", 1
+    assert_select "a[data-clear-filters][data-turbo-frame='_top']", 1
+  end
+
+  test "the way back ignores unsafe return_to values" do
     get participant_path(participants(:juan), return_to: "javascript:alert(1)")
 
-    assert_select "a", text: /Volver/ do |links|
-      assert_equal dashboard_path, links.first["href"]
+    assert_select "[data-page-back] a", text: /Jóvenes/ do |links|
+      assert_equal participants_path, links.first["href"]
     end
+  end
+
+  test "the profile carries a QR that opens the very same ficha" do
+    juan = participants(:juan)
+
+    get participant_path(juan)
+
+    assert_select "[data-profile-qr]", 1
+    assert_select "dialog[data-dialog-name='qr'] svg[role='img']", 1
+    assert_select "dialog[data-dialog-name='qr']", html: /#{Regexp.escape(juan.full_name)}/
   end
 
   test "update records the edited fields in the history" do

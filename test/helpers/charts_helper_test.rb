@@ -1,12 +1,17 @@
 require "test_helper"
 
 class ChartsHelperTest < ActionView::TestCase
+  # Contra la escala, no contra los hex: cambiar de paleta no debería romper estas pruebas.
   test "age bars get darker as the count approaches the busiest age" do
-    assert_equal [ "#c5d5e8", "#3671b2", "#1d447c" ], age_bar_colors([ 2, 5, 10 ])
+    lightest = ChartsHelper::AGE_LIGHTEST
+    half = ChartsHelper::AGE_SHADES[2].last
+    darkest = ChartsHelper::AGE_SHADES[0].last
+
+    assert_equal [ lightest, half, darkest ], age_bar_colors([ 2, 5, 10 ])
   end
 
   test "age bar colors survive an all-zero series" do
-    assert_equal [ "#c5d5e8", "#c5d5e8" ], age_bar_colors([ 0, 0 ])
+    assert_equal [ ChartsHelper::AGE_LIGHTEST ] * 2, age_bar_colors([ 0, 0 ])
   end
 
   test "roles have Spanish labels and a fallback color" do

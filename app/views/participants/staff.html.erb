@@ -10,7 +10,7 @@
       <% end %>
     <% end %>
   </div>
-  <%= render "filters", form_url: staff_participants_path, clear_url: staff_participants_path, show_role: true %>
+  <%= render "filters", form_url: staff_participants_path, show_role: true %>
   <%= turbo_frame_tag "participants_table" do %>
     <%= render "results", participants: @participants, pagy: @pagy, is_staff: true,
                           empty_message: "No hay personal que coincida con la búsqueda." %>
