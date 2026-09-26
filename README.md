@@ -80,7 +80,9 @@ bin/rubocop --no-server        # lint (Rails Omakase)
 
 ## Deploy (Kamal)
 
-Se usa **Kamal** + GitHub Actions para desplegar a un VPS. La configuración está en `config/deploy.yml`.
+Se usa **Kamal** para desplegar a una instancia Always Free de **Oracle Cloud** (Ampere A1, ARM64). La configuración está en `config/deploy.yml` y la guía paso a paso (crear la instancia, abrir puertos, `script/oracle/setup_server.sh`, variables y respaldos) en [`docs/deploy_oracle.md`](docs/deploy_oracle.md).
+
+- **SSL:** `kamal-proxy` con Let's Encrypt para `APP_HOST`.
 
 - **BD en producción:** PostgreSQL como accessory de Kamal (`postgres:18`), con BDs separadas: primaria, cache, queue y cable.
 - **Jobs:** Solid Queue corre dentro del proceso de Puma (`SOLID_QUEUE_IN_PUMA: true`), por lo que no requiere un contenedor de workers dedicado.
