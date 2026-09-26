@@ -1,0 +1,59 @@
+<% if participants.load.any? %>
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="text-[11px] tracking-[.06em] uppercase text-ink-300 dark:text-slate-500">
+          <th scope="col" class="pb-2.5 pr-4 font-bold">Nombre</th>
+          <th scope="col" class="pb-2.5 pr-4 font-bold">Estaca</th>
+          <th scope="col" class="pb-2.5 pr-4 font-bold">Edad</th>
+          <th scope="col" class="pb-2.5 font-bold">Cuarto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% participants.each do |participant| %>
+          <tr class="border-t border-line-soft dark:border-slate-700" data-participant-row>
+            <td class="py-2.5 pr-4">
+              <%= link_to participant_path(participant, return_to: request.fullpath), data: { turbo_frame: "_top" },
+                    class: "group flex items-center gap-2.5 min-w-0" do %>
+                <%= render(AvatarComponent.new(participant: participant, size: :sm)) %>
+                <span class="truncate text-[13px] font-semibold text-ink-900 dark:text-slate-100 group-hover:underline"><%= participant.full_name %></span>
+              <% end %>
+            </td>
+            <td class="py-2.5 pr-4"><%= render(StakeSpanComponent.new(stake: participant.stake)) %></td>
+            <td class="py-2.5 pr-4 text-[13px] text-ink-700 dark:text-slate-300 tabular-nums"><%= participant.age %></td>
+            <td class="py-2.5 text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= participant.room.presence || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="md:hidden divide-y divide-line-soft dark:divide-slate-700">
+    <% participants.each do |participant| %>
+      <li>
+        <%= link_to participant_path(participant, return_to: request.fullpath), data: { turbo_frame: "_top" },
+              class: "flex items-center gap-3 py-2.5" do %>
+          <%= render(AvatarComponent.new(participant: participant)) %>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= participant.full_name %></span>
+            <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+              <%= [ participant.stake&.titleize, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
+            </span>
+          </span>
+          <span class="text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= participant.room.presence || "—" %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3 pt-4 border-t border-line-soft dark:border-slate-700">
+    <p class="text-[12.5px] font-medium text-ink-500 dark:text-slate-400">Mostrando <%= pagy.from %>–<%= pagy.to %> de <%= pagy.count %></p>
+    <% if pagy.last > 1 %>
+      <div class="overflow-x-auto"><%== pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %></div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="py-8 text-center text-sm text-ink-500 dark:text-slate-400">
+    <%= params[:query].present? ? "Ningún joven coincide con “#{params[:query]}”." : "Esta compañía aún no tiene jóvenes asignados." %>
+  </p>
+<% end %>

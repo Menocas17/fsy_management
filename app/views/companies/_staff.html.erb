@@ -1,0 +1,60 @@
+<%
+  subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500"
+  # El consejero ve a sus líderes pero no cambia la plantilla de su propia compañía.
+  staffing = can_edit_company_staffing?(company)
+%>
+<section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
+  <%= section_heading "Líderes", "user-check" %>
+  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500 dark:text-slate-400">
+    <% if staffing %>
+      Los cambios de líderes se guardan al instante · 1 hombre y 1 mujer por rol.
+    <% else %>
+      1 hombre y 1 mujer por rol · los asigna tu coordinación.
+    <% end %>
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div>
+      <p class="<%= subheading %>">Consejeros · <%= counselors.size %>/2</p>
+      <div class="space-y-2">
+        <% %w[H M].each do |gender| %>
+          <% person = counselors.find { |counselor| counselor.gender == gender } %>
+          <%= render "companies/leader_slot", person: person, role: "consejero", gender: gender,
+                     remove_url: staffing && person && remove_staff_company_path(company, membership_id: membership_ids[person.id]) %>
+        <% end %>
+      </div>
+    </div>
+    <div>
+      <p class="<%= subheading %>">Auxiliares · <%= auxiliars.size %>/2</p>
+      <div class="space-y-2">
+        <% %w[H M].each do |gender| %>
+          <%= render "companies/leader_slot", person: auxiliars.find { |auxiliar| auxiliar.gender == gender }, role: "auxiliar", gender: gender %>
+        <% end %>
+      </div>
+      <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+        <% if company.auxiliar_company %>
+          Se asignan desde <%= link_to company.auxiliar_company.name, company.auxiliar_company, class: "font-semibold text-primary-600 dark:text-primary-300 hover:underline" %>.
+        <% else %>
+          Asigna una compañía auxiliar para ver sus auxiliares.
+        <% end %>
+      </p>
+    </div>
+  </div>
+
+  <% if staffing && counselors.size < 2 %>
+    <%= form_with url: assign_staff_company_path(company), method: :post, class: "mt-5 pt-5 border-t border-line-soft dark:border-slate-700" do |form| %>
+      <%= form.label :participant_id, "Agregar consejero", class: field_label_classes %>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= form.select :participant_id, candidates.map { |candidate| [ "#{candidate.full_name} · #{Participant::GENDER_LABELS[candidate.gender]}", candidate.id ] },
+              { prompt: candidates.any? ? "Selecciona un consejero disponible…" : "No hay consejeros disponibles" },
+              required: true, disabled: candidates.none?, class: "#{field_select_classes} sm:flex-1" %>
+        <%= tag.button type: "submit", disabled: candidates.none?,
+              class: "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Asignar
+        <% end %>
+      </div>
+      <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Solo aparecen consejeros sin compañía que llenan un espacio vacante.</p>
+    <% end %>
+  <% end %>
+</section>

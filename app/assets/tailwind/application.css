@@ -1,7 +1,220 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Rails buscará automáticamente la imagen en la carpeta public/ o app/assets/images/ */
-  --background-image-fsy-pattern: url('/images/banner.jpg');
+  --background-image-fsy-pattern: url('top-header-4.png');
   --font-sans: 'Onest', sans-serif;
+
+  /* Color pallete */
+  --color-primary: oklch(33% 0.095 258);
+  --color-primary-50: oklch(97% 0.012 245);
+  --color-primary-100: oklch(93% 0.025 245);
+  --color-primary-300: oklch(76% 0.07 250);
+  --color-primary-500: oklch(54% 0.12 253);
+  --color-primary-600: oklch(46% 0.115 255);
+  --color-primary-700: oklch(39% 0.105 258);
+  --color-primary-800: oklch(33% 0.095 258);
+  --color-primary-900: oklch(27% 0.085 258);
+  --color-primary-950: oklch(22% 0.075 258);
+  --background-image-primary-gradient: linear-gradient(
+    155deg,
+    oklch(27% 0.085 258),
+    oklch(22% 0.075 258)
+  );
+  --background-image-primary-gradient-right: linear-gradient(
+    100deg,
+    oklch(39% 0.105 258),
+    oklch(54% 0.12 253)
+  );
+  --background-image-brand-tile: linear-gradient(
+    155deg,
+    oklch(46% 0.115 255),
+    oklch(27% 0.085 258)
+  );
+  --background-image-avatar-gradient: linear-gradient(
+    155deg,
+    oklch(55% 0.16 275),
+    oklch(33% 0.095 258)
+  );
+  --background-image-hero:
+    radial-gradient(120% 160% at 10% 0%, oklch(54% 0.12 253) 0%, transparent 45%),
+    radial-gradient(90% 140% at 95% 100%, oklch(55% 0.16 275) 0%, transparent 50%),
+    linear-gradient(155deg, oklch(27% 0.085 258), oklch(22% 0.075 258));
+
+  --color-ink-900: oklch(24% 0.02 260);
+  --color-ink-700: oklch(40% 0.018 260);
+  --color-ink-500: oklch(56% 0.015 260);
+  --color-ink-300: oklch(78% 0.01 260);
+
+  --color-surface: oklch(99% 0.003 260);
+  --color-canvas: oklch(96.5% 0.006 258);
+  --color-line: oklch(90% 0.008 258);
+  --color-line-soft: oklch(93.5% 0.006 258);
+
+  --color-cat-blue: oklch(62% 0.13 230);
+  --color-cat-indigo: oklch(55% 0.16 275);
+  --color-cat-green: oklch(62% 0.15 148);
+  --color-cat-amber: oklch(72% 0.14 70);
+  --color-cat-rose: oklch(60% 0.17 15);
+
+  --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
+  --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);
+  --shadow-lg: 0 20px 40px -12px oklch(20% 0.05 260 / 0.22);
+
+  --color-villa-flor: #109618;
+  --color-puerto-cabezas: #e68a00;
+  --color-las-americas: #1c21b4;
+  --color-bello-horizonte: #0089b2;
+}
+
+/* Pagy's series_nav emits bare anchors; style them by their ARIA state. */
+@layer components {
+  .pagy.series-nav {
+    @apply flex items-center gap-1.5;
+  }
+  .pagy.series-nav a {
+    @apply min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-[10px] border border-line text-[13px] font-bold text-ink-700 transition hover:bg-primary-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700;
+  }
+  .pagy.series-nav a[aria-current="page"] {
+    @apply bg-primary-700 border-transparent text-white hover:bg-primary-700 dark:hover:bg-primary-700;
+  }
+  .pagy.series-nav a[aria-disabled="true"]:not([aria-current]) {
+    @apply text-ink-300 cursor-default hover:bg-transparent dark:text-slate-600 dark:hover:bg-transparent;
+  }
+}
+
+/* Organigrama: connector lines drawn with pseudo-elements on nested lists. */
+.org-tree {
+  --org-line: oklch(90% 0.008 258);
+  text-align: center;
+}
+:where(.dark) .org-tree {
+  --org-line: oklch(44.6% 0.03 257);
+}
+.org-tree,
+.org-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.org-tree ul {
+  display: table;
+  margin: 0 auto;
+  padding-top: 28px;
+  position: relative;
+}
+.org-tree ul::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.org-tree li {
+  float: left;
+  text-align: center;
+  position: relative;
+  padding: 28px 12px 0;
+}
+.org-tree li::before,
+.org-tree li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 28px;
+  border-top: 2px solid var(--org-line);
+}
+.org-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--org-line);
+}
+.org-tree li:only-child::before,
+.org-tree li:only-child::after {
+  display: none;
+}
+.org-tree li:only-child {
+  padding-top: 0;
+}
+.org-tree li:first-child::before,
+.org-tree li:last-child::after {
+  border: 0 none;
+}
+.org-tree li:last-child::before {
+  border-right: 2px solid var(--org-line);
+  border-radius: 0 6px 0 0;
+}
+.org-tree li:first-child::after {
+  border-radius: 6px 0 0 0;
+}
+.org-tree ul ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 28px;
+  border-left: 2px solid var(--org-line);
+}
+
+/* Leaf groups (a branch's companies or logistics areas) stack vertically so the whole chart stays compact. */
+.org-tree ul.org-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.org-tree ul.org-stack::after {
+  display: none;
+}
+.org-tree ul.org-stack > li,
+.org-tree ul.org-stack > li:only-child {
+  float: none;
+  padding: 14px 0 0;
+}
+.org-tree ul.org-stack > li::before,
+.org-tree ul.org-stack > li:first-child::before,
+.org-tree ul.org-stack > li:last-child::before,
+.org-tree ul.org-stack > li:only-child::before {
+  display: block;
+  top: 0;
+  left: 50%;
+  right: auto;
+  width: 0;
+  height: 14px;
+  border: 0 none;
+  border-left: 2px solid var(--org-line);
+  border-radius: 0;
+}
+.org-tree ul.org-stack > li::after,
+.org-tree ul.org-stack > li:only-child::after {
+  display: none;
+}
+.org-tree ul.org-stack > li > * {
+  min-width: 14rem;
+}
+
+/* Organigrama canvas in full screen fills the display. */
+.org-chart:fullscreen {
+  padding: 1rem;
+  background: var(--color-canvas);
+}
+:where(.dark) .org-chart:fullscreen {
+  background: var(--color-slate-900);
+}
+.org-chart:fullscreen [data-org-chart-target='viewport'] {
+  height: 100%;
+}
+
+/* Accessibility: reduce motion */
+:where(.reduce-motion, .reduce-motion *) {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Accessibility: larger text */
+html.text-lg-mode {
+  font-size: 112.5%;
 }

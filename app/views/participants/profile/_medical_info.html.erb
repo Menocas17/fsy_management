@@ -1,9 +1,17 @@
-  
-<section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a] mt-3">
-  <h3 class="font-bold text-lg bg-[#A1CD98] px-3 py-2 rounded-t-xl">Informacion Medica</h3>
-  <dl class="mt-5 grid grid-cols-2 md:grid-cols-4 p-3">
-    <%= render(InfoTileComponent.new(title: "Alergias", icon: "allergies.svg", data: [@participant.allergies ]))%>
-    <%= render(InfoTileComponent.new(title: "Medicinas", icon: "medicine.svg", data: [@participant.medicines ] ))%>
-    <%= render(InfoTileComponent.new(title: "Dieta", icon: "diet.svg", data: [@participant.diet] ))%>
-  </dl>
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Información médica", "shield-plus" %>
+  <div>
+    <%= info_row "Alergias", "shield-plus", participant.allergies %>
+    <%= info_row "Medicinas", "pill", participant.medicines %>
+    <%= info_row "Dieta", "leaf", participant.diet %>
+  </div>
+
+  <div class="mt-5 rounded-[13px] bg-canvas dark:bg-slate-900/60 border border-line-soft dark:border-slate-700 px-5 py-4">
+    <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Notas adicionales</p>
+    <% if participant.additional_instructions.present? %>
+      <p class="mt-1.5 text-[13px] leading-relaxed italic text-ink-700 dark:text-slate-300"><%= participant.additional_instructions %></p>
+    <% else %>
+      <p class="mt-1.5 text-[13px] text-ink-500 dark:text-slate-400">No hay notas adicionales.</p>
+    <% end %>
+  </div>
 </section>

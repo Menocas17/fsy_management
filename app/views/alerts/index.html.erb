@@ -1,0 +1,40 @@
+<% content_for :title, "Alertas" %>
+<% content_for :eyebrow, "Gestión" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <p class="text-[13px] font-medium text-ink-500 dark:text-slate-400"><%= pluralize(@pagy.count, "alerta enviada", plural: "alertas enviadas") %></p>
+    <%= link_to new_alert_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+      <%= icon "plus", class: "w-4 h-4" %>
+      Nueva alerta
+    <% end %>
+  </div>
+
+  <div class="<%= card_classes("overflow-hidden") %>">
+    <% if @alerts.any? %>
+      <div class="divide-y divide-line-soft dark:divide-slate-700">
+        <% @alerts.each do |alert| %>
+          <div class="relative group">
+            <%= render "alerts/alert", alert: alert %>
+            <%= button_to alert_path(alert), method: :delete,
+                  form: { class: "absolute top-3 right-3", data: { turbo_confirm: "¿Eliminar la alerta «#{alert.title}»?" } },
+                  aria: { label: "Eliminar alerta" },
+                  class: "w-8 h-8 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
+              <%= icon "trash-2", class: "w-4 h-4" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <% if @pagy.last > 1 %>
+        <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-line-soft dark:border-slate-700">
+          <p class="text-[12.5px] font-medium text-ink-500 dark:text-slate-400">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
+          <%== @pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="px-6 py-10 text-center">
+        <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Aún no se han enviado alertas</p>
+        <p class="mt-1 text-[12.5px] text-ink-500 dark:text-slate-400">Las alertas aparecen en la campana de todos los participantes a los que van dirigidas.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -47,15 +47,17 @@ module ApplicationHelper
     end
   end
 
+  # options[:class] sets the size (and initials font size); the round shape and gradient fallback are always applied.
   def current_user_avatar_tag(options = {})
-    css_classes = options[:class] || "w-9 h-9 rounded-full object-cover border-2 border-[#1C7DA5]"
+    size_classes = options[:class] || "w-9 h-9 text-[13px]"
+    participant = Current.user&.participant
 
-    if Current.user&.participant&.avatar&.attached?
-      image_tag Current.user.participant.avatar, class: css_classes
+    if participant&.avatar&.attached?
+      image_tag participant.avatar.variant(:thumb), alt: "Tu foto de perfil", class: "#{size_classes} rounded-full object-cover shrink-0"
     else
-      initials = Current.user&.participant&.full_name&.split&.map(&:first)&.join&.upcase || "FSY"
+      initials = participant&.full_name.to_s.split.map(&:first).first(2).join.upcase.presence || "FSY"
 
-      content_tag(:div, initials, class: "#{css_classes} bg-blue-600 text-white flex items-center justify-center font-bold text-sm")
+      content_tag(:span, initials, class: "#{size_classes} rounded-full shrink-0 bg-avatar-gradient text-white font-bold flex items-center justify-center")
     end
   end
 end

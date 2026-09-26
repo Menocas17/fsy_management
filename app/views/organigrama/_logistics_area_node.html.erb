@@ -1,0 +1,11 @@
+<div class="<%= card_classes("inline-block w-full md:w-auto md:min-w-48 text-left px-4 py-3") %>" data-logistics-area="<%= area&.name || "sin-area" %>">
+  <p class="text-[10px] font-bold tracking-[.08em] uppercase text-amber-700 dark:text-cat-amber"><%= area&.name || "Sin área asignada" %></p>
+  <div class="mt-2 space-y-1.5">
+    <% members.each do |member| %>
+      <div class="flex items-center gap-2">
+        <%= render(AvatarComponent.new(participant: member, size: :sm)) %>
+        <p class="text-[11.5px] font-semibold text-ink-700 dark:text-slate-300"><%= member.full_name %></p>
+      </div>
+    <% end %>
+  </div>
+</div>

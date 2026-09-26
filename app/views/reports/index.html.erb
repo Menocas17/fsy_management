@@ -1,0 +1,116 @@
+<% content_for :title, "Reportes" %>
+<% content_for :eyebrow, "Gestión" %>
+<%
+  card = card_classes("p-5 flex flex-col gap-3 h-full")
+  action = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition"
+  secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  inert = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-ink-300 dark:text-slate-500 cursor-not-allowed"
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 space-y-6">
+  <% if can_import_participants? %>
+    <section class="<%= card_classes("p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4") %>">
+      <span class="w-11 h-11 shrink-0 rounded-[13px] bg-primary-50 dark:bg-primary-700/30 text-primary-600 dark:text-primary-100 flex items-center justify-center">
+        <%= icon "file-spreadsheet", class: "w-5 h-5" %>
+      </span>
+      <div class="flex-1 min-w-0">
+        <h2 class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Carga masiva de participantes</h2>
+        <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400">
+          Subí el Excel del registro y se crean las fichas en bloque. Te decimos fila por fila qué entró y qué no.
+        </p>
+      </div>
+      <%= link_to new_participant_import_path, class: "#{action} shrink-0" do %>
+        <%= icon "upload", class: "w-4 h-4" %>
+        Cargar participantes
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if can_view_participant_reports? %>
+    <section>
+      <h2 class="mb-3 text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Listas para imprimir</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <%
+          printables = [
+            { title: "Participantes", text: "Todos los jóvenes agrupados por compañía, con edad, estaca, cuarto y teléfono.",
+              icon: "users", url: participants_reports_path,
+              extras: [ [ "Solo mujeres", participants_reports_path(scope: "mujeres") ],
+                        [ "Solo hombres", participants_reports_path(scope: "hombres") ] ] },
+            { title: "Staff", text: "El personal del evento con su rol, compañía y datos de contacto.",
+              icon: "user-check", url: participants_reports_path(scope: "staff") },
+            { title: "Cuartos", text: "Cada cuarto con sus ocupantes y la compañía a la que pertenecen.",
+              icon: "bed-double", url: rooms_reports_path },
+            { title: "Agenda", text: "Los seis días del evento con horario, lugar y a quién va dirigida cada actividad.",
+              icon: "calendar-days", url: agenda_reports_path }
+          ]
+        %>
+        <% printables.each do |report| %>
+          <article class="<%= card %>">
+            <div class="flex items-center gap-2.5">
+              <%= icon report[:icon], class: "w-[18px] h-[18px] text-primary-500 dark:text-primary-300" %>
+              <h3 class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100"><%= report[:title] %></h3>
+            </div>
+            <p class="text-[13px] leading-relaxed text-ink-500 dark:text-slate-400 flex-1"><%= report[:text] %></p>
+            <div class="flex flex-wrap gap-2">
+              <%= link_to report[:url], target: "_blank", rel: "noopener", class: action do %>
+                <%= icon "printer", class: "w-4 h-4" %>
+                Generar PDF
+              <% end %>
+              <% Array(report[:extras]).each do |label, url| %>
+                <%= link_to label, url, target: "_blank", rel: "noopener", class: secondary %>
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if can_view_logistics_reports? %>
+    <section>
+      <h2 class="mb-3 text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Logística y finanzas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
+        <% [
+             { title: "Inventario", text: "Existencias de cada inventario con su mínimo, estado y ubicación, listo para el conteo físico.",
+               icon: "package", url: inventory_reports_path, extras: [ [ "Ver el módulo", inventories_path ] ] },
+             { title: "Etiquetas QR", text: "Hoja para recortar y pegar en las cajas: el QR, el nombre y el código de cada artículo.",
+               icon: "tags", url: labels_reports_path }
+           ].each do |report| %>
+          <article class="<%= card %>">
+            <div class="flex items-center gap-2.5">
+              <%= icon report[:icon], class: "w-[18px] h-[18px] text-primary-500 dark:text-primary-300" %>
+              <h3 class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100"><%= report[:title] %></h3>
+            </div>
+            <p class="text-[13px] leading-relaxed text-ink-500 dark:text-slate-400 flex-1"><%= report[:text] %></p>
+            <div class="flex flex-wrap gap-2">
+              <%= link_to report[:url], target: "_blank", rel: "noopener", class: action do %>
+                <%= icon "printer", class: "w-4 h-4" %>
+                Generar PDF
+              <% end %>
+              <% Array(report[:extras]).each do |label, url| %>
+                <%= link_to label, url, class: secondary %>
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <%# Estos dos esperan a que exista el modelo de gastos y la carga de ajustes en bloque. %>
+        <% [
+             { title: "Ajustes de inventario", text: "Subir un archivo con entradas y salidas en bloque, para no ajustar artículo por artículo.", icon: "upload", label: "Subir ajustes" },
+             { title: "Reporte de gastos", text: "Gastos del evento por área y por categoría, con totales para tesorería.", icon: "wallet", label: "Generar PDF" }
+           ].each do |report| %>
+          <article class="<%= card %>">
+            <div class="flex items-center gap-2.5">
+              <%= icon report[:icon], class: "w-[18px] h-[18px] text-ink-300 dark:text-slate-500" %>
+              <h3 class="text-[14.5px] font-bold text-ink-500 dark:text-slate-400"><%= report[:title] %></h3>
+              <span class="ml-auto text-[10px] font-bold tracking-[.06em] uppercase px-2 py-0.5 rounded-full bg-canvas dark:bg-slate-700 text-ink-300 dark:text-slate-500">Pronto</span>
+            </div>
+            <p class="text-[13px] leading-relaxed text-ink-300 dark:text-slate-500 flex-1"><%= report[:text] %></p>
+            <span aria-disabled="true" class="<%= inert %>"><%= report[:label] %></span>
+          </article>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

@@ -1,0 +1,7 @@
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Registro", "calendar" %>
+  <div>
+    <%= info_row "Fecha de registro", "calendar", participant.created_at&.strftime("%d/%m/%Y") %>
+    <%= info_row "Última actualización", "clock", participant.updated_at&.strftime("%d/%m/%Y") %>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+<%
+  alerts = Alert.visible_to(Current.user&.participant).recent.limit(5).to_a
+  unread = Current.user&.unread_alerts_count.to_i
+  badge = "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cat-rose text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-surface dark:border-slate-800"
+%>
+<%= link_to notifications_path, aria: { label: "Notificaciones#{unread.positive? ? ", #{unread} sin leer" : ""}" },
+      class: "md:hidden relative w-8 h-8 rounded-[9px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300" do %>
+  <%= icon "bell", class: "w-[17px] h-[17px]" %>
+  <% if unread.positive? %><span class="<%= badge %>" data-unread-count><%= unread %></span><% end %>
+<% end %>
+<div data-controller="dropdown" class="relative hidden md:block">
+  <button type="button" data-notifications-trigger aria-haspopup="true"
+          aria-label="Notificaciones<%= ", #{unread} sin leer" if unread.positive? %>"
+          data-action="click->dropdown#toggle click@window->dropdown#hide"
+          class="relative w-10 h-10 rounded-[11px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300 hover:text-ink-900 dark:hover:text-slate-100 cursor-pointer transition">
+    <%= icon "bell", class: "w-5 h-5" %>
+    <% if unread.positive? %><span class="<%= badge %>" data-unread-count><%= unread %></span><% end %>
+  </button>
+  <div class="hidden absolute right-0 top-full mt-2 w-96 z-50 overflow-hidden bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[16px] shadow-lg"
+       data-dropdown-target="menu">
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft dark:border-slate-700">
+      <p class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Notificaciones</p>
+      <% if can_manage_alerts? %>
+        <%= link_to "Nueva alerta", new_alert_path, class: "text-[12px] font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+      <% end %>
+    </div>
+    <% if alerts.any? %>
+      <div class="max-h-96 overflow-y-auto divide-y divide-line-soft dark:divide-slate-700">
+        <%= render partial: "alerts/alert", collection: alerts, as: :alert, locals: { compact: true } %>
+      </div>
+      <%= link_to "Ver todas", notifications_path,
+            class: "block px-5 py-3 border-t border-line-soft dark:border-slate-700 text-center text-[12.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+    <% else %>
+      <%= render "notifications/empty_state" %>
+    <% end %>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class InfoTileComponent < ViewComponent::Base
+  # icon is a Lucide icon name (e.g. "users"), rendered through rails_icons.
   def initialize(title:, icon:, data:)
     @title = title
     @icon = icon

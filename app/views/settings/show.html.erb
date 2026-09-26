@@ -1,0 +1,59 @@
+<% content_for :title, "Configuración" %>
+<% content_for :eyebrow, "Cuenta" %>
+<% back_to "Inicio", dashboard_path %>
+<% card_heading = "flex items-center gap-[9px] mb-[18px] text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300" %>
+
+<div class="px-4 md:px-8 pt-6 md:pt-7 pb-10" data-controller="preferences">
+  <div class="max-w-[640px] flex flex-col gap-5">
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-account">
+      <h2 id="settings-account" class="<%= card_heading %>">
+        <%= icon "id-card", class: "w-[17px] h-[17px]" %>
+        Cuenta
+      </h2>
+      <div>
+        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">Correo electrónico</p>
+        <p class="mt-0.5 text-sm font-semibold text-ink-900 dark:text-slate-100 break-all"><%= Current.user.email_address %></p>
+      </div>
+      <div class="mt-4 pt-4 border-t border-line-soft dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-semibold text-ink-900 dark:text-slate-100">Contraseña</p>
+          <p class="mt-0.5 text-[12.5px] text-ink-500 dark:text-slate-400">Te enviaremos un enlace para restablecer tu contraseña.</p>
+        </div>
+        <%= button_to send_password_reset_settings_path, method: :post,
+              class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 cursor-pointer transition" do %>
+          <%= icon "key-round", class: "w-4 h-4" %>
+          Cambiar contraseña
+        <% end %>
+      </div>
+    </section>
+
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-appearance">
+      <h2 id="settings-appearance" class="<%= card_heading %>">
+        <%= icon "sun", class: "w-[17px] h-[17px]" %>
+        Apariencia
+      </h2>
+      <%= render(ToggleComponent.new(id: "theme-toggle", label: "Modo oscuro",
+            description: "Cambia la apariencia de la aplicación a un tema oscuro.",
+            action: "toggleTheme", target: "themeToggle")) %>
+    </section>
+
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-accessibility">
+      <h2 id="settings-accessibility" class="<%= card_heading %>">
+        <%= icon "eye", class: "w-[17px] h-[17px]" %>
+        Accesibilidad
+      </h2>
+      <div class="flex flex-col divide-y divide-line-soft dark:divide-slate-700">
+        <div class="pb-4">
+          <%= render(ToggleComponent.new(id: "reduce-motion-toggle", label: "Reducir movimiento",
+                description: "Minimiza las animaciones y transiciones en toda la aplicación.",
+                action: "toggleMotion", target: "motionToggle")) %>
+        </div>
+        <div class="pt-4">
+          <%= render(ToggleComponent.new(id: "text-size-toggle", label: "Texto grande",
+                description: "Aumenta el tamaño del texto para facilitar la lectura.",
+                action: "toggleTextSize", target: "textSizeToggle")) %>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

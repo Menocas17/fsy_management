@@ -25,14 +25,23 @@
       <span><%= @text %></span>
     </div>
   </button>
+<% elsif @is_nav && disabled? %>
+  <span aria-disabled="true" title="Próximamente" class="<%= styles %> text-ink-300 dark:text-slate-500 cursor-not-allowed">
+    <% if @lucide_icon %>
+      <%= helpers.icon(@lucide_icon, class: "w-[19px] h-[19px] shrink-0") %>
+    <% elsif @secondary_icon.present? %>
+      <%= image_tag(@secondary_icon, class: "w-[19px] h-[19px] shrink-0 opacity-50") %>
+    <% end %>
+    <span><%= @text %></span>
+  </span>
 <% elsif @is_nav %>
-  <%= link_to @url, class: "#{active_classes} #{styles}" do %>
-    <div class="flex gap-3 items-center">
-      <% if current_icon.present? %>
-        <%= image_tag(current_icon, class: "w-[20px] h-[20px]") %>
-      <% end %>
-      <span><%= @text %></span>
-    </div>
+  <%= link_to @url, class: "#{styles} #{active_classes}", aria: { current: (active? ? "page" : nil) } do %>
+    <% if @lucide_icon %>
+      <%= helpers.icon(@lucide_icon, class: "w-[19px] h-[19px] shrink-0") %>
+    <% elsif current_icon.present? %>
+      <%= image_tag(current_icon, class: "w-[19px] h-[19px] shrink-0") %>
+    <% end %>
+    <span><%= @text %></span>
   <% end %>
 <% else %>
   <%= link_to @url, class: styles do %>

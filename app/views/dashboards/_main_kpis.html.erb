@@ -1,29 +1,35 @@
-<section class="grid grid-cols-2 lg:flex w-full gap-9">
-  <div class="  inline-block p-4 rounded-lg text-center  flex-1 border bg-white border-slate-100 shadow-lg">
-    <div class="flex gap-3 items-center justify-center">
-      <div class="bg-green-100 rounded-lg p-2">
-        <%= icon "user", class: "text-green-700"%>
-      </div>
-      <h3 class="text-gray-500 ">Total de jovenes</h3>
-    </div>
-    <p class="font-bold text-3xl mt-3"><%= total_jovenes %></p>
-  </div>
-  <div class=" inline-block p-4 rounded-lg text-center flex-1 col-span-2 order-1 bg-white border-slate-100 shadow-lg">
-    <div class="flex gap-3 items-center justify-center"">
-      <div class="bg-violet-100 rounded-lg p-2">
-        <%= icon "users", class: "text-violet-700"%>
-      </div>
-      <h3 class="text-gray-500 ">Total de personas</h3>
-    </div>
-    <p class="font-bold text-3xl mt-3"><%= total_participants%></p>
-  </div>
-  <div class=" inline-block p-4 rounded-lg text-center flex-1 bg-white border-slate-100 shadow-lg">
-    <div class="flex gap-3 items-center justify-center"">
-      <div class="bg-yellow-100 rounded-lg p-2">
-        <%= icon "user-star", class:"text-yellow-700"%>
-      </div>
-      <h3 class="text-gray-500 ">Total de staff</h3>
-    </div>
-    <p class="font-bold text-3xl mt-3"><%= total_staff%></p>
-  </div>
+<%
+  # Icono grande junto al número, y cada tarjeta lleva a su lista: la cifra es la puerta de entrada.
+  kpis = [
+    { key: "total_jovenes", label: "Total de jóvenes", value: total_jovenes, icon: "user",
+      tone: "bg-cat-green", url: participants_path },
+    { key: "total_participants", label: "Total de personas", value: total_participants, icon: "users",
+      tone: "bg-cat-indigo", url: nil },
+    { key: "total_staff", label: "Total de staff", value: total_staff, icon: "user-star",
+      tone: "bg-cat-amber", url: staff_participants_path }
+  ]
+  card = "flex items-center gap-4 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-5 py-[18px] md:px-6"
+%>
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
+  <% kpis.each do |kpi| %>
+    <%
+      body = capture do %>
+        <span class="w-[52px] h-[52px] rounded-[14px] flex items-center justify-center shrink-0 text-white <%= kpi[:tone] %>">
+          <%= icon kpi[:icon], class: "w-6 h-6" %>
+        </span>
+        <span class="min-w-0">
+          <span class="block text-[34px] font-extrabold leading-none tracking-tight text-ink-900 dark:text-slate-100 tabular-nums" data-kpi="<%= kpi[:key] %>"><%= kpi[:value] %></span>
+          <span class="block mt-1 text-[13px] font-semibold text-ink-500 dark:text-slate-400 truncate"><%= kpi[:label] %></span>
+        </span>
+        <% if kpi[:url] %>
+          <%= icon "arrow-right", class: "w-[18px] h-[18px] ml-auto shrink-0 text-ink-300 dark:text-slate-500" %>
+        <% end %>
+      <% end
+    %>
+    <% if kpi[:url] %>
+      <%= link_to kpi[:url], data: { kpi_link: kpi[:key] }, class: "#{card} hover:border-primary-300 dark:hover:border-primary-300 transition" do %><%= body %><% end %>
+    <% else %>
+      <div class="<%= card %>"><%= body %></div>
+    <% end %>
+  <% end %>
 </section>

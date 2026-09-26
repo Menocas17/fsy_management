@@ -1,0 +1,16 @@
+<%# Inner layers inherit the wrapper's radius, so profile avatars stay square while list avatars stay round. %>
+<% if has_avatar?%>
+    <div class="<%= css_classes %> relative overflow-hidden" data-controller="avatar">
+    <div class="<%= avatar_colors_for(@participant.full_name) %> absolute inset-0 flex items-center justify-center font-bold rounded-[inherit]">
+      <%= initials %>
+    </div>
+    <%= image_tag avatar_url, width: 40, height: 40,
+          data: { avatar_target: "image", action: "load->avatar#loaded" },
+          class: "absolute inset-0 h-full w-full rounded-[inherit] object-cover bg-slate-100 opacity-0 transition-opacity duration-200",
+          alt: "Avatar de #{@participant.full_name}" %>
+  </div>
+<%else%>
+  <div class=" <%= avatar_colors_for(@participant.full_name)%> flex items-center justify-center font-bold  <%= css_classes%>">
+    <%= initials%>
+  </div>
+<%end%>

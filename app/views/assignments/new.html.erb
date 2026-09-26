@@ -1,0 +1,9 @@
+<% content_for :title, "Nueva asignación" %>
+<% content_for :eyebrow, "Participantes" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-2xl mx-auto">
+  <p class="mb-4 text-[13px] font-medium text-ink-500 dark:text-slate-400">
+    Para <span class="font-bold text-ink-900 dark:text-slate-100"><%= @participant.full_name %></span> ·
+    <%= Participant.role_label(@participant.rol) %>
+  </p>
+  <%= render "assignments/form", assignment: @assignment, participant: @participant %>
+</div>

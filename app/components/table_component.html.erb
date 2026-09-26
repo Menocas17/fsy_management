@@ -1,56 +1,69 @@
-<section class="mt-5">
-  <div class="overflow-x-auto shadow-md rounded-lg border border-gray-200">
-    <table class="w-full text-left border-collapse bg-white">
+<div class="bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md overflow-hidden">
+  <div class="overflow-x-auto px-7">
+    <table class="w-full text-left border-collapse">
       <thead>
-        <tr class="bg-linear-to-tr from-[#095581] via-[#238db4] to-[#3c9baa] text-center text-white">
-          <th class="py-3 px-4">Nombre Completo</th>
-          <th class="py-3 px-4 hidden sm:table-cell">Estaca</th>
-          <th class="py-3 px-4 hidden lg:table-cell">Barrio</th>
+        <tr class="border-b border-line-soft dark:border-slate-700">
+          <th class="<%= header_cell_classes %>">Nombre completo</th>
+          <th class="<%= header_cell_classes %>">Estaca</th>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
           <% if @is_staff %>
-            <th class="py-3 px-4">Rol</th>
+            <th class="<%= header_cell_classes %>">Rol</th>
           <% end %>
-          <th class="py-3 px-4 hidden lg:table-cell">Edad</th>
-          <th class="py-3 px-4 hidden lg:table-cell">Genero</th>
-          <th class="py-3 px-4">Compania</th>
-          <th class="py-3 px-4 <%= show_cell %>">Cuarto</th>
-          <th class="py-3 px-4 hidden lg:table-cell"></th>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Edad</th>
+          <th class="<%= header_cell_classes %> hidden xl:table-cell">Género</th>
+          <th class="<%= header_cell_classes %>">Compañía</th>
+          <th class="<%= header_cell_classes %> hidden lg:table-cell">Cuarto</th>
+          <th class="<%= header_cell_classes %>"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200 text-sm text-gray-600 text-center">
+      <tbody class="divide-y divide-line-soft dark:divide-slate-700">
         <% @participants.each do |participant| %>
-          <tr class="odd:bg-gray-100">
-            <td class="py-3 px-4 font-medium text-gray-900 underline">
-              <%= link_to participant.full_name, participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" } %>
+          <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors">
+            <td class="<%= cell_classes %>">
+              <div class="flex items-center gap-3">
+                <%= render(AvatarComponent.new(participant: participant)) %>
+                <%= link_to participant.full_name,
+                      participant_path(participant, from: from_path, return_to: request.fullpath),
+                      data: { turbo_frame: "_top" },
+                      class: "font-semibold text-ink-900 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-300" %>
+              </div>
             </td>
-            <td class="py-3 px-4 hidden sm:table-cell">
-              <%= participant.stake.titleize %>
+            <td class="<%= cell_classes %>">
+              <%= render(StakeSpanComponent.new(stake: participant.stake)) %>
             </td>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.ward&.titleize %>
-            </td>
+            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.ward&.titleize || "—" %></td>
             <% if @is_staff %>
-              <td class="py-3 px-4">
-                <%= render(RoleSpanComponent.new(role: participant.rol))%>
+              <td class="<%= cell_classes %>">
+                <%= render(RoleSpanComponent.new(role: participant.rol)) %>
               </td>
             <% end %>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.age %>
+            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.age %></td>
+            <td class="<%= cell_classes %> hidden xl:table-cell"><%= gender_label(participant) %></td>
+            <td class="<%= cell_classes %>"><%= company_name(participant) %></td>
+            <td class="<%= cell_classes %> hidden lg:table-cell">
+              <% if participant.room.present? %>
+                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-canvas dark:bg-slate-700 border border-line dark:border-slate-600 text-xs font-semibold"><%= participant.room %></span>
+              <% else %>
+                —
+              <% end %>
             </td>
-            <td class="py-3 px-4 hidden lg:table-cell">
-              <%= participant.genre.capitalize %>
-            </td>
-            <td class="py-3 px-4">
-              <%= participant.company %>
-            </td>
-            <td class="py-3 px-4 <%= show_cell %>">
-              <%= participant.room %>
-            </td>
-            <td>
-              <%= link_to "Ver registro", participant_path(participant, from: from_path, return_to: request.fullpath), data: { turbo_frame: "_top" }, class: "text-gray-900 underline hidden lg:table-cell" %>
+            <td class="py-2">
+              <div class="flex justify-end gap-1">
+                <%= link_to participant_path(participant, from: from_path, return_to: request.fullpath),
+                      data: { turbo_frame: "_top" }, class: row_button_classes, title: "Ver perfil" do %>
+                  <%= icon "eye", class: "w-[17px] h-[17px]" %>
+                <% end %>
+                <% if editable?(participant) %>
+                  <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath),
+                        data: { turbo_frame: "_top" }, class: row_button_classes, title: "Editar" do %>
+                    <%= icon "square-pen", class: "w-[17px] h-[17px]" %>
+                  <% end %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
-</section>
+</div>

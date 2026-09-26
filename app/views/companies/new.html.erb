@@ -1,0 +1,8 @@
+<% content_for :title, "Nueva compañía" %>
+<% content_for :eyebrow, "Compañías" %>
+<% back_to "Compañías", companies_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
+  <%= render "companies/form_banner", company: @company %>
+  <%= render "companies/form", company: @company %>
+  <%= render "companies/form_actions", company: @company %>
+</div>

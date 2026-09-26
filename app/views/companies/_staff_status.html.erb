@@ -1,0 +1,8 @@
+<%
+  label, classes = {
+    complete: [ "Completa", "bg-cat-green/15 text-cat-green" ],
+    missing_counselor: [ "Falta consejero", "bg-cat-amber/20 text-amber-700 dark:text-cat-amber" ],
+    no_counselors: [ "Sin consejeros", "bg-cat-rose/15 text-cat-rose" ]
+  }.fetch(company.staff_status)
+%>
+<span class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap <%= classes %>"><%= label %></span>

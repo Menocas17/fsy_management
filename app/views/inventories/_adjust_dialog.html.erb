@@ -1,0 +1,69 @@
+<%# Un solo cuadro por pantalla: los botones de la tabla, de la ficha y del escáner lo abren con sus datos. %>
+<dialog data-inventory-adjust-target="modal" data-action="click->inventory-adjust#clickOutside" aria-modal="true"
+        class="p-0 m-auto w-full max-w-sm rounded-[18px] shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm bg-transparent">
+  <%= form_with url: "#", method: :post, data: { inventory_adjust_target: "form" },
+                class: card_classes("p-5 text-left") do |form| %>
+    <p class="text-[16px] font-extrabold text-ink-900 dark:text-slate-100" data-inventory-adjust-target="title">Artículo</p>
+    <p class="mt-1 mb-4 text-[12.5px] font-semibold text-ink-500 dark:text-slate-400" data-inventory-adjust-target="subtitle"></p>
+
+    <input type="hidden" name="sign" value="1" data-inventory-adjust-target="sign">
+    <input type="hidden" name="source" value="manual" data-inventory-adjust-target="source">
+
+    <div class="grid grid-cols-2 gap-1.5 p-1 rounded-[13px] bg-canvas dark:bg-slate-900">
+      <button type="button" data-action="inventory-adjust#add" data-inventory-adjust-target="plus" aria-pressed="true"
+              class="h-10 rounded-[10px] inline-flex items-center justify-center gap-1.5 text-[13px] font-bold text-ink-700 dark:text-slate-300 cursor-pointer transition">
+        <%= icon "plus", class: "w-4 h-4" %>
+        Sumar
+      </button>
+      <button type="button" data-action="inventory-adjust#subtract" data-inventory-adjust-target="minus" aria-pressed="false"
+              class="h-10 rounded-[10px] inline-flex items-center justify-center gap-1.5 text-[13px] font-bold text-ink-700 dark:text-slate-300 cursor-pointer transition">
+        <%= icon "minus", class: "w-4 h-4" %>
+        Restar
+      </button>
+    </div>
+
+    <div class="flex items-center justify-center gap-3 my-4">
+      <button type="button" data-action="inventory-adjust#step" data-step="-1" aria-label="Menos uno"
+              class="w-10 h-10 rounded-[12px] border border-line dark:border-slate-600 flex items-center justify-center text-ink-700 dark:text-slate-300 hover:border-primary-500 cursor-pointer transition">
+        <%= icon "minus", class: "w-[18px] h-[18px]" %>
+      </button>
+      <input type="number" name="quantity" min="1" step="1" value="1" inputmode="numeric" required
+             data-inventory-adjust-target="quantity" data-action="input->inventory-adjust#preview" aria-label="Cantidad"
+             class="w-24 h-14 text-center text-[30px] font-extrabold tabular-nums rounded-[12px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-900 text-ink-900 dark:text-slate-100 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500">
+      <button type="button" data-action="inventory-adjust#step" data-step="1" aria-label="Más uno"
+              class="w-10 h-10 rounded-[12px] border border-line dark:border-slate-600 flex items-center justify-center text-ink-700 dark:text-slate-300 hover:border-primary-500 cursor-pointer transition">
+        <%= icon "plus", class: "w-[18px] h-[18px]" %>
+      </button>
+    </div>
+
+    <div>
+      <%= label_tag :reason, "Motivo", class: field_label_classes %>
+      <select name="reason" id="reason" class="<%= field_select_classes %>">
+        <% InventoryMovement::REASON_LABELS.except("inicial").each do |key, label| %>
+          <option value="<%= key %>"><%= label %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="mt-3">
+      <%= label_tag :note, "Nota (opcional)", class: field_label_classes %>
+      <%= text_field_tag :note, nil, placeholder: "Ej. entregado a la compañía 4", class: field_input_classes %>
+    </div>
+
+    <p class="mt-4 px-3 py-2.5 rounded-[11px] bg-canvas dark:bg-slate-900 flex items-center justify-between text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">
+      <span>Queda en</span>
+      <b class="tabular-nums" data-inventory-adjust-target="preview">—</b>
+    </p>
+
+    <div class="flex gap-2 mt-4">
+      <button type="button" data-action="inventory-adjust#close"
+              class="flex-1 h-10 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+        Cancelar
+      </button>
+      <button type="submit"
+              class="flex-1 h-10 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition">
+        Guardar ajuste
+      </button>
+    </div>
+  <% end %>
+</dialog>

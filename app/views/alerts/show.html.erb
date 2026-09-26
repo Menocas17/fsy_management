@@ -1,0 +1,13 @@
+<% content_for :title, @alert.title %>
+<% content_for :eyebrow, "Actividad" %>
+<% content_for :heading, "Alerta" %>
+<% back_to "Alertas", alerts_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-2xl mx-auto">
+  <div class="<%= card_classes("overflow-hidden") %>">
+    <%= render "alerts/alert", alert: @alert %>
+  </div>
+  <%= link_to notifications_path, class: "mt-5 inline-flex items-center gap-2 text-[13px] font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100" do %>
+    <%= icon "arrow-left", class: "w-4 h-4" %>
+    Volver a notificaciones
+  <% end %>
+</div>

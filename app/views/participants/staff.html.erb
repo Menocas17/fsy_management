@@ -1,57 +1,18 @@
-<div class="flex justify-between mb-5 px-3">
-  <h1 class="font-bold text-2xl">Staff</h1>
-  <%if Current.user&.admin_or_staff_manager?%>
-    <%= render(ButtonComponent.new(text:"Nuevo", url: new_participant_path, type:"primary"))%>
-  <%end%>
-</div>
-<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-  <%= form_with url: staff_participants_path, method: :get, data: { turbo_frame: "participants_table", turbo_action: "advance" }, class: "flex flex-wrap gap-4 items-center" do |f| %>
-    <div class="flex-1 min-w-50">
-      <%= f.text_field :query, 
-            value: params[:query], 
-            placeholder: "Buscar por nombre...", 
-            class: "w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            oninput: "this.form.requestSubmit()" %>
-    </div>
-    <div class="w-48">
-      <%= f.select :stake, 
-            options_for_select(Participant.stakes.keys.map { |k| [k.titleize, k] }, params[:stake]), 
-            { include_blank: "Todas las Estacas" }, 
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            onchange: "this.form.requestSubmit()" %>
-    </div>
-    <div class="w-48">
-      <%= f.select :ward, 
-            options_for_select(Participant.wards.keys.map { |k| [k.titleize, k] }, params[:ward]), 
-            { include_blank: "Todos los Barrios" }, 
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            onchange: "this.form.requestSubmit()" %>
-    </div>
-    <div class="w-40">
-      <%= f.select :genre, 
-            options_for_select([["Hombre", "H"], ["Mujer", "M"]], params[:genre]), 
-            { include_blank: "Todos los Géneros" }, 
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            onchange: "this.form.requestSubmit()" %>
-    </div>
-    <div class="w-40">
-      <%= f.number_field :company, 
-            value: params[:company], 
-            placeholder: "Compañía...", 
-            class: "w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            oninput: "this.form.requestSubmit()" %>
-    </div>
-    <% staff_roles = Participant.rols.keys.reject { |k| k == "joven" } %>
-    <div class="w-40">
-      <%= f.select :rol, 
-            options_for_select(staff_roles.map { |k| [k.titleize, k] }, params[:rol]), 
-            { include_blank: "Todos los roles" }, 
-            class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none",
-            onchange: "this.form.requestSubmit()" %>
-    </div>
-    <%= link_to "Limpiar", participants_path, class: "text-xs text-gray-500 hover:text-red-500 underline" %>
+<% content_for :title, "Staff" %>
+<% content_for :eyebrow, "Participantes" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <p class="text-[13px] font-medium text-ink-500 dark:text-slate-400"><%= pluralize(@pagy.count, "miembro del staff", plural: "miembros del staff") %></p>
+    <% if can_create_participants? %>
+      <%= link_to new_participant_path, class: "inline-flex items-center gap-2 rounded-[11px] bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Nuevo participante
+      <% end %>
+    <% end %>
+  </div>
+  <%= render "filters", form_url: staff_participants_path, show_role: true %>
+  <%= turbo_frame_tag "participants_table" do %>
+    <%= render "results", participants: @participants, pagy: @pagy, is_staff: true,
+                          empty_message: "No hay personal que coincida con la búsqueda." %>
   <% end %>
 </div>
-<%= turbo_frame_tag "participants_table" do %>
-  <%= render(TableComponent.new(participants: @participants, is_staff:true))%>
-<% end %>

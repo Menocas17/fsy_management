@@ -1,0 +1,113 @@
+<% content_for :title, @inventory.name %>
+<% content_for :eyebrow, "Inventario" %>
+<% back_to "Inventario", inventories_path %>
+<%
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  filter_chip = ->(active) { "inline-flex items-center h-10 px-3.5 rounded-[11px] text-[13px] font-semibold transition #{active ? 'bg-primary-700 text-white shadow-sm' : 'border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700'}" }
+  low_count = @inventory.items.count { |item| item.low? || item.out? }
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10" data-controller="inventory-adjust">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="w-11 h-11 shrink-0 rounded-[13px] text-white flex items-center justify-center <%= inventory_tile_class(@inventory) %>">
+        <%= icon @inventory.icon, class: "w-5 h-5" %>
+      </span>
+      <div class="min-w-0">
+        <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100 truncate"><%= @inventory.name %></h1>
+        <p class="text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
+          <%= pluralize(@inventory.items.size, "artículo") %> · <%= low_count %> por agotarse · códigos <%= @inventory.code_prefix %>-0000
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to scan_inventories_path, class: secondary do %>
+        <%= icon "scan-qr-code", class: "w-4 h-4" %>
+        Escanear
+      <% end %>
+      <%= link_to labels_reports_path(inventory: @inventory.id), target: "_blank", rel: "noopener", class: secondary do %>
+        <%= icon "tags", class: "w-4 h-4" %>
+        Etiquetas QR
+      <% end %>
+      <% if can_manage_inventories? %>
+        <%= link_to edit_inventory_path(@inventory), class: secondary do %>
+          <%= icon "square-pen", class: "w-4 h-4" %>
+          Editar
+        <% end %>
+      <% end %>
+      <%= link_to new_inventory_item_path(@inventory), class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Nuevo artículo
+      <% end %>
+    </div>
+  </div>
+
+  <%= form_with url: inventory_path(@inventory), method: :get, class: "flex flex-wrap gap-2 mb-4" do |form| %>
+    <span class="relative flex items-center flex-1 min-w-[180px]">
+      <%= icon "search", class: "absolute left-3 w-4 h-4 text-ink-300 dark:text-slate-500" %>
+      <%= form.search_field :query, value: params[:query], placeholder: "Buscar artículo, código o ubicación…",
+            class: "#{field_input_classes} pl-9" %>
+    </span>
+    <%= link_to "Todos", inventory_path(@inventory, query: params[:query]), class: filter_chip.(params[:filter] != "low") %>
+    <%= link_to "Por agotarse", inventory_path(@inventory, query: params[:query], filter: "low"), class: filter_chip.(params[:filter] == "low") %>
+  <% end %>
+
+  <% if @items.any? %>
+    <div class="<%= card_classes("overflow-hidden") %>">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-line-soft dark:border-slate-700">
+              <% [ "Artículo", "Código", "Existencia", "Mínimo", "Estado", "" ].each_with_index do |header, index| %>
+                <th class="px-4 py-3 text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500 <%= index == 2 ? 'text-right' : index == 5 ? 'text-right' : 'text-left' %>"><%= header %></th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% @items.each do |item| %>
+              <tr class="border-b border-line-soft dark:border-slate-700 last:border-b-0" data-item-code="<%= item.code %>">
+                <td class="px-4 py-3">
+                  <%= link_to item.name, item, class: "text-[13.5px] font-bold text-ink-900 dark:text-slate-100 hover:underline" %>
+                  <% if item.location.present? %>
+                    <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= item.location %></span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-3 text-[12.5px] font-mono text-ink-500 dark:text-slate-400"><%= item.code %></td>
+                <td class="px-4 py-3 text-right text-[13.5px] font-bold tabular-nums text-ink-900 dark:text-slate-100" data-item-quantity>
+                  <%= item.quantity %> <span class="font-semibold text-ink-500 dark:text-slate-400"><%= item.unit %></span>
+                </td>
+                <td class="px-4 py-3 text-[13px] tabular-nums text-ink-500 dark:text-slate-400"><%= item.minimum %></td>
+                <td class="px-4 py-3"><%= inventory_status_chip(item) %></td>
+                <td class="px-4 py-3">
+                  <div class="flex justify-end gap-1">
+                    <% [ [ "-1", "minus", "Restar" ], [ "1", "plus", "Sumar" ] ].each do |sign, icon_name, label| %>
+                      <button type="button" data-action="inventory-adjust#open" aria-label="<%= label %> <%= item.name %>"
+                              data-adjust-item="<%= item.name %>" data-adjust-code="<%= item.code %>"
+                              data-adjust-inventory="<%= @inventory.name %>" data-adjust-stock="<%= item.quantity %>"
+                              data-adjust-unit="<%= item.unit %>" data-adjust-sign="<%= sign %>"
+                              data-adjust-url="<%= inventory_item_movements_path(item) %>"
+                              class="w-[30px] h-[30px] rounded-[9px] border border-line dark:border-slate-600 flex items-center justify-center text-ink-700 dark:text-slate-300 hover:border-primary-500 hover:text-primary-600 cursor-pointer transition">
+                        <%= icon icon_name, class: "w-[15px] h-[15px]" %>
+                      </button>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% if @pagy.pages > 1 %>
+      <nav class="mt-4 flex justify-center" aria-label="Paginación"><%== @pagy.series_nav(anchor_string: 'class="px-3 py-1.5 mx-0.5 rounded-lg text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700"') %></nav>
+    <% end %>
+  <% else %>
+    <div class="<%= card_classes("p-10 text-center") %>">
+      <p class="text-[15px] font-bold text-ink-900 dark:text-slate-100">
+        <%= params[:query].present? || params[:filter] == "low" ? "Nada que coincida con esa búsqueda" : "Este inventario todavía no tiene artículos" %>
+      </p>
+      <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400">Agregá el primero y su código QR se genera solo.</p>
+    </div>
+  <% end %>
+
+  <%= render "inventories/adjust_dialog" %>
+</div>

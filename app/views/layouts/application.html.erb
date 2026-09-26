@@ -9,11 +9,29 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('fsy:theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+          if (localStorage.getItem('fsy:reduce-motion') === 'true') {
+            document.documentElement.classList.add('reduce-motion');
+          }
+          if (localStorage.getItem('fsy:text-size') === 'large') {
+            document.documentElement.classList.add('text-lg-mode');
+          }
+        } catch (e) {
+          // localStorage unavailable (private browsing) — fall back to defaults
+        }
+      })();
+    </script>
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <%# El .ico va primero: es el que los navegadores pintan en la pestaña sin reescalar el de 512. %>
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.png" type="image/png" sizes="512x512">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
@@ -21,18 +39,22 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body>
+  <body class="h-dvh overflow-hidden bg-canvas text-ink-900 dark:bg-slate-900 dark:text-slate-100">
     <%= render "shared/toast"%>
-    <div class="flex h-screen">
+    <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
+    <div class="flex h-full">
       <%= render "shared/aside"%>
-      <div class="flex flex-col flex-1 h-full overflow-hidden">
+      <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <%= render "shared/top_menu"%>
-        <main class="container mx-auto flex-1 overflow-y-auto bg-slate-100">
+        <main class="flex-1 min-h-0 overflow-y-auto bg-canvas dark:bg-slate-900">
+          <%# En pantallas chicas el volver encabeza el contenido, lejos del botón de menú y con su etiqueta visible. %>
+          <% if content_for?(:back) %>
+            <div data-page-back-mobile class="sm:hidden px-4 pt-4 -mb-1"><%= yield :back %></div>
+          <% end %>
           <%= yield %>
         </main>
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>
   </body>
-</html>
 </html>

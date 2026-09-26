@@ -1,0 +1,10 @@
+<nav class="flex flex-col gap-1" aria-label="Navegación principal">
+  <% nav_sections.each do |section| %>
+    <% if section[:label] %>
+      <p class="px-3.5 mt-3 mb-0.5 text-[10.5px] font-bold tracking-[.08em] uppercase text-ink-300 dark:text-slate-500"><%= section[:label] %></p>
+    <% end %>
+    <% section[:items].each do |item| %>
+      <%= render(ButtonComponent.new(**item)) %>
+    <% end %>
+  <% end %>
+</nav>

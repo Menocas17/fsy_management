@@ -1,14 +1,12 @@
-<div class="mt-7 px-5">
-  <section class="border border-gray-200 rounded-xl shadow-[0_0_4px_#0000001a]">
-    <h3 class="font-bold text-lg bg-[#A1DFEC] px-3 py-2 rounded-t-xl">Informacion General</h3>
-    <dl class="mt-5 grid grid-cols-2 md:grid-cols-4 p-3">
-      <%= render(InfoTileComponent.new(title: "Compañia", icon: "company.svg", data: [@participant.company ]))%>
-      <%= render(InfoTileComponent.new(title: "Cuarto", icon: "room.svg", data: [@participant.room ] ))%>
-      <%= render(InfoTileComponent.new(title: "Consejeros", icon: "respond_to.svg", data: [@participant.m_person_in_charge, @participant.h_person_in_charge] ))%>
-      <%= render(InfoTileComponent.new(title: "Estaca", icon: "stake.svg", data: [@participant.stake.titleize ] ))%>
-      <%= render(InfoTileComponent.new(title: "Barrio", icon: "ward.svg", data: [@participant.ward&.titleize] ))%>
-      <%= render(InfoTileComponent.new(title: "Genero", icon: "gender.svg", data: [@participant.genre ] ))%>
-      <%= render(InfoTileComponent.new(title: "Identificacion", icon: "id.svg", data: [@participant.identity_document ] ))%>
-      <%= render(InfoTileComponent.new(title: "Camisa", icon: "shirt.svg", data: [@participant.shirt_number.capitalize ] ))%>
-    </dl>
-  </section>
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Información general", "layers" %>
+  <div>
+    <%= info_row "Compañía asignada", "building-2", participant.company&.name %>
+    <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
+    <%= info_row "Cuarto", "door-open", participant.room %>
+    <%= info_row "Consejeros a cargo", "users", [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
+    <%= info_row "Identificación", "id-card", participant.identity_document %>
+    <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>
+    <%= info_row "Talla de camisa", "shirt", participant.shirt_number&.upcase %>
+  </div>
+</section>

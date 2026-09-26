@@ -1,0 +1,15 @@
+<%
+  # Cabecera de tarjeta con la baldosa del icono, el mismo patrón que usan las tarjetas del inventario.
+  spacing = local_assigns.fetch(:spacing, "")
+  small = local_assigns.fetch(:size, "md") == "sm"
+%>
+<div class="flex items-center gap-3 <%= spacing %>">
+  <span data-card-icon="<%= icon_name %>" aria-hidden="true"
+        class="<%= small ? "w-[34px] h-[34px] rounded-[11px]" : "w-[38px] h-[38px] rounded-[12px]" %> shrink-0 flex items-center justify-center <%= tone %>">
+    <%= icon icon_name, class: small ? "w-[17px] h-[17px]" : "w-[19px] h-[19px]" %>
+  </span>
+  <div class="min-w-0">
+    <p class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300"><%= eyebrow %></p>
+    <h2 class="mt-px <%= small ? "text-[15px]" : "text-base" %> font-bold text-ink-900 dark:text-slate-100 truncate"><%= title %></h2>
+  </div>
+</div>

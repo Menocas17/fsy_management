@@ -7,7 +7,19 @@ es:
   activerecord:
     models:
       participant: 'Participante'
+      company: 'Compañía'
+      auxiliar_company: 'Compañía auxiliar'
     attributes:
+      auxiliar_company:
+        name: 'Nombre'
+        coordinator: 'Coordinador'
+        second_coordinator: 'Segundo coordinador'
+      company:
+        name: 'Nombre'
+        number: 'Número de compañía'
+        nickname: 'Nombre elegido'
+        dining_hall: 'Comedor'
+        auxiliar_company: 'Compañía auxiliar'
       participant:
         first_name: 'Primer Nombre'
         last_name: 'Segundo Nombre'
@@ -17,7 +29,8 @@ es:
         date_of_inscription: 'Fecha de Inscripción'
         shirt_numbrer: 'Número de camisa'
         room: 'Cuarto'
-        comapany: 'Compañia'
+        company: 'Compañia'
+        company_id: 'Compañía'
         m_person_in_charge: 'Persona a cargo (mujer)'
         h_person_in_charge: 'Persona a cargo (hombre)'
         allergies: 'Alergias'
@@ -27,6 +40,7 @@ es:
         additional_instructions: 'Notas adicionales'
         identity_document: 'Documento de Identidad'
         genre: 'Genero'
+        gender: 'Genero'
         phone_number: 'Número de telefono'
         email_address: 'Correo electrónico'
         emergency_contact_number: 'Número de emergencia'
