@@ -1,0 +1,21 @@
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if company.persisted? && full_company_access? %>
+      <%= button_to company_path(company), method: :delete,
+            form: { data: { turbo_confirm: "¿Seguro que deseas borrar #{company.name}? Sus jóvenes quedarán sin compañía." } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-[11px] text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar compañía
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", company.persisted? ? company_path(company) : companies_path,
+          class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+    <button type="submit" form="company-form"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
+      <%= icon "check", class: "w-4 h-4" %>
+      <%= company.persisted? ? "Guardar cambios" : "Crear compañía" %>
+    </button>
+  </div>
+</div>

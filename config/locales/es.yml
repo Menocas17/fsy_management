@@ -7,7 +7,19 @@ es:
   activerecord:
     models:
       participant: 'Participante'
+      company: 'Compañía'
+      auxiliar_company: 'Compañía auxiliar'
     attributes:
+      auxiliar_company:
+        name: 'Nombre'
+        coordinator: 'Coordinador'
+        second_coordinator: 'Segundo coordinador'
+      company:
+        name: 'Nombre'
+        number: 'Número de compañía'
+        nickname: 'Nombre elegido'
+        dining_hall: 'Comedor'
+        auxiliar_company: 'Compañía auxiliar'
       participant:
         first_name: 'Primer Nombre'
         last_name: 'Segundo Nombre'

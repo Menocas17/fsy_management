@@ -1,0 +1,58 @@
+<%# The body of an activity: shown in the side panel on desktop and inside the accordion on phones. %>
+<% notes = activity.notes_for(Current.user&.participant) %>
+<% last_alert = activity.alerts.recent.first %>
+
+<div class="flex flex-col gap-3">
+  <%= info_row "Horario", "clock", "#{spanish_date(activity.day)} · #{activity.time_range}" %>
+  <%= info_row "Lugar", "map-pin", activity.location %>
+  <%= info_row "Responsables", "user-check", activity.responsible_names.presence %>
+  <%= info_row "Alerta enviada a", "megaphone", activity.audience_label %>
+</div>
+
+<% if activity.description.present? %>
+  <div class="mt-4 pt-4 border-t border-line-soft dark:border-slate-700">
+    <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">Descripción</p>
+    <p class="mt-1 text-[12.5px] leading-relaxed text-ink-700 dark:text-slate-300"><%= activity.description %></p>
+  </div>
+<% end %>
+
+<% if notes.any? %>
+  <div class="mt-4 pt-4 border-t border-line-soft dark:border-slate-700 flex flex-col gap-2.5">
+    <p class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500">Notas por rol</p>
+    <% notes.each do |note| %>
+      <div class="rounded-[13px] px-3.5 py-3 bg-canvas dark:bg-slate-900/60" data-role-note="<%= note[:label].parameterize %>">
+        <p class="flex items-center gap-1.5 text-[10px] font-bold tracking-[.07em] uppercase text-ink-500 dark:text-slate-400">
+          <%= icon note[:icon], class: "w-3.5 h-3.5" %>
+          <%= note[:label] %>
+        </p>
+        <p class="mt-1.5 text-[12px] font-semibold leading-relaxed text-ink-700 dark:text-slate-300"><%= note[:text] %></p>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if last_alert %>
+  <div class="mt-4 pt-4 border-t border-line-soft dark:border-slate-700 flex flex-wrap items-center gap-2">
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-cat-green/15 text-green-700 dark:text-cat-green">
+      <%= icon "check", class: "w-3 h-3" %>
+      Alerta enviada
+    </span>
+    <span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400"><%= last_alert.created_at.strftime("%d/%m · %H:%M") %> · <%= last_alert.sender_name %></span>
+  </div>
+<% end %>
+
+<% if can_manage_agenda? %>
+  <div class="mt-4 flex gap-2.5">
+    <%= link_to edit_activity_path(activity), class: "flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+      <%= icon "square-pen", class: "w-4 h-4" %>
+      Editar
+    <% end %>
+    <%= button_to activity_path(activity), method: :delete,
+          form: { class: "flex-1", data: { turbo_confirm: "¿Eliminar «#{activity.title}»? Se avisará a los participantes." } },
+          class: "w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
+      <%= icon "trash-2", class: "w-4 h-4" %>
+      Eliminar
+    <% end %>
+  </div>
+  <p class="mt-2.5 text-[11px] font-medium text-ink-500 dark:text-slate-400">Cada cambio envía una alerta automática a quienes participan.</p>
+<% end %>

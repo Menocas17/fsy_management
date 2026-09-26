@@ -1,90 +1,135 @@
-<div class="px-3 md:px-7 pt-10">
-  <div class="flex justify-between mb-5 px-3">
-    <h1 class="font-bold text-2xl">Vista general de Compañías</h1>
-    <%= render(ButtonComponent.new(text: "Ver compañías", url: companies_path, type: "muted")) %>
+<% content_for :title, "Vista general" %>
+<% content_for :eyebrow, "Compañías" %>
+<%
+  secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  eyebrow = "text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300"
+  counselor_total = @companies.sum { |company| company.counselors.size }
+  men = @companies.map { |company| @gender_counts.fetch([ company.id, "H" ], 0) }
+  women = @companies.map { |company| @gender_counts.fetch([ company.id, "M" ], 0) }
+  kpis = [
+    [ "Compañías auxiliares", @auxiliar_companies.size, "network", "bg-cat-indigo/15 text-cat-indigo" ],
+    [ "Compañías", @companies.size, "building-2", "bg-cat-blue/15 text-cat-blue" ],
+    [ "Consejeros asignados", "#{counselor_total}/#{@companies.size * 2}", "user-check", "bg-cat-green/15 text-cat-green" ],
+    [ "Jóvenes en compañías", @jovenes_counts.values.sum, "users", "bg-cat-amber/20 text-amber-700 dark:text-cat-amber" ]
+  ]
+  dining_colors = { "Salón Nicaragua" => "#0093c5", "Salón Las Américas" => "#5965cd" }
+  groups = @auxiliar_companies.map { |auxiliar_company| [ auxiliar_company, @companies.select { |company| company.auxiliar_company_id == auxiliar_company.id } ] }
+  orphans = @companies.select { |company| company.auxiliar_company_id.nil? }
+  groups << [ nil, orphans ] if orphans.any?
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 space-y-5 md:space-y-6">
+  <div class="flex flex-wrap justify-end gap-2">
+    <%= link_to companies_path, class: secondary_link do %>
+      <%= icon "building-2", class: "w-4 h-4" %>
+      Compañías
+    <% end %>
+    <%= link_to auxiliar_companies_path, class: secondary_link do %>
+      <%= icon "network", class: "w-4 h-4" %>
+      Compañías auxiliares
+    <% end %>
   </div>
 
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
-      <p class="text-gray-500 font-bold">Compañías auxiliares</p>
-      <p class="font-bold text-3xl mt-3"><%= @auxiliar_companies.count %></p>
-    </div>
-    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
-      <p class="text-gray-500 font-bold">Compañías estándar</p>
-      <p class="font-bold text-3xl mt-3"><%= @companies.count %></p>
-    </div>
-    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
-      <p class="text-gray-500 font-bold">Consejeros</p>
-      <p class="font-bold text-3xl mt-3"><%= @companies.sum { |c| c.counselors.count } %></p>
-    </div>
-    <div class="p-4 rounded-lg text-center flex-1 border bg-white border-slate-100 shadow-lg">
-      <p class="text-gray-500 font-bold">Jóvenes asignados</p>
-      <p class="font-bold text-3xl mt-3"><%= @companies.sum { |c| c.participants.count } %></p>
-    </div>
-  </div>
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+    <% kpis.each do |label, value, icon_name, tone| %>
+      <div class="<%= card_classes("px-5 py-5") %>">
+        <span class="w-10 h-10 rounded-xl flex items-center justify-center <%= tone %>"><%= icon icon_name, class: "w-5 h-5" %></span>
+        <p class="mt-4 text-[28px] md:text-[32px] leading-none font-extrabold tracking-tight text-ink-900 dark:text-slate-100 tabular-nums" data-overview-kpi="<%= label.parameterize %>"><%= value %></p>
+        <p class="mt-1.5 text-[12.5px] font-semibold text-ink-500 dark:text-slate-400"><%= label %></p>
+      </div>
+    <% end %>
+  </section>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
-      <h3 class="text-gray-500 font-bold mb-6 ml-2">Jóvenes por compañía</h3>
-      <%= column_chart @companies.map { |c| [ c.name, c.participants.count ] },
-          colors: ["#0089B2"], height: "260px" %>
+  <section class="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 md:gap-5">
+    <div class="<%= card_classes("min-w-0 px-6 py-6 md:px-7") %>">
+      <p class="<%= eyebrow %>">Balance</p>
+      <h2 class="mt-0.5 mb-3 text-base font-bold text-ink-900 dark:text-slate-100">Jóvenes por compañía y género</h2>
+      <% if @companies.any? %>
+        <%= tag.div role: "img",
+              aria: { label: "Jóvenes por compañía y género. " + @companies.each_with_index.map { |company, index| "#{company.name}: #{men[index]} hombres y #{women[index]} mujeres" }.join(", ") },
+              data: { controller: "chart", chart_kind_value: "stacked",
+                      chart_labels_value: @companies.map { |company| company.number&.to_s || company.name },
+                      chart_series_value: [ { name: "Hombres", data: men }, { name: "Mujeres", data: women } ],
+                      chart_colors_value: [ "#0093c5", "#d14a5f" ], chart_radius_value: 6, chart_column_width_value: "55%", chart_height_value: 280 } do %>
+          <div data-chart-target="canvas" class="min-h-[280px]"></div>
+        <% end %>
+        <p class="mt-1 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Cada columna es una compañía (por número). Ayuda a equilibrar el tamaño y los cuartos por género.</p>
+      <% else %>
+        <p class="py-10 text-center text-sm text-ink-500 dark:text-slate-400">Aún no hay compañías.</p>
+      <% end %>
     </div>
-    <div class="border p-4 rounded-lg w-full min-w-0 overflow-hidden bg-white border-slate-100 shadow-lg">
-      <h3 class="text-gray-500 font-bold mb-6 ml-2">Personal (consejeros + auxiliares) por compañía</h3>
-      <%= column_chart @companies.map { |c| [ c.name, c.counselors.count + c.auxiliars.count ] },
-          colors: ["#109618"], height: "260px" %>
-    </div>
-  </div>
 
-  <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-    <h3 class="font-bold text-xl mb-4">Detalle por compañía</h3>
+    <div class="<%= card_classes("min-w-0 flex flex-col px-6 py-6 md:px-7") %>">
+      <p class="<%= eyebrow %>">Comedores</p>
+      <h2 class="mt-0.5 mb-5 text-base font-bold text-ink-900 dark:text-slate-100">Jóvenes por salón</h2>
+      <% if @dining_counts.values.sum.positive? %>
+        <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center gap-6 flex-1">
+          <%= tag.div class: "w-[180px] shrink-0", role: "img",
+                aria: { label: "Jóvenes por salón. #{chart_summary(@dining_counts.keys, @dining_counts.values)}" },
+                data: { controller: "chart", chart_kind_value: "donut",
+                        chart_labels_value: @dining_counts.keys, chart_series_value: @dining_counts.values,
+                        chart_colors_value: @dining_counts.keys.map { |label| dining_colors.fetch(label, "#b4b8be") }, chart_height_value: 180 } do %>
+            <div data-chart-target="canvas" class="min-h-[180px]"></div>
+          <% end %>
+          <ul class="w-full sm:w-auto flex flex-col gap-2.5" aria-hidden="true">
+            <% @dining_counts.each do |label, count| %>
+              <li class="flex items-center gap-2 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">
+                <span class="w-2 h-2 rounded-full shrink-0" style="background: <%= dining_colors.fetch(label, "#b4b8be") %>"></span>
+                <%= label %>
+                <span class="ml-auto pl-4 tabular-nums text-ink-500 dark:text-slate-400"><%= count %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% else %>
+        <p class="flex-1 flex items-center justify-center text-sm text-ink-500 dark:text-slate-400">Aún no hay jóvenes en compañías con salón asignado.</p>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="<%= card_classes("px-5 py-6 md:px-6") %>">
+    <p class="<%= eyebrow %>">Detalle</p>
+    <h2 class="mt-0.5 mb-4 text-base font-bold text-ink-900 dark:text-slate-100">Estado por compañía</h2>
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
+      <table class="w-full min-w-[760px] text-left">
         <thead>
-          <tr class="text-gray-500 border-b border-gray-200">
-            <th class="py-2 px-2">Compañía</th>
-            <th class="py-2 px-2">Auxiliar</th>
-            <th class="py-2 px-2">Consejeros</th>
-            <th class="py-2 px-2">Auxiliares</th>
-            <th class="py-2 px-2">Jóvenes</th>
-            <th class="py-2 px-2">Estado</th>
+          <tr class="text-[11px] tracking-[.06em] uppercase text-ink-300 dark:text-slate-500">
+            <th scope="col" class="pb-2.5 px-3 font-bold">Compañía</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Consejeros</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Jóvenes</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Hombres / Mujeres</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Cuartos</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Salón</th>
+            <th scope="col" class="pb-2.5 px-3 font-bold">Estado</th>
           </tr>
         </thead>
         <tbody>
-          <% @auxiliar_companies.each do |ac| %>
-            <tr class="border-b border-gray-100 font-semibold bg-slate-50">
-              <td class="py-2 px-2 text-blue-950"><%= link_to ac.name, ac %></td>
-              <td class="py-2 px-2"><%= ac.coordinator_name %></td>
-              <td class="py-2 px-2" colspan="4"></td>
-            </tr>
-            <% ac.companies.each do |c| %>
-              <tr class="border-b border-gray-100">
-                <td class="py-2 px-2 pl-6"><%= link_to c.name, c, class: "text-blue-950 hover:underline" %></td>
-                <td class="py-2 px-2 text-gray-500"><%= c.auxiliar_company&.name %></td>
-                <td class="py-2 px-2"><%= c.counselors.count %>/2</td>
-                <td class="py-2 px-2"><%= c.auxiliars.count %>/2</td>
-                <td class="py-2 px-2"><%= c.participants.count %></td>
-                <td class="py-2 px-2">
-                  <span class="<%= c.staff_complete? ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %> px-2 py-0.5 rounded-full text-xs">
-                    <%= c.staff_complete? ? "Completa" : "Incompleta" %>
-                  </span>
-                </td>
-              </tr>
-            <% end %>
-          <% end %>
-          <% @orphan_companies.each do |c| %>
-            <tr class="border-b border-gray-100">
-              <td class="py-2 px-2"><%= link_to c.name, c, class: "text-blue-950 hover:underline" %></td>
-              <td class="py-2 px-2 text-gray-400">Sin auxiliar</td>
-              <td class="py-2 px-2"><%= c.counselors.count %>/2</td>
-              <td class="py-2 px-2"><%= c.auxiliars.count %>/2</td>
-              <td class="py-2 px-2"><%= c.participants.count %></td>
-              <td class="py-2 px-2">
-                <span class="<%= c.staff_complete? ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %> px-2 py-0.5 rounded-full text-xs">
-                  <%= c.staff_complete? ? "Completa" : "Incompleta" %>
-                </span>
+          <% groups.each do |auxiliar_company, companies| %>
+            <tr class="bg-canvas dark:bg-slate-900/60">
+              <td colspan="7" class="px-3 py-2 text-[11.5px] font-bold text-ink-700 dark:text-slate-300">
+                <% if auxiliar_company %>
+                  <%= link_to auxiliar_company.name, auxiliar_company, class: "hover:underline" %>
+                  <span class="font-semibold text-ink-500 dark:text-slate-400">· Auxiliares: <%= auxiliar_company.auxiliars.map(&:full_name).join(", ").presence || "sin asignar" %></span>
+                <% else %>
+                  Sin compañía auxiliar
+                <% end %>
               </td>
             </tr>
+            <% companies.each do |company| %>
+              <tr class="border-t border-line-soft dark:border-slate-700 text-[13px] text-ink-700 dark:text-slate-300" data-overview-row="<%= company.number %>">
+                <td class="px-3 py-2.5">
+                  <%= link_to company_path(company), class: "group block" do %>
+                    <span class="block font-bold text-ink-900 dark:text-slate-100 group-hover:underline"><%= company.name %></span>
+                    <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= company.nickname.presence || "Sin nombre elegido" %></span>
+                  <% end %>
+                </td>
+                <td class="px-3 py-2.5 tabular-nums"><%= company.counselors.size %>/2</td>
+                <td class="px-3 py-2.5 font-bold text-ink-900 dark:text-slate-100 tabular-nums"><%= @jovenes_counts.fetch(company.id, 0) %></td>
+                <td class="px-3 py-2.5 tabular-nums"><%= @gender_counts.fetch([ company.id, "H" ], 0) %> / <%= @gender_counts.fetch([ company.id, "M" ], 0) %></td>
+                <td class="px-3 py-2.5 tabular-nums"><%= @room_counts.fetch(company.id, 0) %></td>
+                <td class="px-3 py-2.5"><%= company.dining_hall_label || "—" %></td>
+                <td class="px-3 py-2.5"><%= render "companies/staff_status", company: company %></td>
+              </tr>
+            <% end %>
           <% end %>
         </tbody>
       </table>

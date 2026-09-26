@@ -1,18 +1,17 @@
-    
-<section class="flex flex-col md:flex-row gap-5 md:gap-30  border-b-2 justify-left py-4 mx-3  border-gray-300 ">
-  <legend class="font-bold mt-5 text-3xl md:text-xl">Medico</legend>
-  <fieldset class="flex-1">
-    <div class="mb-4">
-      <%= form.label :allergies, class:" font-semibold block mb-1"%>
-      <%= form.text_area :allergies, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4 min-h-20" %>
+<section class="<%= card_classes("p-6") %>">
+  <%= section_heading "Médico", "shield-plus" %>
+  <div class="space-y-4">
+    <div>
+      <%= form.label :allergies, "Alergias", class: field_label_classes %>
+      <%= form.text_area :allergies, rows: 2, class: field_textarea_classes, placeholder: "Ninguna" %>
     </div>
-    <div class="mb-4">
-      <%= form.label :medicines, class:" font-semibold block mb-1"%>
-      <%= form.text_area :medicines, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4 min-h-20" %>
+    <div>
+      <%= form.label :medicines, "Medicinas", class: field_label_classes %>
+      <%= form.text_area :medicines, rows: 2, class: field_textarea_classes, placeholder: "Ninguna" %>
     </div>
-    <div class="mb-4">
-      <%= form.label :diet, class:" font-semibold block mb-1"%>
-      <%= form.text_area :diet, class:"border rounded-sm border-gray-200 bg-gray-100 w-full py-1 px-2 shadow-sm md:max-w-3/4 min-h-20" %>
+    <div>
+      <%= form.label :diet, "Dieta", class: field_label_classes %>
+      <%= form.text_area :diet, rows: 2, class: field_textarea_classes, placeholder: "Sin restricciones" %>
     </div>
-  </fieldset>
+  </div>
 </section>

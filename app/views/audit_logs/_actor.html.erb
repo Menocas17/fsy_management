@@ -1,0 +1,10 @@
+<div class="flex items-center gap-2.5 min-w-0">
+  <% if log.actor %>
+    <%= render(AvatarComponent.new(participant: log.actor, size: :sm)) %>
+  <% else %>
+    <span class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100">
+      <%= icon "key-round", class: "w-3.5 h-3.5" %>
+    </span>
+  <% end %>
+  <span class="font-semibold text-ink-900 dark:text-slate-100 truncate"><%= log.actor_name %></span>
+</div>

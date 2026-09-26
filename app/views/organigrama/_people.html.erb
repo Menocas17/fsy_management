@@ -1,0 +1,7 @@
+<div class="flex shrink-0">
+  <% people.each_with_index do |person, index| %>
+    <div class="rounded-full ring-2 <%= ring %> <%= "-ml-2" if index.positive? %>">
+      <%= render(AvatarComponent.new(participant: person, size: :sm)) %>
+    </div>
+  <% end %>
+</div>

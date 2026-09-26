@@ -1,0 +1,66 @@
+<%
+  hint = "mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400"
+  activities = Activity.chronological.map { |activity| [ "#{SpanishDates.long(activity.day)} · #{activity.starts_at.strftime('%H:%M')} · #{activity.title}", activity.id ] }
+%>
+<%= form_with model: assignment, url: participant_assignments_path(participant), id: "assignment-form", class: card_classes("px-5 py-6 md:px-7") do |form| %>
+  <% if assignment.errors.any? %>
+    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose" role="alert">
+      <% assignment.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= section_heading "De la agenda", "calendar-days" %>
+  <div>
+    <%= form.label :activity_id, "Actividad", class: field_label_classes %>
+    <%= form.select :activity_id, activities, { include_blank: "Otra asignación (fuera de la agenda)" }, class: field_select_classes %>
+    <p class="<%= hint %>">Si eliges una actividad, se usan su fecha, hora y lugar.</p>
+  </div>
+
+  <div class="mt-7 pt-6 border-t border-line-soft dark:border-slate-700">
+    <%= section_heading "Otra asignación", "clipboard-list" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div class="sm:col-span-2">
+        <%= form.label :title, "Nombre de la asignación", class: field_label_classes %>
+        <%= form.text_field :title, maxlength: 120, placeholder: "Ej. Primera oración en el devocional", class: field_input_classes %>
+        <p class="<%= hint %>">Solo hace falta si no elegiste una actividad de la agenda.</p>
+      </div>
+      <div>
+        <%= form.label :starts_at, "Fecha y hora", class: field_label_classes %>
+        <%= form.datetime_local_field :starts_at, class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :location, "Lugar", class: field_label_classes %>
+        <%= form.text_field :location, placeholder: "Ej. Auditorio principal", class: field_input_classes %>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-7 pt-6 border-t border-line-soft dark:border-slate-700">
+    <%= section_heading "Detalle", "list" %>
+    <div class="flex flex-col gap-5">
+      <div>
+        <%= form.label :details, "Instrucciones", class: field_label_classes %>
+        <%= form.text_area :details, rows: 3, placeholder: "Qué tiene que hacer, qué llevar, con quién coordinar…", class: field_textarea_classes %>
+      </div>
+      <div class="sm:max-w-xs">
+        <%= form.label :status, "Estado", class: field_label_classes %>
+        <%= form.select :status, Assignment::STATUS_LABELS.map { |value, label| [ label, value ] }, {}, class: field_select_classes %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <p class="min-w-0 flex-1 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">La asignación aparece en el perfil de la persona y se le envía una alerta.</p>
+  <div class="flex gap-2.5 shrink-0 sm:justify-end">
+    <%= link_to "Cancelar", participant_path(participant),
+          class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+    <button type="submit" form="assignment-form"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
+      <%= icon "check", class: "w-4 h-4" %>
+      Guardar asignación
+    </button>
+  </div>
+</div>

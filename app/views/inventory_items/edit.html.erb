@@ -1,0 +1,7 @@
+<% content_for :title, "Editar #{@item.name}" %>
+<% content_for :eyebrow, @inventory.name %>
+<% content_for :heading, "Editar artículo" %>
+<% back_to @item.name, inventory_item_path(@item) %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+  <%= render "form", item: @item, inventory: @inventory %>
+</div>

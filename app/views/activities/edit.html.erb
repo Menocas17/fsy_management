@@ -1,0 +1,7 @@
+<% content_for :title, "Editar #{@activity.title}" %>
+<% content_for :eyebrow, "Agenda" %>
+<% content_for :heading, "Editar actividad" %>
+<% back_to "Agenda", agenda_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-7xl mx-auto">
+  <%= render "activities/form", activity: @activity %>
+</div>

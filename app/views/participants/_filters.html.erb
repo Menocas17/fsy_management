@@ -1,13 +1,13 @@
 <%
+  # Las fichas de lo aplicado viven en participants/_active_filters, dentro del frame de la tabla.
   form_url = local_assigns.fetch(:form_url, participants_path)
-  clear_url = local_assigns.fetch(:clear_url, participants_path)
   show_role = local_assigns.fetch(:show_role, false)
-  staff_roles = Participant.rols.keys.reject { |k| k == "joven" }
+  staff_roles = Participant.rols.keys.reject { |key| key == "joven" }
   chip_classes = "h-10 pl-3 pr-8 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
 %>
 <%= form_with url: form_url, method: :get, data: { turbo_frame: "participants_table", turbo_action: "advance" },
-      class: "flex flex-col lg:flex-row lg:items-center gap-3 mb-5" do |f| %>
-  <div class="relative w-full lg:max-w-xs">
+      class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-3" do |f| %>
+  <div class="relative w-full lg:w-72 lg:shrink-0">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
     <%= f.text_field :query,
           value: params[:query],
@@ -15,27 +15,34 @@
           class: "w-full h-10 pl-10 pr-3 rounded-[11px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           oninput: "this.form.requestSubmit()" %>
   </div>
-  <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap">
+  <%# Chips scroll sideways on phones and wrap on wide screens; both toolbars align to the top so a wrapped second row stays flush. %>
+  <div class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:flex-1 lg:min-w-0">
     <%= f.select :stake,
-          options_for_select(Participant.stakes.keys.map { |k| [ k.titleize, k ] }, params[:stake]),
+          options_for_select(Participant.stakes.keys.map { |key| [ key.titleize, key ] }, params[:stake]),
           { include_blank: "Estaca" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <%= f.select :ward,
-          options_for_select(Participant.wards.keys.map { |k| [ k.titleize, k ] }, params[:ward]),
+          options_for_select(Participant.wards.keys.map { |key| [ key.titleize, key ] }, params[:ward]),
           { include_blank: "Barrio" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <%= f.select :gender,
-          options_for_select([ [ "Hombre", "H" ], [ "Mujer", "M" ] ], params[:gender]),
+          options_for_select(Participant::GENDER_LABELS.map { |key, label| [ label, key ] }, params[:gender]),
           { include_blank: "Género" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% if show_role %>
       <%= f.select :rol,
-            options_for_select(staff_roles.map { |k| [ k.titleize, k ] }, params[:rol]),
+            options_for_select(staff_roles.map { |key| [ Participant.role_label(key), key ] }, params[:rol]),
             { include_blank: "Rol" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
+    <% else %>
+      <%= f.select :care,
+            options_for_select(Participant::CARE_FILTERS.map { |key, label| [ label, key ] }, params[:care]),
+            { include_blank: "Cocina y salud" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% end %>
+    <%# Companies are searched by their number, so a narrow field is enough. %>
     <%= f.text_field :company,
           value: params[:company],
-          placeholder: "Compañía…",
-          class: "h-10 w-36 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
+          placeholder: "N.º",
+          inputmode: "numeric",
+          aria: { label: "Filtrar por compañía" },
+          title: "Número o nombre de la compañía",
+          class: "h-10 w-20 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
           oninput: "this.form.requestSubmit()" %>
-    <%= link_to "Limpiar", clear_url,
-          class: "h-10 inline-flex items-center px-3 rounded-[10px] text-[13px] font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100 shrink-0" %>
   </div>
 <% end %>

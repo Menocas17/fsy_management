@@ -1,24 +1,62 @@
-<%= form_with model: company, url: url, class: "bg-white rounded-xl shadow-sm border border-gray-100 p-6" do |f| %>
+<% hint = "mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400" %>
+<%= form_with model: company, id: "company-form", class: card_classes("relative -mt-10 mx-3 md:mx-7 px-5 py-6 md:px-7") do |form| %>
   <% if company.errors.any? %>
-    <div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-lg p-3 mb-4">
-      <% company.errors.full_messages.each do |msg| %>
-        <p><%= msg %></p>
+    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose" role="alert">
+      <% company.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
       <% end %>
     </div>
   <% end %>
 
-  <div class="mb-4">
-    <%= f.label :name, "Nombre", class: "block font-semibold mb-1" %>
-    <%= f.text_field :name, class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
-  </div>
+  <div class="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
+    <span aria-hidden="true"
+          class="w-[72px] h-[72px] md:w-24 md:h-24 shrink-0 rounded-[20px] md:rounded-3xl border-4 border-surface dark:border-slate-800 shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
+      <span class="text-[9px] md:text-[10px] font-bold tracking-[.08em] uppercase opacity-75">Comp.</span>
+      <span class="text-[26px] md:text-[34px] font-extrabold leading-none"><%= company.number.presence || "#" %></span>
+    </span>
 
-  <div class="mb-6">
-    <%= f.label :auxiliar_company_id, "Compañía auxiliar", class: "block font-semibold mb-1" %>
-    <%= f.select :auxiliar_company_id,
-        options_from_collection_for_select(AuxiliarCompany.order(:name), :id, :name, company.auxiliar_company_id),
-        { include_blank: "Sin compañía auxiliar" },
-        class: "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" %>
+    <div class="flex-1 min-w-0">
+      <%= section_heading "Datos de la compañía", "building-2" %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+        <div>
+          <% if company.new_record? %>
+            <%= form.label :number, "Número de compañía", class: field_label_classes %>
+            <%= form.number_field :number, min: 1, step: 1, required: true, placeholder: "Ej. 23", class: field_input_classes %>
+            <p class="<%= hint %>">Se mostrará como «Compañía N» y no se puede cambiar después.</p>
+          <% else %>
+            <p id="company-number-label" class="<%= field_label_classes %>">Compañía</p>
+            <div aria-labelledby="company-number-label" aria-readonly="true" data-locked-number
+                 class="w-full h-10 px-3.5 rounded-[11px] bg-canvas dark:bg-slate-900/60 border border-line dark:border-slate-600 text-[13.5px] font-semibold text-ink-500 dark:text-slate-400 flex items-center justify-between cursor-not-allowed">
+              <%= company.name %>
+              <%= icon "lock", class: "w-4 h-4 text-ink-300 dark:text-slate-500" %>
+            </div>
+            <p class="<%= hint %>">El número de la compañía no cambia.</p>
+          <% end %>
+        </div>
+        <div>
+          <%= form.label :nickname, "Nombre elegido por la compañía", class: field_label_classes %>
+          <%= form.text_field :nickname, maxlength: 60, placeholder: "Ej. Guerreros de Helamán", class: field_input_classes %>
+          <p class="<%= hint %>">Lo eligen los participantes de la compañía. Opcional.</p>
+        </div>
+        <%# La rama solo la mueve quien tiene acceso total; el consejero únicamente renombra su compañía. %>
+        <% level = company.new_record? ? :full : company_edit_level(company) %>
+        <% if level == :full %>
+          <div>
+            <%= form.label :auxiliar_company_id, "Compañía auxiliar", class: field_label_classes %>
+            <%= form.select :auxiliar_company_id, AuxiliarCompany.order(:name).map { |auxiliar_company| [ auxiliar_company.name, auxiliar_company.id ] },
+                  { include_blank: "Sin compañía auxiliar" }, class: field_select_classes %>
+            <p class="<%= hint %>">Define a qué rama del organigrama pertenece.</p>
+          </div>
+        <% end %>
+        <% if level == :full || level == :branch %>
+          <div>
+            <%= form.label :dining_hall, "Comedor asignado", class: field_label_classes %>
+            <%= form.select :dining_hall, Company::DINING_HALL_LABELS.map { |key, label| [ label, key ] },
+                  { include_blank: "Sin asignar" }, class: field_select_classes %>
+            <p class="<%= hint %>">Salón donde come la compañía.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
   </div>
-
-  <%= f.submit "Guardar", class: "bg-primary-600 text-white py-2 px-5 rounded-lg text-sm font-bold cursor-pointer" %>
 <% end %>

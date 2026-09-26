@@ -1,16 +1,25 @@
 class Participant < ApplicationRecord
   has_one :user, dependent: :nullify
   belongs_to :company, optional: true
+  belongs_to :logistics_area, optional: true
 
+  has_many :assignments, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
 
-  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, registrador: 4, logistica: 5, joven: 6 }
+  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, registrador: 4, logistica: 5, joven: 6, director_logistica: 7 }
+
+  ROLE_LABELS = {
+    "director" => "Director", "coordinador" => "Coordinador", "auxiliar" => "Auxiliar", "consejero" => "Consejero",
+    "registrador" => "Registrador", "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
+  }.freeze
   enum :stake, { bello_horizonte: 0, las_americas: 1, villa_flor: 2, puerto_cabezas: 3 }
   enum :ward, { bello_horizonte_b: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6 }
   enum :shirt_number, { xs: 0, s: 1, m: 2, l: 3, xl: 4 }
   enum :gender, { M: 0, H: 1 }
+
+  GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
 
   # With this you can access to the structure of the jsonb columns and treat them as they were actual columns
   store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation
@@ -23,13 +32,39 @@ class Participant < ApplicationRecord
   after_save :sync_membership_gender
 
   scope :jovenes, -> { where(rol: "joven") }
-  scope :staff,   -> { where(rol: [ "logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
+  scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
   scope :search_by_name, ->(query) { where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{query}%") if query.present? }
   scope :by_stake, ->(stake) { where(stake: stake) if stake.present? }
   scope :by_ward, ->(ward) { where(ward: ward) if ward.present? }
   scope :by_gender, ->(gender) { where(gender: gender) if gender.present? }
-  scope :by_company, ->(query) { joins(:company).where("companies.name ILIKE :q", q: "%#{query}%") if query.present? }
+  # A bare number matches that company number exactly ("1" no longer matches "Compañía 10"); other text matches its names.
+  scope :by_company, ->(query) {
+    term = query.to_s.strip
+    next if term.blank?
+
+    if term.match?(/\A\d+\z/)
+      joins(:company).where(companies: { number: term.to_i })
+    else
+      joins(:company).where("companies.name ILIKE :q OR companies.nickname ILIKE :q", q: "%#{sanitize_sql_like(term)}%")
+    end
+  }
   scope :by_role, ->(role) { where(rol: role) if role.present? }
+
+  # "Ninguna" o "Sin restricciones" es la forma de decir que no hay nada que atender: no cuenta.
+  MEDICAL_NONE = [ "ninguna", "ninguno", "ninguna.", "sin restricciones", "sin restriccion", "sin alergias",
+                   "sin dieta", "n/a", "na", "no", "-", "--" ].freeze
+
+  CARE_FILTERS = { "allergies" => "Con alergias", "diet" => "Con dieta especial", "medicines" => "Toman medicinas" }.freeze
+
+  # El filtro que llega desde el panel de cocina y salud.
+  scope :by_care, ->(field) { with_medical_note(field) if CARE_FILTERS.key?(field.to_s) }
+
+  # Quiénes necesitan atención especial en cocina o enfermería.
+  scope :with_medical_note, ->(field) {
+    where("btrim(coalesce(medical_info ->> :field, '')) <> ''", field: field.to_s)
+      .where("lower(btrim(medical_info ->> :field)) <> ALL (ARRAY[:none]::text[])", field: field.to_s, none: MEDICAL_NONE)
+  }
+
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
   has_one_attached :avatar do |attachable|
@@ -42,6 +77,14 @@ class Participant < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def self.role_label(rol)
+    ROLE_LABELS.fetch(rol.to_s, rol.to_s.humanize)
+  end
+
+  def role_label
+    self.class.role_label(rol)
   end
 
   def self.data_by_age
@@ -86,13 +129,12 @@ class Participant < ApplicationRecord
     AuxiliarCompany.for_coordinator(self)
   end
 
-  # 2) Auxiliar: the AuxiliarCompany it belongs to, all its counselors, and all
-  #    the standard Companies managed by those counselors.
+  # 2) Auxiliar: the AuxiliarCompany it belongs to, its standard Companies, and
+  #    the counselors staffed in those companies.
   def auxiliar_scope
     company = auxiliar_companies.first
-    counselors = company ? company.counselors.to_a : []
-    companies = counselors.flat_map(&:companies).uniq
-    { auxiliar_company: company, counselors: counselors, companies: companies }
+    companies = company ? company.companies.to_a : []
+    { auxiliar_company: company, counselors: companies.flat_map(&:counselors).uniq, companies: companies }
   end
 
   # 3) Counselor: only the standard Company directly assigned.

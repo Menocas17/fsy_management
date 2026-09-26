@@ -1,31 +1,34 @@
-<div class="mx-auto md:w-2/3 w-full border border-slate-300 rounded-xl shadow-md p-6 mt-20">
-  <div class="flex items-center justify-center gap-3 border-b border-slate-200 w-full py-3 mb-10">
-    <%= image_tag "fsy_letters.svg", class:"w-30 h-30"%>
-    <%= image_tag "fsy-logo.svg", class:"w-30 h-30"%>
-  </div>
+<% content_for :title, "Nueva contraseña" %>
+<%= render layout: "shared/auth_screen",
+           locals: { headline: "Elegí una contraseña nueva.",
+                     meta_icon: "lock", meta_text: "Este enlace es solo tuyo" } do %>
+  <h1 class="text-[22px] font-extrabold tracking-tight text-ink-900">Actualizar tu contraseña</h1>
+  <p class="mt-1.5 text-[13.5px] leading-snug text-ink-500">Reemplaza la anterior y cierra tus sesiones abiertas.</p>
+
   <% if @user.errors.any? %>
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-      <h3 class="text-red-800 font-bold text-sm">La contraseña no cumple con los requisitos:</h3>
-      <ul class="list-disc list-inside text-sm text-red-700 mt-2">
+    <div role="alert" class="mt-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-3.5 py-3">
+      <p class="flex items-start gap-2.5 text-[13px] font-bold text-cat-rose">
+        <%= icon "circle-alert", class: "w-[17px] h-[17px] shrink-0 mt-px" %>
+        La contraseña no cumple con los requisitos:
+      </p>
+      <ul class="mt-1.5 ml-7 list-disc text-[12.5px] font-semibold text-cat-rose">
         <% @user.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
-  <% if alert = flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg block mx-auto text-center" id="alert"><%= alert %></p>
+
+  <%= form_with url: password_path(params[:token]), method: :put, class: "mt-6 space-y-4" do |form| %>
+    <%= render "shared/password_field", form: form, attribute: :password, label: "Nueva contraseña",
+               autocomplete: "new-password", placeholder: "Tu nueva contraseña", rules: true %>
+
+    <%= render "shared/password_field", form: form, attribute: :password_confirmation, label: "Repetir la contraseña",
+               autocomplete: "new-password", placeholder: "Escribila de nuevo" %>
+
+    <%= tag.button type: "submit", class: auth_button_classes do %>
+      <%= icon "check", class: "w-4 h-4" %>
+      Guardar contraseña
+    <% end %>
   <% end %>
-  <h1 class="font-bold text-4xl">Actualizar tu contraseña</h1>
-  <%= form_with url: password_path(params[:token]), method: :put, class: "contents" do |form| %>
-    <div class="my-5">
-      <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Ingrese la nueva contraseña", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
-    </div>
-    <div class="my-5">
-      <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Repita la nueva contraseña", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
-    </div>
-    <div class="inline">
-      <%= form.submit "Guardar", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white inline-block font-medium cursor-pointer" %>
-    </div>
-  <% end %>
-</div>
+<% end %>

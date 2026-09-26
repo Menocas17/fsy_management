@@ -53,7 +53,7 @@
                       data: { turbo_frame: "_top" }, class: row_button_classes, title: "Ver perfil" do %>
                   <%= icon "eye", class: "w-[17px] h-[17px]" %>
                 <% end %>
-                <% if admin? %>
+                <% if editable?(participant) %>
                   <%= link_to edit_participant_path(participant, from: from_path, return_to: request.fullpath),
                         data: { turbo_frame: "_top" }, class: row_button_classes, title: "Editar" do %>
                     <%= icon "square-pen", class: "w-[17px] h-[17px]" %>

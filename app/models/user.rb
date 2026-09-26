@@ -8,13 +8,43 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
-  def admin_or_staff_manager?
+  # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
+  def full_access?
     return true if participant_id.nil?
-    participant&.coordinador? || participant&.director? || participant&.logistica?
+    participant&.coordinador? || participant&.director? || false
   end
 
-  def counselers_staff?
-    participant&.consejero? || participant&.auxiliar?
+  # Paneles de gestión (historial, columnas de acciones): el acceso total más el director de logística,
+  # que administra su propio comité. Un miembro raso de logística no administra a nadie.
+  def admin_or_staff_manager?
+    full_access? || participant&.director_logistica? || false
+  end
+
+  # Who may send alerts and edit the agenda: the director couple, the coordinators, the logistics director
+  # and the superadmin.
+  def alert_manager?
+    return true if participant_id.nil?
+    participant&.director? || participant&.coordinador? || participant&.director_logistica?
+  end
+
+  # The agenda is edited by the director couple, the coordinators and the superadmin.
+  def agenda_manager?
+    return true if participant_id.nil?
+    participant&.director? || participant&.coordinador?
+  end
+
+  # El inventario lo mueve logística entera, más el acceso total.
+  def inventory_member?
+    full_access? || participant&.logistica? || participant&.director_logistica? || false
+  end
+
+  # Quién entra al módulo de reportes: el acceso total y el director de logística (solo su sección).
+  def reports_viewer?
+    full_access? || participant&.director_logistica? || false
+  end
+
+  def unread_alerts_count
+    Alert.visible_to(participant).unread_for(self).count
   end
 
   def full_name
@@ -23,6 +53,10 @@ class User < ApplicationRecord
 
   def rol
     participant&.rol || "superadmin"
+  end
+
+  def role_label
+    participant ? participant.role_label : "Superadmin"
   end
 
   private

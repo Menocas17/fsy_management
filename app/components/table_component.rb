@@ -1,8 +1,6 @@
 class TableComponent < ViewComponent::Base
   delegate :icon, to: :helpers
 
-  GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
-
   def initialize(participants:, is_staff: false)
     @participants = participants
     @is_staff = is_staff
@@ -12,12 +10,13 @@ class TableComponent < ViewComponent::Base
     @is_staff ? "staff" : "jovenes"
   end
 
-  def admin?
-    Current.user&.admin_or_staff_manager?
+  # El lápiz solo aparece en las fichas que esta persona manda: la cadena la resuelve Authorization.
+  def editable?(participant)
+    helpers.can_edit_participant?(participant)
   end
 
   def gender_label(participant)
-    GENDER_LABELS.fetch(participant.gender, participant.gender)
+    Participant::GENDER_LABELS.fetch(participant.gender, participant.gender)
   end
 
   def company_name(participant)

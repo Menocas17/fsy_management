@@ -1,0 +1,48 @@
+<%
+  auxiliars = auxiliar_company.auxiliars.sort_by { |auxiliar| auxiliar.gender == "H" ? 0 : 1 }
+  companies = auxiliar_company.companies
+  numbers = auxiliar_company.company_numbers_label
+  stats = [
+    [ companies.size, "Compañías" ],
+    [ "#{companies.sum { |company| company.counselors.size }}/#{companies.size * 2}", "Consejeros" ],
+    [ jovenes_counts.fetch(auxiliar_company.id, 0), "Jóvenes" ]
+  ]
+%>
+<%= link_to auxiliar_company_path(auxiliar_company), data: { auxiliar_company_card: auxiliar_company.name },
+      class: card_classes("group block px-5 pt-[18px] pb-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500/30") do %>
+  <div class="flex items-center gap-3">
+    <span class="w-11 h-11 shrink-0 rounded-[13px] bg-brand-tile text-white text-[17px] font-extrabold flex items-center justify-center shadow-sm"><%= auxiliar_company.initial %></span>
+    <div class="min-w-0 flex-1">
+      <p class="text-[15.5px] font-extrabold text-ink-900 dark:text-slate-100 truncate"><%= auxiliar_company.name %></p>
+      <p class="mt-px text-[12px] font-semibold text-ink-500 dark:text-slate-400 truncate">
+        <%= numbers ? "Compañías #{numbers}" : "Sin compañías asignadas" %>
+      </p>
+    </div>
+    <%= render "auxiliar_companies/staff_status", auxiliar_company: auxiliar_company %>
+  </div>
+
+  <div class="flex items-center gap-2 mt-3.5 min-h-7">
+    <% if auxiliars.any? %>
+      <span class="flex shrink-0">
+        <% auxiliars.each_with_index do |auxiliar, index| %>
+          <span class="rounded-full ring-2 ring-surface dark:ring-slate-800 <%= "-ml-2" if index.positive? %>">
+            <%= render(AvatarComponent.new(participant: auxiliar, size: :sm)) %>
+          </span>
+        <% end %>
+      </span>
+      <span class="text-[12px] font-semibold text-ink-700 dark:text-slate-300 truncate"><%= auxiliars.map(&:full_name).join(" · ") %></span>
+    <% else %>
+      <span class="w-7 h-7 shrink-0 rounded-full border-[1.5px] border-dashed border-line dark:border-slate-600"></span>
+      <span class="text-[12px] font-semibold text-ink-300 dark:text-slate-500">Auxiliares por asignar</span>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-3 gap-2 mt-3.5">
+    <% stats.each do |value, label| %>
+      <div class="px-1 py-2 rounded-[11px] bg-canvas dark:bg-slate-900/60 text-center">
+        <p class="text-[15px] leading-5.5 font-extrabold text-ink-900 dark:text-slate-100 tabular-nums"><%= value %></p>
+        <p class="text-[10.5px] font-semibold text-ink-500 dark:text-slate-400"><%= label %></p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

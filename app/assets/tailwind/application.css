@@ -27,6 +27,16 @@
     oklch(39% 0.105 258),
     oklch(54% 0.12 253)
   );
+  --background-image-brand-tile: linear-gradient(
+    155deg,
+    oklch(46% 0.115 255),
+    oklch(27% 0.085 258)
+  );
+  --background-image-avatar-gradient: linear-gradient(
+    155deg,
+    oklch(55% 0.16 275),
+    oklch(33% 0.095 258)
+  );
   --background-image-hero:
     radial-gradient(120% 160% at 10% 0%, oklch(54% 0.12 253) 0%, transparent 45%),
     radial-gradient(90% 140% at 95% 100%, oklch(55% 0.16 275) 0%, transparent 50%),
@@ -72,6 +82,128 @@
   .pagy.series-nav a[aria-disabled="true"]:not([aria-current]) {
     @apply text-ink-300 cursor-default hover:bg-transparent dark:text-slate-600 dark:hover:bg-transparent;
   }
+}
+
+/* Organigrama: connector lines drawn with pseudo-elements on nested lists. */
+.org-tree {
+  --org-line: oklch(90% 0.008 258);
+  text-align: center;
+}
+:where(.dark) .org-tree {
+  --org-line: oklch(44.6% 0.03 257);
+}
+.org-tree,
+.org-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.org-tree ul {
+  display: table;
+  margin: 0 auto;
+  padding-top: 28px;
+  position: relative;
+}
+.org-tree ul::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.org-tree li {
+  float: left;
+  text-align: center;
+  position: relative;
+  padding: 28px 12px 0;
+}
+.org-tree li::before,
+.org-tree li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 28px;
+  border-top: 2px solid var(--org-line);
+}
+.org-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 2px solid var(--org-line);
+}
+.org-tree li:only-child::before,
+.org-tree li:only-child::after {
+  display: none;
+}
+.org-tree li:only-child {
+  padding-top: 0;
+}
+.org-tree li:first-child::before,
+.org-tree li:last-child::after {
+  border: 0 none;
+}
+.org-tree li:last-child::before {
+  border-right: 2px solid var(--org-line);
+  border-radius: 0 6px 0 0;
+}
+.org-tree li:first-child::after {
+  border-radius: 6px 0 0 0;
+}
+.org-tree ul ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 28px;
+  border-left: 2px solid var(--org-line);
+}
+
+/* Leaf groups (a branch's companies or logistics areas) stack vertically so the whole chart stays compact. */
+.org-tree ul.org-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.org-tree ul.org-stack::after {
+  display: none;
+}
+.org-tree ul.org-stack > li,
+.org-tree ul.org-stack > li:only-child {
+  float: none;
+  padding: 14px 0 0;
+}
+.org-tree ul.org-stack > li::before,
+.org-tree ul.org-stack > li:first-child::before,
+.org-tree ul.org-stack > li:last-child::before,
+.org-tree ul.org-stack > li:only-child::before {
+  display: block;
+  top: 0;
+  left: 50%;
+  right: auto;
+  width: 0;
+  height: 14px;
+  border: 0 none;
+  border-left: 2px solid var(--org-line);
+  border-radius: 0;
+}
+.org-tree ul.org-stack > li::after,
+.org-tree ul.org-stack > li:only-child::after {
+  display: none;
+}
+.org-tree ul.org-stack > li > * {
+  min-width: 14rem;
+}
+
+/* Organigrama canvas in full screen fills the display. */
+.org-chart:fullscreen {
+  padding: 1rem;
+  background: var(--color-canvas);
+}
+:where(.dark) .org-chart:fullscreen {
+  background: var(--color-slate-900);
+}
+.org-chart:fullscreen [data-org-chart-target='viewport'] {
+  height: 100%;
 }
 
 /* Accessibility: reduce motion */

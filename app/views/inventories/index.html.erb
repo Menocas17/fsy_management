@@ -1,0 +1,73 @@
+<% content_for :title, "Inventario" %>
+<% content_for :eyebrow, "Gestión" %>
+<%
+  total_items = @inventories.sum { |inventory| inventory.items.size }
+  low_total = @inventories.sum { |inventory| inventory.items.count { |item| item.low? || item.out? } }
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+    <p class="text-[13px] font-semibold text-ink-500 dark:text-slate-400" data-inventory-summary>
+      <%= pluralize(@inventories.size, "inventario") %>
+      · <%= pluralize(total_items, "artículo") %>
+      · <%= low_total %> por agotarse
+    </p>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to scan_inventories_path, class: secondary do %>
+        <%= icon "scan-qr-code", class: "w-4 h-4" %>
+        Escanear QR
+      <% end %>
+      <% if can_manage_inventories? %>
+        <%= link_to new_inventory_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Nuevo inventario
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @inventories.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
+      <% @inventories.each do |inventory| %>
+        <% low = inventory.items.count(&:low?) %>
+        <% out = inventory.items.count(&:out?) %>
+        <%= link_to inventory, class: card_classes("p-5 flex flex-col gap-3 hover:border-primary-300 dark:hover:border-primary-300 transition") do %>
+          <div class="flex items-center gap-3">
+            <span class="w-[38px] h-[38px] shrink-0 rounded-[12px] text-white flex items-center justify-center <%= inventory_tile_class(inventory) %>">
+              <%= icon inventory.icon, class: "w-[19px] h-[19px]" %>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= inventory.name %></p>
+              <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400 truncate"><%= inventory.description.presence || "Sin descripción" %></p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-3 border-t border-line-soft dark:border-slate-700">
+            <span class="text-[21px] font-extrabold tabular-nums text-ink-900 dark:text-slate-100" data-inventory-count="<%= inventory.code_prefix %>">
+              <%= inventory.items.size %>
+              <span class="ml-1 text-[11.5px] font-bold text-ink-500 dark:text-slate-400">artículos</span>
+            </span>
+            <% if out.positive? %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold text-cat-rose bg-cat-rose/10"><%= pluralize(out, "agotado") %></span>
+            <% elsif low.positive? %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold text-cat-amber bg-cat-amber/10"><%= low %> por agotarse</span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold text-cat-green bg-cat-green/10">al día</span>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="<%= card_classes("p-10 text-center") %>">
+      <span class="mx-auto w-11 h-11 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-300 dark:text-slate-400">
+        <%= icon "boxes", class: "w-5 h-5" %>
+      </span>
+      <p class="mt-3 text-[15px] font-bold text-ink-900 dark:text-slate-100">Todavía no hay inventarios</p>
+      <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400">Creá el primero —Materiales, Comida, Medicinas— y empezá a cargarle artículos.</p>
+      <% if can_manage_inventories? %>
+        <%= link_to "Nuevo inventario", new_inventory_path,
+              class: "mt-4 inline-flex items-center h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

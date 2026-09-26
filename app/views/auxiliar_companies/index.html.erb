@@ -1,44 +1,42 @@
-<div class="px-3 md:px-7 pt-10">
-  <div class="flex justify-between mb-5 px-3">
-    <h1 class="font-bold text-2xl">Compañías Auxiliares</h1>
-    <% if full_company_access? %>
-      <%= render(ButtonComponent.new(text: "Nueva", url: new_auxiliar_company_path, type: "primary")) %>
-    <% end %>
+<% content_for :title, "Compañías auxiliares" %>
+<% content_for :eyebrow, "Gestión" %>
+<%
+  secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  company_total = @auxiliar_companies.sum { |auxiliar_company| auxiliar_company.companies.size }
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+    <p class="text-[13px] font-semibold text-ink-500 dark:text-slate-400" data-auxiliar-summary>
+      <%= pluralize(@auxiliar_companies.size, "compañía auxiliar", plural: "compañías auxiliares") %>
+      · <%= pluralize(company_total, "compañía", plural: "compañías") %>
+      · <%= pluralize(@jovenes_counts.values.sum, "joven", plural: "jóvenes") %>
+    </p>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to companies_path, class: secondary_link do %>
+        <%= icon "building-2", class: "w-4 h-4" %>
+        Compañías
+      <% end %>
+      <%= link_to organigrama_path, class: secondary_link do %>
+        <%= icon "network", class: "w-4 h-4" %>
+        Organigrama
+      <% end %>
+      <% if full_company_access? %>
+        <%= link_to new_auxiliar_company_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Nueva compañía auxiliar
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-    <% @auxiliar_companies.each do |ac| %>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3">
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="font-bold text-lg text-blue-950"><%= link_to ac.name, ac %></h3>
-            <p class="text-sm text-gray-500 mt-1">
-              <span class="font-medium">Coordinator:</span>
-              <%= ac.coordinator_name %>
-            </p>
-          </div>
-          <%= image_tag "company.svg", class: "w-10 h-10 opacity-70" %>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 text-center text-sm mt-2">
-          <%= render(InfoTileComponent.new(title: "Compañías", icon: "company.svg", data: [ac.companies.count])) %>
-          <%= render(InfoTileComponent.new(title: "Auxiliares", icon: "people.svg", data: [ac.auxiliar_count])) %>
-          <%= render(InfoTileComponent.new(title: "Consejeros", icon: "people.svg", data: [ac.counselor_count])) %>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 mt-2">
-          <%= render(ButtonComponent.new(text: "Ver", url: ac, type: "muted")) %>
-          <% if can_edit_auxiliar_company?(ac) %>
-            <%= render(ButtonComponent.new(text: "Editar", url: edit_auxiliar_company_path(ac), type: "muted")) %>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
-  </div>
-
-  <% if @auxiliar_companies.empty? %>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center text-gray-500">
-      No hay compañías auxiliares aún.
+  <% if @auxiliar_companies.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
+      <%= render partial: "auxiliar_companies/card", collection: @auxiliar_companies, as: :auxiliar_company,
+                 locals: { jovenes_counts: @jovenes_counts } %>
+    </div>
+  <% else %>
+    <div class="<%= card_classes("p-10 text-center") %>">
+      <p class="text-ink-500 dark:text-slate-400">Aún no hay compañías auxiliares registradas.</p>
     </div>
   <% end %>
 </div>

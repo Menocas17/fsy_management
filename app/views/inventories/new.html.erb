@@ -1,0 +1,7 @@
+<% content_for :title, "Nuevo inventario" %>
+<% content_for :eyebrow, "Inventario" %>
+<% content_for :heading, "Nuevo inventario" %>
+<% back_to "Inventario", inventories_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+  <%= render "form", inventory: @inventory %>
+</div>
