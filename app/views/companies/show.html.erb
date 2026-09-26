@@ -37,6 +37,13 @@
           <%= icon "arrow-left", class: "w-4 h-4" %>
           Volver
         <% end %>
+        <% if can_view_participant_reports? %>
+          <%= link_to badges_reports_path(company: @company.id), target: "_blank", rel: "noopener",
+                class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+            <%= icon "id-card", class: "w-4 h-4" %>
+            Gafetes
+          <% end %>
+        <% end %>
         <% if can_edit_company?(@company) %>
           <%= link_to edit_company_path(@company),
                 class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>

@@ -13,7 +13,7 @@ class AvatarComponentTest < ViewComponent::TestCase
   test "renders placeholder initials behind image while it loads" do
     participant = participants(:maria)
     participant.avatar.attach(
-      io: File.open("/tmp/tiny.png"),
+      io: file_fixture("tiny.png").open,
       filename: "tiny.png",
       content_type: "image/png"
     )
