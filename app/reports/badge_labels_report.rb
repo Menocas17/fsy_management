@@ -35,7 +35,7 @@ class BadgeLabelsReport < ApplicationReport
     end
 
     def subtitle
-      "#{participants.size} #{participants.size == 1 ? 'gafete' : 'gafetes'} · recortá por la línea punteada"
+      "#{participants.size} #{participants.size == 1 ? 'gafete' : 'gafetes'} · recorta por la línea punteada"
     end
 
     def build(pdf)
@@ -99,7 +99,7 @@ class BadgeLabelsReport < ApplicationReport
       pdf.fill_color SLATE
       pdf.text_box company_label(participant), at: [ text_left, top ], width: width, height: 20,
                    size: 8, overflow: :shrink_to_fit
-      pdf.text_box "Escaneá para abrir la ficha", at: [ text_left, top - 26 ], width: width, height: 10,
+      pdf.text_box "Escanea para abrir la ficha", at: [ text_left, top - 26 ], width: width, height: 10,
                    size: 7, style: :italic, overflow: :shrink_to_fit
     end
 

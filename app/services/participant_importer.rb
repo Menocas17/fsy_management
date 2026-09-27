@@ -62,7 +62,7 @@ class ParticipantImporter
     def open_sheet
       Roo::Spreadsheet.open(path_for(@file), extension: extension_for(@file)).sheet(0)
     rescue StandardError => error
-      raise UnreadableFile, "No se pudo leer el archivo (#{error.class}). Subí un .xlsx o un .csv."
+      raise UnreadableFile, "No se pudo leer el archivo (#{error.class}). Sube un .xlsx o un .csv."
     end
 
     def path_for(file)

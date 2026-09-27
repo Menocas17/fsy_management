@@ -7,7 +7,7 @@ export default class extends Controller {
   static targets = ["video", "canvas", "status", "start"]
   static values = {
     url: String,
-    aim: { type: String, default: "Apuntá al código de la caja" },
+    aim: { type: String, default: "Apunta al código de la caja" },
     found: { type: String, default: "Artículo" }
   }
 
@@ -17,7 +17,7 @@ export default class extends Controller {
 
   async start() {
     this.startTarget.hidden = true
-    this.status("Pedí permiso a la cámara…")
+    this.status("Pidiendo permiso a la cámara…")
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
@@ -25,7 +25,7 @@ export default class extends Controller {
       })
     } catch (error) {
       this.startTarget.hidden = false
-      this.status("No se pudo abrir la cámara. Escribí el código a mano.", true)
+      this.status("No se pudo abrir la cámara. Escribe el código a mano.", true)
       return
     }
 

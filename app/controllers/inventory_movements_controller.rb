@@ -5,7 +5,7 @@ class InventoryMovementsController < ApplicationController
   def create
     quantity = params[:quantity].to_i.abs
     sign = params[:sign].to_s == "-1" ? -1 : 1
-    return redirect_back_with("Escribí una cantidad mayor que cero.") if quantity.zero?
+    return redirect_back_with("Escribe una cantidad mayor que cero.") if quantity.zero?
 
     movement = @item.movements.build(delta: quantity * sign, participant: Current.user&.participant,
                                      reason: reason_param(sign), note: params[:note].presence,

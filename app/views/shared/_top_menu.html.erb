@@ -1,8 +1,8 @@
-<div data-controller="mobile-menu" class="relative shrink-0">
+<div data-controller="mobile-menu" data-action="keydown.esc@window->mobile-menu#closeOnEscape" class="relative shrink-0">
   <%# Main nav bar %>
   <header class="h-[60px] md:h-[72px] px-3.5 md:px-8 flex items-center justify-between gap-4 bg-surface border-b border-line-soft">
     <div class="flex items-center gap-2 min-w-0">
-      <button type="button" aria-label="Abrir menú"
+      <button type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-target="trigger"
               class="md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-lg text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
               data-action="click->mobile-menu#toggle">
         <%= icon "menu", class: "w-[22px] h-[22px]" %>
@@ -30,7 +30,7 @@
       <div data-controller="dropdown" class="relative">
         <button type="button" aria-haspopup="true" aria-label="Menú de cuenta"
                 class="flex items-center gap-2.5 rounded-xl p-0.5 md:py-1.5 md:pl-1.5 md:pr-3 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition"
-                data-action="click->dropdown#toggle click@window->dropdown#hide">
+                data-action="click->dropdown#toggle click@window->dropdown#hide keydown.esc@window->dropdown#close">
           <%= current_user_avatar_tag(class: "w-8 h-8 md:w-9 md:h-9 text-[11.5px] md:text-[13px]") %>
           <span class="hidden md:block text-left leading-tight">
             <span class="block text-[13.5px] font-bold text-ink-900"><%= Current.user.full_name %></span>
@@ -39,7 +39,7 @@
           <%= icon "chevron-down", class: "hidden md:block w-4 h-4 text-ink-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
         </button>
 
-        <div class="hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
+        <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
              data-dropdown-target="menu">
           <%= link_to settings_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
             <%= icon "settings", class: "w-4 h-4" %>
@@ -61,14 +61,16 @@
   </header>
 
   <%# backdrop %>
-  <div class="fixed inset-0 z-100 bg-black/50 transition-opacity hidden" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
+  <div class="fixed inset-0 z-100 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
   </div>
   <%# slide mobile menu %>
-  <div class="fixed inset-y-0 left-0 z-200 w-72 max-w-[85vw] h-dvh flex flex-col bg-surface shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out" data-mobile-menu-target="menu">
+  <%# La curva de los paneles de iOS: arranca rápido y frena suave, en vez del ease-in-out que arranca lento. %>
+  <div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menú"
+       class="fixed inset-y-0 left-0 z-200 w-72 max-w-[85vw] h-dvh flex flex-col bg-surface shadow-xl transform -translate-x-full transition-transform duration-[280ms] ease-[cubic-bezier(0.32,0.72,0,1)]" data-mobile-menu-target="menu">
     <div class="flex items-center justify-between gap-2 mx-4 pt-5 pb-4 border-b border-line-soft">
       <%= render "shared/brand" %>
-      <button type="button" aria-label="Cerrar menú"
-              class="p-1.5 rounded-lg text-ink-500 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
+      <button type="button" aria-label="Cerrar menú" data-mobile-menu-target="closeButton"
+              class="size-11 -mr-2 inline-flex items-center justify-center rounded-lg text-ink-500 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
               data-action="click->mobile-menu#close">
         <%= icon "x", class: "w-5 h-5" %>
       </button>

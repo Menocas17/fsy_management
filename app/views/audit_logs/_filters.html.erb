@@ -1,5 +1,5 @@
 <% categories = [ [ "", "Todos" ] ] + AuditLog::CATEGORY_LABELS.to_a %>
-<%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance" },
+<%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance", controller: "auto-submit" },
       class: "flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5" do |f| %>
   <div class="relative w-full lg:w-72 lg:shrink-0">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
@@ -8,14 +8,14 @@
           placeholder: "Buscar por nombre…",
           aria: { label: "Buscar por nombre" },
           class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
-          oninput: "this.form.requestSubmit()" %>
+          data: { action: "input->auto-submit#typed" } %>
   </div>
   <fieldset class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:justify-end">
     <legend class="sr-only">Categoría</legend>
     <% categories.each do |value, label| %>
       <label class="shrink-0 cursor-pointer">
         <%= f.radio_button :category, value, checked: params[:category].to_s == value, class: "peer sr-only",
-              onchange: "this.form.requestSubmit()" %>
+              data: { action: "change->auto-submit#changed" } %>
         <span class="inline-flex items-center h-9 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 transition peer-checked:bg-primary-700 peer-checked:border-transparent peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500/40">
           <%= label %>
         </span>

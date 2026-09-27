@@ -49,13 +49,13 @@ export default class extends Controller {
       this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
     } catch (error) {
       this.startTarget.hidden = false
-      return this.say("No se pudo abrir la cámara. Podés registrar con el código a mano.", true)
+      return this.say("No se pudo abrir la cámara. Puedes registrar con el código a mano.", true)
     }
 
     this.videoTarget.srcObject = this.stream
     this.videoTarget.setAttribute("playsinline", true)
     await this.videoTarget.play()
-    this.say("Apuntá al código del gafete")
+    this.say("Apunta al código del gafete")
     this.scanning = true
     this.tick()
   }
@@ -191,7 +191,7 @@ export default class extends Controller {
 
       this.roster = roster
       this.writeStore(this.rosterKey, roster)
-      this.say(this.scanning ? "Apuntá al código del gafete" : "Padrón actualizado")
+      this.say(this.scanning ? "Apunta al código del gafete" : "Padrón actualizado")
     } catch (error) {
       this.say("Sin conexión: se trabaja con el padrón guardado y se sincroniza después.")
     }

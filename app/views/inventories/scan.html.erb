@@ -7,7 +7,7 @@
            data-controller="qr-scanner" data-qr-scanner-url-value="<%= lookup_inventory_items_path(code: 'CODE') %>">
     <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
       <p class="text-[14.5px] font-bold text-ink-900">Escanear QR</p>
-      <p class="text-[11.5px] font-semibold text-ink-500" data-qr-scanner-target="status">Activá la cámara para empezar</p>
+      <p class="text-[11.5px] font-semibold text-ink-500" data-qr-scanner-target="status">Activa la cámara para empezar</p>
     </div>
 
     <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-square flex items-center justify-center">
@@ -28,7 +28,7 @@
   </section>
 
   <section class="<%= card_classes("p-5") %>">
-    <%= section_heading "O escribí el código", "keyboard" %>
+    <%= section_heading "O escribe el código", "keyboard" %>
     <%= form_with url: lookup_inventory_items_path, method: :get, class: "flex gap-2" do %>
       <%= text_field_tag :code, nil, required: true, placeholder: "Ej. MAT-0042", autocomplete: "off",
             class: "#{field_input_classes} font-mono uppercase" %>

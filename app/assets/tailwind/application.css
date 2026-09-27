@@ -247,12 +247,28 @@
   height: 100%;
 }
 
-/* Accessibility: reduce motion */
-:where(.reduce-motion, .reduce-motion *) {
+/* Accesibilidad: reducir movimiento. Vale igual la preferencia del sistema que el interruptor de
+   Configuración. Solo se animan fundidos y cambios de color, cortos, porque son la señal de que algo
+   pasó y no marean a nadie; lo que se desplaza o cambia de tamaño llega a su lugar sin recorrido.
+   (No se anula translate/scale: Tailwind posiciona con ellos, p. ej. el menú fuera de pantalla.) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  ::backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-property: opacity, color, background-color, border-color !important;
+    transition-duration: 150ms !important;
+  }
+}
+:where(.reduce-motion, .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after, .reduce-motion ::backdrop) {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+  transition-property: opacity, color, background-color, border-color !important;
+  transition-duration: 150ms !important;
 }
 
 /* Accessibility: larger text */
@@ -381,5 +397,24 @@ form[aria-busy='true'] [type='submit'],
     opacity: 0;
     transform: translateY(-4px);
     background-color: oklch(62% 0.15 148 / 0.12);
+  }
+}
+
+/* Mientras un filtro trae resultados, la lista se atenúa un poco. El retraso evita el parpadeo cuando la
+   respuesta llega enseguida. */
+turbo-frame[aria-busy='true'] {
+  opacity: 0.55;
+  transition: opacity 150ms ease 120ms;
+}
+
+/* Menús desplegables (cuenta, campanita): se abren desde el botón, con el mismo tiempo que su chevron. */
+.dropdown-menu {
+  transform-origin: top right;
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  @starting-style {
+    opacity: 0;
+    scale: 0.97;
   }
 }

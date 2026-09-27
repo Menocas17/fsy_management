@@ -65,7 +65,7 @@ class InventoryMovement < ApplicationRecord
       return if inventory_item.nil? || delta.nil? || delta.positive?
 
       if inventory_item.quantity + delta < 0
-        errors.add(:delta, "no podés restar más de lo que hay (#{inventory_item.quantity_label})")
+        errors.add(:delta, "no puedes restar más de lo que hay (#{inventory_item.quantity_label})")
       end
     end
 

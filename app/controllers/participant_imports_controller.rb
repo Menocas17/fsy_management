@@ -6,7 +6,7 @@ class ParticipantImportsController < ApplicationController
 
   def create
     file = params[:file]
-    return redirect_to(new_participant_import_path, alert: "Elegí un archivo para cargar.") if file.blank?
+    return redirect_to(new_participant_import_path, alert: "Elige un archivo para cargar.") if file.blank?
 
     @import = ParticipantImporter.new(file).call
 

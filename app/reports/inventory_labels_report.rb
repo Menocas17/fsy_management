@@ -18,7 +18,7 @@ class InventoryLabelsReport < ApplicationReport
     end
 
     def subtitle
-      "#{items.size} #{items.size == 1 ? 'etiqueta' : 'etiquetas'} · recortá por la línea punteada"
+      "#{items.size} #{items.size == 1 ? 'etiqueta' : 'etiquetas'} · recorta por la línea punteada"
     end
 
     def build(pdf)

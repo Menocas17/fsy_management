@@ -113,7 +113,7 @@
       <%= inventory_qr_tag(@item) %>
       <div>
         <p class="text-[13.5px] font-extrabold font-mono text-ink-900"><%= @item.code %></p>
-        <p class="mt-1 text-[11.5px] font-semibold text-ink-500">Pegá este código en la caja</p>
+        <p class="mt-1 text-[11.5px] font-semibold text-ink-500">Pega este código en la caja</p>
       </div>
       <%= link_to labels_reports_path(inventory: @inventory.id), target: "_blank", rel: "noopener", class: "#{secondary} w-full justify-center" do %>
         <%= icon "printer", class: "w-4 h-4" %>
