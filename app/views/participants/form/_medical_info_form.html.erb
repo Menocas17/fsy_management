@@ -2,16 +2,17 @@
   <%= section_heading "Médico", "shield-plus" %>
   <div class="space-y-4">
     <div>
+      <%# Los ejemplos no parecen un valor ya escrito (antes «Ninguna» se leía como respuesta), y vacío es «nada que atender». %>
       <%= form.label :allergies, "Alergias", class: field_label_classes %>
-      <%= form.text_area :allergies, rows: 2, class: field_textarea_classes, placeholder: "Ninguna" %>
+      <%= form.text_area :allergies, rows: 2, class: field_textarea_classes, placeholder: "Ej. penicilina, maní. Déjalo vacío si no tiene." %>
     </div>
     <div>
       <%= form.label :medicines, "Medicinas", class: field_label_classes %>
-      <%= form.text_area :medicines, rows: 2, class: field_textarea_classes, placeholder: "Ninguna" %>
+      <%= form.text_area :medicines, rows: 2, class: field_textarea_classes, placeholder: "Ej. inhalador para el asma. Déjalo vacío si no toma." %>
     </div>
     <div>
       <%= form.label :diet, "Dieta", class: field_label_classes %>
-      <%= form.text_area :diet, rows: 2, class: field_textarea_classes, placeholder: "Sin restricciones" %>
+      <%= form.text_area :diet, rows: 2, class: field_textarea_classes, placeholder: "Ej. vegetariana, sin gluten. Déjalo vacío si no tiene." %>
     </div>
   </div>
 </section>

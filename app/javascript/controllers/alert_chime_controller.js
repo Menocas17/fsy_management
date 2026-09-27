@@ -45,11 +45,22 @@ export default class extends Controller {
   }
 
   paint(unread) {
+    const grew = unread > this.unreadValue
     this.unreadValue = unread
     this.badgeTargets.forEach((badge) => {
       badge.textContent = unread
       badge.hidden = unread < 1
+      // Una alerta nueva es rara e importante: el número salta un poco para que se note sin mirar la campanita.
+      if (grew && !badge.hidden && !this.reducedMotion) {
+        badge.animate([ { transform: "scale(.6)" }, { transform: "scale(1)" } ],
+                      { duration: 220, easing: "cubic-bezier(0.34, 1.4, 0.64, 1)" })
+      }
     })
+  }
+
+  get reducedMotion() {
+    return document.documentElement.classList.contains("reduce-motion") ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
   }
 
   announce() {

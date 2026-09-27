@@ -1,13 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 import jsQR from "jsqr"
 
+const SCAN_INTERVAL_MS = 120
+const SCAN_MAX_SIDE = 640
+
 // Lee un QR con la cámara del teléfono y salta a donde lleva: la caja del inventario o, desde el panel,
 // el gafete de una persona. jsQR va incluido en vendor/javascript porque Safari no trae lector propio.
 export default class extends Controller {
   static targets = ["video", "canvas", "status", "start"]
   static values = {
     url: String,
-    aim: { type: String, default: "Apuntá al código de la caja" },
+    aim: { type: String, default: "Apunta al código de la caja" },
     found: { type: String, default: "Artículo" }
   }
 
@@ -17,7 +20,7 @@ export default class extends Controller {
 
   async start() {
     this.startTarget.hidden = true
-    this.status("Pedí permiso a la cámara…")
+    this.status("Pidiendo permiso a la cámara…")
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
@@ -25,7 +28,7 @@ export default class extends Controller {
       })
     } catch (error) {
       this.startTarget.hidden = false
-      this.status("No se pudo abrir la cámara. Escribí el código a mano.", true)
+      this.status("No se pudo abrir la cámara. Escribe el código a mano.", true)
       return
     }
 
@@ -47,10 +50,15 @@ export default class extends Controller {
     if (!this.scanning) return
 
     const video = this.videoTarget
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    const now = performance.now()
+    // Unas ocho lecturas por segundo a 640px sobran para un QR, y no calientan el teléfono en horas de
+    // registro como leer cada cuadro a resolución completa.
+    if (video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
+      this.lastRead = now
       const canvas = this.canvasTarget
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      const ratio = Math.min(1, SCAN_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
+      canvas.width = Math.round(video.videoWidth * ratio)
+      canvas.height = Math.round(video.videoHeight * ratio)
       const context = canvas.getContext("2d", { willReadFrequently: true })
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
 

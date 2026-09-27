@@ -93,12 +93,12 @@
           <h2 class="text-[15px] font-bold text-ink-900">Participantes · <%= @jovenes_total %></h2>
         </div>
         <%= form_with url: company_path(@company), method: :get, role: "search", class: "relative w-full sm:w-[240px]",
-              data: { turbo_frame: "company_participants", turbo_action: "advance" } do |form| %>
+              data: { turbo_frame: "company_participants", turbo_action: "advance", controller: "auto-submit" } do |form| %>
           <%= icon "search", class: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
           <%= form.search_field :query, value: params[:query], autocomplete: "off",
                 placeholder: "Buscar en la compañía…", aria: { label: "Buscar jóvenes de la compañía" },
                 class: "w-full h-9 pl-9 pr-3 rounded-control bg-canvas border border-line text-[13px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
-                oninput: "this.form.requestSubmit()" %>
+                data: { action: "input->auto-submit#typed" } %>
         <% end %>
       </div>
       <%= turbo_frame_tag "company_participants" do %>

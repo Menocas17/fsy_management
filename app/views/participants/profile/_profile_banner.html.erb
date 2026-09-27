@@ -43,9 +43,11 @@
                 class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
           <%= icon "x", class: "w-4 h-4" %>
         </button>
-        <h2 class="mb-3 px-2 text-lg font-bold text-ink-900">Fotografía de <%= participant.full_name %></h2>
+        <h2 class="mb-3 pl-2 pr-10 text-lg font-bold text-balance break-words text-ink-900">Fotografía de <%= participant.full_name %></h2>
         <% if participant.avatar.attached? %>
-          <%= image_tag participant.avatar, class: "w-full max-h-[70vh] object-contain rounded-xl bg-canvas" %>
+          <%# La versión de vista previa (1200px), no el original; y una altura mínima para que el cuadro no salte al cargar. %>
+          <%= image_tag participant.avatar.variant(:preview), loading: "lazy", decoding: "async",
+                class: "w-full min-h-60 max-h-[70vh] object-contain rounded-xl bg-canvas" %>
         <% else %>
           <p class="px-2 pb-2 text-sm text-ink-500">Este participante aún no tiene fotografía.</p>
         <% end %>

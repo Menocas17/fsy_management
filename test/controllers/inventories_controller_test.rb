@@ -114,7 +114,7 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     post inventory_item_movements_path(@item), params: { sign: "-1", quantity: 100, reason: "entrega" }
 
     assert_equal 62, @item.reload.quantity
-    assert_match(/no podés restar más/, flash[:alert])
+    assert_match(/no puedes restar más/, flash[:alert])
   end
 
   test "a scan lands on the item with the dialog open" do

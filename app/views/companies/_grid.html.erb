@@ -16,5 +16,8 @@
     <p class="text-ink-500">
       <%= params[:query].present? ? "No hay compañías que coincidan con “#{params[:query]}”." : "Aún no hay compañías registradas." %>
     </p>
+    <% if params[:query].present? %>
+      <%= link_to "Limpiar búsqueda", companies_path, data: { turbo_frame: "_top" }, class: button_classes(:secondary, extra: "mt-4") %>
+    <% end %>
   </div>
 <% end %>

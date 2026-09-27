@@ -56,7 +56,7 @@ export default class extends Controller {
 
     if (!response.ok) {
       await subscription.unsubscribe()
-      return this.paint("error", "No se pudo guardar la suscripción. Intentá de nuevo.")
+      return this.paint("error", "No se pudo guardar la suscripción. Intenta de nuevo.")
     }
 
     this.paint("activo", "Listo: este dispositivo recibirá las alertas.")

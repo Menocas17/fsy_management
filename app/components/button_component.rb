@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [], except_paths: [])
+  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [], except_paths: [], hint: nil)
     @url = url
+    # Por qué está deshabilitado: «Próximamente» si todavía no existe, o quién tiene acceso si es por permiso.
+    @hint = hint || "Próximamente"
     @disabled = disabled
     @lucide_icon = lucide_icon
     @active_paths = active_paths

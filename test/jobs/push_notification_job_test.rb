@@ -35,7 +35,7 @@ class PushNotificationJobTest < ActiveSupport::TestCase
   test "an alert for one person does not reach anybody else" do
     other = Participant.create!(first_name: "Otra", last_name: "Persona", age: 30, stake: "las_americas",
                                 shirt_number: "m", gender: "M", rol: :consejero)
-    alert = Alert.create!(title: "Tu asignación", body: "Revisá tu perfil", sender_name: "Coordinación",
+    alert = Alert.create!(title: "Tu asignación", body: "Revisa tu perfil", sender_name: "Coordinación",
                           audience: :individual, recipient: other)
 
     assert_empty capture_sends { PushNotificationJob.new.perform(alert.id) }

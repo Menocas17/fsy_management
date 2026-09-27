@@ -37,7 +37,7 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     post participant_import_path
 
     assert_redirected_to new_participant_import_path
-    assert_equal "Elegí un archivo para cargar.", flash[:alert]
+    assert_equal "Elige un archivo para cargar.", flash[:alert]
   end
 
   test "a file it cannot read explains itself" do

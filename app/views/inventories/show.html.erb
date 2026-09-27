@@ -1,3 +1,4 @@
+<% content_for :page_h1, true %>
 <% content_for :title, @inventory.name %>
 <% content_for :eyebrow, "Inventario" %>
 <% back_to "Inventario", inventories_path %>
@@ -44,7 +45,7 @@
   <%= form_with url: inventory_path(@inventory), method: :get, class: "flex flex-wrap gap-2 mb-4" do |form| %>
     <span class="relative flex items-center flex-1 min-w-[180px]">
       <%= icon "search", class: "absolute left-3 w-4 h-4 text-ink-500" %>
-      <%= form.search_field :query, value: params[:query], placeholder: "Buscar artículo, código o ubicación…",
+      <%= form.search_field :query, value: params[:query], placeholder: "Buscar artículo, código o ubicación…", aria: { label: "Buscar en el inventario" },
             class: "#{field_input_classes} pl-9" %>
     </span>
     <%= link_to "Todos", inventory_path(@inventory, query: params[:query]), class: filter_chip.(params[:filter] != "low") %>
@@ -58,7 +59,7 @@
           <thead>
             <tr class="border-b border-line-soft">
               <% [ "Artículo", "Código", "Existencia", "Mínimo", "Estado", "" ].each_with_index do |header, index| %>
-                <th class="px-4 py-3 text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 <%= index == 2 ? 'text-right' : index == 5 ? 'text-right' : 'text-left' %>"><%= header %></th>
+                <th scope="col" class="px-4 py-3 text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 <%= index == 2 ? 'text-right' : index == 5 ? 'text-right' : 'text-left' %>"><%= header %></th>
               <% end %>
             </tr>
           </thead>
@@ -105,7 +106,7 @@
       <p class="text-[15px] font-bold text-ink-900">
         <%= params[:query].present? || params[:filter] == "low" ? "Nada que coincida con esa búsqueda" : "Este inventario todavía no tiene artículos" %>
       </p>
-      <p class="mt-1 text-[13px] text-ink-500">Agregá el primero y su código QR se genera solo.</p>
+      <p class="mt-1 text-[13px] text-ink-500">Agrega el primero y su código QR se genera solo.</p>
     </div>
   <% end %>
 

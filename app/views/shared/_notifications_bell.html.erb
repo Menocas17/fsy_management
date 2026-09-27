@@ -16,12 +16,12 @@
 <div data-controller="dropdown" class="relative hidden md:block">
   <button type="button" data-notifications-trigger aria-haspopup="true"
           aria-label="Notificaciones<%= ", #{unread} sin leer" if unread.positive? %>"
-          data-action="click->dropdown#toggle click@window->dropdown#hide"
+          data-action="click->dropdown#toggle click@window->dropdown#hide keydown.esc@window->dropdown#close"
           class="relative w-10 h-10 rounded-control border border-line bg-canvas flex items-center justify-center text-ink-500 dark:text-slate-300 hover:text-ink-900 cursor-pointer transition">
     <%= icon "bell", class: "w-5 h-5" %>
     <span class="<%= badge %>" data-unread-count data-alert-chime-target="badge" <%= "hidden" unless unread.positive? %>><%= unread %></span>
   </button>
-  <div class="hidden absolute right-0 top-full mt-2 w-96 z-50 overflow-hidden bg-surface border border-line-soft rounded-tile shadow-lg"
+  <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-96 z-50 overflow-hidden bg-surface border border-line-soft rounded-tile shadow-lg"
        data-dropdown-target="menu">
     <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
       <p class="text-[15px] font-bold text-ink-900">Notificaciones</p>

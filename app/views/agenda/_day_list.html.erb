@@ -11,7 +11,7 @@
       <% if activities.any? %>
         <div class="divide-y divide-line-soft">
           <% activities.each do |activity| %>
-            <details class="group" data-activity-id="<%= activity.id %>" <%= "open" if @activity&.id == activity.id && params[:activity_id].present? %>>
+            <details class="group agenda-details" data-activity-id="<%= activity.id %>" <%= "open" if @activity&.id == activity.id && params[:activity_id].present? %>>
               <summary class="flex items-center gap-3 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden border-l-[3px] <%= activity.styles[:block] %>">
                 <span class="w-12 shrink-0 text-[11.5px] font-extrabold tabular-nums"><%= activity.starts_at.strftime("%H:%M") %></span>
                 <span class="min-w-0 flex-1">

@@ -121,7 +121,7 @@ class Activity < ApplicationRecord
       return if starts_at.blank?
       return if self.class.event_days.cover?(starts_at.to_date)
 
-      errors.add(:starts_at, "debe caer entre el #{SpanishDates.long(self.class.event_days.first)} y el #{SpanishDates.long(self.class.event_days.last)}")
+      errors.add(:starts_at, "debe caer entre el #{SpanishDates.long(self.class.event_days.first, capitalize: false)} y el #{SpanishDates.long(self.class.event_days.last, capitalize: false)}")
     end
 
     def roles_listed_for_role_activities

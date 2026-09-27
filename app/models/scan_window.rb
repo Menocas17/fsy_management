@@ -32,6 +32,6 @@ class ScanWindow
   def closed_reason
     return "El administrador cerró este registro." if mode == "closed"
 
-    day > Date.current ? "Se abre el #{SpanishDates.long(day)}." : "Se cerró al terminar el #{SpanishDates.long(day)}."
+    day > Date.current ? "Se abre el #{SpanishDates.long(day, capitalize: false)}." : "Se cerró al terminar el #{SpanishDates.long(day, capitalize: false)}."
   end
 end

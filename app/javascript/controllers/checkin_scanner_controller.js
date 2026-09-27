@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import jsQR from "jsqr"
 
+const SCAN_INTERVAL_MS = 120
+const SCAN_MAX_SIDE = 640
+
 // Registro de llegadas del día del evento: la cámara no se cierra entre persona y persona.
 // Trabaja sin señal a propósito — el padrón queda en el dispositivo y los escaneos se encolan
 // hasta que vuelva el internet, porque el día que llegan 445 jóvenes el wifi es lo primero que falla.
@@ -49,13 +52,13 @@ export default class extends Controller {
       this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
     } catch (error) {
       this.startTarget.hidden = false
-      return this.say("No se pudo abrir la cámara. Podés registrar con el código a mano.", true)
+      return this.say("No se pudo abrir la cámara. Puedes registrar con el código a mano.", true)
     }
 
     this.videoTarget.srcObject = this.stream
     this.videoTarget.setAttribute("playsinline", true)
     await this.videoTarget.play()
-    this.say("Apuntá al código del gafete")
+    this.say("Apunta al código del gafete")
     this.scanning = true
     this.tick()
   }
@@ -70,10 +73,15 @@ export default class extends Controller {
     if (!this.scanning) return
 
     const video = this.videoTarget
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    const now = performance.now()
+    // Unas ocho lecturas por segundo a 640px sobran para un QR, y no calientan el teléfono en horas de
+    // registro como leer cada cuadro a resolución completa.
+    if (video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
+      this.lastRead = now
       const canvas = this.canvasTarget
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      const ratio = Math.min(1, SCAN_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
+      canvas.width = Math.round(video.videoWidth * ratio)
+      canvas.height = Math.round(video.videoHeight * ratio)
       const context = canvas.getContext("2d", { willReadFrequently: true })
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
@@ -191,7 +199,7 @@ export default class extends Controller {
 
       this.roster = roster
       this.writeStore(this.rosterKey, roster)
-      this.say(this.scanning ? "Apuntá al código del gafete" : "Padrón actualizado")
+      this.say(this.scanning ? "Apunta al código del gafete" : "Padrón actualizado")
     } catch (error) {
       this.say("Sin conexión: se trabaja con el padrón guardado y se sincroniza después.")
     }

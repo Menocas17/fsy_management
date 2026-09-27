@@ -23,13 +23,13 @@ module NavigationHelper
              # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
              active_paths: [ inventories_path, "/articulos" ] }
          else
-           { text: "Inventario", lucide_icon: "boxes", disabled: true }
+           { text: "Inventario", lucide_icon: "boxes", disabled: true, hint: "Solo para el comité de logística" }
          end),
         (if Current.user&.reports_viewer?
            { text: "Reportes", url: reports_path, lucide_icon: "file-text",
              active_paths: [ reports_path, new_participant_import_path ] }
          else
-           { text: "Reportes", lucide_icon: "file-text", disabled: true }
+           { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),
         { text: "Finanzas", lucide_icon: "wallet", disabled: true },
         ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
