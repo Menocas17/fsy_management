@@ -16,6 +16,8 @@ class BadgeLabelsReport < ApplicationReport
   LABEL_HEIGHT = 153
   ROWS = 4
   QR_SIZE = 104
+  BAND = 18
+  STRIPE = 7
 
   # qr_url recibe al participante y devuelve la URL de su ficha; el reporte no conoce las rutas.
   def initialize(qr_url:, scope: "todos", company: nil)
@@ -66,9 +68,20 @@ class BadgeLabelsReport < ApplicationReport
       end
     end
 
-    # Frente: el nombre grande y la compañía debajo, centrados en la etiqueta.
+    # Frente: franja navy con el nombre del evento arriba, el nombre grande y la compañía al centro, y
+    # abajo una franja del color de su estaca (jóvenes) o de su rol (staff), el mismo de la app: así se
+    # reconoce el grupo de lejos.
     def front(pdf, participant)
-      padding = 22
+      pdf.fill_color NAVY
+      pdf.fill_rectangle [ 0, pdf.bounds.top ], LABEL_WIDTH, BAND
+      pdf.image mark_path, at: [ 8, pdf.bounds.top - 2 ], fit: [ BAND - 4, BAND - 4 ]
+      pdf.fill_color "FFFFFF"
+      pdf.text_box Rails.configuration.x.event_name.upcase, at: [ BAND + 8, pdf.bounds.top - 5 ], width: LABEL_WIDTH - BAND * 2 - 16,
+                   height: BAND - 6, size: 8, style: :bold, character_spacing: 1, valign: :center
+      pdf.fill_color group_color(participant)
+      pdf.fill_rectangle [ 0, STRIPE ], LABEL_WIDTH, STRIPE
+
+      padding = 26
       pdf.fill_color NAVY
       pdf.text_box participant.first_name.to_s, at: [ 12, pdf.bounds.top - padding - 14 ], width: LABEL_WIDTH - 24,
                    height: 30, size: 24, style: :bold, align: :center, overflow: :shrink_to_fit
@@ -101,6 +114,15 @@ class BadgeLabelsReport < ApplicationReport
                    size: 8, overflow: :shrink_to_fit
       pdf.text_box "Escaneá para abrir la ficha", at: [ text_left, top - 26 ], width: width, height: 10,
                    size: 7, style: :italic, overflow: :shrink_to_fit
+    end
+
+    def group_color(participant)
+      category = if participant.joven?
+        ChartsHelper::STAKE_CATEGORY[participant.stake]
+      else
+        ChartsHelper::ROLE_CATEGORY[participant.rol]
+      end
+      ChartsHelper.hex(category).delete_prefix("#")
     end
 
     # Los jóvenes tienen compañía propia; consejeros y auxiliares la tienen por su membresía.
