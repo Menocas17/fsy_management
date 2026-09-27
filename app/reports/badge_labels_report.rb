@@ -99,7 +99,14 @@ class BadgeLabelsReport < ApplicationReport
       pdf.fill_color SLATE
       pdf.text_box company_label(participant), at: [ text_left, top ], width: width, height: 20,
                    size: 8, overflow: :shrink_to_fit
-      pdf.text_box "Escanea para abrir la ficha", at: [ text_left, top - 26 ], width: width, height: 10,
+      # El código corto, por si el QR no se lee: se escribe en el campo del escáner.
+      if participant.code.present?
+        pdf.fill_color NAVY
+        pdf.text_box participant.code, at: [ text_left, top - 22 ], width: width, height: 16,
+                     size: 13, style: :bold, character_spacing: 1, overflow: :shrink_to_fit
+        pdf.fill_color SLATE
+      end
+      pdf.text_box "Escanea el QR o escribe el código", at: [ text_left, top - 42 ], width: width, height: 10,
                    size: 7, style: :italic, overflow: :shrink_to_fit
     end
 

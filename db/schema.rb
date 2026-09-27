@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_28_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -238,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_010000) do
   create_table "participants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "additional_instructions"
     t.integer "age"
+    t.string "code"
     t.uuid "company_id"
     t.jsonb "contact_info"
     t.datetime "created_at", null: false
@@ -255,6 +256,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_010000) do
     t.integer "stake"
     t.datetime "updated_at", null: false
     t.integer "ward"
+    t.index ["code"], name: "index_participants_on_code", unique: true
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
   end

@@ -97,7 +97,7 @@
         <div hidden data-checkin-scanner-target="last" data-last-scan
              class="flex items-center gap-3 rounded-tile bg-canvas px-3.5 py-2.5"></div>
         <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "flex gap-2" do %>
-          <%= text_field_tag :code, nil, placeholder: "Código del gafete", autocomplete: "off", aria: { label: "Código del gafete" },
+          <%= text_field_tag :code, nil, placeholder: "Código del gafete (ej. P-0421)", autocomplete: "off", aria: { label: "Código del gafete" },
                 data: { checkin_scanner_target: "manual" }, class: "#{field_input_classes} font-mono" %>
           <%= tag.button type: "submit", class: button_classes(:secondary, extra: "shrink-0") do %>
             Registrar

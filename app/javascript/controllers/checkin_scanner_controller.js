@@ -152,7 +152,7 @@ export default class extends Controller {
   }
 
   handle(payload, { force = false } = {}) {
-    const id = payload.trim().split("/").pop().split("?")[0]
+    const id = this.resolveId(payload.trim().split("/").pop().split("?")[0])
     const now = Date.now()
 
     // La cámara lee el mismo código treinta veces por segundo: solo cuenta la primera, y cada
@@ -186,6 +186,19 @@ export default class extends Controller {
       detail: this.summary(person),
       url: person.url
     }, [ 90 ])
+  }
+
+  // El QR trae el id; a mano se escribe el código corto del gafete (P-0421, p421 o solo 421).
+  resolveId(value) {
+    if (this.roster[value]) return value
+
+    const match = value.match(/^p?[\s-]*(\d{1,6})$/i)
+    if (!match) return value
+
+    // Igual que Participant.normalize_code: «0421», «421» y «p-421» son P-0421.
+    const code = `P-${String(parseInt(match[1], 10)).padStart(4, "0")}`
+    const person = Object.values(this.roster).find((candidate) => candidate.code === code)
+    return person ? person.id : value
   }
 
   // Cola ------------------------------------------------------------------

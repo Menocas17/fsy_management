@@ -33,4 +33,24 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_not participant.valid?
     assert participant.errors[:age].any?
   end
+
+  test "each new participant gets the next short badge code" do
+    Participant.where.not(code: nil).update_all(code: nil)
+    Participant.first.update_columns(code: "P-0041")
+
+    created = Participant.create!(first_name: "Nuevo", last_name: "Código", age: 15, stake: "villa_flor", shirt_number: "m", gender: "H")
+
+    assert_equal "P-0042", created.code
+  end
+
+  test "a badge code is found however it is typed" do
+    participant = participants(:juan)
+    participant.update_columns(code: "P-0421")
+
+    [ "P-0421", "p0421", "p 421", "421", "0421" ].each do |typed|
+      assert_equal participant, Participant.find_by_badge(typed), typed
+    end
+    assert_equal participant, Participant.find_by_badge("https://fsy.example/participants/#{participant.id}")
+    assert_nil Participant.normalize_code("MAT-0042"), "an inventory code is not a badge code"
+  end
 end

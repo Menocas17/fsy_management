@@ -69,7 +69,8 @@ class CheckinsController < ApplicationController
       # Se juzga por la hora del escaneo: lo que se tomó sin señal el día que tocaba entra aunque llegue después.
       return { client_token: scan[:client_token], status: "closed" } unless @window.open?(parse_time(scan[:recorded_at]))
 
-      participant = expected_scope.includes(:company).find_by(id: scan[:participant_id])
+      # Normalmente llega el id (lo resuelve el teléfono con su padrón); por si acaso, también el código corto.
+      participant = expected_scope.includes(:company).find_by_badge(scan[:participant_id])
       return { client_token: scan[:client_token], status: "unknown" } if participant.nil?
 
       record, status = record_for(participant, scan)
@@ -100,6 +101,7 @@ class CheckinsController < ApplicationController
       {
         id: participant.id,
         name: participant.full_name,
+        code: participant.code,
         company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
         stake: participant.stake&.titleize,
         gender: Participant::GENDER_LABELS[participant.gender],

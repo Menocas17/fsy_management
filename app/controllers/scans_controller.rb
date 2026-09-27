@@ -7,7 +7,7 @@ class ScansController < ApplicationController
   def lookup
     code = params[:code].to_s.strip.split("/").last.to_s.split("?").first.to_s
 
-    if (participant = Participant.find_by(id: code))
+    if (participant = Participant.find_by_badge(code))
       redirect_to participant_path(participant, from: "escaner", return_to: scan_path)
     elsif can_view_inventory? && (item = InventoryItem.find_by(code: code.upcase))
       redirect_to inventory_item_path(item, ajuste: 1, origen: "escaneo")
