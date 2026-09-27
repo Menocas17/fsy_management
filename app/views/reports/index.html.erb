@@ -40,7 +40,11 @@
             { title: "Cuartos", text: "Cada cuarto con sus ocupantes y la compañía a la que pertenecen.",
               icon: "bed-double", url: rooms_reports_path },
             { title: "Agenda", text: "Los seis días del evento con horario, lugar y a quién va dirigida cada actividad.",
-              icon: "calendar-days", url: agenda_reports_path }
+              icon: "calendar-days", url: agenda_reports_path },
+            { title: "Gafetes para lanyard", text: "Dos etiquetas por persona: el frente con su nombre y compañía, y el QR de su ficha para pegar detrás.",
+              icon: "id-card", url: badges_reports_path,
+              extras: [ [ "Solo jóvenes", badges_reports_path(scope: "jovenes") ],
+                        [ "Solo staff", badges_reports_path(scope: "staff") ] ] }
           ]
         %>
         <% printables.each do |report| %>

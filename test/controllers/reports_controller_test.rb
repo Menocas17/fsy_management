@@ -17,6 +17,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{participants_reports_path(scope: 'mujeres')}']"
     assert_select "a[href='#{rooms_reports_path}']"
     assert_select "a[href='#{agenda_reports_path}']"
+    assert_select "a[href='#{badges_reports_path}']"
     assert_select "a[href='#{new_participant_import_path}']"
   end
 
@@ -25,7 +26,10 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
       participants_reports_path(scope: "mujeres") => "participantes-mujeres",
       participants_reports_path(scope: "staff") => "staff",
       rooms_reports_path => "cuartos",
-      agenda_reports_path => "agenda" }.each do |path, stem|
+      agenda_reports_path => "agenda",
+      badges_reports_path => "gafetes",
+      badges_reports_path(scope: "staff") => "gafetes-staff",
+      badges_reports_path(company: @company.id) => "gafetes-compania-3" }.each do |path, stem|
       get path
 
       assert_response :success
@@ -55,6 +59,9 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{labels_reports_path}']"
 
     get participants_reports_path
+    assert_redirected_to reports_path
+
+    get badges_reports_path
     assert_redirected_to reports_path
   end
 
