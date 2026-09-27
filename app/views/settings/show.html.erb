@@ -37,6 +37,29 @@
             action: "toggleTheme", target: "themeToggle")) %>
     </section>
 
+    <%# El permiso de notificaciones es por dispositivo: este bloque habla del teléfono o la compu que estás usando. %>
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push"
+             data-controller="push" data-push-public-key-value="<%= Rails.application.credentials.dig(:vapid, :public_key) %>"
+             data-push-url-value="<%= push_subscription_notifications_path %>">
+      <h2 id="settings-push" class="<%= card_heading %>">
+        <%= icon "bell-ring", class: "w-[17px] h-[17px]" %>
+        Notificaciones
+      </h2>
+      <p class="text-[13.5px] font-semibold text-ink-900 dark:text-slate-100">Alertas en este dispositivo</p>
+      <p class="mt-1 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400" data-push-target="status">
+        Revisando el permiso…
+      </p>
+      <button type="button" data-action="push#toggle" data-push-target="button"
+              class="mt-3 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition">
+        Activar en este dispositivo
+      </button>
+      <div class="mt-5 pt-4 border-t border-line-soft dark:border-slate-700">
+        <%= render(ToggleComponent.new(id: "push-sound-toggle", label: "Sonido y vibración",
+              description: "Las alertas llegan con tono y vibración. En iPhone el sonido lo controla el sistema.",
+              action: "saveSound", target: "sound", controller: "push")) %>
+      </div>
+    </section>
+
     <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-accessibility">
       <h2 id="settings-accessibility" class="<%= card_heading %>">
         <%= icon "eye", class: "w-[17px] h-[17px]" %>
@@ -50,7 +73,7 @@
         </div>
         <div class="pt-4">
           <%= render(ToggleComponent.new(id: "text-size-toggle", label: "Texto grande",
-                description: "Aumenta el tamaño del texto para facilitar la lectura.",
+                description: "Sube un escalón más el texto. En el teléfono la letra ya viene grande de base.",
                 action: "toggleTextSize", target: "textSizeToggle")) %>
         </div>
       </div>

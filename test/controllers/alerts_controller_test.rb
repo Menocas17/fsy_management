@@ -53,7 +53,9 @@ class AlertsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, users(:one).reload.unread_alerts_count
 
     get notifications_path
-    assert_select "[data-unread-count]", 0
+    # La insignia se dibuja siempre y se oculta: así la campanita puede corregirse sola al volver de la caché.
+    assert_select "[data-unread-count]:not([hidden])", 0
+    assert_select "[data-unread-count][hidden]", 2
     assert_equal 0, users(:one).reload.unread_alerts_count
   end
 

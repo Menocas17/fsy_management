@@ -3,6 +3,7 @@ class Participant < ApplicationRecord
   belongs_to :company, optional: true
   belongs_to :logistics_area, optional: true
 
+  has_one :checkin, dependent: :destroy
   has_many :assignments, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
@@ -77,6 +78,10 @@ class Participant < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def arrived?
+    checkin.present?
   end
 
   def self.role_label(rol)

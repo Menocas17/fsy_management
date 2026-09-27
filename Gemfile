@@ -38,7 +38,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.1"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -87,3 +87,6 @@ gem "roo", "~> 3.0"
 gem "csv", "~> 3.3"
 # json 3.0 rompe ActiveSupport::JSON.decode (y con él todas las columnas jsonb): nos quedamos en la 2.x parcheada.
 gem "json", "~> 2.21", ">= 2.21.2"
+
+# Notificaciones push del navegador (VAPID + cifrado del payload)
+gem "web-push", "~> 3.0"

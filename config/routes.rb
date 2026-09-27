@@ -8,9 +8,9 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # PWA: el manifest permite instalar la app y el service worker recibe las notificaciones push.
+  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
   # root "posts#index"
@@ -18,6 +18,10 @@ Rails.application.routes.draw do
   resource :dashboard, only: [ :show ]
   resource :organigrama, only: [ :show ], controller: "organigrama"
   resources :audit_logs, only: [ :index ], path: "historial"
+  # Registro de llegadas: la pantalla de escaneo, el padrón que se guarda en el dispositivo y la sincronización.
+  get "registro" => "checkins#index", as: :checkins
+  get "registro/padron" => "checkins#roster", as: :checkins_roster
+  post "registro" => "checkins#create", as: :register_checkins
   resources :inventories, only: %i[index show new create edit update destroy], path: "inventario" do
     collection do
       get :scan, path: "escanear"
@@ -42,7 +46,14 @@ Rails.application.routes.draw do
     end
   end
   resource :participant_import, only: [ :new, :create ], path: "carga-de-participantes"
-  resources :notifications, only: [ :index ], path: "notificaciones"
+  resources :notifications, only: [ :index ], path: "notificaciones" do
+    collection do
+      # La campanita pregunta por su número cuando vuelve de la caché de Turbo, donde viene congelado.
+      get "campanita" => "notifications#count", as: :count
+      post "suscripcion" => "push_subscriptions#create", as: :push_subscription
+      delete "suscripcion" => "push_subscriptions#destroy"
+    end
+  end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
