@@ -83,6 +83,47 @@ Al arrancar, `bin/docker-entrypoint` corre `db:prepare`, que crea las bases `pri
 Despliegues siguientes: `bin/kamal deploy`. Útiles: `bin/kamal logs`, `bin/kamal console`,
 `bin/kamal dbc`.
 
+En producción `db/seeds.rb` no carga los datos de demo, así que la base arranca vacía y sin
+usuarios.
+
+### Crear el superadmin
+
+La cuenta del sistema es un `User` sin participante (acceso total, y la única que abre o cierra
+el escaneo en Configuración):
+
+```bash
+bin/kamal console
+```
+
+```ruby
+User.create!(email_address: "tu-correo@dominio.com", password: "Una-Clave-Larga-2026")
+```
+
+La contraseña necesita 8 caracteres o más, un número, una mayúscula y un signo.
+
+### Deploy automático desde GitHub
+
+El job `deploy` de `.github/workflows/ci.yml` corre `bin/kamal deploy` en cada push a `main` que
+pasa las pruebas. Necesita estos secrets en *Settings → Secrets and variables → Actions*:
+
+| Secret | Valor |
+|---|---|
+| `ORACLE_SERVER_IP` | IP pública de la instancia |
+| `APP_HOST` | el dominio (o `<ip-con-guiones>.sslip.io`) |
+| `SSH_PRIVATE_KEY` | la llave privada que entra como `ubuntu` a la instancia |
+| `KAMAL_REGISTRY_PASSWORD` | token de GitHub con `write:packages` |
+| `RAILS_MASTER_KEY` | el contenido de `config/master.key` |
+| `POSTGRES_PASSWORD` | la misma que usaste en `kamal setup` |
+
+`kamal setup` se corre una sola vez a mano; después, cada merge a `main` despliega solo.
+
+### Correo
+
+Todavía no hay servidor SMTP configurado (`config.action_mailer.smtp_settings` en
+`config/environments/production.rb`): los correos de «Cambiar contraseña», «¿Olvidaste tu
+contraseña?» y las alertas críticas se encolan pero no salen. Hasta configurarlo, las contraseñas
+se cambian desde `bin/kamal console`.
+
 ## 7. Respaldos
 
 Todo vive en el boot volume de la instancia (Postgres en `~/fsy_management-db/data`, archivos
