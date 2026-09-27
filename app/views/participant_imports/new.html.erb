@@ -50,7 +50,7 @@
             La primera fila tiene que ser la de los títulos de columna.
           </p>
         </div>
-        <%= tag.button type: "submit", class: "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer" do %>
+        <%= tag.button type: "submit", data: { turbo_submits_with: "Cargando participantes…" }, class: "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer" do %>
           <%= icon "upload", class: "w-4 h-4" %>
           Cargar participantes
         <% end %>

@@ -4,6 +4,16 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
   static targets = ['menu', 'chevron'];
 
+  // Turbo guarda la página tal cual al salir: sin esto, volver atrás la muestra con el menú abierto.
+  connect() {
+    this.boundClose = this.close.bind(this);
+    document.addEventListener('turbo:before-cache', this.boundClose);
+  }
+
+  disconnect() {
+    document.removeEventListener('turbo:before-cache', this.boundClose);
+  }
+
   toggle(event) {
     event.stopPropagation();
     this.menuTarget.classList.toggle('hidden');

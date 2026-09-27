@@ -9,7 +9,7 @@
 <div id="notifications_bell" class="contents" data-controller="alert-chime" data-alert-chime-unread-value="<%= unread %>"
      data-alert-chime-count-url-value="<%= count_notifications_path %>">
 <%= link_to notifications_path, aria: { label: "Notificaciones#{unread.positive? ? ", #{unread} sin leer" : ""}" },
-      class: "md:hidden relative w-8 h-8 rounded-[9px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300" do %>
+      class: "md:hidden relative w-8 h-8 after:absolute after:-inset-1.5 rounded-[9px] border border-line dark:border-slate-600 bg-canvas dark:bg-slate-900 flex items-center justify-center text-ink-500 dark:text-slate-300" do %>
   <%= icon "bell", class: "w-[17px] h-[17px]" %>
   <span class="<%= badge %>" data-unread-count data-alert-chime-target="badge" <%= "hidden" unless unread.positive? %>><%= unread %></span>
 <% end %>

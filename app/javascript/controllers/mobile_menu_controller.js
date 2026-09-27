@@ -6,9 +6,13 @@ export default class extends Controller {
   connect() {
     this.boundHandleResize = this.handleResize.bind(this);
     window.addEventListener('resize', this.boundHandleResize);
+    // Turbo guarda la página tal cual al salir: sin esto, volver atrás la muestra con el menú abierto.
+    this.boundClose = this.close.bind(this);
+    document.addEventListener('turbo:before-cache', this.boundClose);
   }
   disconnect() {
     window.removeEventListener('resize', this.boundHandleResize);
+    document.removeEventListener('turbo:before-cache', this.boundClose);
   }
 
   toggle(event) {

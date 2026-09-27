@@ -56,18 +56,20 @@
         <p class="mt-0.5 text-[11.5px] font-semibold text-primary-600 dark:text-primary-300">
           <%= @training ? @training.label : "Llegada al FSY · #{SpanishDates.long(Rails.configuration.x.event_start_on)}" %>
         </p>
-        <p class="mt-1 text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
+        <p role="status" class="mt-1 text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
           Activá la cámara para empezar
         </p>
       </div>
 
-      <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-square flex items-center justify-center">
+      <%# En el teléfono el visor no pasa de media pantalla, y el resultado se pinta encima del video:
+          quien registra está mirando la cámara, no la parte de abajo de la página. %>
+      <div class="relative bg-slate-900 aspect-square max-h-[55dvh] lg:max-h-none w-full flex items-center justify-center">
         <video data-checkin-scanner-target="video" class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
         <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
         <div class="relative w-44 h-44 pointer-events-none">
           <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-xl", "top-0 right-0 border-l-0 border-b-0 rounded-tr-xl",
                "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-xl", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-xl" ].each do |corner| %>
-            <span class="absolute w-9 h-9 border-[3px] border-white/90 <%= corner %>"></span>
+            <span data-checkin-scanner-target="corner" class="absolute w-9 h-9 border-[3px] border-white/90 transition-colors duration-500 ease-out <%= corner %>"></span>
           <% end %>
         </div>
         <button type="button" data-action="checkin-scanner#start" data-checkin-scanner-target="start"
@@ -75,10 +77,11 @@
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Activar la cámara
         </button>
+        <div hidden data-checkin-scanner-target="card" role="status" aria-live="polite" aria-atomic="true"
+             class="absolute inset-x-3 bottom-3 z-10"></div>
       </div>
 
       <div class="p-4 space-y-3">
-        <div hidden data-checkin-scanner-target="card"></div>
         <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "flex gap-2" do %>
           <%= text_field_tag :code, nil, placeholder: "Código del gafete", autocomplete: "off",
                 data: { checkin_scanner_target: "manual" }, class: "#{field_input_classes} font-mono" %>

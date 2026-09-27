@@ -40,7 +40,7 @@
             class="p-0 m-auto w-full max-w-lg rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
       <div class="relative p-4 bg-surface dark:bg-slate-800 rounded-2xl">
         <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
-                class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+                class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
           <%= icon "x", class: "w-4 h-4" %>
         </button>
         <h2 class="mb-3 px-2 text-lg font-bold text-ink-900 dark:text-slate-100">Fotografía de <%= participant.full_name %></h2>
@@ -57,7 +57,7 @@
             class="p-0 m-auto w-full max-w-xs rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
       <div class="relative p-5 bg-surface dark:bg-slate-800 rounded-2xl text-center">
         <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
-                class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+                class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
           <%= icon "x", class: "w-4 h-4" %>
         </button>
         <h2 class="mb-4 text-[15px] font-bold text-ink-900 dark:text-slate-100">Código de <%= participant.full_name %></h2>
