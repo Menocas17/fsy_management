@@ -37,30 +37,53 @@ export default class extends Controller {
     this.onOnline = () => { this.refreshRoster(); this.flush() }
     window.addEventListener("online", this.onOnline)
     this.timer = setInterval(() => this.flush(), 20000)
+
+    // La cámara no sobrevive a salir de la página: Turbo guardaba la pantalla con el botón oculto y el
+    // video sin señal, y al volver con el gesto quedaba en negro. Se apaga al salir o al esconder la app,
+    // se deja la pantalla como nueva, y se vuelve a encender sola si ya había permiso.
+    this.onBeforeCache = () => { this.stop(); this.resetCamera() }
+    this.onVisibility = () => document.hidden ? this.stop() : this.resume()
+    this.onPageShow = (event) => { if (event.persisted) this.resume() }
+    this.onFirstTouch = () => this.unlockAudio()
+    document.addEventListener("turbo:before-cache", this.onBeforeCache)
+    document.addEventListener("visibilitychange", this.onVisibility)
+    window.addEventListener("pageshow", this.onPageShow)
+    this.element.addEventListener("pointerdown", this.onFirstTouch, { once: true })
+
+    this.resume()
   }
 
   disconnect() {
     this.stop()
     clearTimeout(this.hideTimer)
+    document.removeEventListener("turbo:before-cache", this.onBeforeCache)
+    document.removeEventListener("visibilitychange", this.onVisibility)
+    window.removeEventListener("pageshow", this.onPageShow)
+    this.element.removeEventListener("pointerdown", this.onFirstTouch)
     window.removeEventListener("online", this.onOnline)
     clearInterval(this.timer)
   }
 
   // Cámara ----------------------------------------------------------------
   async start() {
+    if (this.starting || this.scanning) return
+    this.starting = true
     this.startTarget.hidden = true
     this.unlockAudio()
     this.say("Abriendo la cámara…")
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+      this.videoTarget.srcObject = this.stream
+      this.videoTarget.setAttribute("playsinline", true)
+      await this.videoTarget.play()
     } catch (error) {
+      this.stop()
       this.startTarget.hidden = false
       return this.say("No se pudo abrir la cámara. Puedes registrar con el código a mano.", true)
+    } finally {
+      this.starting = false
     }
 
-    this.videoTarget.srcObject = this.stream
-    this.videoTarget.setAttribute("playsinline", true)
-    await this.videoTarget.play()
     this.say("Apunta al código del gafete")
     this.scanning = true
     this.tick()
@@ -70,6 +93,29 @@ export default class extends Controller {
     this.scanning = false
     if (this.frame) cancelAnimationFrame(this.frame)
     this.stream?.getTracks().forEach((track) => track.stop())
+    this.stream = null
+  }
+
+  // Pantalla como recién abierta: botón visible, sin video ni tarjeta encima.
+  resetCamera() {
+    this.videoTarget.srcObject = null
+    this.startTarget.hidden = false
+    clearTimeout(this.hideTimer)
+    this.cardTarget.hidden = true
+    this.say("Activa la cámara para empezar")
+  }
+
+  // Si el navegador ya dio permiso a la cámara, se enciende sola; si no, queda el botón para pedirlo.
+  async resume() {
+    if (this.scanning || this.starting) return
+    this.resetCamera()
+
+    try {
+      const permission = await navigator.permissions?.query({ name: "camera" })
+      if (permission?.state === "granted") await this.start()
+    } catch (error) {
+      // Navegadores sin Permissions API para la cámara: se queda el botón.
+    }
   }
 
   tick() {
@@ -217,12 +263,13 @@ export default class extends Controller {
     }
     const tone = tones[result.tone]
 
-    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 rounded-tile border border-line border-l-4 ${tone.bar} bg-surface px-4 py-3 shadow-lg dark:border-slate-700 transition-opacity duration-200`
+    // Franja compacta de alto fijo (tres líneas cortadas) en la zona de abajo del visor; el enlace a la ficha
+    // va en la nota de «Último» debajo de la cámara, para no navegar por un toque sin querer.
+    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex flex-col justify-center rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg dark:border-slate-700 transition-opacity duration-200`
     this.cardTarget.innerHTML = `
-      <p class="text-[11.5px] font-bold uppercase tracking-[.06em] ${tone.text}">${tone.label}</p>
-      <p class="mt-0.5 text-[16px] font-extrabold text-ink-900">${this.escape(result.title)}</p>
-      ${result.detail ? `<p class="mt-0.5 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">${this.escape(result.detail)}</p>` : ""}
-      ${result.url ? `<a href="${this.escape(result.url)}" class="mt-1.5 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
+      <p class="text-[11px] font-bold uppercase tracking-[.06em] leading-tight ${tone.text}">${tone.label}</p>
+      <p class="text-[15px] font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</p>
+      ${result.detail ? `<p class="text-[12px] font-semibold leading-tight text-ink-700 dark:text-slate-300 truncate">${this.escape(result.detail)}</p>` : ""}
     `
     this.cardTarget.hidden = false
     this.cardTarget.classList.remove("opacity-0")
