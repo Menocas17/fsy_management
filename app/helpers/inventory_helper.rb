@@ -6,8 +6,10 @@ module InventoryHelper
   }.freeze
 
   INVENTORY_COLORS = {
-    "primary" => "bg-primary-600", "green" => "bg-cat-green", "amber" => "bg-cat-amber",
-    "rose" => "bg-cat-rose", "indigo" => "bg-cat-indigo"
+    "primary" => "bg-primary-600", "blue" => "bg-cat-blue", "sky" => "bg-sky-600", "teal" => "bg-cat-teal",
+    "green" => "bg-cat-green", "lime" => "bg-lime-600", "amber" => "bg-cat-amber", "orange" => "bg-orange-600",
+    "brown" => "bg-amber-800", "rose" => "bg-cat-rose", "pink" => "bg-pink-600", "indigo" => "bg-cat-indigo",
+    "violet" => "bg-violet-600", "slate" => "bg-slate-600"
   }.freeze
 
   def inventory_status_chip(item)
@@ -16,7 +18,11 @@ module InventoryHelper
   end
 
   def inventory_tile_class(inventory)
-    INVENTORY_COLORS.fetch(inventory.color, "bg-primary-600")
+    inventory_color_class(inventory.color)
+  end
+
+  def inventory_color_class(color)
+    INVENTORY_COLORS.fetch(color.to_s, INVENTORY_COLORS["primary"])
   end
 
   def inventory_qr_tag(item, size: 132)
