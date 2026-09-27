@@ -1,11 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 import jsQR from "jsqr"
 
-// Lee el QR pegado en la caja con la cámara del teléfono y salta a la ficha del artículo.
-// jsQR va incluido en vendor/javascript porque Safari no trae lector propio.
+// Lee un QR con la cámara del teléfono y salta a donde lleva: la caja del inventario o, desde el panel,
+// el gafete de una persona. jsQR va incluido en vendor/javascript porque Safari no trae lector propio.
 export default class extends Controller {
   static targets = ["video", "canvas", "status", "start"]
-  static values = { url: String }
+  static values = {
+    url: String,
+    aim: { type: String, default: "Apuntá al código de la caja" },
+    found: { type: String, default: "Artículo" }
+  }
 
   disconnect() {
     this.stop()
@@ -28,7 +32,7 @@ export default class extends Controller {
     this.videoTarget.srcObject = this.stream
     this.videoTarget.setAttribute("playsinline", true)
     await this.videoTarget.play()
-    this.status("Apuntá al código de la caja")
+    this.status(this.aimValue)
     this.scanning = true
     this.tick()
   }
@@ -62,8 +66,10 @@ export default class extends Controller {
   found(payload) {
     const code = payload.trim().split("/").pop().split("?")[0]
     this.stop()
-    this.status(`Artículo ${code}`)
-    window.location.href = this.urlValue.replace("CODE", encodeURIComponent(code))
+    this.status(`${this.foundValue} ${code}`)
+    navigator.vibrate?.(40)
+    const url = this.urlValue.replace("CODE", encodeURIComponent(code))
+    window.Turbo ? Turbo.visit(url) : (window.location.href = url)
   }
 
   status(message, isError = false) {
