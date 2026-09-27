@@ -26,7 +26,7 @@
     </div>
   </button>
 <% elsif @is_nav && disabled? %>
-  <span aria-disabled="true" title="Próximamente" class="<%= styles %> text-ink-300 dark:text-slate-500 cursor-not-allowed">
+  <span aria-disabled="true" title="Próximamente" class="<%= styles %> text-ink-500 cursor-not-allowed">
     <% if @lucide_icon %>
       <%= helpers.icon(@lucide_icon, class: "w-[19px] h-[19px] shrink-0") %>
     <% elsif @secondary_icon.present? %>

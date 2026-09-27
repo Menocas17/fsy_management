@@ -62,7 +62,7 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active_classes
-    active? ? "bg-primary-gradient-right text-white shadow-sm" : "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
+    active? ? "bg-primary-gradient-right text-white shadow-sm" : "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
   end
 
   def current_icon

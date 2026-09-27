@@ -4,12 +4,12 @@
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
     <div class="flex items-center gap-3 min-w-0">
-      <span class="w-11 h-11 shrink-0 rounded-[13px] bg-cat-indigo text-white flex items-center justify-center">
+      <span class="w-11 h-11 shrink-0 rounded-tile bg-cat-indigo text-white flex items-center justify-center">
         <%= icon "graduation-cap", class: "w-5 h-5" %>
       </span>
       <div class="min-w-0">
-        <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100 truncate"><%= @training.name %></h1>
-        <p class="text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
+        <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 truncate"><%= @training.name %></h1>
+        <p class="text-[12.5px] font-semibold text-ink-500">
           <%= SpanishDates.long(@training.held_on) %> de <%= @training.held_on.year %>
           <%= " · #{@training.location}" if @training.location.present? %>
         </p>
@@ -17,7 +17,7 @@
     </div>
     <% if can_check_in? && @training.scan_window.open? %>
       <%= link_to checkins_path(training_id: @training.id),
-            class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+            class: button_classes do %>
         <%= icon "scan-qr-code", class: "w-4 h-4" %>
         Escanear asistencia
       <% end %>

@@ -1,15 +1,31 @@
 require "rqrcode"
 
 module UiHelper
-  CARD_CLASSES = "bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md".freeze
-  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-[11px] bg-surface dark:bg-slate-900 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
+  CARD_CLASSES = "bg-surface border border-line-soft rounded-card shadow-md".freeze
+  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-control bg-surface dark:bg-slate-900 border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
+
+  BUTTON_BASE = "inline-flex items-center justify-center gap-2 rounded-control text-sm font-semibold transition cursor-pointer " \
+                "active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100".freeze
+  BUTTON_SIZES = { sm: "h-9 px-3.5", md: "h-10 px-4", lg: "h-11 px-5" }.freeze
+  BUTTON_VARIANTS = {
+    primary: "bg-primary-700 text-white shadow-sm hover:bg-primary-800",
+    secondary: "border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700",
+    danger: "bg-danger text-white shadow-sm hover:bg-danger/90",
+    ghost: "text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"
+  }.freeze
+
+  # Un solo lugar para los botones: antes cada vista copiaba su propia cadena y ninguna coincidía del todo.
+  # extra suma lo que es del sitio (ancho, márgenes), no del botón.
+  def button_classes(variant = :primary, size: :md, extra: nil)
+    [ BUTTON_BASE, BUTTON_SIZES.fetch(size), BUTTON_VARIANTS.fetch(variant), extra ].compact.join(" ")
+  end
 
   def card_classes(extra = nil)
     [ CARD_CLASSES, extra ].compact.join(" ")
   end
 
   def field_label_classes
-    "block mb-1.5 text-[11.5px] font-bold text-ink-700 dark:text-slate-300"
+    "block mb-1.5 text-[11.5px] font-bold text-ink-700"
   end
 
   def field_input_classes
@@ -18,11 +34,11 @@ module UiHelper
 
   # Las pantallas de acceso van siempre en claro y el formulario es todo el contenido: campos algo más altos.
   def auth_input_classes
-    "w-full h-11 px-3.5 rounded-[11px] bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"
+    "w-full h-11 px-3.5 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"
   end
 
   def auth_button_classes
-    "w-full inline-flex items-center justify-center gap-2 h-11 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-md hover:bg-primary-800 transition cursor-pointer"
+    "w-full inline-flex items-center justify-center gap-2 h-11 rounded-control bg-primary-700 text-sm font-semibold text-white shadow-md hover:bg-primary-800 transition cursor-pointer"
   end
 
   def field_select_classes
@@ -55,12 +71,12 @@ module UiHelper
   # href convierte el valor en enlace (p. ej. tel: para llamar desde la ficha); sin valor no hay enlace.
   def info_row(label, icon_name, value, href: nil)
     display = Array(value).compact_blank.join(" · ").presence || "—"
-    value_classes = "mt-px text-[13.5px] font-semibold text-ink-900 dark:text-slate-100 break-words"
-    tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft dark:border-slate-700") do
+    value_classes = "mt-px text-[13.5px] font-semibold text-ink-900 break-words"
+    tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft") do
       tag.span(icon(icon_name, class: "w-4 h-4"),
-               class: "w-[34px] h-[34px] shrink-0 rounded-[10px] flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
+               class: "w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
         tag.div(class: "min-w-0") do
-          tag.p(label, class: "text-[11.5px] font-semibold text-ink-500 dark:text-slate-400") +
+          tag.p(label, class: "text-[11.5px] font-semibold text-ink-500") +
             if href && display != "—"
               tag.p(link_to(display, href, class: "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"), class: value_classes)
             else

@@ -57,17 +57,50 @@
   --color-cat-green: oklch(62% 0.15 148);
   --color-cat-amber: oklch(72% 0.14 70);
   --color-cat-rose: oklch(60% 0.17 15);
+  --color-cat-teal: oklch(60% 0.1 195);
   /* Para fondos de botones de borrado: cat-rose no llega a 4.5:1 con texto blanco. */
   --color-danger: oklch(52% 0.17 25);
+
+  /* Texto sobre los tintes de categoría (chips, avisos, estados): el tono base no llega a 4.5:1 en letra
+     chica. En oscuro vuelven al tono base, que sí contrasta sobre fondo oscuro. */
+  --color-cat-blue-ink: oklch(47% 0.12 230);
+  --color-cat-indigo-ink: oklch(45% 0.16 275);
+  --color-cat-green-ink: oklch(46% 0.13 148);
+  --color-cat-amber-ink: oklch(50% 0.12 70);
+  --color-cat-rose-ink: oklch(48% 0.17 15);
+  --color-cat-teal-ink: oklch(46% 0.09 195);
+
+  /* Radios: controles (botones, campos, pestañas), baldosas (iconos, bloques internos), tarjetas y paneles. */
+  --radius-control: 11px;
+  --radius-tile: 13px;
+  --radius-card: 18px;
+  --radius-panel: 22px;
 
   --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-lg: 0 20px 40px -12px oklch(20% 0.05 260 / 0.22);
 
-  --color-villa-flor: #109618;
-  --color-puerto-cabezas: #e68a00;
-  --color-las-americas: #1c21b4;
-  --color-bello-horizonte: #0089b2;
+}
+
+/* Modo oscuro por tokens: las superficies, líneas y tintas cambian aquí, así que una clase como
+   bg-surface o text-ink-900 ya sirve para los dos temas sin su par dark:. Los valores son los slate de
+   Tailwind que la app usaba a mano. Solo hace falta dark: cuando algo se aparta del token. */
+.dark {
+  --color-surface: oklch(27.9% 0.041 260.031);
+  --color-canvas: oklch(20.8% 0.042 265.755);
+  --color-line: oklch(44.6% 0.043 257.281);
+  --color-line-soft: oklch(37.2% 0.044 257.287);
+  --color-ink-900: oklch(96.8% 0.007 247.896);
+  --color-ink-700: oklch(86.9% 0.022 252.894);
+  --color-ink-500: oklch(70.4% 0.04 256.788);
+  --color-ink-300: oklch(55.4% 0.046 257.417);
+
+  --color-cat-blue-ink: var(--color-cat-blue);
+  --color-cat-indigo-ink: var(--color-cat-indigo);
+  --color-cat-green-ink: var(--color-cat-green);
+  --color-cat-amber-ink: var(--color-cat-amber);
+  --color-cat-rose-ink: var(--color-cat-rose);
+  --color-cat-teal-ink: var(--color-cat-teal);
 }
 
 /* Pagy's series_nav emits bare anchors; style them by their ARIA state. */
@@ -76,13 +109,13 @@
     @apply flex items-center gap-1.5;
   }
   .pagy.series-nav a {
-    @apply min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-[10px] border border-line text-[13px] font-bold text-ink-700 transition hover:bg-primary-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700;
+    @apply min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-control border border-line text-[13px] font-bold text-ink-700 transition hover:bg-primary-50 dark:hover:bg-slate-700;
   }
   .pagy.series-nav a[aria-current="page"] {
     @apply bg-primary-700 border-transparent text-white hover:bg-primary-700 dark:hover:bg-primary-700;
   }
   .pagy.series-nav a[aria-disabled="true"]:not([aria-current]) {
-    @apply text-ink-300 cursor-default hover:bg-transparent dark:text-slate-600 dark:hover:bg-transparent;
+    @apply text-ink-500 cursor-default hover:bg-transparent dark:text-slate-600 dark:hover:bg-transparent;
   }
 }
 

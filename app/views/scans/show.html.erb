@@ -5,9 +5,9 @@
   <section class="<%= card_classes("overflow-hidden") %>"
            data-controller="qr-scanner" data-qr-scanner-url-value="<%= scan_lookup_path(code: "CODE") %>"
            data-qr-scanner-aim-value="Apunta al código del gafete" data-qr-scanner-found-value="Abriendo">
-    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft dark:border-slate-700">
-      <h1 class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100">Escanear QR</h1>
-      <p role="status" class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-qr-scanner-target="status">Activa la cámara para empezar</p>
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
+      <h1 class="text-[14.5px] font-bold text-ink-900">Escanear QR</h1>
+      <p role="status" class="text-[11.5px] font-semibold text-ink-500" data-qr-scanner-target="status">Activa la cámara para empezar</p>
     </div>
 
     <div class="relative bg-slate-900 aspect-square max-h-[55dvh] w-full flex items-center justify-center">
@@ -20,14 +20,14 @@
         <% end %>
       </div>
       <button type="button" data-action="qr-scanner#start" data-qr-scanner-target="start"
-              class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-[11px] bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+              class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
         <%= icon "scan-qr-code", class: "w-4 h-4" %>
         Activar la cámara
       </button>
     </div>
   </section>
 
-  <p class="px-1 text-[12.5px] font-medium text-ink-500 dark:text-slate-400">
+  <p class="px-1 text-[12.5px] font-medium text-ink-500">
     Con el gafete de una persona se abre su ficha<%= can_view_inventory? ? "; con la etiqueta de una caja, el artículo del inventario" : "" %>.
   </p>
 </div>

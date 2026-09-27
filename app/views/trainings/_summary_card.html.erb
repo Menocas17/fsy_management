@@ -1,27 +1,27 @@
 <%
   # Una tarjeta por capacitación: cómo fue, o cuánto falta si todavía no llega.
   tone, chip = if training.past? || training.today?
-    training.attendance_rate >= 80 ? [ "bg-cat-green", "text-emerald-700 dark:text-cat-green bg-cat-green/12" ] : [ "bg-cat-amber", "text-amber-700 dark:text-cat-amber bg-cat-amber/15" ]
+    training.attendance_rate >= 80 ? [ "bg-cat-green", "text-cat-green-ink bg-cat-green/12" ] : [ "bg-cat-amber", "text-cat-amber-ink bg-cat-amber/15" ]
   else
-    [ "bg-cat-indigo", "text-cat-indigo bg-cat-indigo/12" ]
+    [ "bg-cat-indigo", "text-cat-indigo-ink bg-cat-indigo/12" ]
   end
 %>
 <%= link_to agenda_training_path(training), class: card_classes("p-4 flex flex-col gap-3 hover:border-primary-300 dark:hover:border-primary-300 transition"),
             data: { training_card: training.id } do %>
   <div class="flex items-center gap-3">
-    <span class="w-10 h-10 shrink-0 rounded-[12px] text-white flex items-center justify-center <%= tone %>">
+    <span class="w-10 h-10 shrink-0 rounded-control text-white flex items-center justify-center <%= tone %>">
       <%= icon "graduation-cap", class: "w-[19px] h-[19px]" %>
     </span>
     <div class="min-w-0">
-      <p class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= training.name %></p>
-      <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= SpanishDates.long(training.held_on) %></p>
+      <p class="text-[14.5px] font-bold text-ink-900 truncate"><%= training.name %></p>
+      <p class="text-[11.5px] font-semibold text-ink-500"><%= SpanishDates.long(training.held_on) %></p>
     </div>
   </div>
 
   <div class="flex items-baseline justify-between gap-2">
-    <p class="text-[22px] font-extrabold tabular-nums text-ink-900 dark:text-slate-100" data-training-attended>
+    <p class="text-[22px] font-extrabold tabular-nums text-ink-900" data-training-attended>
       <%= training.past? || training.today? ? training.attended_count : "—" %>
-      <span class="text-[11.5px] font-bold text-ink-500 dark:text-slate-400">de <%= training.expected_count %></span>
+      <span class="text-[11.5px] font-bold text-ink-500">de <%= training.expected_count %></span>
     </p>
     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold <%= chip %>">
       <% if training.today? %>
@@ -34,7 +34,7 @@
     </span>
   </div>
 
-  <div class="flex h-2 rounded-full overflow-hidden bg-canvas dark:bg-slate-900">
+  <div class="flex h-2 rounded-full overflow-hidden bg-canvas">
     <span class="<%= tone %>" style="width: <%= training.attendance_rate %>%"></span>
   </div>
 <% end %>

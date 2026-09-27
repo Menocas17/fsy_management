@@ -1,7 +1,7 @@
 <%= form_with model: participant, id: "participant-form", class: "space-y-5" do |form| %>
   <%= hidden_field_tag :from, params[:from] %>
   <% if form.object.errors.any? %>
-    <div class="rounded-[14px] border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose" role="alert">
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
       <%= form.object.errors.full_messages.first %>
     </div>
   <% end %>

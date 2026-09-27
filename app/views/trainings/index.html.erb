@@ -2,12 +2,12 @@
 <% content_for :eyebrow, "Agenda" %>
 <%
   tab_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
-  tab_on = "#{tab_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900 dark:text-slate-100"
-  tab_off = "#{tab_base} font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100"
+  tab_on = "#{tab_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900"
+  tab_off = "#{tab_base} font-semibold text-ink-500 hover:text-ink-900"
 %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
-    <nav class="inline-flex p-1 gap-0.5 rounded-[11px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-700 w-fit" aria-label="Vista de la agenda">
+    <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-slate-700 w-fit" aria-label="Vista de la agenda">
       <%= link_to agenda_path, class: tab_off do %>
         <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
         Agenda del evento
@@ -19,13 +19,13 @@
     </nav>
     <div class="flex flex-wrap items-center gap-2">
       <%= link_to trainings_reports_path, target: "_blank", rel: "noopener",
-            class: "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+            class: button_classes(:secondary) do %>
         <%= icon "printer", class: "w-4 h-4" %>
         PDF de asistencia
       <% end %>
       <% if can_check_in? && (next_training = @trainings.find { |training| training.scan_window.open? }) %>
         <%= link_to checkins_path(training_id: next_training.id),
-              class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+              class: button_classes do %>
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Escanear asistencia
         <% end %>
@@ -43,22 +43,22 @@
 
   <%# La tabla completa: una columna por fecha, que es la vista que sirve para perseguir a quien falta. %>
   <section class="<%= card_classes("overflow-hidden") %>">
-    <div class="px-5 py-4 border-b border-line-soft dark:border-slate-700">
-      <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Asistencia del staff</p>
-      <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= pluralize(@staff.size, "persona") %> · una columna por capacitación</p>
+    <div class="px-5 py-4 border-b border-line-soft">
+      <p class="text-[14px] font-bold text-ink-900">Asistencia del staff</p>
+      <p class="text-[11.5px] font-semibold text-ink-500"><%= pluralize(@staff.size, "persona") %> · una columna por capacitación</p>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead>
-          <tr class="border-b border-line-soft dark:border-slate-700">
-            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400 sticky left-0 z-[1] bg-surface dark:bg-slate-800">Persona</th>
-            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400">Rol</th>
+          <tr class="border-b border-line-soft">
+            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 sticky left-0 z-[1] bg-surface">Persona</th>
+            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500">Rol</th>
             <% @trainings.each do |training| %>
-              <th scope="col" class="px-3 py-3 text-center text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400 whitespace-nowrap">
+              <th scope="col" class="px-3 py-3 text-center text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 whitespace-nowrap">
                 <%= training.held_on.day %> <%= SpanishDates.month(training.held_on).first(3) %>
               </th>
             <% end %>
-            <th scope="col" class="px-4 py-3 text-right text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400">Asistencia</th>
+            <th scope="col" class="px-4 py-3 text-right text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500">Asistencia</th>
           </tr>
         </thead>
         <tbody>
@@ -67,11 +67,11 @@
             <% attended = held.count { |training| @attended[training.id]&.include?(person.id) } %>
             <tr class="group border-b border-line dark:border-slate-700 last:border-b-0 hover:bg-canvas dark:hover:bg-slate-700/40" data-staff-row="<%= person.id %>">
               <%# El nombre queda fijo al desplazar la tabla de lado en el teléfono: si no, se pierde de quién es cada fila. %>
-              <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:bg-slate-800 dark:group-hover:bg-slate-700">
+              <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:group-hover:bg-slate-700">
                 <%= link_to person.full_name, participant_path(person, from: "staff"),
-                      class: "text-[13.5px] font-bold text-ink-900 dark:text-slate-100 hover:underline" %>
+                      class: "text-[13.5px] font-bold text-ink-900 hover:underline" %>
               </td>
-              <td class="px-4 py-3 text-[12.5px] font-medium text-ink-700 dark:text-slate-300">
+              <td class="px-4 py-3 text-[12.5px] font-medium text-ink-700">
                 <%= person.role_label %><%= " · #{person.company&.name || person.logistics_area&.name}" if person.company || person.logistics_area %>
               </td>
               <% @trainings.each do |training| %>
@@ -81,17 +81,17 @@
                       <%= icon "check", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Asistió</span>
                     </span>
                   <% elsif training.held_on > Date.current %>
-                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center border border-dashed border-ink-300 text-ink-500 dark:border-slate-500 dark:text-slate-400" title="Todavía no llega" data-mark="pending">
+                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center border border-dashed border-ink-300 text-ink-500" title="Todavía no llega" data-mark="pending">
                       <%= icon "clock", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Todavía no llega</span>
                     </span>
                   <% else %>
-                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-400/40" title="Faltó" data-mark="no">
+                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center bg-rose-100 text-cat-rose-ink ring-1 ring-inset ring-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-400/40" title="Faltó" data-mark="no">
                       <%= icon "x", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Faltó</span>
                     </span>
                   <% end %>
                 </td>
               <% end %>
-              <td class="px-4 py-3 text-right text-[12.5px] font-bold tabular-nums text-ink-900 dark:text-slate-100 whitespace-nowrap" data-attendance-total>
+              <td class="px-4 py-3 text-right text-[12.5px] font-bold tabular-nums text-ink-900 whitespace-nowrap" data-attendance-total>
                 <%= held.any? ? "#{attended} de #{held.size}" : "—" %>
               </td>
             </tr>

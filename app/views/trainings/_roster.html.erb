@@ -11,12 +11,12 @@
          [ missing_label, training.expected_count - training.attended_count, pending ? "bg-cat-amber" : "bg-cat-rose", pending ? "clock" : "x" ],
          [ "Del staff", training.expected_count, "bg-cat-indigo", "users" ] ].each do |label, value, tone, icon_name| %>
       <div class="<%= card_classes("flex items-center gap-4 px-5 py-[18px]") %>">
-        <span class="w-[52px] h-[52px] shrink-0 rounded-[14px] text-white flex items-center justify-center <%= tone %>">
+        <span class="w-[52px] h-[52px] shrink-0 rounded-tile text-white flex items-center justify-center <%= tone %>">
           <%= icon icon_name, class: "w-6 h-6" %>
         </span>
         <div>
-          <p class="text-[34px] font-extrabold leading-none tabular-nums text-ink-900 dark:text-slate-100" data-figure="<%= label.parameterize %>"><%= value %></p>
-          <p class="mt-1 text-[13px] font-semibold text-ink-500 dark:text-slate-400"><%= label %></p>
+          <p class="text-[34px] font-extrabold leading-none tabular-nums text-ink-900" data-figure="<%= label.parameterize %>"><%= value %></p>
+          <p class="mt-1 text-[13px] font-semibold text-ink-500"><%= label %></p>
         </div>
       </div>
     <% end %>
@@ -28,13 +28,13 @@
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading "Asistieron · #{attendances.size}", "user-check" %>
       <% if attendances.any? %>
-        <ul class="divide-y divide-line-soft dark:divide-slate-700" data-attendees>
+        <ul class="divide-y divide-line-soft" data-attendees>
           <% attendances.each do |attendance| %>
             <li class="flex items-center gap-3 py-2.5 first:pt-0 <%= "roster-moved" if attendance.participant_id == highlight %>">
-              <span class="text-[12px] font-bold tabular-nums text-ink-500 dark:text-slate-400 shrink-0"><%= attendance.recorded_at.strftime("%H:%M") %></span>
+              <span class="text-[12px] font-bold tabular-nums text-ink-500 shrink-0"><%= attendance.recorded_at.strftime("%H:%M") %></span>
               <span class="min-w-0 flex-1">
-                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= attendance.participant.full_name %></span>
-                <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+                <span class="block text-[13.5px] font-bold text-ink-900 truncate"><%= attendance.participant.full_name %></span>
+                <span class="block text-[11.5px] font-semibold text-ink-500">
                   <%= attendance.participant.role_label %><%= " · marcada a mano" if attendance.source_manual? %>
                 </span>
               </span>
@@ -42,7 +42,7 @@
                 <%= button_to agenda_training_attendance_path(training, attendance), method: :delete,
                       form: { data: { turbo_confirm: "¿Quitar la asistencia de #{attendance.participant.full_name}?",
                                       turbo_confirm_detail: "Se puede volver a marcar después.", turbo_confirm_button: "Sí, quitar" } },
-                      class: "shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-2 text-[12px] font-bold text-rose-700 dark:text-cat-rose hover:underline cursor-pointer" do %>
+                      class: "shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-2 text-[12px] font-bold text-cat-rose-ink hover:underline cursor-pointer" do %>
                   Quitar
                 <% end %>
               <% end %>
@@ -50,25 +50,25 @@
           <% end %>
         </ul>
       <% else %>
-        <p class="text-[13px] text-ink-500 dark:text-slate-400">Todavía no hay asistencias registradas.</p>
+        <p class="text-[13px] text-ink-500">Todavía no hay asistencias registradas.</p>
       <% end %>
     </section>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading "#{pending ? "Por registrar" : "Faltaron"} · #{absentees.size}", "user-x" %>
       <% if absentees.any? %>
-        <ul class="divide-y divide-line-soft dark:divide-slate-700" data-absentees>
+        <ul class="divide-y divide-line-soft" data-absentees>
           <% absentees.each do |person| %>
             <li class="flex items-center gap-3 py-2.5 first:pt-0 <%= "roster-moved" if person.id == highlight %>">
               <span class="min-w-0 flex-1">
-                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= person.full_name %></span>
-                <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+                <span class="block text-[13.5px] font-bold text-ink-900 truncate"><%= person.full_name %></span>
+                <span class="block text-[11.5px] font-semibold text-ink-500">
                   <%= person.role_label %><%= " · #{person.company&.name || person.logistics_area&.name}" if person.company || person.logistics_area %>
                 </span>
               </span>
               <% if can_check_in? %>
                 <%= button_to agenda_training_attendances_path(training, participant_id: person.id),
-                      class: "shrink-0 inline-flex items-center gap-1.5 h-11 md:h-8 px-3 rounded-[10px] border border-line dark:border-slate-600 text-[12px] font-bold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 active:scale-[0.97] cursor-pointer transition" do %>
+                      class: "shrink-0 inline-flex items-center gap-1.5 h-11 md:h-8 px-3 rounded-control border border-line text-[12px] font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 active:scale-[0.97] cursor-pointer transition" do %>
                   Marcar
                 <% end %>
               <% end %>
@@ -76,7 +76,7 @@
           <% end %>
         </ul>
       <% else %>
-        <p class="text-[13px] text-ink-500 dark:text-slate-400"><%= pending ? "Ya están todos marcados." : "Vino todo el staff." %></p>
+        <p class="text-[13px] text-ink-500"><%= pending ? "Ya están todos marcados." : "Vino todo el staff." %></p>
       <% end %>
     </section>
   </div>

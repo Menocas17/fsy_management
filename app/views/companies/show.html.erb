@@ -11,42 +11,42 @@
     <div class="flex flex-wrap items-center justify-between gap-x-5 gap-y-4">
       <div class="flex items-center gap-4 md:gap-[18px] min-w-0 flex-1 basis-72">
         <span aria-hidden="true"
-              class="-mt-10 md:-mt-[46px] shrink-0 w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-[20px] md:rounded-[24px] border-4 border-surface dark:border-slate-800 shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
+              class="-mt-10 md:-mt-[46px] shrink-0 w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-panel md:rounded-panel border-4 border-surface shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
           <span class="text-[9px] md:text-[10px] font-bold tracking-[.08em] uppercase opacity-75">Comp.</span>
           <span class="text-[26px] md:text-[34px] font-extrabold leading-none"><%= @company.number || "–" %></span>
         </span>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100"><%= @company.name %></h1>
+            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900"><%= @company.name %></h1>
             <% if @company.auxiliar_company %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-indigo/15 text-cat-indigo text-xs font-semibold whitespace-nowrap"><%= @company.auxiliar_company.name %></span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-indigo/15 text-cat-indigo-ink text-xs font-semibold whitespace-nowrap"><%= @company.auxiliar_company.name %></span>
             <% end %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-blue/15 text-cat-blue text-xs font-semibold whitespace-nowrap"><%= pluralize(@jovenes_total, "joven", plural: "jóvenes") %></span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-blue/15 text-cat-blue-ink text-xs font-semibold whitespace-nowrap"><%= pluralize(@jovenes_total, "joven", plural: "jóvenes") %></span>
           </div>
           <% if @company.nickname.present? %>
             <p class="mt-1 text-[15px] font-bold text-primary-600 dark:text-primary-300 break-words" data-company-nickname><%= @company.nickname %></p>
           <% end %>
-          <p class="mt-0.5 text-[13px] font-medium text-ink-500 dark:text-slate-400">
+          <p class="mt-0.5 text-[13px] font-medium text-ink-500">
             <%= [ counselor_names.presence && "Consejeros: #{counselor_names}", @company.dining_hall_label, pluralize(@rooms.size, "cuarto", plural: "cuartos") ].compact.join(" · ") %>
           </p>
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
         <%= link_to safe_return_to(companies_path),
-              class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+              class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
           <%= icon "arrow-left", class: "w-4 h-4" %>
           Volver
         <% end %>
         <% if can_view_participant_reports? %>
           <%= link_to badges_reports_path(company: @company.id), target: "_blank", rel: "noopener",
-                class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+                class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
             <%= icon "id-card", class: "w-4 h-4" %>
             Gafetes
           <% end %>
         <% end %>
         <% if can_edit_company?(@company) %>
           <%= link_to edit_company_path(@company),
-                class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+                class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
             <%= icon "square-pen", class: "w-4 h-4" %>
             Editar
           <% end %>
@@ -74,14 +74,14 @@
         <% if @rooms.any? %>
           <div class="grid grid-cols-2 gap-2">
             <% @rooms.each do |room, count| %>
-              <div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-canvas dark:bg-slate-900/60 border border-line-soft dark:border-slate-700" data-room="<%= room %>">
-                <span class="text-sm font-extrabold text-ink-900 dark:text-slate-100"><%= room %></span>
-                <span class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400"><%= count %> jóv.</span>
+              <div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-canvas dark:bg-slate-900/60 border border-line-soft" data-room="<%= room %>">
+                <span class="text-sm font-extrabold text-ink-900"><%= room %></span>
+                <span class="text-[11.5px] font-semibold text-ink-500"><%= count %> jóv.</span>
               </div>
             <% end %>
           </div>
         <% else %>
-          <p class="text-[13px] text-ink-500 dark:text-slate-400">Aún no hay cuartos asignados a sus jóvenes.</p>
+          <p class="text-[13px] text-ink-500">Aún no hay cuartos asignados a sus jóvenes.</p>
         <% end %>
       </section>
     </div>
@@ -94,10 +94,10 @@
         </div>
         <%= form_with url: company_path(@company), method: :get, role: "search", class: "relative w-full sm:w-[240px]",
               data: { turbo_frame: "company_participants", turbo_action: "advance" } do |form| %>
-          <%= icon "search", class: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
+          <%= icon "search", class: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
           <%= form.search_field :query, value: params[:query], autocomplete: "off",
                 placeholder: "Buscar en la compañía…", aria: { label: "Buscar jóvenes de la compañía" },
-                class: "w-full h-9 pl-9 pr-3 rounded-[10px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-600 text-[13px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+                class: "w-full h-9 pl-9 pr-3 rounded-control bg-canvas border border-line text-[13px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
                 oninput: "this.form.requestSubmit()" %>
         <% end %>
       </div>

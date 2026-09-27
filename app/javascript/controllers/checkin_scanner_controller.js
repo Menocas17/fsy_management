@@ -200,16 +200,16 @@ export default class extends Controller {
   // Pantalla --------------------------------------------------------------
   show(result, vibration) {
     const tones = {
-      ok: { label: "Registrado", bar: "border-l-cat-green dark:border-l-cat-green", text: "text-emerald-700 dark:text-cat-green", corner: "border-cat-green" },
-      already: { label: "Ya estaba registrado", bar: "border-l-cat-amber dark:border-l-cat-amber", text: "text-amber-700 dark:text-cat-amber", corner: "border-cat-amber" },
-      unknown: { label: "No reconocido", bar: "border-l-cat-rose dark:border-l-cat-rose", text: "text-rose-700 dark:text-cat-rose", corner: "border-cat-rose" }
+      ok: { label: "Registrado", bar: "border-l-cat-green dark:border-l-cat-green", text: "text-cat-green-ink", corner: "border-cat-green" },
+      already: { label: "Ya estaba registrado", bar: "border-l-cat-amber dark:border-l-cat-amber", text: "text-cat-amber-ink", corner: "border-cat-amber" },
+      unknown: { label: "No reconocido", bar: "border-l-cat-rose dark:border-l-cat-rose", text: "text-cat-rose-ink", corner: "border-cat-rose" }
     }
     const tone = tones[result.tone]
 
-    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 rounded-[14px] border border-line border-l-4 ${tone.bar} bg-surface px-4 py-3 shadow-lg dark:bg-slate-800 dark:border-slate-700`
+    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 rounded-tile border border-line border-l-4 ${tone.bar} bg-surface px-4 py-3 shadow-lg dark:border-slate-700`
     this.cardTarget.innerHTML = `
       <p class="text-[11.5px] font-bold uppercase tracking-[.06em] ${tone.text}">${tone.label}</p>
-      <p class="mt-0.5 text-[16px] font-extrabold text-ink-900 dark:text-slate-100">${this.escape(result.title)}</p>
+      <p class="mt-0.5 text-[16px] font-extrabold text-ink-900">${this.escape(result.title)}</p>
       ${result.detail ? `<p class="mt-0.5 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">${this.escape(result.detail)}</p>` : ""}
       ${result.url ? `<a href="${this.escape(result.url)}" class="mt-1.5 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
     `
@@ -285,7 +285,7 @@ export default class extends Controller {
 
   say(message, isError = false) {
     this.statusTarget.textContent = message
-    this.statusTarget.classList.toggle("text-cat-rose", isError)
+    this.statusTarget.classList.toggle("text-cat-rose-ink", isError)
   }
 
   escape(text) {

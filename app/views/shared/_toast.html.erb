@@ -6,10 +6,10 @@
          <%= "data-toast-timeout-value=0" if error %>
          data-action="pointerenter->toast#pause pointerleave->toast#resume"
          role="<%= error ? "alert" : "status" %>"
-         class="toast flex items-start gap-3 pl-4 pr-1.5 py-1.5 rounded-[11px] border border-line border-l-[3px] bg-surface text-ink-900 shadow-lg dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 <%= toast_styles(type) %>">
+         class="toast flex items-start gap-3 pl-4 pr-1.5 py-1.5 rounded-control border border-line border-l-[3px] bg-surface text-ink-900 shadow-lg dark:border-slate-700 <%= toast_styles(type) %>">
       <span class="flex-1 min-w-0 py-1.5 text-[13.5px] font-semibold break-words"><%= message %></span>
       <button type="button" data-action="toast#close" aria-label="Cerrar aviso"
-              class="shrink-0 size-9 inline-flex items-center justify-center rounded-lg text-ink-500 hover:bg-canvas hover:text-ink-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition-colors cursor-pointer">
+              class="shrink-0 size-9 inline-flex items-center justify-center rounded-lg text-ink-500 hover:bg-canvas hover:text-ink-900 dark:hover:bg-slate-700 transition-colors cursor-pointer">
         <%= icon "x", class: "w-4 h-4" %>
       </button>
     </div>

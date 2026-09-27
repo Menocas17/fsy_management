@@ -57,7 +57,7 @@ export default class extends Controller {
     this.previewTarget.textContent = invalid
       ? `Solo hay ${this.stock} ${this.unit}`
       : `${total} ${this.unit}`
-    this.previewTarget.classList.toggle("text-cat-rose", invalid)
+    this.previewTarget.classList.toggle("text-cat-rose-ink", invalid)
     this.formTarget.querySelector("[type=submit]").disabled = invalid || quantity === 0
   }
 

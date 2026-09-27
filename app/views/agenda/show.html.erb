@@ -2,10 +2,10 @@
 <% content_for :eyebrow, "Gestión" %>
 <%
   toggle_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
-  active_toggle = "#{toggle_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900 dark:text-slate-100"
-  idle_toggle = "#{toggle_base} font-semibold text-ink-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-slate-100"
-  nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-[10px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-[10px] border border-line-soft dark:border-slate-700 text-ink-300 dark:text-slate-600 cursor-not-allowed"
+  active_toggle = "#{toggle_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900"
+  idle_toggle = "#{toggle_base} font-semibold text-ink-500 hover:text-ink-900"
+  nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-slate-600 cursor-not-allowed"
 %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
@@ -29,10 +29,10 @@
         </div>
       <% end %>
       <div class="min-w-0">
-        <p class="text-[15px] md:text-base font-extrabold text-ink-900 dark:text-slate-100 truncate">
+        <p class="text-[15px] md:text-base font-extrabold text-ink-900 truncate">
           <%= @view == "dia" ? spanish_date(@selected_day) : spanish_range(@days.first, @days.last) %>
         </p>
-        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+        <p class="text-[11.5px] font-semibold text-ink-500">
           <% if @view == "dia" %>
             <%= pluralize(@day_activities.size, "actividad", plural: "actividades") %> este día
           <% else %>
@@ -43,7 +43,7 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <nav class="inline-flex p-1 gap-0.5 rounded-[11px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-700" aria-label="Vista de la agenda">
+      <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-slate-700" aria-label="Vista de la agenda">
         <%= link_to agenda_path(date: @selected_day, view: "semana"), class: @view == "semana" ? active_toggle : idle_toggle,
               aria: { current: (@view == "semana" ? "page" : nil) }, data: { agenda_view: "semana" } do %>
           <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
@@ -61,7 +61,7 @@
         <% end %>
       </nav>
       <% if can_manage_agenda? %>
-        <%= link_to new_activity_path(date: @selected_day), class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+        <%= link_to new_activity_path(date: @selected_day), class: button_classes do %>
           <%= icon "plus", class: "w-4 h-4" %>
           Nueva actividad
         <% end %>
@@ -73,9 +73,9 @@
     <div class="min-w-0">
       <%# La leyenda va antes de la agenda: los colores se entienden al llegar, no después de recorrerla. %>
       <div class="<%= card_classes("mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5") %>" data-agenda-legend>
-        <span class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500">Tipos</span>
+        <span class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500">Tipos</span>
         <% Activity::CATEGORY_LABELS.each do |key, label| %>
-          <span class="inline-flex items-center gap-2 text-[12px] font-semibold text-ink-700 dark:text-slate-300">
+          <span class="inline-flex items-center gap-2 text-[12px] font-semibold text-ink-700">
             <span class="w-2.5 h-2.5 rounded-[3px] <%= Activity::CATEGORY_STYLES[key][:dot] %>"></span>
             <%= label %>
           </span>

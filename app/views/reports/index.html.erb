@@ -2,19 +2,19 @@
 <% content_for :eyebrow, "Gestión" %>
 <%
   card = card_classes("p-5 flex flex-col gap-3 h-full")
-  action = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition"
-  secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  inert = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-ink-300 dark:text-slate-500 cursor-not-allowed"
+  action = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition"
+  secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  inert = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-500 cursor-not-allowed"
 %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 space-y-6">
   <% if can_import_participants? %>
     <section class="<%= card_classes("p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4") %>">
-      <span class="w-11 h-11 shrink-0 rounded-[13px] bg-primary-50 dark:bg-primary-700/30 text-primary-600 dark:text-primary-100 flex items-center justify-center">
+      <span class="w-11 h-11 shrink-0 rounded-tile bg-primary-50 dark:bg-primary-700/30 text-primary-600 dark:text-primary-100 flex items-center justify-center">
         <%= icon "file-spreadsheet", class: "w-5 h-5" %>
       </span>
       <div class="flex-1 min-w-0">
-        <h2 class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Carga masiva de participantes</h2>
-        <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400">
+        <h2 class="text-[15px] font-bold text-ink-900">Carga masiva de participantes</h2>
+        <p class="mt-1 text-[13px] text-ink-500">
           Subí el Excel del registro y se crean las fichas en bloque. Te decimos fila por fila qué entró y qué no.
         </p>
       </div>
@@ -51,9 +51,9 @@
           <article class="<%= card %>">
             <div class="flex items-center gap-2.5">
               <%= icon report[:icon], class: "w-[18px] h-[18px] text-primary-500 dark:text-primary-300" %>
-              <h3 class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100"><%= report[:title] %></h3>
+              <h3 class="text-[14.5px] font-bold text-ink-900"><%= report[:title] %></h3>
             </div>
-            <p class="text-[13px] leading-relaxed text-ink-500 dark:text-slate-400 flex-1"><%= report[:text] %></p>
+            <p class="text-[13px] leading-relaxed text-ink-500 flex-1"><%= report[:text] %></p>
             <div class="flex flex-wrap gap-2">
               <%= link_to report[:url], target: "_blank", rel: "noopener", class: action do %>
                 <%= icon "printer", class: "w-4 h-4" %>
@@ -82,9 +82,9 @@
           <article class="<%= card %>">
             <div class="flex items-center gap-2.5">
               <%= icon report[:icon], class: "w-[18px] h-[18px] text-primary-500 dark:text-primary-300" %>
-              <h3 class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100"><%= report[:title] %></h3>
+              <h3 class="text-[14.5px] font-bold text-ink-900"><%= report[:title] %></h3>
             </div>
-            <p class="text-[13px] leading-relaxed text-ink-500 dark:text-slate-400 flex-1"><%= report[:text] %></p>
+            <p class="text-[13px] leading-relaxed text-ink-500 flex-1"><%= report[:text] %></p>
             <div class="flex flex-wrap gap-2">
               <%= link_to report[:url], target: "_blank", rel: "noopener", class: action do %>
                 <%= icon "printer", class: "w-4 h-4" %>
@@ -106,11 +106,11 @@
            ].each do |report| %>
           <article class="<%= card %>">
             <div class="flex items-center gap-2.5">
-              <%= icon report[:icon], class: "w-[18px] h-[18px] text-ink-300 dark:text-slate-500" %>
-              <h3 class="text-[14.5px] font-bold text-ink-500 dark:text-slate-400"><%= report[:title] %></h3>
-              <span class="ml-auto text-[10px] font-bold tracking-[.06em] uppercase px-2 py-0.5 rounded-full bg-canvas dark:bg-slate-700 text-ink-300 dark:text-slate-500">Pronto</span>
+              <%= icon report[:icon], class: "w-[18px] h-[18px] text-ink-500" %>
+              <h3 class="text-[14.5px] font-bold text-ink-500"><%= report[:title] %></h3>
+              <span class="ml-auto text-[10px] font-bold tracking-[.06em] uppercase px-2 py-0.5 rounded-full bg-canvas dark:bg-slate-700 text-ink-500">Pronto</span>
             </div>
-            <p class="text-[13px] leading-relaxed text-ink-300 dark:text-slate-500 flex-1"><%= report[:text] %></p>
+            <p class="text-[13px] leading-relaxed text-ink-500 flex-1"><%= report[:text] %></p>
             <span aria-disabled="true" class="<%= inert %>"><%= report[:label] %></span>
           </article>
         <% end %>

@@ -5,9 +5,9 @@
   <%# La ficha del artículo abre sola el cuadro de ajuste cuando se llega escaneando. %>
   <section class="<%= card_classes("overflow-hidden") %>"
            data-controller="qr-scanner" data-qr-scanner-url-value="<%= lookup_inventory_items_path(code: 'CODE') %>">
-    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft dark:border-slate-700">
-      <p class="text-[14.5px] font-bold text-ink-900 dark:text-slate-100">Escanear QR</p>
-      <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-qr-scanner-target="status">Activá la cámara para empezar</p>
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
+      <p class="text-[14.5px] font-bold text-ink-900">Escanear QR</p>
+      <p class="text-[11.5px] font-semibold text-ink-500" data-qr-scanner-target="status">Activá la cámara para empezar</p>
     </div>
 
     <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-square flex items-center justify-center">
@@ -20,7 +20,7 @@
         <% end %>
       </div>
       <button type="button" data-action="qr-scanner#start" data-qr-scanner-target="start"
-              class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-[11px] bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+              class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
         <%= icon "scan-qr-code", class: "w-4 h-4" %>
         Activar la cámara
       </button>
@@ -32,12 +32,12 @@
     <%= form_with url: lookup_inventory_items_path, method: :get, class: "flex gap-2" do %>
       <%= text_field_tag :code, nil, required: true, placeholder: "Ej. MAT-0042", autocomplete: "off",
             class: "#{field_input_classes} font-mono uppercase" %>
-      <%= tag.button type: "submit", class: "shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 cursor-pointer transition" do %>
+      <%= tag.button type: "submit", class: button_classes(:primary, extra: "shrink-0") do %>
         <%= icon "arrow-right", class: "w-4 h-4" %>
         Buscar
       <% end %>
     <% end %>
-    <p class="mt-2 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+    <p class="mt-2 text-[11.5px] font-medium text-ink-500">
       Sirve también con una pistola lectora: escanea y escribe el código en el campo.
     </p>
   </section>

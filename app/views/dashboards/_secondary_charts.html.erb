@@ -1,7 +1,7 @@
 <section class="grid grid-cols-1 lg:grid-cols-[1fr_1fr_1.2fr] gap-4 md:gap-5">
-  <div class="bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6">
+  <div class="bg-surface border border-line-soft rounded-card shadow-md px-6 py-6">
     <%= render "dashboards/card_heading", eyebrow: "Género", title: "Jóvenes por género",
-               icon_name: "venus-and-mars", tone: "bg-cat-rose/15 text-cat-rose", spacing: "mb-5", size: "sm" %>
+               icon_name: "venus-and-mars", tone: "bg-cat-rose/15 text-cat-rose-ink", spacing: "mb-5", size: "sm" %>
     <%
       jovenes_total = male_count + female_count
       share = ->(count) { jovenes_total.zero? ? 0 : (count * 100.0 / jovenes_total).round }
@@ -11,18 +11,18 @@
     <div class="space-y-3">
       <% rows.each do |key, count, label, icon_name, tone| %>
         <div class="flex items-center gap-3.5">
-          <div class="w-[52px] h-[52px] rounded-[14px] flex items-center justify-center shrink-0 text-white <%= tone %>">
+          <div class="w-[52px] h-[52px] rounded-tile flex items-center justify-center shrink-0 text-white <%= tone %>">
             <%= icon icon_name, class: "w-6 h-6" %>
           </div>
           <div class="min-w-0">
-            <p class="text-[34px] font-extrabold leading-none tabular-nums text-ink-900 dark:text-slate-100" data-kpi="<%= key %>"><%= count %></p>
-            <p class="mt-1 text-[13px] font-semibold text-ink-500 dark:text-slate-400"><%= label %></p>
+            <p class="text-[34px] font-extrabold leading-none tabular-nums text-ink-900" data-kpi="<%= key %>"><%= count %></p>
+            <p class="mt-1 text-[13px] font-semibold text-ink-500"><%= label %></p>
           </div>
-          <p class="ml-auto text-[13px] font-bold tabular-nums text-ink-500 dark:text-slate-400" data-kpi-share="<%= key %>"><%= share.(count) %> %</p>
+          <p class="ml-auto text-[13px] font-bold tabular-nums text-ink-500" data-kpi-share="<%= key %>"><%= share.(count) %> %</p>
         </div>
       <% end %>
       <% if jovenes_total.positive? %>
-        <div class="flex h-2 rounded-full overflow-hidden bg-canvas dark:bg-slate-900" aria-hidden="true">
+        <div class="flex h-2 rounded-full overflow-hidden bg-canvas" aria-hidden="true">
           <span class="bg-cat-blue" style="width: <%= share.(male_count) %>%"></span>
           <span class="bg-cat-rose" style="width: <%= share.(female_count) %>%"></span>
         </div>
@@ -32,9 +32,9 @@
 
   <%= render "shirt_table", shirt_counts: shirt_counts %>
 
-  <div class="min-w-0 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-6 py-6">
+  <div class="min-w-0 bg-surface border border-line-soft rounded-card shadow-md px-6 py-6">
     <%= render "dashboards/card_heading", eyebrow: "Edad", title: "Jóvenes por edad",
-               icon_name: "cake", tone: "bg-cat-green/15 text-cat-green", spacing: "mb-4", size: "sm" %>
+               icon_name: "cake", tone: "bg-cat-green/15 text-cat-green-ink", spacing: "mb-4", size: "sm" %>
     <% ages = data_by_age.reject { |age, _| age.nil? }.sort.to_h %>
     <%= tag.div role: "img", aria: { label: "Jóvenes por edad. #{chart_summary(ages.keys, ages.values)}" },
           data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",

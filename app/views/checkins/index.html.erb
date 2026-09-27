@@ -2,9 +2,9 @@
 <% content_for :eyebrow, "Registro" %>
 <% back_to "Inicio", dashboard_path %>
 <%
-  mode_base = "inline-flex items-center gap-2.5 h-auto px-3.5 py-2 rounded-[12px] text-[13px] font-bold transition"
+  mode_base = "inline-flex items-center gap-2.5 h-auto px-3.5 py-2 rounded-control text-[13px] font-bold transition"
   mode_on = "#{mode_base} bg-primary-700 text-white shadow-sm"
-  mode_off = "#{mode_base} border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700"
+  mode_off = "#{mode_base} border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"
 %>
 <% open = @window.open? %>
 <%= tag.div class: "px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto",
@@ -41,27 +41,27 @@
 
   <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
-      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100">
+      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900">
         <%= @training ? "Asistencia a la capacitación" : "Registro de llegadas" %>
       </h1>
-      <p class="text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
-        <span class="text-ink-900 dark:text-slate-100 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @registered %></span>
+      <p class="text-[12.5px] font-semibold text-ink-500">
+        <span class="text-ink-900 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @registered %></span>
         de <%= @expected %> <%= @training ? "del staff" : "jóvenes" %> registrados
       </p>
     </div>
     <span hidden data-checkin-scanner-target="pending" data-pending
-          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-cat-amber/15 text-[12.5px] font-bold text-amber-700 dark:text-cat-amber"></span>
+          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-cat-amber/15 text-[12.5px] font-bold text-cat-amber-ink"></span>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
     <% if open %>
     <section class="<%= card_classes("overflow-hidden") %>">
-      <div class="px-5 py-3.5 border-b border-line-soft dark:border-slate-700">
-        <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Escáner</p>
+      <div class="px-5 py-3.5 border-b border-line-soft">
+        <p class="text-[14px] font-bold text-ink-900">Escáner</p>
         <p class="mt-0.5 text-[11.5px] font-semibold text-primary-600 dark:text-primary-300">
           <%= @training ? @training.label : "Llegada al FSY · #{SpanishDates.long(Rails.configuration.x.event_start_on)}" %>
         </p>
-        <p role="status" class="mt-1 text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
+        <p role="status" class="mt-1 text-[11.5px] font-semibold text-ink-500" data-checkin-scanner-target="status">
           Activá la cámara para empezar
         </p>
       </div>
@@ -78,7 +78,7 @@
           <% end %>
         </div>
         <button type="button" data-action="checkin-scanner#start" data-checkin-scanner-target="start"
-                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-[11px] bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Activar la cámara
         </button>
@@ -90,11 +90,11 @@
         <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "flex gap-2" do %>
           <%= text_field_tag :code, nil, placeholder: "Código del gafete", autocomplete: "off",
                 data: { checkin_scanner_target: "manual" }, class: "#{field_input_classes} font-mono" %>
-          <%= tag.button type: "submit", class: "shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+          <%= tag.button type: "submit", class: button_classes(:secondary, extra: "shrink-0") do %>
             Registrar
           <% end %>
         <% end %>
-        <p class="text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+        <p class="text-[11.5px] font-medium text-ink-500">
           Funciona sin señal: el padrón queda guardado en este dispositivo y lo escaneado se envía solo al volver el internet.
         </p>
       </div>
@@ -105,8 +105,8 @@
         <span class="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300">
           <%= icon "lock", class: "w-6 h-6" %>
         </span>
-        <p class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Este registro no está abierto</p>
-        <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400"><%= @window.closed_reason %></p>
+        <p class="text-[15px] font-bold text-ink-900">Este registro no está abierto</p>
+        <p class="mt-1 text-[13px] text-ink-500"><%= @window.closed_reason %></p>
         <% if Current.user.superadmin? %>
           <%= link_to "Abrirlo desde Configuración", settings_path(anchor: "settings-scan"),
                 class: "mt-4 inline-flex items-center min-h-11 text-[13px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2" %>
@@ -117,13 +117,13 @@
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check" %>
       <% if @recent.any? %>
-        <ul class="divide-y divide-line-soft dark:divide-slate-700" data-recent-checkins>
+        <ul class="divide-y divide-line-soft" data-recent-checkins>
           <% @recent.each do |record| %>
             <li class="flex items-baseline gap-3 py-2.5 first:pt-0">
-              <span class="text-[12px] font-bold tabular-nums text-ink-500 dark:text-slate-400"><%= record.recorded_at.strftime("%H:%M") %></span>
+              <span class="text-[12px] font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
               <span class="min-w-0 flex-1">
-                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= record.participant.full_name %></span>
-                <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+                <span class="block text-[13.5px] font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
+                <span class="block text-[11.5px] font-semibold text-ink-500">
                   <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
                 </span>
               </span>
@@ -131,7 +131,7 @@
           <% end %>
         </ul>
       <% else %>
-        <p class="text-[13px] text-ink-500 dark:text-slate-400">Todavía no hay nadie registrado.</p>
+        <p class="text-[13px] text-ink-500">Todavía no hay nadie registrado.</p>
       <% end %>
 
       <% if @training %>

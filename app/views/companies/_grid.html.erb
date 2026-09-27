@@ -2,7 +2,7 @@
   jovenes_total = companies.sum { |company| jovenes_counts.fetch(company.id, 0) }
   company_count = pluralize(companies.size, "compañía", plural: "compañías")
 %>
-<p class="mb-4 text-[13px] font-semibold text-ink-500 dark:text-slate-400" data-companies-summary>
+<p class="mb-4 text-[13px] font-semibold text-ink-500" data-companies-summary>
   <%= params[:query].present? ? "#{company_count} de #{total_companies}" : company_count %> · <%= pluralize(jovenes_total, "joven", plural: "jóvenes") %>
 </p>
 
@@ -13,7 +13,7 @@
   </div>
 <% else %>
   <div class="<%= card_classes("p-10 text-center") %>">
-    <p class="text-ink-500 dark:text-slate-400">
+    <p class="text-ink-500">
       <%= params[:query].present? ? "No hay compañías que coincidan con “#{params[:query]}”." : "Aún no hay compañías registradas." %>
     </p>
   </div>
