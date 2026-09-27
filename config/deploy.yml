@@ -1,3 +1,18 @@
+# Despliegue con Kamal a una instancia "Always Free" de Oracle Cloud (OCI).
+#
+# Shape recomendada: VM.Standard.A1.Flex (Ampere, ARM64) con Ubuntu 24.04.
+# El free tier da hasta 4 OCPU / 24 GB repartibles; con 2 OCPU / 12 GB sobra para
+# Rails + Postgres. La E2.1.Micro (AMD, 1 GB RAM) tambien es gratis pero se queda
+# corta para Rails + Postgres + libvips; si se usa, cambiar builder.arch a amd64.
+#
+# Los datos propios de cada instalacion se leen de variables de entorno para no
+# versionar IPs ni dominios (ver docs/deploy_oracle.md):
+#   ORACLE_SERVER_IP  IP publica de la instancia
+#   APP_HOST          dominio que apunta a esa IP (p. ej. fsy.midominio.com o
+#                     <ip-con-guiones>.sslip.io si no hay dominio propio)
+<% server_ip = ENV.fetch("ORACLE_SERVER_IP") { abort "Falta ORACLE_SERVER_IP (IP publica de la instancia de Oracle)" } %>
+<% app_host  = ENV.fetch("APP_HOST") { abort "Falta APP_HOST (dominio que apunta a la instancia)" } %>
+
 # Name of your application. Used to uniquely configure containers.
 service: fsy_management
 
@@ -7,32 +22,22 @@ image: menocas17/fsy_management
 # Deploy to these servers.
 servers:
   web:
-    - 143.244.159.252
-  # job:
-  #   hosts:
-  #     - 192.168.0.1
-  #   cmd: bin/jobs
+    - <%= server_ip %>
 
-# Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
-# If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
-#
-# Using an SSL proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
-#
-# Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
-#
-# proxy:
-#   ssl: true
-#   host: app.example.com
+# kamal-proxy termina SSL y pide el certificado a Let's Encrypt. Requiere que el
+# puerto 80 y 443 esten abiertos en la Security List de la VCN *y* en el
+# iptables de la instancia (script/oracle/setup_server.sh lo hace).
+proxy:
+  ssl: true
+  host: <%= app_host %>
+  app_port: 80
+  healthcheck:
+    path: /up
 
 # Where you keep your container images.
 registry:
-  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
   server: ghcr.io
-
-  # Needed for authenticated registries.
   username: menocas17
-
-  # Always use an access token rather than real password when possible.
   password:
     - KAMAL_REGISTRY_PASSWORD
 
@@ -42,69 +47,51 @@ env:
     - RAILS_MASTER_KEY
     - POSTGRES_PASSWORD
   clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
+    APP_HOST: <%= app_host %>
     DB_HOST: fsy_management-db # Nombre del contenedor de la BD en la red interna de Docker
     POSTGRES_USER: fsy_management
-    POSTGRES_DB: fsy_management_production
+    # Solid Queue corre dentro de Puma: un solo contenedor para web + jobs.
     SOLID_QUEUE_IN_PUMA: true
-
-    # Set number of processes dedicated to Solid Queue (default: 1)
-    # JOB_CONCURRENCY: 3
-
-    # Set number of cores available to the application on each server (default: 1).
-    # WEB_CONCURRENCY: 2
-
-    # Match this to any external database server to configure Active Record correctly
-    # Use fsy_management-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
-
-    # Log everything from Rails
-    # RAILS_LOG_LEVEL: debug
+    # Ajustar a los OCPU asignados a la instancia A1.
+    WEB_CONCURRENCY: 2
+    RAILS_MAX_THREADS: 3
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
-# "bin/kamal logs -r job" will tail logs from the first server in the job section.
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Use a persistent storage volume for sqlite database files and local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
+# Archivos de Active Storage (avatares, etc.). Vive en el boot volume de la
+# instancia; conviene respaldarlo (ver docs/deploy_oracle.md).
 volumes:
-  - 'fsy_management_storage:/rails/storage'
+  - "fsy_management_storage:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
-# hitting 404 on in-flight requests. Combines all files from new and old
-# version inside the asset_path.
+# hitting 404 on in-flight requests.
 asset_path: /rails/public/assets
 
-# Configure the image builder.
+# Las instancias Ampere A1 son ARM64. Si la maquina local no es ARM (p. ej. una
+# laptop x86), Kamal construye la imagen en el propio servidor por SSH en vez de
+# emular con QEMU, que es muchisimo mas lento. En un Mac con Apple Silicon se
+# construye localmente.
 builder:
-  arch: amd64
+  arch: arm64
+  remote: ssh://ubuntu@<%= server_ip %>
 
-  # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
-  # remote: ssh://docker@docker-builder-server
-  #
-  # # Pass arguments and secrets to the Docker build process
-  # args:
-  #   RUBY_VERSION: 4.0.6
-  # secrets:
-  #   - GITHUB_TOKEN
-  #   - RAILS_MASTER_KEY
-
-# Use a different ssh user than root
-# ssh:
-#   user: app
+# Las imagenes de Ubuntu de Oracle no permiten SSH como root; el usuario por
+# defecto es "ubuntu" (en Oracle Linux es "opc"). Debe pertenecer al grupo docker.
+ssh:
+  user: ubuntu
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
   db:
-    image: postgres:18
-    host: 143.244.159.252
-    # Change to 3306 to expose port to the world instead of just local network.
-    port: '127.0.0.1:5432:5432'
+    image: postgres:18 # multi-arch, tiene build para arm64
+    host: <%= server_ip %>
+    # Solo accesible desde la propia maquina; nunca exponer 5432 a internet.
+    port: "127.0.0.1:5432:5432"
     env:
       clear:
         POSTGRES_USER: fsy_management
@@ -112,4 +99,6 @@ accessories:
       secret:
         - POSTGRES_PASSWORD
     directories:
-      - data:/var/lib/postgresql/data
+      # postgres:18 guarda los datos en /var/lib/postgresql/18/docker y se niega a
+      # arrancar si hay un volumen montado en /var/lib/postgresql/data.
+      - data:/var/lib/postgresql
