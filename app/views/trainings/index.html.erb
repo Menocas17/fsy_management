@@ -23,17 +23,18 @@
         <%= icon "printer", class: "w-4 h-4" %>
         PDF de asistencia
       <% end %>
-      <% if can_manage_agenda? %>
-        <%= link_to new_agenda_training_path, class: button_classes(:secondary) do %>
-          <%= icon "plus", class: "w-4 h-4" %>
-          Nueva capacitación
-        <% end %>
-      <% end %>
+      <%# Como en Inventario: escanear es secundario y crear, el botón navy, al final. %>
       <% if can_check_in? && (next_training = @trainings.find { |training| training.scan_window.open? }) %>
         <%= link_to checkins_path(training_id: next_training.id),
-              class: button_classes do %>
+              class: button_classes(:secondary) do %>
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Escanear asistencia
+        <% end %>
+      <% end %>
+      <% if can_manage_agenda? %>
+        <%= link_to new_agenda_training_path, class: button_classes do %>
+          <%= icon "plus", class: "w-4 h-4" %>
+          Nueva capacitación
         <% end %>
       <% end %>
     </div>
