@@ -60,7 +60,8 @@
                 class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
           <%= icon "x", class: "w-4 h-4" %>
         </button>
-        <h2 class="mb-4 text-[15px] font-bold text-ink-900 dark:text-slate-100">Código de <%= participant.full_name %></h2>
+        <%# Margen a ambos lados del ancho del botón de cerrar: el título sigue centrado y un nombre largo baja de línea en vez de quedar debajo de la X. %>
+        <h2 class="mb-4 px-9 pt-1 text-[15px] font-bold text-balance break-words text-ink-900 dark:text-slate-100">Código de <%= participant.full_name %></h2>
         <%= qr_svg_tag participant_url(participant), label: "Código QR de #{participant.full_name}", size: 200 %>
         <p class="mt-3 text-[13px] font-bold text-ink-900 dark:text-slate-100"><%= participant.full_name %></p>
         <p class="mt-0.5 text-[12px] font-semibold text-ink-500 dark:text-slate-400">
