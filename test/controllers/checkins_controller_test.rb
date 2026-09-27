@@ -34,7 +34,7 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Compañía 3", person["company"]
     assert_equal @joven.stake.titleize, person["stake"]
     assert_equal Participant::GENDER_LABELS[@joven.gender], person["gender"]
-    assert_equal participant_path(@joven), person["url"]
+    assert_equal participant_path(@joven, from: "escaner", return_to: checkins_path), person["url"]
     assert_nil person["care"], "los datos médicos no viajan al padrón del dispositivo"
     refute person["arrived"]
   end

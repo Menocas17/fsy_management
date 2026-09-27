@@ -60,9 +60,12 @@ module NavigationHelper
     end
   end
 
-  # La ficha de un participante vuelve a la lista de la que vino.
+  # La ficha de un participante vuelve a donde se abrió: la lista de jóvenes o de staff, o el escáner
+  # (registro o lector del panel), con return_to diciendo exactamente cuál.
   def participants_back
-    if params[:from] == "staff"
+    if params[:from] == "escaner"
+      back_to "Escáner", safe_return_to(checkins_path)
+    elsif params[:from] == "staff"
       back_to "Staff", safe_return_to(staff_participants_path)
     else
       back_to "Jóvenes", safe_return_to(participants_path)
