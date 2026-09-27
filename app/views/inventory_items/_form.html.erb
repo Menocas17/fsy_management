@@ -3,7 +3,7 @@
 %>
 <%= form_with model: item, url: url, class: "space-y-5" do |form| %>
   <% if item.errors.any? %>
-    <div class="rounded-[14px] border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose" role="alert">
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
       <% item.errors.full_messages.each do |message| %>
         <p><%= message %></p>
       <% end %>
@@ -24,13 +24,13 @@
       <div>
         <%= form.label :minimum, "Mínimo antes de avisar", class: field_label_classes %>
         <%= form.number_field :minimum, min: 0, step: 1, class: field_input_classes %>
-        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Por debajo de esto el artículo se marca «por agotarse».</p>
+        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Por debajo de esto el artículo se marca «por agotarse».</p>
       </div>
       <% unless item.persisted? %>
         <div>
           <%= label_tag "inventory_item[starting_quantity]", "Existencia inicial", class: field_label_classes %>
           <%= number_field_tag "inventory_item[starting_quantity]", 0, min: 0, step: 1, class: field_input_classes %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500 dark:text-slate-400">Queda registrada como el primer movimiento del artículo.</p>
+          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Queda registrada como el primer movimiento del artículo.</p>
         </div>
       <% end %>
       <div>
@@ -43,7 +43,7 @@
       </div>
     </div>
     <% if item.persisted? %>
-      <p class="mt-4 px-3.5 py-2.5 rounded-[11px] bg-canvas dark:bg-slate-900 text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
+      <p class="mt-4 px-3.5 py-2.5 rounded-control bg-canvas text-[12.5px] font-semibold text-ink-500">
         La existencia (<%= item.quantity_label %>) no se edita acá: se mueve con los ajustes, y así queda el registro de quién y por qué.
       </p>
     <% end %>
@@ -51,8 +51,8 @@
 
   <div class="<%= card_classes("px-5 py-4 flex gap-2.5 sm:justify-end") %>">
     <%= link_to "Cancelar", item.persisted? ? item : inventory,
-          class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+          class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
     <%= form.submit item.persisted? ? "Guardar cambios" : "Agregar artículo",
-          class: "flex-1 sm:flex-none inline-flex items-center justify-center h-10 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer" %>
+          class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
   </div>
 <% end %>

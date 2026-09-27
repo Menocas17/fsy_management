@@ -24,7 +24,7 @@ export default class extends Controller {
 
     this.ruleTargets.forEach((rule) => {
       const met = RULES[rule.dataset.rule](value)
-      rule.classList.toggle("text-cat-green", met)
+      rule.classList.toggle("text-cat-green-ink", met)
       rule.classList.toggle("text-ink-500", !met)
       rule.querySelector("[data-rule-icon='pending']").classList.toggle("hidden", met)
       rule.querySelector("[data-rule-icon='met']").classList.toggle("hidden", !met)

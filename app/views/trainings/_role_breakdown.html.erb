@@ -1,22 +1,22 @@
 <section class="<%= card_classes("p-5 md:p-6") %>" data-role-breakdown>
   <%= render "dashboards/card_heading", eyebrow: "Por rol", title: title,
-             icon_name: "chart-column", tone: "bg-cat-indigo/15 text-cat-indigo", spacing: "mb-4", size: "sm" %>
+             icon_name: "chart-column", tone: "bg-cat-indigo/15 text-cat-indigo-ink", spacing: "mb-4", size: "sm" %>
   <% if by_role.any? %>
     <ul class="space-y-3">
       <% by_role.each do |label, figures| %>
         <% share = figures[:expected].zero? ? 0 : (figures[:attended] * 100.0 / figures[:expected]).round %>
         <li class="flex items-center gap-3" data-role-row="<%= label.parameterize %>">
-          <span class="w-40 shrink-0 text-[13px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= label %></span>
-          <span class="flex-1 flex h-2 rounded-full overflow-hidden bg-canvas dark:bg-slate-900">
+          <span class="w-40 shrink-0 text-[13px] font-bold text-ink-900 truncate"><%= label %></span>
+          <span class="flex-1 flex h-2 rounded-full overflow-hidden bg-canvas">
             <span class="<%= share >= 80 ? "bg-cat-green" : "bg-cat-amber" %>" style="width: <%= share %>%"></span>
           </span>
-          <span class="shrink-0 text-[12.5px] font-bold tabular-nums text-ink-700 dark:text-slate-300">
+          <span class="shrink-0 text-[12.5px] font-bold tabular-nums text-ink-700">
             <%= figures[:attended] %> de <%= figures[:expected] %>
           </span>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="text-[13px] text-ink-500 dark:text-slate-400">Todavía no hay asistencias registradas.</p>
+    <p class="text-[13px] text-ink-500">Todavía no hay asistencias registradas.</p>
   <% end %>
 </section>

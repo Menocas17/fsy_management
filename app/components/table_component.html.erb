@@ -1,8 +1,8 @@
-<div class="bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md overflow-hidden">
+<div class="bg-surface border border-line-soft rounded-card shadow-md overflow-hidden">
   <div class="overflow-x-auto px-7">
     <table class="w-full text-left border-collapse">
       <thead>
-        <tr class="border-b border-line-soft dark:border-slate-700">
+        <tr class="border-b border-line-soft">
           <th class="<%= header_cell_classes %>">Nombre completo</th>
           <th class="<%= header_cell_classes %>">Estaca</th>
           <th class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
@@ -16,7 +16,7 @@
           <th class="<%= header_cell_classes %>"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-line-soft dark:divide-slate-700">
+      <tbody class="divide-y divide-line-soft">
         <% @participants.each do |participant| %>
           <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors">
             <td class="<%= cell_classes %>">
@@ -25,7 +25,7 @@
                 <%= link_to participant.full_name,
                       participant_path(participant, from: from_path, return_to: request.fullpath),
                       data: { turbo_frame: "_top" },
-                      class: "font-semibold text-ink-900 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-300" %>
+                      class: "font-semibold text-ink-900 hover:text-primary-600 dark:hover:text-primary-300" %>
               </div>
             </td>
             <td class="<%= cell_classes %>">
@@ -42,7 +42,7 @@
             <td class="<%= cell_classes %>"><%= company_name(participant) %></td>
             <td class="<%= cell_classes %> hidden lg:table-cell">
               <% if participant.room.present? %>
-                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-canvas dark:bg-slate-700 border border-line dark:border-slate-600 text-xs font-semibold"><%= participant.room %></span>
+                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-canvas dark:bg-slate-700 border border-line text-xs font-semibold"><%= participant.room %></span>
               <% else %>
                 —
               <% end %>

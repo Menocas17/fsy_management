@@ -1,8 +1,8 @@
 module InventoryHelper
   STATUS_CHIPS = {
-    ok:  "text-cat-green bg-cat-green/10",
-    low: "text-cat-amber bg-cat-amber/10",
-    out: "text-cat-rose bg-cat-rose/10"
+    ok:  "text-cat-green-ink bg-cat-green/10",
+    low: "text-cat-amber-ink bg-cat-amber/10",
+    out: "text-cat-rose-ink bg-cat-rose/10"
   }.freeze
 
   INVENTORY_COLORS = {

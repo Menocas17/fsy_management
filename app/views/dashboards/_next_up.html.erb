@@ -13,14 +13,14 @@
     trainings = next_trainings.map do |training|
       { key: "training-#{training.held_on}", eyebrow: "Capacitación", title: SpanishDates.long(training.held_on),
         meta: "#{training.name} · #{training.held_on.year}", days: days_until(training.held_on),
-        icon: "graduation-cap", tone: "bg-cat-amber", chip: "bg-cat-amber/15 text-amber-700 dark:text-cat-amber",
+        icon: "graduation-cap", tone: "bg-cat-amber", chip: "bg-cat-amber/15 text-cat-amber-ink",
         url: agenda_training_path(training) }
     end
     start_on = Rails.configuration.x.event_start_on
     trainings + [ { key: "event", eyebrow: "FSY 2026", title: "Comienza el evento",
                     meta: "#{SpanishDates.long(start_on)} de #{start_on.year} · Managua-Caribe",
                     days: days_until(start_on), icon: "party-popper", tone: "bg-cat-indigo",
-                    chip: "bg-cat-indigo/15 text-cat-indigo", url: agenda_path } ]
+                    chip: "bg-cat-indigo/15 text-cat-indigo-ink", url: agenda_path } ]
   end
   items = items.first(3)
   columns = { 1 => "", 2 => "lg:grid-cols-2", 3 => "lg:grid-cols-3" }.fetch(items.size, "lg:grid-cols-3")
@@ -28,36 +28,36 @@
 <section class="<%= card_classes("p-5 md:p-6") %>" data-next-up>
   <%= render "dashboards/card_heading", eyebrow: "Lo que viene",
              title: event_in_progress? ? "Próximas actividades" : "Próximas fechas",
-             icon_name: "calendar-clock", tone: "bg-cat-indigo/15 text-cat-indigo", spacing: "mb-4", size: "sm" %>
+             icon_name: "calendar-clock", tone: "bg-cat-indigo/15 text-cat-indigo-ink", spacing: "mb-4", size: "sm" %>
 
   <% if items.any? %>
     <div class="grid grid-cols-1 <%= columns %> gap-3">
       <% items.each do |item| %>
         <%
           body = capture do %>
-            <span class="w-10 h-10 shrink-0 rounded-[12px] flex items-center justify-center text-white <%= item[:tone] %>">
+            <span class="w-10 h-10 shrink-0 rounded-control flex items-center justify-center text-white <%= item[:tone] %>">
               <%= icon item[:icon], class: "w-[19px] h-[19px]" %>
             </span>
             <span class="min-w-0">
-              <span class="block text-[11px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500"><%= item[:eyebrow] %></span>
-              <span class="block mt-1 text-[15.5px] font-extrabold leading-tight text-ink-900 dark:text-slate-100"><%= item[:title] %></span>
-              <span class="block mt-1 text-[12.5px] font-semibold text-ink-500 dark:text-slate-400"><%= item[:meta] %></span>
+              <span class="block text-[11px] font-bold tracking-[.07em] uppercase text-ink-500"><%= item[:eyebrow] %></span>
+              <span class="block mt-1 text-[15.5px] font-extrabold leading-tight text-ink-900"><%= item[:title] %></span>
+              <span class="block mt-1 text-[12.5px] font-semibold text-ink-500"><%= item[:meta] %></span>
               <% if (label = countdown_label(item[:days])) %>
                 <span class="mt-2 inline-flex items-center px-2.5 py-1 rounded-full text-[11.5px] font-bold <%= item[:chip] %>"><%= label %></span>
               <% end %>
             </span>
           <% end
-          cell = "flex items-start gap-3.5 rounded-[14px] bg-canvas dark:bg-slate-900/60 px-4 py-4"
+          cell = "flex items-start gap-3.5 rounded-tile bg-canvas dark:bg-slate-900/60 px-4 py-4"
         %>
         <% if item[:url] %>
-          <%= link_to item[:url], data: { next_item: item[:key] }, class: "#{cell} hover:bg-line-soft/60 dark:hover:bg-slate-700/60 transition" do %><%= body %><% end %>
+          <%= link_to item[:url], data: { next_item: item[:key] }, class: "#{cell} hover:bg-line-soft/60 transition" do %><%= body %><% end %>
         <% else %>
           <div class="<%= cell %>" data-next-item="<%= item[:key] %>"><%= body %></div>
         <% end %>
       <% end %>
     </div>
   <% else %>
-    <p class="text-[13px] text-ink-500 dark:text-slate-400">
+    <p class="text-[13px] text-ink-500">
       La agenda del evento ya terminó. <%= link_to "Ver la agenda", agenda_path, class: "font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
     </p>
   <% end %>

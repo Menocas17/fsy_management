@@ -11,11 +11,11 @@
 <div class="<%= card_classes("overflow-hidden") %>">
   <div class="overflow-x-auto">
     <div class="<%= days.size > 2 ? "min-w-[680px]" : "" %>">
-      <div class="grid border-b border-line-soft dark:border-slate-700" style="<%= columns %>">
+      <div class="grid border-b border-line-soft" style="<%= columns %>">
         <div></div>
         <% days.each do |day| %>
           <%= link_to agenda_path(date: day, view: @view),
-                class: "px-2 py-2.5 text-center border-l border-line-soft dark:border-slate-700 #{"bg-primary-50 dark:bg-primary-700/20" if day == @selected_day}" do %>
+                class: "px-2 py-2.5 text-center border-l border-line-soft #{"bg-primary-50 dark:bg-primary-700/20" if day == @selected_day}" do %>
             <span class="block text-[10.5px] font-bold tracking-[.06em] uppercase <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-300 dark:text-slate-500" %>"><%= spanish_day_abbr(day) %></span>
             <span class="block text-[17px] font-extrabold tabular-nums <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-900 dark:text-slate-100" %>"><%= day.day %></span>
           <% end %>
@@ -26,23 +26,23 @@
         <div>
           <% @hours.each do |hour| %>
             <div style="height: <%= hour_height %>px"
-                 class="border-t border-line-soft dark:border-slate-700 first:border-t-0 pr-2 pt-1 text-right">
-              <span class="text-[10.5px] font-semibold text-ink-300 dark:text-slate-500 tabular-nums"><%= format("%02d:00", hour) %></span>
+                 class="border-t border-line-soft first:border-t-0 pr-2 pt-1 text-right">
+              <span class="text-[10.5px] font-semibold text-ink-500 tabular-nums"><%= format("%02d:00", hour) %></span>
             </div>
           <% end %>
         </div>
 
         <% days.each do |day| %>
-          <div class="relative border-l border-line-soft dark:border-slate-700 <%= "bg-primary-50/50 dark:bg-primary-700/10" if day == @selected_day && days.size > 1 %>">
+          <div class="relative border-l border-line-soft <%= "bg-primary-50/50 dark:bg-primary-700/10" if day == @selected_day && days.size > 1 %>">
             <% @hours.each do %>
-              <div style="height: <%= hour_height %>px" class="border-t border-line-soft dark:border-slate-700 first:border-t-0"></div>
+              <div style="height: <%= hour_height %>px" class="border-t border-line-soft first:border-t-0"></div>
             <% end %>
 
             <% @activities_by_day.fetch(day, []).each do |activity| %>
               <% block_height = height_for.(activity) %>
               <%= link_to agenda_path(date: day, view: @view, activity_id: activity.id),
                     style: "top: #{(offset_for.(activity.starts_at) + 2).round}px; height: #{block_height}px;",
-                    class: "absolute left-1 right-1 flex flex-col justify-center gap-0.5 overflow-hidden rounded-[10px] border-l-[3px] px-2.5 py-1.5 #{activity.styles[:block]} #{"ring-2 ring-primary-500" if @activity&.id == activity.id}",
+                    class: "absolute left-1 right-1 flex flex-col justify-center gap-0.5 overflow-hidden rounded-control border-l-[3px] px-2.5 py-1.5 #{activity.styles[:block]} #{"ring-2 ring-primary-500" if @activity&.id == activity.id}",
                     data: { activity_id: activity.id, turbo_action: "advance" } do %>
                 <span class="block text-[11.5px] font-bold leading-tight truncate"><%= activity.title %></span>
                 <%# Una actividad corta no tiene alto para la segunda línea: mejor el título limpio que texto cortado. %>

@@ -11,16 +11,16 @@
         Cuenta
       </h2>
       <div>
-        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">Correo electrónico</p>
-        <p class="mt-0.5 text-sm font-semibold text-ink-900 dark:text-slate-100 break-all"><%= Current.user.email_address %></p>
+        <p class="text-[11.5px] font-semibold text-ink-500">Correo electrónico</p>
+        <p class="mt-0.5 text-sm font-semibold text-ink-900 break-all"><%= Current.user.email_address %></p>
       </div>
-      <div class="mt-4 pt-4 border-t border-line-soft dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+      <div class="mt-4 pt-4 border-t border-line-soft flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p class="text-sm font-semibold text-ink-900 dark:text-slate-100">Contraseña</p>
-          <p class="mt-0.5 text-[12.5px] text-ink-500 dark:text-slate-400">Te enviaremos un enlace para restablecer tu contraseña.</p>
+          <p class="text-sm font-semibold text-ink-900">Contraseña</p>
+          <p class="mt-0.5 text-[12.5px] text-ink-500">Te enviaremos un enlace para restablecer tu contraseña.</p>
         </div>
         <%= button_to send_password_reset_settings_path, method: :post,
-              class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 cursor-pointer transition" do %>
+              class: button_classes do %>
           <%= icon "key-round", class: "w-4 h-4" %>
           Cambiar contraseña
         <% end %>
@@ -45,15 +45,15 @@
         <%= icon "bell-ring", class: "w-[17px] h-[17px]" %>
         Notificaciones
       </h2>
-      <p class="text-[13.5px] font-semibold text-ink-900 dark:text-slate-100">Alertas en este dispositivo</p>
-      <p class="mt-1 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400" data-push-target="status">
+      <p class="text-[13.5px] font-semibold text-ink-900">Alertas en este dispositivo</p>
+      <p class="mt-1 text-[12.5px] leading-relaxed text-ink-500" data-push-target="status">
         Revisando el permiso…
       </p>
       <button type="button" data-action="push#toggle" data-push-target="button"
-              class="mt-3 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition">
+              class="<%= button_classes(:primary, extra: "mt-3") %>">
         Activar en este dispositivo
       </button>
-      <div class="mt-5 pt-4 border-t border-line-soft dark:border-slate-700">
+      <div class="mt-5 pt-4 border-t border-line-soft">
         <%= render(ToggleComponent.new(id: "push-sound-toggle", label: "Sonido y vibración",
               description: "Las alertas llegan con tono y vibración. En iPhone el sonido lo controla el sistema.",
               action: "saveSound", target: "sound", controller: "push")) %>
@@ -65,7 +65,7 @@
         <%= icon "eye", class: "w-[17px] h-[17px]" %>
         Accesibilidad
       </h2>
-      <div class="flex flex-col divide-y divide-line-soft dark:divide-slate-700">
+      <div class="flex flex-col divide-y divide-line-soft">
         <div class="pb-4">
           <%= render(ToggleComponent.new(id: "reduce-motion-toggle", label: "Reducir movimiento",
                 description: "Minimiza las animaciones y transiciones en toda la aplicación.",
@@ -86,19 +86,19 @@
           <%= icon "scan-line", class: "w-[17px] h-[17px]" %>
           Registro por escaneo
         </h2>
-        <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400">
+        <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500">
           «Solo el día» abre el escáner únicamente en la fecha del registro. «Abierto» lo deja disponible
           cualquier día, por ejemplo para una prueba, y «Cerrado» lo bloquea aunque sea el día.
         </p>
         <%= form_with url: scan_windows_settings_path, method: :patch do %>
           <% rows = [ [ "arrival", "Llegada de los jóvenes", ScanWindow.arrival ] ] +
                     @trainings.map { |training| [ "trainings[#{training.id}]", training.name, training.scan_window ] } %>
-          <ul class="divide-y divide-line-soft dark:divide-slate-700">
+          <ul class="divide-y divide-line-soft">
             <% rows.each do |name, label, window| %>
               <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 first:pt-0" data-scan-window="<%= name %>">
                 <div class="min-w-0 flex-1">
-                  <%= label_tag name.parameterize(separator: "_"), label, class: "block text-[13.5px] font-semibold text-ink-900 dark:text-slate-100" %>
-                  <p class="text-[12px] font-semibold text-ink-500 dark:text-slate-400">
+                  <%= label_tag name.parameterize(separator: "_"), label, class: "block text-[13.5px] font-semibold text-ink-900" %>
+                  <p class="text-[12px] font-semibold text-ink-500">
                     <%= SpanishDates.long(window.day) %> ·
                     <span class="<%= window.open? ? "text-emerald-700 dark:text-cat-green" : "text-ink-500 dark:text-slate-400" %>">
                       <%= window.open? ? "abierto ahora" : "cerrado ahora" %>
@@ -110,7 +110,7 @@
               </li>
             <% end %>
           </ul>
-          <button type="submit" class="mt-4 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 cursor-pointer transition">
+          <button type="submit" class="<%= button_classes(:primary, extra: "mt-4") %>">
             <%= icon "check", class: "w-4 h-4" %>
             Guardar
           </button>

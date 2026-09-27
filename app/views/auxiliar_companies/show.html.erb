@@ -16,30 +16,30 @@
     <div class="flex flex-wrap items-center justify-between gap-x-5 gap-y-4">
       <div class="flex items-center gap-4 md:gap-[18px] min-w-0 flex-1 basis-72">
         <span aria-hidden="true"
-              class="-mt-10 md:-mt-[46px] shrink-0 w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-[20px] md:rounded-[24px] border-4 border-surface dark:border-slate-800 shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
+              class="-mt-10 md:-mt-[46px] shrink-0 w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-panel md:rounded-panel border-4 border-surface shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
           <span class="text-[9px] md:text-[10px] font-bold tracking-[.08em] uppercase opacity-75">Aux.</span>
           <span class="text-[26px] md:text-[34px] font-extrabold leading-none"><%= @auxiliar_company.initial %></span>
         </span>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100"><%= @auxiliar_company.name %></h1>
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-indigo/15 text-cat-indigo text-xs font-semibold whitespace-nowrap"><%= pluralize(@companies.size, "compañía", plural: "compañías") %></span>
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-blue/15 text-cat-blue text-xs font-semibold whitespace-nowrap"><%= pluralize(jovenes_total, "joven", plural: "jóvenes") %></span>
+            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900"><%= @auxiliar_company.name %></h1>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-indigo/15 text-cat-indigo-ink text-xs font-semibold whitespace-nowrap"><%= pluralize(@companies.size, "compañía", plural: "compañías") %></span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-blue/15 text-cat-blue-ink text-xs font-semibold whitespace-nowrap"><%= pluralize(jovenes_total, "joven", plural: "jóvenes") %></span>
           </div>
-          <p class="mt-1 text-[13px] font-medium text-ink-500 dark:text-slate-400">
+          <p class="mt-1 text-[13px] font-medium text-ink-500">
             <%= [ numbers && "Compañías #{numbers}", "#{counselor_total} de #{counselor_capacity} consejeros", "#{@auxiliars.size} de 2 auxiliares" ].compact.join(" · ") %>
           </p>
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
         <%= link_to safe_return_to(auxiliar_companies_path),
-              class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+              class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
           <%= icon "arrow-left", class: "w-4 h-4" %>
           Volver
         <% end %>
         <% if can_edit_auxiliar_company?(@auxiliar_company) %>
           <%= link_to edit_auxiliar_company_path(@auxiliar_company),
-                class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+                class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
             <%= icon "square-pen", class: "w-4 h-4" %>
             Editar
           <% end %>
@@ -62,7 +62,7 @@
 
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Auxiliares", "user-check" %>
-        <p class="mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500">Auxiliares · <%= @auxiliars.size %>/2</p>
+        <p class="mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500">Auxiliares · <%= @auxiliars.size %>/2</p>
         <div class="space-y-2">
           <% %w[H M].each do |gender| %>
             <%= render "companies/leader_slot", person: @auxiliars.find { |auxiliar| auxiliar.gender == gender }, role: "auxiliar", gender: gender %>
@@ -83,7 +83,7 @@
         </div>
       <% else %>
         <div class="<%= card_classes("p-8 text-center") %>">
-          <p class="text-ink-500 dark:text-slate-400">Esta compañía auxiliar aún no tiene compañías. Asígnalas desde la edición de cada compañía.</p>
+          <p class="text-ink-500">Esta compañía auxiliar aún no tiene compañías. Asígnalas desde la edición de cada compañía.</p>
         </div>
       <% end %>
     </section>

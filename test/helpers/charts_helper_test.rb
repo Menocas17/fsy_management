@@ -16,7 +16,20 @@ class ChartsHelperTest < ActionView::TestCase
 
   test "roles have Spanish labels and a fallback color" do
     assert_equal "Logística", role_chart_label("logistica")
-    assert_equal "#b4b8be", role_chart_color("desconocido")
+    assert_equal ChartsHelper.hex("neutral"), role_chart_color("desconocido")
+  end
+
+  test "a role or a stake has the same color in its chip and in the charts" do
+    assert_equal ChartsHelper.hex(ChartsHelper::ROLE_CATEGORY["consejero"]), role_chart_color("consejero")
+    assert_includes RoleSpanComponent.new(role: "consejero").styles, "cat-#{ChartsHelper::ROLE_CATEGORY["consejero"]}"
+
+    assert_equal stake_chart_color("villa_flor"), stake_chart_color("Villa Flor")
+    assert_includes StakeSpanComponent.new(stake: "villa_flor").stake_color, "cat-#{ChartsHelper::STAKE_CATEGORY["villa_flor"]}"
+  end
+
+  test "no two staff roles share a color in the roles chart" do
+    staff = ChartsHelper::ROLE_CATEGORY.except("joven").values
+    assert_equal staff.uniq.size, staff.size
   end
 
   test "summarizes multi-line labels as plain text" do

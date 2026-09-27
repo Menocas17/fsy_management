@@ -1,4 +1,4 @@
-<% subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-300 dark:text-slate-500" %>
+<% subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500" %>
 <section class="<%= card_classes("p-6") %>">
   <%= section_heading "Líderes", "user-check" %>
 
@@ -9,7 +9,7 @@
     <% end %>
   </div>
 
-  <div class="mt-5 pt-4 border-t border-line-soft dark:border-slate-700">
+  <div class="mt-5 pt-4 border-t border-line-soft">
     <p class="<%= subheading %>">Auxiliares · <%= auxiliars.size %>/2</p>
     <% if company.auxiliar_company %>
       <div class="space-y-2">
@@ -18,7 +18,7 @@
         <% end %>
       </div>
     <% else %>
-      <p class="text-[12.5px] text-ink-500 dark:text-slate-400">Sin compañía auxiliar asignada.</p>
+      <p class="text-[12.5px] text-ink-500">Sin compañía auxiliar asignada.</p>
     <% end %>
   </div>
 </section>

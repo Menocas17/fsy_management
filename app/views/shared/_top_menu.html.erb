@@ -1,9 +1,9 @@
 <div data-controller="mobile-menu" class="relative shrink-0">
   <%# Main nav bar %>
-  <header class="h-[60px] md:h-[72px] px-3.5 md:px-8 flex items-center justify-between gap-4 bg-surface dark:bg-slate-800 border-b border-line-soft dark:border-slate-700">
+  <header class="h-[60px] md:h-[72px] px-3.5 md:px-8 flex items-center justify-between gap-4 bg-surface border-b border-line-soft">
     <div class="flex items-center gap-2 min-w-0">
       <button type="button" aria-label="Abrir menú"
-              class="md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-lg text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
+              class="md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-lg text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
               data-action="click->mobile-menu#toggle">
         <%= icon "menu", class: "w-[22px] h-[22px]" %>
       </button>
@@ -13,16 +13,16 @@
       <% end %>
       <div class="min-w-0" data-page-header>
         <p class="text-[9.5px] md:text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300 truncate"><%= page_eyebrow %></p>
-        <%= content_tag page_heading_tag, page_heading, class: "mt-px text-sm md:text-[19px] leading-tight font-bold text-ink-900 dark:text-slate-100 truncate" %>
+        <%= content_tag page_heading_tag, page_heading, class: "mt-px text-sm md:text-[19px] leading-tight font-bold text-ink-900 truncate" %>
       </div>
     </div>
 
     <div class="flex items-center gap-2 md:gap-[18px] shrink-0">
       <%= form_with url: participants_path, method: :get, role: "search", class: "hidden lg:block relative" do %>
-        <%= icon "search", class: "absolute left-[13px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-ink-300 dark:text-slate-500 pointer-events-none" %>
+        <%= icon "search", class: "absolute left-[13px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-ink-500 pointer-events-none" %>
         <%= search_field_tag :query, (params[:query] if controller_name == "participants" && action_name == "index"),
               placeholder: "Buscar participante…", aria: { label: "Buscar participante" },
-              class: "w-[220px] h-10 rounded-[11px] pl-[38px] pr-3 text-[13.5px] bg-canvas dark:bg-slate-900 border border-line dark:border-slate-600 text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30" %>
+              class: "w-[220px] h-10 rounded-control pl-[38px] pr-3 text-[13.5px] bg-canvas border border-line text-ink-900 placeholder:text-ink-300 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30" %>
       <% end %>
 
       <%= render "shared/notifications_bell" %>
@@ -33,25 +33,25 @@
                 data-action="click->dropdown#toggle click@window->dropdown#hide">
           <%= current_user_avatar_tag(class: "w-8 h-8 md:w-9 md:h-9 text-[11.5px] md:text-[13px]") %>
           <span class="hidden md:block text-left leading-tight">
-            <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100"><%= Current.user.full_name %></span>
-            <span class="block text-[11.5px] font-medium text-ink-500 dark:text-slate-400"><%= Current.user.role_label %></span>
+            <span class="block text-[13.5px] font-bold text-ink-900"><%= Current.user.full_name %></span>
+            <span class="block text-[11.5px] font-medium text-ink-500"><%= Current.user.role_label %></span>
           </span>
-          <%= icon "chevron-down", class: "hidden md:block w-4 h-4 text-ink-300 dark:text-slate-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
+          <%= icon "chevron-down", class: "hidden md:block w-4 h-4 text-ink-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
         </button>
 
-        <div class="hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[14px] shadow-lg"
+        <div class="hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
              data-dropdown-target="menu">
-          <%= link_to settings_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 dark:text-slate-300 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
+          <%= link_to settings_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
             <%= icon "settings", class: "w-4 h-4" %>
             Configuración
           <% end %>
-          <%= link_to myprofile_participants_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 dark:text-slate-300 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
+          <%= link_to myprofile_participants_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
             <%= icon "user-round", class: "w-4 h-4" %>
             Mi perfil
           <% end %>
-          <div class="border-t border-line-soft dark:border-slate-700 my-1.5"></div>
+          <div class="border-t border-line-soft my-1.5"></div>
           <%= button_to session_path, method: :delete, form_class: "mx-1.5",
-                class: "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13.5px] font-medium text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
+                class: "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13.5px] font-medium text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition" do %>
             <%= icon "log-out", class: "w-4 h-4" %>
             Cerrar sesión
           <% end %>
@@ -64,8 +64,8 @@
   <div class="fixed inset-0 z-100 bg-black/50 transition-opacity hidden" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
   </div>
   <%# slide mobile menu %>
-  <div class="fixed inset-y-0 left-0 z-200 w-72 max-w-[85vw] h-dvh flex flex-col bg-surface dark:bg-slate-800 shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out" data-mobile-menu-target="menu">
-    <div class="flex items-center justify-between gap-2 mx-4 pt-5 pb-4 border-b border-line-soft dark:border-slate-700">
+  <div class="fixed inset-y-0 left-0 z-200 w-72 max-w-[85vw] h-dvh flex flex-col bg-surface shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out" data-mobile-menu-target="menu">
+    <div class="flex items-center justify-between gap-2 mx-4 pt-5 pb-4 border-b border-line-soft">
       <%= render "shared/brand" %>
       <button type="button" aria-label="Cerrar menú"
               class="p-1.5 rounded-lg text-ink-500 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer"
@@ -76,9 +76,9 @@
     <div class="flex-1 overflow-y-auto px-4 pt-2 pb-4">
       <%= render "shared/nav_sections" %>
     </div>
-    <div class="mx-4 pt-3 pb-5 border-t border-line-soft dark:border-slate-700">
+    <div class="mx-4 pt-3 pb-5 border-t border-line-soft">
       <%= button_to session_path, method: :delete,
-            class: "w-full flex items-center justify-center gap-2 h-10 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:border-cat-rose hover:text-cat-rose cursor-pointer transition" do %>
+            class: "w-full flex items-center justify-center gap-2 h-10 rounded-control border border-line text-sm font-semibold text-ink-700 hover:border-cat-rose hover:text-cat-rose-ink cursor-pointer transition" do %>
         <%= icon "log-out", class: "w-4 h-4" %>
         Cerrar sesión
       <% end %>

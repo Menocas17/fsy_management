@@ -74,6 +74,6 @@ export default class extends Controller {
 
   status(message, isError = false) {
     this.statusTarget.textContent = message
-    this.statusTarget.classList.toggle("text-cat-rose", isError)
+    this.statusTarget.classList.toggle("text-cat-rose-ink", isError)
   }
 }

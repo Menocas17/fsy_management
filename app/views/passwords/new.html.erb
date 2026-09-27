@@ -20,7 +20,7 @@
     <% end %>
 
     <%= link_to new_session_path,
-          class: "w-full inline-flex items-center justify-center gap-2 h-11 rounded-[11px] border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-canvas transition" do %>
+          class: button_classes(:secondary, size: :lg, extra: "w-full") do %>
       <%= icon "arrow-left", class: "w-4 h-4" %>
       Volver a iniciar sesión
     <% end %>

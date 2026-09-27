@@ -1,29 +1,62 @@
 module ChartsHelper
-  # Paleta "Viva": saturada y con los tonos bien separados entre sí, que es lo que hace distinguible una
-  # barra de la otra. Van en hexadecimal porque ApexCharts no entiende OKLCH.
-  CATEGORY_COLORS = %w[#2563ff #7c3aed #00b878 #ff9500 #ff3b6b].freeze
-
-  # Cada rol conserva su color en todas las pantallas; el orden sigue a los roles más numerosos.
-  ROLE_CHART = {
-    "consejero" => [ "Consejero", "#2563ff" ],
-    "logistica" => [ "Logística", "#7c3aed" ],
-    "auxiliar" => [ "Auxiliar", "#00b878" ],
-    "coordinador" => [ "Coordinador", "#ff9500" ],
-    "director" => [ "Director", "#ff3b6b" ],
-    "director_logistica" => [ "Director de logística", "#00c2d7" ],
-    "registrador" => [ "Registrador", "#facc15" ],
-    "joven" => [ "Joven", "#38bdf8" ]
+  # Un color por dato, el mismo en los chips, en las gráficas y en cualquier pantalla: un rol o una estaca
+  # no cambia de color al pasar del panel a la lista. Cada dato apunta a una categoría; la categoría tiene
+  # su chip (clases de los tokens cat-* de application.css) y su hex para ApexCharts, que no entiende
+  # OKLCH. Los hex son esos mismos tokens convertidos: si se cambia uno, se cambia el otro.
+  CATEGORY_HEX = {
+    "blue" => "#0093c5", "indigo" => "#5965cd", "green" => "#369e4e", "amber" => "#dc932e",
+    "rose" => "#d14a5f", "teal" => "#0f9293", "navy" => "#1d447c", "neutral" => "#6f757e"
   }.freeze
+  CATEGORY_CHIP = {
+    "blue" => "bg-cat-blue/15 text-cat-blue-ink",
+    "indigo" => "bg-cat-indigo/15 text-cat-indigo-ink",
+    "green" => "bg-cat-green/15 text-cat-green-ink",
+    "amber" => "bg-cat-amber/20 text-cat-amber-ink",
+    "rose" => "bg-cat-rose/15 text-cat-rose-ink",
+    "teal" => "bg-cat-teal/15 text-cat-teal-ink",
+    "navy" => "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100",
+    "neutral" => "bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300"
+  }.freeze
+
+  ROLE_CATEGORY = {
+    "joven" => "green", "consejero" => "amber", "auxiliar" => "blue", "coordinador" => "indigo",
+    "director" => "navy", "logistica" => "rose", "director_logistica" => "teal", "registrador" => "neutral"
+  }.freeze
+  STAKE_CATEGORY = { "bello_horizonte" => "blue", "las_americas" => "indigo", "villa_flor" => "green", "puerto_cabezas" => "amber" }.freeze
+  GENDER_CATEGORY = { "H" => "blue", "M" => "rose" }.freeze
+
+  # Etiquetas de la gráfica de roles; el orden sigue a los roles más numerosos.
+  ROLE_CHART_LABELS = {
+    "consejero" => "Consejero", "logistica" => "Logística", "auxiliar" => "Auxiliar", "coordinador" => "Coordinador",
+    "director" => "Director", "director_logistica" => "Director de logística", "registrador" => "Registrador", "joven" => "Joven"
+  }.freeze
+
+  def self.chip(category)
+    CATEGORY_CHIP.fetch(category.to_s, CATEGORY_CHIP["neutral"])
+  end
+
+  def self.hex(category)
+    CATEGORY_HEX.fetch(category.to_s, CATEGORY_HEX["neutral"])
+  end
 
   AGE_SHADES = [ [ 0.9, "#123fb8" ], [ 0.65, "#2563ff" ], [ 0.45, "#5586ff" ], [ 0.3, "#8fb0ff" ] ].freeze
   AGE_LIGHTEST = "#c9d8ff".freeze
 
   def role_chart_label(role)
-    ROLE_CHART.dig(role, 0) || Participant.role_label(role)
+    ROLE_CHART_LABELS[role] || Participant.role_label(role)
   end
 
   def role_chart_color(role)
-    ROLE_CHART.dig(role, 1) || "#b4b8be"
+    ChartsHelper.hex(ROLE_CATEGORY[role])
+  end
+
+  # Acepta la clave del enum o su versión con título («Villa Flor»), que es como llegan los conteos.
+  def stake_chart_color(stake)
+    ChartsHelper.hex(STAKE_CATEGORY[stake.to_s.parameterize(separator: "_")])
+  end
+
+  def gender_chart_color(gender)
+    ChartsHelper.hex(GENDER_CATEGORY[gender])
   end
 
   # The busiest ages get the darkest bars, like the design mockup.

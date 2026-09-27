@@ -7,7 +7,7 @@
   logistics_title = @logistics_directors.map(&:full_name).join(" · ").presence || "Logística"
   logistics_groups = @logistics.group_by(&:logistics_area).sort_by { |area, _| area&.name || "~" }
   company_node = ->(company) { render("organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0)) }
-  control = "w-8 h-8 inline-flex items-center justify-center rounded-lg text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition"
+  control = "w-8 h-8 inline-flex items-center justify-center rounded-lg text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition"
 %>
 
 <% if branches || @directors.any? %>
@@ -16,7 +16,7 @@
     <div class="org-chart relative h-full" data-controller="org-chart">
       <div data-org-chart-target="viewport" tabindex="0" role="region"
            aria-label="Organigrama. Arrastra para moverte; usa Ctrl y la rueda del ratón, o las teclas más y menos, para acercar o alejar."
-           class="relative h-full w-full overflow-hidden bg-canvas dark:bg-slate-900 cursor-grab data-[dragging]:cursor-grabbing touch-none select-none focus:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-primary-500/30"
+           class="relative h-full w-full overflow-hidden bg-canvas cursor-grab data-[dragging]:cursor-grabbing touch-none select-none focus:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-primary-500/30"
            data-action="pointerdown->org-chart#pointerDown pointermove->org-chart#pointerMove pointerup->org-chart#pointerUp pointercancel->org-chart#pointerUp wheel->org-chart#wheel:!passive keydown->org-chart#keydown click->org-chart#suppressClick:capture">
         <div data-org-chart-target="canvas" class="absolute left-0 top-0 origin-top-left">
           <div class="org-tree w-max p-12">
@@ -46,7 +46,7 @@
                             <% end %>
                             <% if @orphan_companies.any? %>
                               <li>
-                                <%= render "organigrama/group_node", eyebrow: "Sin rama", title: "Sin compañía auxiliar", tone: "text-ink-500 dark:text-slate-400" %>
+                                <%= render "organigrama/group_node", eyebrow: "Sin rama", title: "Sin compañía auxiliar", tone: "text-ink-500" %>
                                 <ul class="org-stack">
                                   <% @orphan_companies.each do |company| %>
                                     <li><%= company_node.(company) %></li>
@@ -80,31 +80,31 @@
 
         <div class="absolute left-3 top-3"><%= render "organigrama/view_switch", floating: true %></div>
 
-        <p class="absolute left-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-surface/90 dark:bg-slate-800/90 px-2.5 py-1.5 text-[11.5px] font-semibold text-ink-500 dark:text-slate-400 shadow-sm pointer-events-none">
+        <p class="absolute left-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-surface/90 px-2.5 py-1.5 text-[11.5px] font-semibold text-ink-500 shadow-sm pointer-events-none">
           <%= icon "move", class: "w-3.5 h-3.5" %>
           Arrastra para moverte · Ctrl + rueda para acercar
         </p>
 
         <div data-org-chart-controls
-             class="absolute right-3 bottom-3 flex items-center gap-0.5 p-1 rounded-xl bg-surface/95 dark:bg-slate-800/95 border border-line-soft dark:border-slate-700 shadow-md">
+             class="absolute right-3 bottom-3 flex items-center gap-0.5 p-1 rounded-xl bg-surface/95 border border-line-soft shadow-md">
           <button type="button" data-action="org-chart#zoomOut" aria-label="Alejar" title="Alejar" class="<%= control %>">
             <%= icon "zoom-out", class: "w-4 h-4" %>
           </button>
-          <span data-org-chart-target="zoomLabel" class="w-11 text-center text-[12px] font-bold tabular-nums text-ink-700 dark:text-slate-300">100%</span>
+          <span data-org-chart-target="zoomLabel" class="w-11 text-center text-[12px] font-bold tabular-nums text-ink-700">100%</span>
           <button type="button" data-action="org-chart#zoomIn" aria-label="Acercar" title="Acercar" class="<%= control %>">
             <%= icon "zoom-in", class: "w-4 h-4" %>
           </button>
-          <span class="w-px h-5 mx-1 bg-line dark:bg-slate-600"></span>
+          <span class="w-px h-5 mx-1 bg-line"></span>
           <% if @show_companies && @auxiliar_companies.any? %>
             <button type="button" data-action="org-chart#toggleAll" data-org-chart-target="toggleAllButton" aria-pressed="false"
                     title="Mostrar u ocultar las compañías de cada rama"
-                    class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+                    class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
               <%= icon "list-tree", class: "w-4 h-4" %>
               <span data-org-chart-target="toggleAllLabel">Mostrar compañías</span>
             </button>
           <% end %>
           <button type="button" data-action="org-chart#fit" title="Ver todo el organigrama"
-                  class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+                  class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
             <%= icon "scan", class: "w-4 h-4" %>
             Ajustar
           </button>
@@ -122,16 +122,16 @@
     <div class="space-y-4">
       <%= render "organigrama/director_node", directors: @directors %>
       <% if branches %>
-        <div class="ml-4 pl-4 border-l-2 border-line dark:border-slate-600 space-y-6">
+        <div class="ml-4 pl-4 border-l-2 border-line space-y-6">
           <% if company_branch %>
             <div class="space-y-3">
               <%= render "organigrama/coordination_node", coordinators: @coordinators %>
-              <div class="ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-4">
+              <div class="ml-3 pl-3.5 border-l-2 border-line-soft space-y-4">
                 <% @auxiliar_companies.each do |auxiliar_company| %>
                   <div>
                     <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company %>
                     <% if auxiliar_company.companies.any? %>
-                      <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+                      <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft space-y-2">
                         <% by_number.(auxiliar_company.companies).each do |company| %>
                           <%= company_node.(company) %>
                         <% end %>
@@ -141,8 +141,8 @@
                 <% end %>
                 <% if @orphan_companies.any? %>
                   <div>
-                    <%= render "organigrama/group_node", eyebrow: "Sin rama", title: "Sin compañía auxiliar", tone: "text-ink-500 dark:text-slate-400" %>
-                    <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+                    <%= render "organigrama/group_node", eyebrow: "Sin rama", title: "Sin compañía auxiliar", tone: "text-ink-500" %>
+                    <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft space-y-2">
                       <% @orphan_companies.each do |company| %>
                         <%= company_node.(company) %>
                       <% end %>
@@ -156,7 +156,7 @@
             <div class="space-y-3">
               <%= render "organigrama/logistics_director_node", directors: @logistics_directors %>
               <% if logistics_groups.any? %>
-                <div class="ml-3 pl-3.5 border-l-2 border-line-soft dark:border-slate-700 space-y-2">
+                <div class="ml-3 pl-3.5 border-l-2 border-line-soft space-y-2">
                   <% logistics_groups.each do |area, members| %>
                     <%= render "organigrama/logistics_area_node", area: area, members: members %>
                   <% end %>
@@ -169,12 +169,12 @@
     </div>
   </div>
 <% else %>
-  <div class="relative md:h-full bg-canvas dark:bg-slate-900">
+  <div class="relative md:h-full bg-canvas">
     <div class="md:hidden px-4 pt-6"><%= render "organigrama/view_switch" %></div>
     <div class="hidden md:block absolute left-3 top-3 z-10"><%= render "organigrama/view_switch", floating: true %></div>
     <div class="px-4 md:px-8 pt-5 md:pt-20 pb-10">
       <div class="<%= card_classes("p-10 text-center") %>">
-        <p class="text-ink-500 dark:text-slate-400">Aún no hay compañías ni personal registrados.</p>
+        <p class="text-ink-500">Aún no hay compañías ni personal registrados.</p>
       </div>
     </div>
   </div>

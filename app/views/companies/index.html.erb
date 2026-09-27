@@ -1,14 +1,14 @@
 <% content_for :title, "Compañías" %>
 <% content_for :eyebrow, "Gestión" %>
-<% secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-[13px] font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
+<% secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition" %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
     <%= form_with url: companies_path, method: :get, role: "search", class: "relative w-full lg:w-[320px] lg:shrink-0",
           data: { turbo_frame: "companies_grid", turbo_action: "advance" } do |form| %>
-      <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300 dark:text-slate-500 pointer-events-none" %>
+      <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
       <%= form.search_field :query, value: params[:query], autocomplete: "off",
             placeholder: "Buscar por número, nombre o consejero…", aria: { label: "Buscar compañías" },
-            class: "w-full h-10 pl-10 pr-3 rounded-[11px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13.5px] text-ink-900 dark:text-slate-100 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+            class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
             oninput: "this.form.requestSubmit()" %>
     <% end %>
     <div class="flex flex-wrap items-center gap-2">
@@ -21,7 +21,7 @@
         Vista general
       <% end %>
       <% if full_company_access? %>
-        <%= link_to new_company_path, class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
+        <%= link_to new_company_path, class: button_classes do %>
           <%= icon "plus", class: "w-4 h-4" %>
           Nueva compañía
         <% end %>

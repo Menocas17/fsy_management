@@ -8,21 +8,21 @@
     { key: "total_staff", label: "Total de staff", value: total_staff, icon: "user-star",
       tone: "bg-cat-amber", url: staff_participants_path }
   ]
-  card = "flex items-center gap-4 bg-surface dark:bg-slate-800 border border-line-soft dark:border-slate-700 rounded-[18px] shadow-md px-5 py-[18px] md:px-6"
+  card = "flex items-center gap-4 bg-surface border border-line-soft rounded-card shadow-md px-5 py-[18px] md:px-6"
 %>
 <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
   <% kpis.each do |kpi| %>
     <%
       body = capture do %>
-        <span class="w-[52px] h-[52px] rounded-[14px] flex items-center justify-center shrink-0 text-white <%= kpi[:tone] %>">
+        <span class="w-[52px] h-[52px] rounded-tile flex items-center justify-center shrink-0 text-white <%= kpi[:tone] %>">
           <%= icon kpi[:icon], class: "w-6 h-6" %>
         </span>
         <span class="min-w-0">
-          <span class="block text-[34px] font-extrabold leading-none tracking-tight text-ink-900 dark:text-slate-100 tabular-nums" data-kpi="<%= kpi[:key] %>"><%= kpi[:value] %></span>
-          <span class="block mt-1 text-[13px] font-semibold text-ink-500 dark:text-slate-400 truncate"><%= kpi[:label] %></span>
+          <span class="block text-[34px] font-extrabold leading-none tracking-tight text-ink-900 tabular-nums" data-kpi="<%= kpi[:key] %>"><%= kpi[:value] %></span>
+          <span class="block mt-1 text-[13px] font-semibold text-ink-500 truncate"><%= kpi[:label] %></span>
         </span>
         <% if kpi[:url] %>
-          <%= icon "arrow-right", class: "w-[18px] h-[18px] ml-auto shrink-0 text-ink-300 dark:text-slate-500" %>
+          <%= icon "arrow-right", class: "w-[18px] h-[18px] ml-auto shrink-0 text-ink-500" %>
         <% end %>
       <% end
     %>
