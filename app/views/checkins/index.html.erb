@@ -67,12 +67,13 @@
         </p>
       </div>
 
-      <%# En el teléfono el visor no pasa de media pantalla, y el resultado se pinta encima del video:
-          quien registra está mirando la cámara, no la parte de abajo de la página. %>
-      <div class="relative bg-slate-900 aspect-square max-h-[55dvh] lg:max-h-none w-full flex items-center justify-center">
+      <%# El visor ocupa casi toda la pantalla del teléfono (vertical, como se sostiene). El resultado se pinta
+          encima del video, porque quien registra mira la cámara, y se va solo a los 5 segundos (o al tocarlo)
+          para no tapar al siguiente; el último queda anotado debajo. %>
+      <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-square max-h-[72dvh] lg:max-h-none w-full flex items-center justify-center">
         <video data-checkin-scanner-target="video" class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
         <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
-        <div class="relative w-44 h-44 pointer-events-none">
+        <div class="relative w-56 h-56 sm:w-48 sm:h-48 pointer-events-none">
           <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-xl", "top-0 right-0 border-l-0 border-b-0 rounded-tr-xl",
                "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-xl", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-xl" ].each do |corner| %>
             <span data-checkin-scanner-target="corner" class="absolute w-9 h-9 border-[3px] border-white/90 transition-colors duration-500 ease-out <%= corner %>"></span>
@@ -84,10 +85,13 @@
           Activar la cámara
         </button>
         <div hidden data-checkin-scanner-target="card" role="status" aria-live="polite" aria-atomic="true"
+             data-action="click->checkin-scanner#dismissCard"
              class="absolute inset-x-3 bottom-3 z-10"></div>
       </div>
 
       <div class="p-4 space-y-3">
+        <div hidden data-checkin-scanner-target="last" data-last-scan
+             class="flex items-center gap-3 rounded-tile bg-canvas px-3.5 py-2.5"></div>
         <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "flex gap-2" do %>
           <%= text_field_tag :code, nil, placeholder: "Código del gafete", autocomplete: "off", aria: { label: "Código del gafete" },
                 data: { checkin_scanner_target: "manual" }, class: "#{field_input_classes} font-mono" %>

@@ -18,6 +18,13 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "de 1 jóvenes registrados"
   end
 
+  test "the scanner keeps a spot below the camera for the last scan" do
+    get checkins_path
+
+    assert_select "[data-checkin-scanner-target='card'][data-action*='dismissCard']"
+    assert_select "[data-last-scan][hidden]"
+  end
+
   test "the roster is what lets the device work without signal" do
     get checkins_roster_path, headers: { "Accept" => "application/json" }
 
