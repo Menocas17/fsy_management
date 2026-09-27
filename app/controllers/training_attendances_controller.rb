@@ -9,19 +9,30 @@ class TrainingAttendancesController < ApplicationController
                                                   recorded_by: Current.user&.participant, source: :manual)
 
     notice = status == :already ? "#{participant.full_name} ya estaba marcado." : "#{participant.full_name} quedó marcado."
-    redirect_back fallback_location: agenda_training_path(@training), notice: notice
+    respond_with_roster(participant, notice)
   end
 
   def destroy
     attendance = @training.attendances.find(params[:id])
-    name = attendance.participant.full_name
+    participant = attendance.participant
     attendance.destroy
 
-    redirect_back fallback_location: agenda_training_path(@training),
-                  notice: "Se quitó la asistencia de #{name}."
+    respond_with_roster(participant, "Se quitó la asistencia de #{participant.full_name}.")
   end
 
   private
+    # Desde la ficha de la capacitación se repinta solo el bloque de cifras y listas: se marcan
+    # decenas seguidas y recargar la página devolvía la lista al principio cada vez.
+    def respond_with_roster(participant, notice)
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace("training-roster", partial: "trainings/roster",
+                                                    locals: { training: @training.reload, highlight: participant.id })
+        end
+        format.html { redirect_back fallback_location: agenda_training_path(@training), notice: notice }
+      end
+    end
+
     def set_training
       @training = Training.find(params[:training_id])
     end
