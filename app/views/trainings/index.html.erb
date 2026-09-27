@@ -51,46 +51,47 @@
       <table class="w-full">
         <thead>
           <tr class="border-b border-line-soft dark:border-slate-700">
-            <th class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500">Persona</th>
-            <th class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500">Rol</th>
+            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400 sticky left-0 z-[1] bg-surface dark:bg-slate-800">Persona</th>
+            <th scope="col" class="px-4 py-3 text-left text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400">Rol</th>
             <% @trainings.each do |training| %>
-              <th class="px-3 py-3 text-center text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500 whitespace-nowrap">
+              <th scope="col" class="px-3 py-3 text-center text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400 whitespace-nowrap">
                 <%= training.held_on.day %> <%= SpanishDates.month(training.held_on).first(3) %>
               </th>
             <% end %>
-            <th class="px-4 py-3 text-right text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-300 dark:text-slate-500">Asistencia</th>
+            <th scope="col" class="px-4 py-3 text-right text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 dark:text-slate-400">Asistencia</th>
           </tr>
         </thead>
         <tbody>
           <% @staff.each do |person| %>
             <% held = @trainings.reject { |training| training.held_on > Date.current } %>
             <% attended = held.count { |training| @attended[training.id]&.include?(person.id) } %>
-            <tr class="border-b border-line-soft dark:border-slate-700 last:border-b-0" data-staff-row="<%= person.id %>">
-              <td class="px-4 py-3">
+            <tr class="group border-b border-line dark:border-slate-700 last:border-b-0 hover:bg-canvas dark:hover:bg-slate-700/40" data-staff-row="<%= person.id %>">
+              <%# El nombre queda fijo al desplazar la tabla de lado en el teléfono: si no, se pierde de quién es cada fila. %>
+              <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:bg-slate-800 dark:group-hover:bg-slate-700">
                 <%= link_to person.full_name, participant_path(person, from: "staff"),
                       class: "text-[13.5px] font-bold text-ink-900 dark:text-slate-100 hover:underline" %>
               </td>
-              <td class="px-4 py-3 text-[12.5px] text-ink-500 dark:text-slate-400">
+              <td class="px-4 py-3 text-[12.5px] font-medium text-ink-700 dark:text-slate-300">
                 <%= person.role_label %><%= " · #{person.company&.name || person.logistics_area&.name}" if person.company || person.logistics_area %>
               </td>
               <% @trainings.each do |training| %>
                 <td class="px-3 py-3 text-center">
                   <% if @attended[training.id]&.include?(person.id) %>
-                    <span class="inline-flex w-6 h-6 rounded-lg items-center justify-center text-cat-green bg-cat-green/12" title="Asistió" data-mark="yes">
-                      <%= icon "check", class: "w-3.5 h-3.5" %>
+                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center bg-emerald-600 text-white" title="Asistió" data-mark="yes">
+                      <%= icon "check", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Asistió</span>
                     </span>
                   <% elsif training.held_on > Date.current %>
-                    <span class="inline-flex w-6 h-6 rounded-lg items-center justify-center text-ink-300 dark:text-slate-500 bg-canvas dark:bg-slate-900" title="Todavía no llega" data-mark="pending">
-                      <%= icon "clock", class: "w-3.5 h-3.5" %>
+                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center border border-dashed border-ink-300 text-ink-500 dark:border-slate-500 dark:text-slate-400" title="Todavía no llega" data-mark="pending">
+                      <%= icon "clock", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Todavía no llega</span>
                     </span>
                   <% else %>
-                    <span class="inline-flex w-6 h-6 rounded-lg items-center justify-center text-cat-rose bg-cat-rose/12" title="Faltó" data-mark="no">
-                      <%= icon "x", class: "w-3.5 h-3.5" %>
+                    <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-400/40" title="Faltó" data-mark="no">
+                      <%= icon "x", class: "w-4 h-4", "aria-hidden": true %><span class="sr-only">Faltó</span>
                     </span>
                   <% end %>
                 </td>
               <% end %>
-              <td class="px-4 py-3 text-right text-[12.5px] font-bold tabular-nums text-ink-700 dark:text-slate-300" data-attendance-total>
+              <td class="px-4 py-3 text-right text-[12.5px] font-bold tabular-nums text-ink-900 dark:text-slate-100 whitespace-nowrap" data-attendance-total>
                 <%= held.any? ? "#{attended} de #{held.size}" : "—" %>
               </td>
             </tr>
