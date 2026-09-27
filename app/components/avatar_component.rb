@@ -31,28 +31,20 @@ class AvatarComponent < ViewComponent::Base
     end
   end
 
+  # Iniciales en los tintes de la paleta del sistema, no un arcoíris de quince: el avatar es lo que más se
+  # repite en las listas. Cada nombre cae siempre en el mismo tinte.
+  AVATAR_TINTS = [
+    "bg-primary-100 text-primary-800 dark:bg-primary-700/40 dark:text-primary-100",
+    "bg-cat-blue/15 text-cat-blue-ink",
+    "bg-cat-teal/15 text-cat-teal-ink",
+    "bg-cat-green/15 text-cat-green-ink",
+    "bg-cat-amber/20 text-cat-amber-ink"
+  ].freeze
+  AVATAR_FALLBACK = "bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300".freeze
+
   def avatar_colors_for(name)
-      colors = [
-      "bg-red-100 text-red-600",
-      "bg-orange-100 text-orange-600",
-      "bg-amber-100 text-amber-600",
-      "bg-green-100 text-green-600",
-      "bg-emerald-100 text-emerald-600",
-      "bg-teal-100 text-teal-600",
-      "bg-cyan-100 text-cyan-600",
-      "bg-blue-100 text-blue-600",
-      "bg-indigo-100 text-indigo-600",
-      "bg-violet-100 text-violet-600",
-      "bg-purple-100 text-purple-600",
-      "bg-fuchsia-100 text-fuchsia-600",
-      "bg-pink-100 text-pink-600",
-      "bg-rose-100 text-rose-600",
-      "bg-slate-100 text-slate-600"
-    ]
+    return AVATAR_FALLBACK if name.blank?
 
-    return colors.last if name.blank?
-
-    index = name.sum % (colors.length - 1)
-    colors[index]
+    AVATAR_TINTS[name.sum % AVATAR_TINTS.size]
   end
 end

@@ -17,7 +17,7 @@
             <span class="block text-2xl md:text-[32px] font-extrabold leading-tight tracking-tight text-white">¡El FSY ya comenzó!</span>
           <% else %>
             <span class="sr-only">Faltan <%= countdown[:days] %> días, <%= countdown[:hours] %> horas y <%= countdown[:minutes] %> minutos para el inicio del FSY</span>
-            <span class="block text-[13px] md:text-sm font-bold tracking-[.08em] uppercase text-white/75">Faltan para el inicio</span>
+            <span class="block text-[13px] md:text-sm font-bold tracking-[.08em] uppercase text-sun">Faltan para el inicio</span>
             <span class="mt-2.5 flex flex-wrap gap-x-6 gap-y-3" aria-hidden="true">
               <% [ [ :days, "Días" ], [ :hours, "Horas" ], [ :minutes, "Minutos" ], [ :seconds, "Segundos" ] ].each do |key, label| %>
                 <span class="flex flex-col items-center text-center">

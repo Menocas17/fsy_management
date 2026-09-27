@@ -61,10 +61,11 @@ module UiHelper
             style: "width: #{size}px")
   end
 
+  # Título de tarjeta en tipo de oración: las etiquetas en mayúsculas quedan solo para la barra superior.
   def section_heading(title, icon_name)
     tag.div(class: "flex items-center gap-2.5 mb-4") do
       icon(icon_name, class: "w-[17px] h-[17px] text-primary-500 dark:text-primary-300") +
-        tag.h2(title, class: "text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300")
+        tag.h2(title, class: "text-[15px] font-bold text-ink-900")
     end
   end
 

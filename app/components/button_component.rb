@@ -62,7 +62,14 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active_classes
-    active? ? "bg-primary-gradient-right text-white shadow-sm" : "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
+    # Activo: fondo claro y una barra de sol a la izquierda. Un bloque navy lleno competía con el contenido
+    # en una barra que se ve todo el tiempo.
+    if active?
+      "relative bg-primary-50 text-primary-800 dark:bg-primary-700/35 dark:text-white " \
+        "before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-full before:bg-sun"
+    else
+      "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
+    end
   end
 
   def current_icon

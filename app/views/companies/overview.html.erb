@@ -2,7 +2,8 @@
 <% content_for :eyebrow, "Compañías" %>
 <%
   secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  eyebrow = "text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300"
+  # La etiqueta sobre cada título queda para lectores de pantalla; a la vista basta el título.
+  eyebrow = "sr-only"
   counselor_total = @companies.sum { |company| company.counselors.size }
   men = @companies.map { |company| @gender_counts.fetch([ company.id, "H" ], 0) }
   women = @companies.map { |company| @gender_counts.fetch([ company.id, "M" ], 0) }
@@ -42,7 +43,7 @@
   <section class="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 md:gap-5">
     <div class="<%= card_classes("min-w-0 px-6 py-6 md:px-7") %>">
       <p class="<%= eyebrow %>">Balance</p>
-      <h2 class="mt-0.5 mb-3 text-base font-bold text-ink-900">Jóvenes por compañía y género</h2>
+      <h2 class="mb-3 text-base font-bold text-ink-900">Jóvenes por compañía y género</h2>
       <% if @companies.any? %>
         <%= tag.div role: "img",
               aria: { label: "Jóvenes por compañía y género. " + @companies.each_with_index.map { |company, index| "#{company.name}: #{men[index]} hombres y #{women[index]} mujeres" }.join(", ") },

@@ -90,7 +90,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div class="flex items-center gap-2.5">
           <%= icon "users", class: "w-[17px] h-[17px] text-primary-500 dark:text-primary-300" %>
-          <h2 class="text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Participantes · <%= @jovenes_total %></h2>
+          <h2 class="text-[15px] font-bold text-ink-900">Participantes · <%= @jovenes_total %></h2>
         </div>
         <%= form_with url: company_path(@company), method: :get, role: "search", class: "relative w-full sm:w-[240px]",
               data: { turbo_frame: "company_participants", turbo_action: "advance" } do |form| %>
