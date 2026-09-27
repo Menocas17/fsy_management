@@ -86,7 +86,7 @@
 
       <%# Full-width buttons so the label never gets cut off in this column. %>
       <section class="<%= card_classes("px-5 py-5 lg:sticky lg:top-4") %>">
-        <button type="submit"
+        <button type="submit" data-turbo-submits-with="Enviando…"
                 class="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
           <%= icon "send", class: "w-4 h-4 shrink-0" %>
           Enviar alerta

@@ -14,7 +14,7 @@
     </div>
     <% if remove_url %>
       <%= button_to "Quitar", remove_url, method: :delete,
-            form: { data: { turbo_confirm: "¿Quitar a #{person.full_name} de esta compañía?" } },
+            form: { data: { turbo_confirm: "¿Quitar a #{person.full_name} de esta compañía?", turbo_confirm_detail: "Se puede volver a asignar después.", turbo_confirm_button: "Sí, quitar" } },
             class: "shrink-0 px-1 text-[12px] font-bold text-cat-rose hover:underline cursor-pointer" %>
     <% end %>
   </div>

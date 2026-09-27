@@ -48,7 +48,7 @@
       Editar
     <% end %>
     <%= button_to activity_path(activity), method: :delete,
-          form: { class: "flex-1", data: { turbo_confirm: "¿Eliminar «#{activity.title}»? Se avisará a los participantes." } },
+          form: { class: "flex-1", data: { turbo_confirm: "¿Eliminar «#{activity.title}»?", turbo_confirm_detail: "Se avisará a los participantes y no se puede deshacer." } },
           class: "w-full inline-flex items-center justify-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 text-sm font-semibold text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
       <%= icon "trash-2", class: "w-4 h-4" %>
       Eliminar

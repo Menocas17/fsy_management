@@ -37,13 +37,12 @@ module ApplicationHelper
     end
   end
 
+  # Solo el color de la franja izquierda cambia por tipo; el resto del aviso sigue el tema.
   def toast_styles(type)
-    if type == "notice"
-      "bg-[#EBF7EE] border border-[#CEEAD5]"
-    elsif type == "alert"
-      "bg-[#FCEDE9] border border-[#FAD8D6]"
-    else
-      "bg-[#E5EFF9] border border-[#CCE2F8]"
+    case type.to_s
+    when "notice" then "border-l-cat-green dark:border-l-cat-green"
+    when "alert" then "border-l-cat-rose dark:border-l-cat-rose"
+    else "border-l-primary-500 dark:border-l-primary-500"
     end
   end
 

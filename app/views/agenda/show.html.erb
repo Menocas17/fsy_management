@@ -69,7 +69,7 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
+  <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
     <div class="min-w-0">
       <%# La leyenda va antes de la agenda: los colores se entienden al llegar, no después de recorrerla. %>
       <div class="<%= card_classes("mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5") %>" data-agenda-legend>
@@ -82,11 +82,12 @@
         <% end %>
       </div>
 
-      <%# Desktop shows the grid and a side panel; on phones each activity opens in place. %>
-      <div class="hidden md:block"><%= render "agenda/week", days: @visible_days %></div>
-      <div class="md:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
+      <%# La cuadrícula de la semana necesita unos 680px más el panel de detalle: solo cabe desde xl.
+          Por debajo (teléfono, tablet, portátil chica con la barra lateral) cada actividad se abre en su lugar. %>
+      <div class="hidden xl:block"><%= render "agenda/week", days: @visible_days %></div>
+      <div class="xl:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
     </div>
 
-    <div class="hidden md:block"><%= render "agenda/detail", activity: @activity %></div>
+    <div class="hidden xl:block"><%= render "agenda/detail", activity: @activity %></div>
   </div>
 </div>

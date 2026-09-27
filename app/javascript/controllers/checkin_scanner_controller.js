@@ -5,10 +5,19 @@ import jsQR from "jsqr"
 // Trabaja sin señal a propósito — el padrón queda en el dispositivo y los escaneos se encolan
 // hasta que vuelva el internet, porque el día que llegan 445 jóvenes el wifi es lo primero que falla.
 // El padrón y la cola se guardan por modo: la llegada al FSY y cada capacitación no se mezclan.
-const SAME_CODE_MS = 4000
+// Un gafete que se queda frente a la cámara no vuelve a contar; vuelve a leerse cuando lleva este
+// tiempo fuera de cuadro (antes, a los 4 s el mismo gafete pasaba de «registrado» a «ya estaba»).
+const SAME_CODE_MS = 1500
+
+// Safari de iOS no vibra: el tono es la confirmación que no obliga a mirar la pantalla.
+const TONES = {
+  ok: [ [ 1320, 0, 0.07, "sine" ] ],
+  already: [ [ 660, 0, 0.06, "sine" ], [ 660, 0.11, 0.06, "sine" ] ],
+  unknown: [ [ 220, 0, 0.22, "square" ] ]
+}
 
 export default class extends Controller {
-  static targets = ["video", "canvas", "start", "status", "card", "arrived", "pending", "manual"]
+  static targets = ["video", "canvas", "start", "status", "card", "corner", "arrived", "pending", "manual"]
   static values = { rosterUrl: String, syncUrl: String, mode: String, total: Number, arrived: Number }
 
   connect() {
@@ -34,6 +43,8 @@ export default class extends Controller {
   // Cámara ----------------------------------------------------------------
   async start() {
     this.startTarget.hidden = true
+    this.unlockAudio()
+    this.say("Abriendo la cámara…")
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
     } catch (error) {
@@ -78,6 +89,7 @@ export default class extends Controller {
   typed(event) {
     event.preventDefault()
     const code = this.manualTarget.value.trim()
+    this.unlockAudio()
     if (code) this.handle(code, { force: true })
     this.manualTarget.value = ""
   }
@@ -86,14 +98,18 @@ export default class extends Controller {
     const id = payload.trim().split("/").pop().split("?")[0]
     const now = Date.now()
 
-    // La cámara lee el mismo código treinta veces por segundo: solo cuenta la primera.
-    if (!force && id === this.lastCode && now - this.lastAt < SAME_CODE_MS) return
+    // La cámara lee el mismo código treinta veces por segundo: solo cuenta la primera, y cada
+    // lectura repetida alarga la espera mientras el gafete siga en cuadro.
+    if (!force && id === this.lastCode && now - this.lastAt < SAME_CODE_MS) {
+      this.lastAt = now
+      return
+    }
     this.lastCode = id
     this.lastAt = now
 
     const person = this.roster[id]
     if (!person) return this.show({ tone: "unknown", title: "Código no reconocido", detail: "No aparece en el padrón de este registro." }, [ 200 ])
-    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: `Ya estaba registrado · ${person.company || "sin compañía"}` }, [ 60, 50, 60 ])
+    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: this.summary(person), url: person.url }, [ 60, 50, 60 ])
 
     person.arrived = true
     this.writeStore(this.rosterKey, this.roster)
@@ -110,8 +126,8 @@ export default class extends Controller {
     this.show({
       tone: "ok",
       title: person.name,
-      detail: [ person.company, person.room && `Cuarto ${person.room}` ].filter(Boolean).join(" · "),
-      care: person.care
+      detail: this.summary(person),
+      url: person.url
     }, [ 90 ])
   }
 
@@ -184,19 +200,87 @@ export default class extends Controller {
   // Pantalla --------------------------------------------------------------
   show(result, vibration) {
     const tones = {
-      ok: "border-cat-green/40 bg-cat-green/10 text-cat-green",
-      already: "border-cat-amber/40 bg-cat-amber/10 text-amber-700",
-      unknown: "border-cat-rose/40 bg-cat-rose/10 text-cat-rose"
+      ok: { label: "Registrado", bar: "border-l-cat-green dark:border-l-cat-green", text: "text-emerald-700 dark:text-cat-green", corner: "border-cat-green" },
+      already: { label: "Ya estaba registrado", bar: "border-l-cat-amber dark:border-l-cat-amber", text: "text-amber-700 dark:text-cat-amber", corner: "border-cat-amber" },
+      unknown: { label: "No reconocido", bar: "border-l-cat-rose dark:border-l-cat-rose", text: "text-rose-700 dark:text-cat-rose", corner: "border-cat-rose" }
     }
+    const tone = tones[result.tone]
 
-    this.cardTarget.className = `rounded-[16px] border px-4 py-3.5 ${tones[result.tone]}`
+    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 rounded-[14px] border border-line border-l-4 ${tone.bar} bg-surface px-4 py-3 shadow-lg dark:bg-slate-800 dark:border-slate-700`
     this.cardTarget.innerHTML = `
-      <p class="text-[15px] font-extrabold">${this.escape(result.title)}</p>
-      ${result.detail ? `<p class="mt-0.5 text-[12.5px] font-semibold opacity-90">${this.escape(result.detail)}</p>` : ""}
-      ${result.care ? `<p class="mt-1.5 text-[12px] font-bold">⚠ ${this.escape(result.care)}</p>` : ""}
+      <p class="text-[11.5px] font-bold uppercase tracking-[.06em] ${tone.text}">${tone.label}</p>
+      <p class="mt-0.5 text-[16px] font-extrabold text-ink-900 dark:text-slate-100">${this.escape(result.title)}</p>
+      ${result.detail ? `<p class="mt-0.5 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">${this.escape(result.detail)}</p>` : ""}
+      ${result.url ? `<a href="${this.escape(result.url)}" class="mt-1.5 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
     `
     this.cardTarget.hidden = false
+    this.pulse(tone.corner)
     navigator.vibrate?.(vibration)
+    this.chime(result.tone)
+  }
+
+  summary(person) {
+    return [ person.company, person.stake, person.gender ].filter(Boolean).join(" · ")
+  }
+
+  // Dos escaneos «ok» seguidos se ven iguales: el pulso y las esquinas de color marcan que hubo uno nuevo.
+  pulse(cornerClass) {
+    clearTimeout(this.cornerTimer)
+    this.cornerTargets.forEach((corner) => {
+      corner.classList.remove("border-white/90", "border-cat-green", "border-cat-amber", "border-cat-rose")
+      corner.classList.add(cornerClass)
+    })
+    this.cornerTimer = setTimeout(() => {
+      this.cornerTargets.forEach((corner) => {
+        corner.classList.remove(cornerClass)
+        corner.classList.add("border-white/90")
+      })
+    }, 700)
+
+    if (this.reducedMotion) return
+    this.cardTarget.animate(
+      [ { transform: "scale(.98)", opacity: 0.7 }, { transform: "none", opacity: 1 } ],
+      { duration: 180, easing: "cubic-bezier(0.23, 1, 0.32, 1)" }
+    )
+  }
+
+  // El audio solo se puede abrir dentro de un gesto: se hace al tocar «Activar la cámara» o «Registrar».
+  unlockAudio() {
+    const Context = window.AudioContext || window.webkitAudioContext
+    if (!Context) return
+
+    try {
+      window.fsyAudioContext ||= new Context()
+      if (window.fsyAudioContext.state === "suspended") window.fsyAudioContext.resume().catch(() => {})
+    } catch (error) {
+      // Sin audio: quedan la vibración y la pantalla.
+    }
+  }
+
+  chime(tone) {
+    const audio = window.fsyAudioContext
+    if (!audio || audio.state !== "running") return
+
+    for (const [ frequency, offset, length, type ] of TONES[tone]) {
+      const oscillator = audio.createOscillator()
+      const gain = audio.createGain()
+      const start = audio.currentTime + offset
+
+      oscillator.type = type
+      oscillator.frequency.value = frequency
+      gain.gain.setValueAtTime(0.0001, start)
+      gain.gain.linearRampToValueAtTime(type === "square" ? 0.08 : 0.16, start + 0.01)
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + length)
+
+      oscillator.connect(gain).connect(audio.destination)
+      oscillator.start(start)
+      oscillator.stop(start + length + 0.02)
+    }
+  }
+
+  get reducedMotion() {
+    return document.documentElement.classList.contains("reduce-motion") ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
   }
 
   say(message, isError = false) {

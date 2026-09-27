@@ -139,7 +139,7 @@
                 <span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400" data-role><%= Participant.role_label(member.rol) %></span>
                 <%= hidden_field_tag "activity[responsible_ids][]", member.id, id: nil %>
                 <button type="button" data-action="participant-picker#remove" aria-label="Quitar a <%= member.full_name %>"
-                        class="w-6 h-6 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition">
+                        class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition">
                   <%= icon "x", class: "w-3.5 h-3.5" %>
                 </button>
               </span>
@@ -147,12 +147,12 @@
           </div>
         </div>
 
-        <template data-participant-picker-target="template"><span class="<%= chip_classes %>" data-picked><span class="text-[12.5px] font-bold text-ink-900 dark:text-slate-100" data-name></span><span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400" data-role></span><input type="hidden" name="activity[responsible_ids][]"><button type="button" data-action="participant-picker#remove" aria-label="Quitar" class="w-6 h-6 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition"><%= icon "x", class: "w-3.5 h-3.5" %></button></span></template>
+        <template data-participant-picker-target="template"><span class="<%= chip_classes %>" data-picked><span class="text-[12.5px] font-bold text-ink-900 dark:text-slate-100" data-name></span><span class="text-[11px] font-semibold text-ink-500 dark:text-slate-400" data-role></span><input type="hidden" name="activity[responsible_ids][]"><button type="button" data-action="participant-picker#remove" aria-label="Quitar" class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition"><%= icon "x", class: "w-3.5 h-3.5" %></button></span></template>
       </section>
 
       <%# Full-width buttons so "Crear y avisar" never gets cut off in this column. %>
       <section class="<%= card_classes("px-5 py-5 lg:sticky lg:top-4") %>">
-        <button type="submit"
+        <button type="submit" data-turbo-submits-with="Guardando y avisando…"
                 class="w-full inline-flex items-center justify-center gap-2 h-11 px-5 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition cursor-pointer">
           <%= icon "check", class: "w-4 h-4 shrink-0" %>
           <%= activity.persisted? ? "Guardar y avisar" : "Crear y avisar" %>

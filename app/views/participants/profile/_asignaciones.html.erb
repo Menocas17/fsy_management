@@ -49,13 +49,13 @@
               <div class="ml-auto flex items-center gap-1.5">
                 <% next_status = assignment.status_pendiente? ? "confirmada" : (assignment.status_confirmada? ? "completada" : "pendiente") %>
                 <%= button_to assignment_path(assignment, assignment: { status: next_status }), method: :patch,
-                      class: "text-[11.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline cursor-pointer" do %>
+                      class: "inline-flex items-center min-h-11 md:min-h-0 px-1 text-[11.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline cursor-pointer" do %>
                   Marcar <%= Assignment::STATUS_LABELS[next_status].downcase %>
                 <% end %>
                 <%= button_to assignment_path(assignment), method: :delete,
-                      form: { data: { turbo_confirm: "¿Quitar «#{assignment.display_title}»?" } },
+                      form: { data: { turbo_confirm: "¿Quitar «#{assignment.display_title}»?", turbo_confirm_detail: "Se puede volver a asignar después.", turbo_confirm_button: "Sí, quitar" } },
                       aria: { label: "Eliminar asignación" },
-                      class: "w-7 h-7 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
+                      class: "relative w-7 h-7 after:absolute after:-inset-2 rounded-lg flex items-center justify-center text-ink-300 dark:text-slate-500 hover:text-cat-rose hover:bg-cat-rose/10 cursor-pointer transition" do %>
                   <%= icon "trash-2", class: "w-3.5 h-3.5" %>
                 <% end %>
               </div>

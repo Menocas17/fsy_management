@@ -81,13 +81,16 @@ class CheckinsController < ApplicationController
       end
     end
 
+    # Lo justo para confirmar a quién se escaneó. Sin datos médicos: el padrón queda guardado en el
+    # dispositivo y se ve en una pantalla que mira la fila; eso vive en la ficha, a un toque.
     def card(participant)
       {
         id: participant.id,
         name: participant.full_name,
         company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
-        room: participant.room.presence,
-        care: participant.allergies.presence
+        stake: participant.stake&.titleize,
+        gender: Participant::GENDER_LABELS[participant.gender],
+        url: participant_path(participant)
       }
     end
 

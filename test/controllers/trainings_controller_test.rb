@@ -43,6 +43,23 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-absentees]", text: /#{@logistics.full_name}/
   end
 
+  test "a training that has not happened yet counts pending, not absent" do
+    get agenda_training_path(@next_one)
+
+    assert_select "[data-figure='pendientes']", text: Training.expected.count.to_s
+    assert_select "[data-figure='faltaron']", 0
+    assert_select "h2", text: /Por registrar/
+  end
+
+  test "marking from the training page repaints only the roster" do
+    post agenda_training_attendances_path(@past, participant_id: @logistics.id), as: :turbo_stream
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_select "turbo-stream[action='replace'][target='training-roster']"
+    assert_select "[data-attendees] .roster-moved", text: /#{@logistics.full_name}/
+  end
+
   test "the breakdown groups the roles that matter" do
     TrainingAttendance.create!(training: @past, participant: @counselor, recorded_at: @past.held_on)
 

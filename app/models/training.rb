@@ -10,6 +10,14 @@ class Training < ApplicationRecord
   scope :upcoming, -> { where(held_on: Date.current..).chronological }
   scope :past, -> { where(held_on: ...Date.current).order(held_on: :desc) }
 
+  # Cómo se agrupa el staff al contar quién vino: es lo que se mira para saber a quién hay que llamar.
+  ROLE_GROUPS = {
+    "Consejeros" => %w[consejero],
+    "Auxiliares" => %w[auxiliar],
+    "Logística" => %w[logistica director_logistica],
+    "Dirección y coordinación" => %w[director coordinador registrador]
+  }.freeze
+
   # A quién se espera: la capacitación es del staff, no de los jóvenes.
   def self.expected
     Participant.staff
@@ -44,6 +52,24 @@ class Training < ApplicationRecord
   # Quién faltó: se calcula, no se guarda, así que agregar staff después no ensucia el historial.
   def absentees
     self.class.expected.where.not(id: attendances.select(:participant_id)).order(:first_name, :last_name)
+  end
+
+  # Hasta que termina el día no hay «faltas», solo gente que todavía no se marcó.
+  def pending?
+    !past?
+  end
+
+  # { "Consejeros" => { attended: 3, expected: 5 }, ... } sin los grupos que no tienen a nadie.
+  def role_breakdown
+    present = attendances.joins(:participant).group("participants.rol").count
+    expected = self.class.expected.group(:rol).count
+
+    ROLE_GROUPS.filter_map do |label, roles|
+      total = roles.sum { |role| expected[role].to_i }
+      next if total.zero?
+
+      [ label, { attended: roles.sum { |role| present[role].to_i }, expected: total } ]
+    end.to_h
   end
 
   def attended?(participant)
