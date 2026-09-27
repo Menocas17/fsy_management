@@ -61,6 +61,6 @@ module DashboardHelper
   end
 
   def event_start_label
-    "#{SpanishDates.long(Rails.configuration.x.event_start_on)} de #{Rails.configuration.x.event_start_on.year}"
+    "#{SpanishDates.long(Rails.configuration.x.event_start_on, capitalize: false)} de #{Rails.configuration.x.event_start_on.year}"
   end
 end

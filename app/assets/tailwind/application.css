@@ -418,3 +418,21 @@ turbo-frame[aria-busy='true'] {
     scale: 0.97;
   }
 }
+
+/* Agenda en el teléfono: cada actividad se despliega en vez de aparecer de golpe. Mejora progresiva:
+   donde el navegador no sabe animar hasta height: auto, se abre como siempre. */
+@supports (interpolate-size: allow-keywords) {
+  .agenda-details {
+    interpolate-size: allow-keywords;
+  }
+  .agenda-details::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 200ms cubic-bezier(0.23, 1, 0.32, 1),
+      content-visibility 200ms allow-discrete;
+  }
+  .agenda-details[open]::details-content {
+    height: auto;
+  }
+}

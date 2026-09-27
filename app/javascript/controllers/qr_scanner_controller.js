@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import jsQR from "jsqr"
 
+const SCAN_INTERVAL_MS = 120
+const SCAN_MAX_SIDE = 640
+
 // Lee un QR con la cámara del teléfono y salta a donde lleva: la caja del inventario o, desde el panel,
 // el gafete de una persona. jsQR va incluido en vendor/javascript porque Safari no trae lector propio.
 export default class extends Controller {
@@ -47,10 +50,15 @@ export default class extends Controller {
     if (!this.scanning) return
 
     const video = this.videoTarget
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    const now = performance.now()
+    // Unas ocho lecturas por segundo a 640px sobran para un QR, y no calientan el teléfono en horas de
+    // registro como leer cada cuadro a resolución completa.
+    if (video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
+      this.lastRead = now
       const canvas = this.canvasTarget
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      const ratio = Math.min(1, SCAN_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
+      canvas.width = Math.round(video.videoWidth * ratio)
+      canvas.height = Math.round(video.videoHeight * ratio)
       const context = canvas.getContext("2d", { willReadFrequently: true })
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
 

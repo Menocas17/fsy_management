@@ -7,8 +7,11 @@ module SpanishDates
 
   module_function
 
-  def long(date)
-    "#{DAY_NAMES[date.wday].capitalize} #{date.day} de #{MONTH_NAMES[date.month - 1]}"
+  # «Lunes 11 de enero» encabezando una etiqueta; capitalize: false para usarla a media frase
+  # («se abre el lunes 11 de enero»).
+  def long(date, capitalize: true)
+    day = DAY_NAMES[date.wday]
+    "#{capitalize ? day.capitalize : day} #{date.day} de #{MONTH_NAMES[date.month - 1]}"
   end
 
   def abbr(date)

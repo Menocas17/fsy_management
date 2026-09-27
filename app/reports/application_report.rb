@@ -85,7 +85,7 @@ class ApplicationReport
         pdf.fill_color SLATE
         pdf.text_box [ subtitle, EVENT ].compact.join(" · "),
                      at: [ 78, top - 21 ], width: pdf.bounds.width - 114, size: 8.5
-        pdf.text_box "Generado el #{SpanishDates.long(Date.current)} de #{Date.current.year}",
+        pdf.text_box "Generado el #{SpanishDates.long(Date.current, capitalize: false)} de #{Date.current.year}",
                      at: [ 36, top - 40 ], width: pdf.bounds.width - 72, size: 8, align: :right
         pdf.fill_color LINE
         pdf.fill_rectangle [ 36, top - 54 ], pdf.bounds.width - 72, 1

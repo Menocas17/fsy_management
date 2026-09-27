@@ -47,15 +47,20 @@ export default class extends Controller {
 
   // Toolbar ---------------------------------------------------------------
 
-  zoomIn() {
+  // Desde los botones de la barra el salto se anima (se ve de dónde a dónde fue); con teclado, rueda o
+  // arrastre no, porque ahí el movimiento ya lo lleva la mano. Solo los clics traen evento.
+  zoomIn(event) {
+    this.animateNext = Boolean(event);
     this.zoomAtCenter(ZOOM_STEP);
   }
 
-  zoomOut() {
+  zoomOut(event) {
+    this.animateNext = Boolean(event);
     this.zoomAtCenter(1 / ZOOM_STEP);
   }
 
-  fit() {
+  fit(event) {
+    if (event instanceof Event) this.animateNext = true;
     const viewport = this.viewportTarget;
     const width = this.canvasTarget.offsetWidth;
     const height = this.canvasTarget.offsetHeight;
@@ -225,6 +230,8 @@ export default class extends Controller {
   }
 
   apply() {
+    this.canvasTarget.style.transition = this.animateNext ? 'transform 220ms cubic-bezier(0.23, 1, 0.32, 1)' : 'none';
+    this.animateNext = false;
     this.canvasTarget.style.transform = `translate(${this.x}px, ${this.y}px) scale(${this.scale})`;
     if (this.hasZoomLabelTarget) this.zoomLabelTarget.textContent = `${Math.round(this.scale * 100)}%`;
   }
