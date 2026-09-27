@@ -20,7 +20,7 @@ Rails.application.routes.draw do
   resources :audit_logs, only: [ :index ], path: "historial"
   # El resumen de capacitaciones vive dentro de la agenda, que es donde se buscan las fechas.
   scope path: "agenda", as: :agenda do
-    resources :trainings, only: %i[index show], path: "capacitaciones" do
+    resources :trainings, path: "capacitaciones", path_names: { new: "nueva", edit: "editar" } do
       resources :attendances, only: %i[create destroy], controller: "training_attendances", path: "asistencia"
     end
   end
