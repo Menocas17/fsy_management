@@ -15,7 +15,6 @@ const TONES = {
   already: [ [ 660, 0, 0.06, "sine" ], [ 660, 0.11, 0.06, "sine" ] ],
   unknown: [ [ 220, 0, 0.22, "square" ] ]
 }
-const WARNING_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`
 
 export default class extends Controller {
   static targets = ["video", "canvas", "start", "status", "card", "corner", "arrived", "pending", "manual"]
@@ -110,7 +109,7 @@ export default class extends Controller {
 
     const person = this.roster[id]
     if (!person) return this.show({ tone: "unknown", title: "Código no reconocido", detail: "No aparece en el padrón de este registro." }, [ 200 ])
-    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: `Ya estaba registrado · ${person.company || "sin compañía"}` }, [ 60, 50, 60 ])
+    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: this.summary(person), url: person.url }, [ 60, 50, 60 ])
 
     person.arrived = true
     this.writeStore(this.rosterKey, this.roster)
@@ -127,8 +126,8 @@ export default class extends Controller {
     this.show({
       tone: "ok",
       title: person.name,
-      detail: [ person.company, person.room && `Cuarto ${person.room}` ].filter(Boolean).join(" · "),
-      care: person.care
+      detail: this.summary(person),
+      url: person.url
     }, [ 90 ])
   }
 
@@ -212,12 +211,16 @@ export default class extends Controller {
       <p class="text-[11.5px] font-bold uppercase tracking-[.06em] ${tone.text}">${tone.label}</p>
       <p class="mt-0.5 text-[16px] font-extrabold text-ink-900 dark:text-slate-100">${this.escape(result.title)}</p>
       ${result.detail ? `<p class="mt-0.5 text-[12.5px] font-semibold text-ink-700 dark:text-slate-300">${this.escape(result.detail)}</p>` : ""}
-      ${result.care ? `<p class="mt-2 flex items-start gap-1.5 rounded-lg bg-cat-rose/10 px-2.5 py-1.5 text-[12.5px] font-bold text-rose-700 dark:text-cat-rose">${WARNING_ICON}<span>${this.escape(result.care)}</span></p>` : ""}
+      ${result.url ? `<a href="${this.escape(result.url)}" class="mt-1.5 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
     `
     this.cardTarget.hidden = false
     this.pulse(tone.corner)
     navigator.vibrate?.(vibration)
     this.chime(result.tone)
+  }
+
+  summary(person) {
+    return [ person.stake, person.gender ].filter(Boolean).join(" · ")
   }
 
   // Dos escaneos «ok» seguidos se ven iguales: el pulso y las esquinas de color marcan que hubo uno nuevo.
