@@ -70,7 +70,7 @@ module NavigationHelper
   end
 
   def page_eyebrow
-    content_for(:eyebrow).presence || "FSY 2026"
+    content_for(:eyebrow).presence || Rails.configuration.x.event_name
   end
 
   def page_heading

@@ -7,7 +7,7 @@
     <%= tag.div role: "img", aria: { label: "Participantes por estaca. #{chart_summary(count_by_stake.keys, count_by_stake.values)}" },
           data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",
                   chart_labels_value: count_by_stake.keys.map(&:split), chart_series_value: count_by_stake.values,
-                  chart_colors_value: count_by_stake.keys.map { |stake| stake_chart_color(stake) }, chart_gradient_value: true, chart_height_value: 220 } do %>
+                  chart_colors_value: count_by_stake.keys.map { |stake| stake_chart_color(stake) }, chart_height_value: 220 } do %>
       <div data-chart-target="canvas" class="min-h-[220px]"></div>
     <% end %>
   </div>
@@ -20,8 +20,7 @@
               aria: { label: "Distribución por rol. #{chart_summary(staff_roles.keys.map { |role| role_chart_label(role) }, staff_roles.values)}" },
               data: { controller: "chart", chart_kind_value: "donut",
                       chart_labels_value: staff_roles.keys.map { |role| role_chart_label(role) }, chart_series_value: staff_roles.values,
-                      chart_colors_value: staff_roles.keys.map { |role| role_chart_color(role) }, chart_height_value: 180,
-                      chart_gradient_value: true, chart_total_value: staff_roles.values.sum } do %>
+                      chart_colors_value: staff_roles.keys.map { |role| role_chart_color(role) }, chart_height_value: 180, chart_total_value: staff_roles.values.sum } do %>
           <div data-chart-target="canvas" class="min-h-[180px]"></div>
         <% end %>
         <ul class="w-full sm:w-auto flex flex-col gap-[9px]" aria-hidden="true">

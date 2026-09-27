@@ -49,7 +49,7 @@
               data: { controller: "chart", chart_kind_value: "stacked",
                       chart_labels_value: @companies.map { |company| company.number&.to_s || company.name },
                       chart_series_value: [ { name: "Hombres", data: men }, { name: "Mujeres", data: women } ],
-                      chart_colors_value: [ gender_chart_color("H"), gender_chart_color("M") ], chart_radius_value: 6, chart_column_width_value: "55%", chart_height_value: 280 } do %>
+                      chart_colors_value: [ gender_chart_color("H"), gender_chart_color("M") ], chart_radius_value: 5, chart_column_width_value: "55%", chart_height_value: 280 } do %>
           <div data-chart-target="canvas" class="min-h-[280px]"></div>
         <% end %>
         <p class="mt-1 text-[11.5px] font-medium text-ink-500">Cada columna es una compañía (por número). Ayuda a equilibrar el tamaño y los cuartos por género.</p>

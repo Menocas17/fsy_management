@@ -8,7 +8,7 @@ class ApplicationReport
   # cargar un .ttf al repositorio. El aviso de Prawn sobre esto no aporta nada aquí.
   Prawn::Fonts::AFM.hide_m17n_warning = true
 
-  EVENT = "FSY 2027 · Managua-Caribe".freeze
+  EVENT = "#{Rails.configuration.x.event_name} · #{Rails.configuration.x.event_region}".freeze
   NAVY = "1D2B4A".freeze
   SLATE = "5B6478".freeze
   LINE = "D8DCE3".freeze

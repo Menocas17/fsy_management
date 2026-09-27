@@ -39,8 +39,8 @@
     <%= tag.div role: "img", aria: { label: "Jóvenes por edad. #{chart_summary(ages.keys, ages.values)}" },
           data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",
                   chart_labels_value: ages.keys.map(&:to_s), chart_series_value: ages.values,
-                  chart_colors_value: age_bar_colors(ages.values), chart_radius_value: 8, chart_column_width_value: "64%",
-                  chart_height_value: 180, chart_gradient_value: true, chart_show_values_value: true } do %>
+                  chart_colors_value: age_bar_colors(ages.values), chart_radius_value: 5, chart_column_width_value: "64%",
+                  chart_height_value: 180, chart_show_values_value: true } do %>
       <div data-chart-target="canvas" class="min-h-[170px]"></div>
     <% end %>
   </div>

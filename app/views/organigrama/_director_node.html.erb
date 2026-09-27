@@ -1,5 +1,5 @@
 <div class="inline-block w-full md:w-auto md:min-w-60 text-left rounded-2xl bg-primary-gradient px-5 py-4 text-white shadow-lg" data-node="direccion">
-  <p class="text-[10px] font-bold tracking-[.08em] uppercase text-white/75">Dirección · FSY 2026</p>
+  <p class="text-[10px] font-bold tracking-[.08em] uppercase text-white/75">Dirección · <%= Rails.configuration.x.event_name %></p>
   <% if directors.any? %>
     <div class="mt-2 flex items-center gap-2.5">
       <%= render "organigrama/people", people: directors, ring: "ring-primary-900" %>
