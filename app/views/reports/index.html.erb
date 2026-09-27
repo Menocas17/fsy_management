@@ -27,7 +27,7 @@
 
   <% if can_view_participant_reports? %>
     <section>
-      <h2 class="mb-3 text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Listas para imprimir</h2>
+      <h2 class="mb-3 text-[15px] font-bold text-ink-900">Listas para imprimir</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <%
           printables = [
@@ -71,7 +71,7 @@
 
   <% if can_view_logistics_reports? %>
     <section>
-      <h2 class="mb-3 text-[11px] font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300">Logística y finanzas</h2>
+      <h2 class="mb-3 text-[15px] font-bold text-ink-900">Logística y finanzas</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
         <% [
              { title: "Inventario", text: "Existencias de cada inventario con su mínimo, estado y ubicación, listo para el conteo físico.",

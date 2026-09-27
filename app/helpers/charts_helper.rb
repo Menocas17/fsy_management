@@ -39,8 +39,9 @@ module ChartsHelper
     CATEGORY_HEX.fetch(category.to_s, CATEGORY_HEX["neutral"])
   end
 
-  AGE_SHADES = [ [ 0.9, "#123fb8" ], [ 0.65, "#2563ff" ], [ 0.45, "#5586ff" ], [ 0.3, "#8fb0ff" ] ].freeze
-  AGE_LIGHTEST = "#c9d8ff".freeze
+  # La rampa del navy de la marca (primary-900 → primary-300), no un azul eléctrico aparte.
+  AGE_SHADES = [ [ 0.9, "#07254f" ], [ 0.65, "#1d447c" ], [ 0.45, "#3671b2" ], [ 0.3, "#90b5dc" ] ].freeze
+  AGE_LIGHTEST = "#dbeaf8".freeze
 
   def role_chart_label(role)
     ROLE_CHART_LABELS[role] || Participant.role_label(role)

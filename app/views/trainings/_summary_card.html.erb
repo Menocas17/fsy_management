@@ -1,6 +1,8 @@
 <%
   # Una tarjeta por capacitación: cómo fue, o cuánto falta si todavía no llega.
-  tone, chip = if training.past? || training.today?
+  tone, chip = if training.today?
+    [ "bg-sun", "text-sun-ink bg-sun/25" ]
+  elsif training.past?
     training.attendance_rate >= 80 ? [ "bg-cat-green", "text-cat-green-ink bg-cat-green/12" ] : [ "bg-cat-amber", "text-cat-amber-ink bg-cat-amber/15" ]
   else
     [ "bg-cat-indigo", "text-cat-indigo-ink bg-cat-indigo/12" ]

@@ -9,7 +9,7 @@ class ButtonComponentTest < ViewComponent::TestCase
 
       link = component.css("a[href='/dashboard']").first
       assert link, "expected a link to /dashboard"
-      assert_includes link["class"], "bg-primary-gradient-right"
+      assert_includes link["class"], "before:bg-sun"
     end
   end
 
@@ -17,7 +17,7 @@ class ButtonComponentTest < ViewComponent::TestCase
     with_request_url "/dashboard" do
       component = render_inline(ButtonComponent.new(text: "Staff", url: "/participants/staff", icon: "nav-people.svg", secondary_icon: "nav-people-s.svg", is_nav: true))
 
-      refute_includes component.css("a").first["class"], "bg-primary-gradient-right"
+      refute_includes component.css("a").first["class"], "before:bg-sun"
     end
   end
 
@@ -27,7 +27,7 @@ class ButtonComponentTest < ViewComponent::TestCase
 
       link = component.css("a[href='/companies']").first
       assert_equal "page", link["aria-current"]
-      assert_includes link["class"], "bg-primary-gradient-right"
+      assert_includes link["class"], "before:bg-sun"
     end
   end
 

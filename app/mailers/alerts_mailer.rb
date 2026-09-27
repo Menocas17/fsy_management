@@ -3,6 +3,6 @@ class AlertsMailer < ApplicationMailer
   def critical(user, alert)
     @user = user
     @alert = alert
-    mail subject: "[FSY 2026] #{alert.title}", to: user.email_address
+    mail subject: "[#{Rails.configuration.x.event_name}] #{alert.title}", to: user.email_address
   end
 end

@@ -17,7 +17,7 @@
         url: agenda_training_path(training) }
     end
     start_on = Rails.configuration.x.event_start_on
-    trainings + [ { key: "event", eyebrow: "FSY 2026", title: "Comienza el evento",
+    trainings + [ { key: "event", eyebrow: Rails.configuration.x.event_name, title: "Comienza el evento",
                     meta: "#{SpanishDates.long(start_on)} de #{start_on.year} · Managua-Caribe",
                     days: days_until(start_on), icon: "party-popper", tone: "bg-cat-indigo",
                     chip: "bg-cat-indigo/15 text-cat-indigo-ink", url: agenda_path } ]

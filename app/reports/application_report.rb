@@ -4,15 +4,22 @@ require "prawn/table"
 # Base de los reportes imprimibles: membrete FSY, pie con paginado y una tabla con el mismo
 # lenguaje visual de la app. Cada reporte concreto solo implementa #build.
 class ApplicationReport
-  # Las fuentes integradas de Prawn son WinAnsi, no UTF-8: alcanzan para el español y evitan
-  # cargar un .ttf al repositorio. El aviso de Prawn sobre esto no aporta nada aquí.
-  Prawn::Fonts::AFM.hide_m17n_warning = true
+  # Onest, la misma letra de la pantalla (vendor/fonts, licencia OFL): el papel se reconoce como parte
+  # de la app y, al ser TTF, acepta cualquier carácter UTF-8. No hay itálica; la regular la reemplaza.
+  FONT_DIR = Rails.root.join("vendor/fonts")
+  FONT_FAMILY = {
+    normal: FONT_DIR.join("Onest-Regular.ttf").to_s,
+    italic: FONT_DIR.join("Onest-Regular.ttf").to_s,
+    bold: FONT_DIR.join("Onest-Bold.ttf").to_s,
+    bold_italic: FONT_DIR.join("Onest-Bold.ttf").to_s
+  }.freeze
 
-  EVENT = "FSY 2027 · Managua-Caribe".freeze
+  EVENT = "#{Rails.configuration.x.event_name} · #{Rails.configuration.x.event_region}".freeze
   NAVY = "1D2B4A".freeze
   SLATE = "5B6478".freeze
   LINE = "D8DCE3".freeze
   ZEBRA = "F4F6F9".freeze
+  HEADER = "E9EDF3".freeze
 
   class_attribute :page_layout, default: :portrait
 
@@ -48,7 +55,10 @@ class ApplicationReport
 
     def document
       Prawn::Document.new(page_size: "A4", page_layout: self.class.page_layout,
-                          margin: [ 96, 36, 54, 36 ], info: pdf_info)
+                          margin: [ 96, 36, 54, 36 ], info: pdf_info).tap do |pdf|
+        pdf.font_families.update("Onest" => FONT_FAMILY)
+        pdf.font "Onest"
+      end
     end
 
     def pdf_info
@@ -78,7 +88,7 @@ class ApplicationReport
         pdf.text_box "Generado el #{SpanishDates.long(Date.current)} de #{Date.current.year}",
                      at: [ 36, top - 40 ], width: pdf.bounds.width - 72, size: 8, align: :right
         pdf.fill_color LINE
-        pdf.fill_rectangle [ 36, top - 46 ], pdf.bounds.width - 72, 1
+        pdf.fill_rectangle [ 36, top - 54 ], pdf.bounds.width - 72, 1
         pdf.fill_color "000000"
       end
     end
@@ -108,10 +118,11 @@ class ApplicationReport
         t.row(0).font_style = :bold
         t.row(0).size = 8
         t.row(0).text_color = NAVY
-        t.row(0).background_color = ZEBRA
+        t.row(0).background_color = HEADER
         t.row(0).borders = [ :bottom ]
         align.each { |column, direction| t.column(column).align = direction }
-        (1...t.row_length).step(2) { |index| t.row(index).background_color = "FFFFFF" }
+        # Filas alternadas de verdad: antes las impares se pintaban de blanco sobre blanco.
+        (2...t.row_length).step(2) { |index| t.row(index).background_color = ZEBRA }
       end
       pdf.move_down 10
     end

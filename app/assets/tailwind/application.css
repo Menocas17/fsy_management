@@ -34,13 +34,18 @@
   );
   --background-image-avatar-gradient: linear-gradient(
     155deg,
-    oklch(55% 0.16 275),
+    oklch(46% 0.115 255),
     oklch(33% 0.095 258)
   );
+  /* El panel de marca: navy con una sola luz del mismo tono, sin el brillo índigo. */
   --background-image-hero:
-    radial-gradient(120% 160% at 10% 0%, oklch(54% 0.12 253) 0%, transparent 45%),
-    radial-gradient(90% 140% at 95% 100%, oklch(55% 0.16 275) 0%, transparent 50%),
+    radial-gradient(120% 160% at 10% 0%, oklch(42% 0.11 256) 0%, transparent 55%),
     linear-gradient(155deg, oklch(27% 0.085 258), oklch(22% 0.075 258));
+
+  /* Acento «sol»: lo que está pasando ahora (el ítem activo, lo de hoy, la cuenta regresiva). Se usa poco
+     a propósito; el navy es la institución y el sol, el momento. */
+  --color-sun: oklch(78% 0.14 78);
+  --color-sun-ink: oklch(45% 0.1 65);
 
   --color-ink-900: oklch(24% 0.02 260);
   --color-ink-700: oklch(40% 0.018 260);
@@ -101,6 +106,7 @@
   --color-cat-amber-ink: var(--color-cat-amber);
   --color-cat-rose-ink: var(--color-cat-rose);
   --color-cat-teal-ink: var(--color-cat-teal);
+  --color-sun-ink: var(--color-sun);
 }
 
 /* Pagy's series_nav emits bare anchors; style them by their ARIA state. */

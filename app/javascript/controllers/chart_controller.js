@@ -4,6 +4,17 @@ import ApexCharts from 'apexcharts';
 // Renders a column, stacked column or donut chart with ApexCharts from server-provided data.
 // Columns and donuts take a flat series of numbers; stacked charts take [{ name, data }, …].
 // Colors arrive as hex (ApexCharts can't parse OKLCH); axis and tooltip colors follow the dark-mode class on <html>.
+// Rellenos sólidos siempre: el color es el dato (ChartsHelper), un degradado solo lo ensucia.
+
+// Al volver atrás Turbo pinta la página desde su caché: las gráficas aparecen quietas en vez de crecer otra vez.
+let restoring = false;
+document.addEventListener('turbo:visit', (event) => {
+  restoring = event.detail?.action === 'restore';
+});
+document.addEventListener('turbo:load', () => {
+  queueMicrotask(() => (restoring = false));
+});
+
 export default class extends Controller {
   static targets = ['canvas'];
   static values = {
@@ -13,9 +24,8 @@ export default class extends Controller {
     series: Array,
     colors: Array,
     height: { type: Number, default: 220 },
-    radius: { type: Number, default: 10 },
+    radius: { type: Number, default: 5 },
     columnWidth: { type: String, default: '45%' },
-    gradient: Boolean,
     // Valor encima de cada barra, y número grande en el centro del donut.
     showValues: Boolean,
     total: String,
@@ -64,6 +74,11 @@ export default class extends Controller {
     return this.dark ? '#f1f5f9' : '#1d2b4a';
   }
 
+  // Las mismas líneas que las tarjetas (line-soft), para leer la magnitud sin que la cuadrícula compita.
+  get gridColor() {
+    return this.dark ? '#314158' : '#e6e9ef';
+  }
+
   options() {
     const base = {
       chart: {
@@ -73,7 +88,12 @@ export default class extends Controller {
         fontFamily: 'Onest, sans-serif',
         parentHeightOffset: 0,
         toolbar: { show: false },
-        animations: { enabled: !this.reduceMotion, speed: 800 },
+        animations: {
+          enabled: !this.reduceMotion && !restoring,
+          speed: 380,
+          animateGradually: { enabled: false },
+          dynamicAnimation: { speed: 250 },
+        },
       },
       colors: this.colorsValue,
       dataLabels: { enabled: false },
@@ -125,7 +145,7 @@ export default class extends Controller {
         labels: { style: this.axisLabelStyle() },
       },
       yaxis: { show: false },
-      grid: { show: false, padding: { left: 0, right: 0, top: this.showValuesValue ? 10 : -10 } },
+      grid: this.gridOptions(),
       dataLabels: this.showValuesValue
         ? {
             enabled: true,
@@ -141,18 +161,22 @@ export default class extends Controller {
           borderRadiusApplication: 'end',
         },
       },
-      fill: this.gradientValue
-        ? {
-            type: 'gradient',
-            gradient: {
-              type: 'vertical',
-              shadeIntensity: 0,
-              opacityFrom: 1,
-              opacityTo: 0.55,
-              stops: [0, 100],
-            },
-          }
-        : { type: 'solid', opacity: 1 },
+      fill: { type: 'solid', opacity: 1 },
+    };
+  }
+
+  // Con los valores escritos sobre cada barra la cuadrícula sobra; sin ellos, unas líneas tenues dan la escala.
+  gridOptions() {
+    const padding = { left: 0, right: 0, top: this.showValuesValue ? 10 : -10 };
+    if (this.showValuesValue) return { show: false, padding };
+
+    return {
+      show: true,
+      borderColor: this.gridColor,
+      strokeDashArray: 0,
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+      padding,
     };
   }
 
@@ -161,7 +185,7 @@ export default class extends Controller {
       series: this.seriesValue,
       labels: this.labelsValue,
       stroke: { width: 3, colors: [this.surface] },
-      fill: this.gradientValue ? { type: 'gradient' } : { type: 'solid', opacity: 1 },
+      fill: { type: 'solid', opacity: 1 },
       plotOptions: {
         pie: {
           expandOnClick: false,
@@ -195,6 +219,7 @@ export default class extends Controller {
       theme.plotOptions = { pie: { donut: { labels: this.donutCenter() } } };
     } else {
       theme.xaxis = { labels: { style: this.axisLabelStyle() } };
+      theme.grid = this.gridOptions();
       if (this.showValuesValue) {
         theme.dataLabels = { style: { fontSize: '11px', fontWeight: 700, colors: [this.mutedText] } };
       }
