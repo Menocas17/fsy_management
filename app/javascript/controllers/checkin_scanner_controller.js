@@ -4,17 +4,18 @@ import jsQR from "jsqr"
 // Registro de llegadas del día del evento: la cámara no se cierra entre persona y persona.
 // Trabaja sin señal a propósito — el padrón queda en el dispositivo y los escaneos se encolan
 // hasta que vuelva el internet, porque el día que llegan 445 jóvenes el wifi es lo primero que falla.
-const ROSTER_KEY = "fsy:checkin-roster"
-const QUEUE_KEY = "fsy:checkin-queue"
+// El padrón y la cola se guardan por modo: la llegada al FSY y cada capacitación no se mezclan.
 const SAME_CODE_MS = 4000
 
 export default class extends Controller {
   static targets = ["video", "canvas", "start", "status", "card", "arrived", "pending", "manual"]
-  static values = { rosterUrl: String, syncUrl: String, total: Number, arrived: Number }
+  static values = { rosterUrl: String, syncUrl: String, mode: String, total: Number, arrived: Number }
 
   connect() {
-    this.roster = this.readStore(ROSTER_KEY) || {}
-    this.queue = this.readStore(QUEUE_KEY) || []
+    this.rosterKey = `fsy:checkin-roster:${this.modeValue}`
+    this.queueKey = `fsy:checkin-queue:${this.modeValue}`
+    this.roster = this.readStore(this.rosterKey) || {}
+    this.queue = this.readStore(this.queueKey) || []
     this.paintPending()
     this.refreshRoster()
     this.flush()
@@ -91,11 +92,11 @@ export default class extends Controller {
     this.lastAt = now
 
     const person = this.roster[id]
-    if (!person) return this.show({ tone: "unknown", title: "Código no reconocido", detail: "No aparece en el padrón de jóvenes." }, [ 200 ])
+    if (!person) return this.show({ tone: "unknown", title: "Código no reconocido", detail: "No aparece en el padrón de este registro." }, [ 200 ])
     if (person.arrived) return this.show({ tone: "already", title: person.name, detail: `Ya estaba registrado · ${person.company || "sin compañía"}` }, [ 60, 50, 60 ])
 
     person.arrived = true
-    this.writeStore(ROSTER_KEY, this.roster)
+    this.writeStore(this.rosterKey, this.roster)
     this.arrivedValue += 1
     this.arrivedTarget.textContent = this.arrivedValue
 
@@ -117,7 +118,7 @@ export default class extends Controller {
   // Cola ------------------------------------------------------------------
   enqueue(scan) {
     this.queue.push(scan)
-    this.writeStore(QUEUE_KEY, this.queue)
+    this.writeStore(this.queueKey, this.queue)
     this.paintPending()
     this.flush()
   }
@@ -139,7 +140,7 @@ export default class extends Controller {
       const body = await response.json()
       const sent = new Set(sending.map((scan) => scan.client_token))
       this.queue = this.queue.filter((scan) => !sent.has(scan.client_token))
-      this.writeStore(QUEUE_KEY, this.queue)
+      this.writeStore(this.queueKey, this.queue)
 
       if (typeof body.arrived === "number") {
         this.arrivedValue = body.arrived
@@ -173,7 +174,7 @@ export default class extends Controller {
       for (const scan of this.queue) if (roster[scan.participant_id]) roster[scan.participant_id].arrived = true
 
       this.roster = roster
-      this.writeStore(ROSTER_KEY, roster)
+      this.writeStore(this.rosterKey, roster)
       this.say(this.scanning ? "Apuntá al código del gafete" : "Padrón actualizado")
     } catch (error) {
       this.say("Sin conexión: se trabaja con el padrón guardado y se sincroniza después.")

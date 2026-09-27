@@ -6,11 +6,13 @@
       <%= render "participants/profile/general_info", participant: participant %>
       <%= render "participants/profile/asignaciones", participant: participant %>
       <%= render "participants/profile/registro", participant: participant %>
+      
     </div>
     <%# On very wide screens this column splits in two, so the page uses three columns instead of stretching. %>
     <div class="space-y-5 2xl:space-y-0 2xl:grid 2xl:grid-cols-2 2xl:gap-5 2xl:items-start">
       <%= render "participants/profile/contact_info", participant: participant %>
       <%= render "participants/profile/medical_info", participant: participant %>
+      <%= render "participants/profile/capacitaciones", participant: participant %>
     </div>
   </div>
 </div>

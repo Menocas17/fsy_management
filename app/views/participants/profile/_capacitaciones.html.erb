@@ -1,0 +1,37 @@
+<%
+  # Solo tiene sentido para el staff: las capacitaciones son suyas, no de los jóvenes.
+  trainings = Training.chronological.to_a
+  attended = TrainingAttendance.where(participant: participant).pluck(:training_id).to_set
+  held = trainings.reject { |training| training.held_on > Date.current }
+  came = held.count { |training| attended.include?(training.id) }
+%>
+<% if trainings.any? && participant.staff_member? %>
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-trainings-card>
+    <%= section_heading "Capacitaciones", "graduation-cap" %>
+    <p class="-mt-2 mb-4 text-[13px] font-semibold text-ink-900 dark:text-slate-100">
+      <% if held.any? %>
+        Asistió a <%= came %> de <%= held.size %> hasta ahora
+      <% else %>
+        Todavía no ha habido capacitaciones
+      <% end %>
+    </p>
+    <div class="flex flex-wrap gap-2">
+      <% trainings.each do |training| %>
+        <%
+          state, tone, icon_name = if attended.include?(training.id)
+            [ "asistió", "text-cat-green border-cat-green/30", "check" ]
+          elsif training.held_on > Date.current
+            [ "pendiente", "text-ink-500 dark:text-slate-400 border-line dark:border-slate-600", "clock" ]
+          else
+            [ "faltó", "text-cat-rose border-cat-rose/30", "x" ]
+          end
+        %>
+        <span class="inline-flex items-center gap-2 px-3 py-2 rounded-[12px] border bg-canvas dark:bg-slate-900/60 text-[12.5px] font-bold <%= tone %>"
+              title="<%= training.name %>: <%= state %>" data-training-mark="<%= state %>">
+          <%= icon icon_name, class: "w-3.5 h-3.5" %>
+          <%= SpanishDates.long(training.held_on).sub(/\A\w+ /, "") %>
+        </span>
+      <% end %>
+    </div>
+  </section>
+<% end %>

@@ -100,6 +100,9 @@ class DemoSeed
     def wipe!
       log "Limpiando datos anteriores…"
       AuditLog.delete_all
+      # La asistencia cuelga de las fichas; las capacitaciones en sí se quedan, son calendario.
+      TrainingAttendance.delete_all
+      Checkin.delete_all
       # destroy, not delete: alerts purge their images and activities release their responsibles.
       Alert.destroy_all
       Assignment.delete_all

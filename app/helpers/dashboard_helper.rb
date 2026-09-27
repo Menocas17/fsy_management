@@ -39,7 +39,7 @@ module DashboardHelper
   end
 
   def next_trainings(limit = 2)
-    Array(Rails.configuration.x.training_dates).select { |date| date >= Date.current }.sort.first(limit)
+    Training.upcoming.limit(limit).to_a
   end
 
   def event_in_progress?

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_26_004533) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_192131) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -273,6 +273,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_26_004533) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "training_attendances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "client_token"
+    t.datetime "created_at", null: false
+    t.uuid "participant_id", null: false
+    t.datetime "recorded_at", null: false
+    t.uuid "recorded_by_id"
+    t.string "recorded_by_name", null: false
+    t.integer "source", default: 0, null: false
+    t.uuid "training_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_token"], name: "index_training_attendances_on_client_token", unique: true
+    t.index ["participant_id"], name: "index_training_attendances_on_participant_id"
+    t.index ["recorded_by_id"], name: "index_training_attendances_on_recorded_by_id"
+    t.index ["training_id", "participant_id"], name: "index_training_attendances_on_training_id_and_participant_id", unique: true
+    t.index ["training_id"], name: "index_training_attendances_on_training_id"
+  end
+
+  create_table "trainings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "held_on", null: false
+    t.string "location"
+    t.string "name", null: false
+    t.text "notes"
+    t.datetime "updated_at", null: false
+    t.index ["held_on"], name: "index_trainings_on_held_on", unique: true
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "alerts_read_at"
     t.datetime "created_at", null: false
@@ -308,5 +335,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_26_004533) do
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "training_attendances", "participants"
+  add_foreign_key "training_attendances", "participants", column: "recorded_by_id"
+  add_foreign_key "training_attendances", "trainings"
   add_foreign_key "users", "participants"
 end

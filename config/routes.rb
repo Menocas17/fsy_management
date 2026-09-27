@@ -18,6 +18,13 @@ Rails.application.routes.draw do
   resource :dashboard, only: [ :show ]
   resource :organigrama, only: [ :show ], controller: "organigrama"
   resources :audit_logs, only: [ :index ], path: "historial"
+  # El resumen de capacitaciones vive dentro de la agenda, que es donde se buscan las fechas.
+  scope path: "agenda", as: :agenda do
+    resources :trainings, only: %i[index show], path: "capacitaciones" do
+      resources :attendances, only: %i[create destroy], controller: "training_attendances", path: "asistencia"
+    end
+  end
+
   # Registro de llegadas: la pantalla de escaneo, el padrón que se guarda en el dispositivo y la sincronización.
   get "registro" => "checkins#index", as: :checkins
   get "registro/padron" => "checkins#roster", as: :checkins_roster
@@ -43,6 +50,7 @@ Rails.application.routes.draw do
       get :badges, path: "gafetes"
       get :inventory, path: "inventario"
       get :labels, path: "etiquetas"
+      get :trainings, path: "capacitaciones"
     end
   end
   resource :participant_import, only: [ :new, :create ], path: "carga-de-participantes"

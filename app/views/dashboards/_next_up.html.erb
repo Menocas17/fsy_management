@@ -10,10 +10,11 @@
         url: agenda_path(date: activity.starts_at.to_date, activity_id: activity.id) }
     end
   else
-    trainings = next_trainings.map do |date|
-      { key: "training-#{date}", eyebrow: "Capacitación", title: SpanishDates.long(date),
-        meta: "Capacitación del staff · #{date.year}", days: days_until(date),
-        icon: "graduation-cap", tone: "bg-cat-amber", chip: "bg-cat-amber/15 text-amber-700 dark:text-cat-amber" }
+    trainings = next_trainings.map do |training|
+      { key: "training-#{training.held_on}", eyebrow: "Capacitación", title: SpanishDates.long(training.held_on),
+        meta: "#{training.name} · #{training.held_on.year}", days: days_until(training.held_on),
+        icon: "graduation-cap", tone: "bg-cat-amber", chip: "bg-cat-amber/15 text-amber-700 dark:text-cat-amber",
+        url: agenda_training_path(training) }
     end
     start_on = Rails.configuration.x.event_start_on
     trainings + [ { key: "event", eyebrow: "FSY 2026", title: "Comienza el evento",

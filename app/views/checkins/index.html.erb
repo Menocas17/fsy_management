@@ -1,19 +1,48 @@
-<% content_for :title, "Registro de llegadas" %>
+<% content_for :title, @training ? "Asistencia · #{@training.name}" : "Registro de llegadas" %>
 <% content_for :eyebrow, "Registro" %>
 <% back_to "Inicio", dashboard_path %>
+<%
+  mode_base = "inline-flex items-center gap-2.5 h-auto px-3.5 py-2 rounded-[12px] text-[13px] font-bold transition"
+  mode_on = "#{mode_base} bg-primary-700 text-white shadow-sm"
+  mode_off = "#{mode_base} border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700"
+%>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto"
      data-controller="checkin-scanner"
-     data-checkin-scanner-roster-url-value="<%= checkins_roster_path %>"
-     data-checkin-scanner-sync-url-value="<%= register_checkins_path %>"
-     data-checkin-scanner-total-value="<%= @jovenes %>"
-     data-checkin-scanner-arrived-value="<%= @arrived %>">
+     data-checkin-scanner-roster-url-value="<%= checkins_roster_path(training_id: @training&.id) %>"
+     data-checkin-scanner-sync-url-value="<%= register_checkins_path(training_id: @training&.id) %>"
+     data-checkin-scanner-mode-value="<%= @training ? "training-#{@training.id}" : "arrival" %>"
+     data-checkin-scanner-total-value="<%= @expected %>"
+     data-checkin-scanner-arrived-value="<%= @registered %>">
+
+  <%# Primero se elige qué se está registrando: cambia a quién se espera y dónde se guarda. %>
+  <div class="flex flex-wrap gap-2 mb-4" data-scan-modes>
+    <%= link_to checkins_path, class: @training ? mode_off : mode_on, data: { scan_mode: "arrival" } do %>
+      <%= icon "user-check", class: "w-[17px] h-[17px]" %>
+      <span>
+        Llegada al FSY
+        <span class="block text-[11px] font-semibold opacity-75"><%= pluralize(Participant.joven.count, "joven", plural: "jóvenes") %></span>
+      </span>
+    <% end %>
+    <% @trainings.each do |training| %>
+      <%= link_to checkins_path(training_id: training.id), class: @training == training ? mode_on : mode_off,
+                  data: { scan_mode: "training-#{training.id}" } do %>
+        <%= icon "graduation-cap", class: "w-[17px] h-[17px]" %>
+        <span>
+          <%= training.name %>
+          <span class="block text-[11px] font-semibold opacity-75"><%= SpanishDates.long(training.held_on) %></span>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
 
   <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
-      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100">Registro de llegadas</h1>
+      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100">
+        <%= @training ? "Asistencia a la capacitación" : "Registro de llegadas" %>
+      </h1>
       <p class="text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
-        <span class="text-ink-900 dark:text-slate-100 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @arrived %></span>
-        de <%= @jovenes %> jóvenes registrados
+        <span class="text-ink-900 dark:text-slate-100 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @registered %></span>
+        de <%= @expected %> <%= @training ? "del staff" : "jóvenes" %> registrados
       </p>
     </div>
     <span hidden data-checkin-scanner-target="pending" data-pending
@@ -22,9 +51,12 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
     <section class="<%= card_classes("overflow-hidden") %>">
-      <div class="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-line-soft dark:border-slate-700">
+      <div class="px-5 py-3.5 border-b border-line-soft dark:border-slate-700">
         <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Escáner</p>
-        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
+        <p class="mt-0.5 text-[11.5px] font-semibold text-primary-600 dark:text-primary-300">
+          <%= @training ? @training.label : "Llegada al FSY · #{SpanishDates.long(Rails.configuration.x.event_start_on)}" %>
+        </p>
+        <p class="mt-1 text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
           Activá la cámara para empezar
         </p>
       </div>
@@ -61,16 +93,16 @@
     </section>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading "Últimos registrados", "clipboard-check" %>
+      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check" %>
       <% if @recent.any? %>
         <ul class="divide-y divide-line-soft dark:divide-slate-700" data-recent-checkins>
-          <% @recent.each do |checkin| %>
+          <% @recent.each do |record| %>
             <li class="flex items-baseline gap-3 py-2.5 first:pt-0">
-              <span class="text-[12px] font-bold tabular-nums text-ink-500 dark:text-slate-400"><%= checkin.recorded_at.strftime("%H:%M") %></span>
+              <span class="text-[12px] font-bold tabular-nums text-ink-500 dark:text-slate-400"><%= record.recorded_at.strftime("%H:%M") %></span>
               <span class="min-w-0 flex-1">
-                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= checkin.participant.full_name %></span>
+                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= record.participant.full_name %></span>
                 <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
-                  <%= checkin.participant.company&.name || "Sin compañía" %> · registró <%= checkin.recorded_by_name %>
+                  <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
                 </span>
               </span>
             </li>
@@ -78,6 +110,13 @@
         </ul>
       <% else %>
         <p class="text-[13px] text-ink-500 dark:text-slate-400">Todavía no hay nadie registrado.</p>
+      <% end %>
+
+      <% if @training %>
+        <%= link_to agenda_trainings_path, class: "mt-4 inline-flex items-center gap-2 text-[12.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
+          <%= icon "chart-column", class: "w-4 h-4" %>
+          Ver el resumen de capacitaciones
+        <% end %>
       <% end %>
     </section>
   </div>
