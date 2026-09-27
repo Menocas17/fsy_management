@@ -62,11 +62,10 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active_classes
-    # Activo: fondo claro y una barra de sol a la izquierda. Un bloque navy lleno competía con el contenido
-    # en una barra que se ve todo el tiempo.
+    # Activo: bloque navy lleno con una barra de sol a la izquierda, para que se note de un vistazo.
     if active?
-      "relative bg-primary-50 text-primary-800 dark:bg-primary-700/35 dark:text-white " \
-        "before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-full before:bg-sun"
+      "relative bg-primary-700 text-white shadow-sm " \
+        "before:absolute before:left-1 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-sun"
     else
       "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
     end

@@ -1,6 +1,7 @@
-<%# Inner layers inherit the wrapper's radius, so profile avatars stay square while list avatars stay round. %>
+<%# Inner layers inherit the wrapper's radius, so profile avatars stay square while list avatars stay round.
+    El fondo sólido evita que, mientras la foto carga, se transparente lo que hay detrás (en la ficha, el banner). %>
 <% if has_avatar?%>
-    <div class="<%= css_classes %> relative overflow-hidden" data-controller="avatar">
+    <div class="<%= css_classes %> relative overflow-hidden bg-surface" data-controller="avatar">
     <div class="<%= avatar_colors_for(@participant.full_name) %> absolute inset-0 flex items-center justify-center font-bold rounded-[inherit]">
       <%= initials %>
     </div>
