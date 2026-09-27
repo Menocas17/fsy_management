@@ -109,6 +109,56 @@
   --color-sun-ink: var(--color-sun);
 }
 
+/* Controles de formulario iguales en todos los navegadores. Safari dibuja <select>, fechas y buscadores
+   con su estilo nativo (degradado, bordes propios, altura y padding que ignora); quitándoselo, toman las
+   mismas clases de borde, radio y color que el resto de los campos. */
+@layer base {
+  :root {
+    color-scheme: light;
+    /* Casillas y radios nativos en el color de la marca. */
+    accent-color: var(--color-primary-600);
+  }
+  .dark {
+    /* Listas de opciones, calendarios y barras de desplazamiento nativos en oscuro. */
+    color-scheme: dark;
+  }
+
+  /* La flecha la dibujamos nosotros (el chevron de Lucide); todos los selects ya dejan pr-8/pr-9 para ella. */
+  select:not([multiple], [size]) {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f757e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+  }
+  .dark select:not([multiple], [size]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  /* Fecha y hora: en iOS salen centradas y más altas que los demás campos. */
+  input:is([type='date'], [type='time'], [type='datetime-local']) {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.5em;
+  }
+  ::-webkit-datetime-edit {
+    padding: 0;
+  }
+
+  /* Buscadores: Safari les pone su propio borde redondeado y una lupa. La × para borrar se queda. */
+  input[type='search'] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+}
+
 /* Pagy's series_nav emits bare anchors; style them by their ARIA state. */
 @layer components {
   .pagy.series-nav {
