@@ -12,8 +12,22 @@ class InventoryMovement < ApplicationRecord
     "perdida" => "Pérdida o daño", "conteo" => "Conteo físico", "inicial" => "Inventario inicial"
   }.freeze
 
+  # Hay motivos que solo tienen sentido en un sentido: nada «se entrega a las compañías» sumando,
+  # ni «se compra» restando. El conteo físico sirve para los dos, que para eso se cuenta.
+  REASON_DIRECTIONS = {
+    "compra" => :in, "devolucion" => :in, "inicial" => :in,
+    "entrega" => :out, "perdida" => :out,
+    "conteo" => :both
+  }.freeze
+
+  # Los que se ofrecen al ajustar; «inicial» no, porque lo pone sola la creación del artículo.
+  def self.reasons_for(direction)
+    REASON_LABELS.except("inicial").select { |reason, _| [ direction.to_s, "both" ].include?(REASON_DIRECTIONS[reason].to_s) }
+  end
+
   validates :delta, numericality: { only_integer: true, other_than: 0 }
   validate :cannot_leave_negative_stock
+  validate :reason_matches_direction
 
   before_validation :stamp_participant_name
   after_create :update_item_quantity
@@ -35,6 +49,16 @@ class InventoryMovement < ApplicationRecord
   private
     def stamp_participant_name
       self.participant_name = participant&.full_name || "Administrador del sistema" if participant_name.blank?
+    end
+
+    def reason_matches_direction
+      return if delta.nil? || delta.zero? || reason.blank?
+
+      allowed = REASON_DIRECTIONS[reason.to_s]
+      return if allowed.nil? || allowed == :both
+      return if (allowed == :in) == delta.positive?
+
+      errors.add(:reason, "«#{reason_label}» no aplica para #{delta.positive? ? 'sumar' : 'restar'}")
     end
 
     def cannot_leave_negative_stock

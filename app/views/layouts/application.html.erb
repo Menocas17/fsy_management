@@ -18,6 +18,7 @@
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
             document.documentElement.classList.add('reduce-motion');
           }
+          // El teléfono ya viene con la letra grande por CSS; esto es el escalón extra que se elige.
           if (localStorage.getItem('fsy:text-size') === 'large') {
             document.documentElement.classList.add('text-lg-mode');
           }
@@ -26,8 +27,9 @@
         }
       })();
     </script>
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%# Instalable en el teléfono: sin esto, iOS no deja activar las notificaciones. %>
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <meta name="theme-color" content="#1d2b4a">
     <%# El .ico va primero: es el que los navegadores pintan en la pestaña sin reescalar el de 512. %>
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon.png" type="image/png" sizes="512x512">
@@ -40,6 +42,8 @@
     <%= javascript_importmap_tags %>
   </head>
   <body class="h-dvh overflow-hidden bg-canvas text-ink-900 dark:bg-slate-900 dark:text-slate-100">
+    <%# Canal propio de cada persona: por aquí llega la campanita al instante, sin recargar. %>
+    <%= turbo_stream_from Current.user if Current.user %>
     <%= render "shared/toast"%>
     <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
     <div class="flex h-full">

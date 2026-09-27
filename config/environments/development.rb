@@ -72,7 +72,16 @@ Rails.application.configure do
   config.action_view.annotate_rendered_view_with_filenames = true
 
   # Uncomment if you wish to allow Action Cable access from any origin.
-  # config.action_cable.disable_request_forgery_protection = true
+  # Solo en desarrollo: sin esto, el WebSocket rechaza al teléfono que entra por la IP de la red local.
+  config.action_cable.disable_request_forgery_protection = true
+
+  # Túneles para probar desde el teléfono con HTTPS, que es lo que exigen el service worker y las
+  # notificaciones push. Cada túnel estrena nombre, de ahí el patrón en vez de un host fijo.
+  # Solo en desarrollo: en producción la lista de hosts se queda corta a propósito.
+  config.hosts << /\A[a-z0-9-]+\.trycloudflare\.com\z/
+  config.hosts << /\A[a-z0-9-]+\.ngrok(-free)?\.(app|io)\z/
+  # Y la IP de la red local, para abrirlo desde el teléfono sin túnel (sin push: eso pide HTTPS).
+  config.hosts << /\A192\.168\.\d{1,3}\.\d{1,3}\z/
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true

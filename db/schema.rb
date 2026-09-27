@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_26_004533) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -135,6 +135,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
     t.index ["second_coordinator_id"], name: "index_auxiliar_companies_on_second_coordinator_id"
   end
 
+  create_table "checkins", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "client_token"
+    t.datetime "created_at", null: false
+    t.uuid "participant_id", null: false
+    t.datetime "recorded_at", null: false
+    t.uuid "recorded_by_id"
+    t.string "recorded_by_name", null: false
+    t.integer "source", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_token"], name: "index_checkins_on_client_token", unique: true
+    t.index ["participant_id"], name: "index_checkins_on_participant_id", unique: true
+    t.index ["recorded_at"], name: "index_checkins_on_recorded_at"
+    t.index ["recorded_by_id"], name: "index_checkins_on_recorded_by_id"
+  end
+
   create_table "companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "auxiliar_company_id"
     t.datetime "created_at", null: false
@@ -191,6 +206,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
   end
 
   create_table "logistics_areas", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "checkin", default: false, null: false
     t.datetime "created_at", null: false
     t.string "description"
     t.string "name", null: false
@@ -235,6 +251,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
   end
 
+  create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "auth_key", null: false
+    t.datetime "created_at", null: false
+    t.string "device"
+    t.string "endpoint", null: false
+    t.datetime "last_used_at"
+    t.string "p256dh_key", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -268,6 +297,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
   add_foreign_key "audit_logs", "participants", column: "actor_id", on_delete: :nullify
   add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
   add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id"
+  add_foreign_key "checkins", "participants"
+  add_foreign_key "checkins", "participants", column: "recorded_by_id"
   add_foreign_key "companies", "auxiliar_companies"
   add_foreign_key "inventory_items", "inventories"
   add_foreign_key "inventory_movements", "inventory_items"
@@ -275,6 +306,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_010413) do
   add_foreign_key "memberships", "participants"
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "participants"
 end

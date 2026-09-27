@@ -8,7 +8,7 @@ module Authorization
                   :can_manage_staff?, :can_manage_alerts?, :can_manage_agenda?, :can_assign_to?,
                   :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
-                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?
+                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -109,6 +109,13 @@ module Authorization
     full_company_access?
   end
 
+  # Registro de llegadas ---------------------------------------------------------
+  # Consultar una ficha escaneando la puede hacer cualquiera del staff; registrar la llegada, solo
+  # el acceso total, el director de logística y el comité de logística marcado para el registro.
+  def can_check_in?
+    Current.user&.checkin_registrar? || false
+  end
+
   # Inventario ------------------------------------------------------------------
   # Cualquier miembro de logística ve y ajusta existencias; crear o borrar un inventario entero
   # queda para el acceso total y el director de logística.
@@ -182,6 +189,12 @@ module Authorization
     # Quién es la persona y dónde encaja en el evento.
     IDENTITY_ATTRIBUTES = %i[first_name last_name age m_person_in_charge h_person_in_charge identity_document
                              gender stake ward rol company_id logistics_area_id].freeze
+
+    def require_checkin_access!
+      unless can_check_in?
+        redirect_to dashboard_path, alert: "El registro de llegadas es del comité de registro"
+      end
+    end
 
     def require_inventory_access!
       unless can_view_inventory?

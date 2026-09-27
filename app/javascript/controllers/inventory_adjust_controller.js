@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Un solo cuadro de ajuste para toda la pantalla: los botones + y − de la tabla, el de la ficha
 // y el escáner lo abren con los datos del artículo que tocaron.
 export default class extends Controller {
-  static targets = ["modal", "form", "title", "subtitle", "sign", "quantity", "preview", "plus", "minus", "source"]
+  static targets = ["modal", "form", "title", "subtitle", "sign", "quantity", "preview", "plus", "minus", "source", "reason"]
   static values = { autoOpen: Boolean }
 
   connect() {
@@ -61,10 +61,25 @@ export default class extends Controller {
     this.formTarget.querySelector("[type=submit]").disabled = invalid || quantity === 0
   }
 
+  // Nada se «entrega a las compañías» sumando ni se «compra» restando: la lista cambia con el signo.
+  paintReasons(adding) {
+    if (!this.hasReasonTarget) return
+
+    const reasons = JSON.parse(this.reasonTarget.dataset.reasons)[adding ? "in" : "out"]
+    const chosen = this.reasonTarget.value
+
+    this.reasonTarget.replaceChildren(...Object.entries(reasons).map(([value, label]) => {
+      const option = new Option(label, value)
+      option.selected = value === chosen
+      return option
+    }))
+  }
+
   setSign(sign) {
     this.sign = sign
     this.signTarget.value = sign
     const adding = sign === 1
+    this.paintReasons(adding)
     this.plusTarget.setAttribute("aria-pressed", String(adding))
     this.minusTarget.setAttribute("aria-pressed", String(!adding))
     this.plusTarget.classList.toggle("bg-cat-green", adding)

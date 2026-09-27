@@ -26,6 +26,10 @@ class Alert < ApplicationRecord
 
   # Every alert leaves its own trace in Historial, whether a person sent it or the agenda did.
   after_create :record_in_history
+  # …suena en los dispositivos suscritos aunque la app esté cerrada…
+  after_create_commit :push_to_devices
+  # …y refresca la campanita de quien la tenga abierta ahora mismo.
+  after_create_commit :refresh_open_bells
 
   scope :recent, -> { order(created_at: :desc, id: :desc) }
 
@@ -101,6 +105,14 @@ class Alert < ApplicationRecord
     target_roles.map { |role| Participant.role_label(role) }.to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
 
+  # A quién le suena el teléfono: el mismo alcance de la campanita, entre quienes tienen cuenta.
+  def push_recipients
+    return User.all if audience_todos?
+    return User.where(participant_id: recipient_id) if audience_individual?
+
+    User.joins(:participant).where(participants: { rol: target_roles })
+  end
+
   # Only people with an account can be emailed.
   def email_recipients
     return User.none unless send_email? && priority_critica?
@@ -126,6 +138,18 @@ class Alert < ApplicationRecord
         target_id: id,
         target_name: title
       )
+    end
+
+    def push_to_devices
+      PushNotificationJob.perform_later(id)
+    end
+
+    # Un envío por persona, porque cada campanita muestra lo que esa persona puede ver.
+    def refresh_open_bells
+      push_recipients.find_each do |user|
+        broadcast_replace_later_to user, target: "notifications_bell",
+                                         partial: "shared/notifications_bell", locals: { user: user }
+      end
     end
 
     def recipient_named_for_individual_alerts

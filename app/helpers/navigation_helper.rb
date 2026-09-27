@@ -15,6 +15,8 @@ module NavigationHelper
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
         { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
+        # El registro de llegadas solo aparece para el comité que lo hace.
+        ({ text: "Registro", url: checkins_path, lucide_icon: "scan-line", active_paths: [ checkins_path ] } if Current.user&.checkin_registrar?),
         { text: "Librería", lucide_icon: "library", disabled: true },
         (if Current.user&.inventory_member?
            { text: "Inventario", url: inventories_path, lucide_icon: "boxes",

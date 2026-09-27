@@ -35,14 +35,13 @@
             options_for_select(Participant::CARE_FILTERS.map { |key, label| [ label, key ] }, params[:care]),
             { include_blank: "Cocina y salud" }, class: chip_classes, onchange: "this.form.requestSubmit()" %>
     <% end %>
-    <%# Companies are searched by their number, so a narrow field is enough. %>
+    <%# Ahora que «Limpiar» bajó con las fichas de filtros, este campo puede decir qué es y respirar. %>
     <%= f.text_field :company,
           value: params[:company],
-          placeholder: "N.º",
-          inputmode: "numeric",
+          placeholder: "Compañía o número",
           aria: { label: "Filtrar por compañía" },
           title: "Número o nombre de la compañía",
-          class: "h-10 w-20 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
+          class: "h-10 w-44 px-3 rounded-[10px] bg-surface dark:bg-slate-800 border border-line dark:border-slate-600 text-[13px] font-semibold text-ink-700 dark:text-slate-300 placeholder:text-ink-300 dark:placeholder:text-slate-500 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
           oninput: "this.form.requestSubmit()" %>
   </div>
 <% end %>
