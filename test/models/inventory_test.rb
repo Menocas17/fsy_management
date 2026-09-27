@@ -72,6 +72,29 @@ class InventoryTest < ActiveSupport::TestCase
     assert_empty @inventory.items.search("camisetas")
   end
 
+  test "a reason only applies in the direction that makes sense" do
+    @item.adjust!(delta: 100, participant: nil, reason: :compra)
+
+    error = assert_raises(ActiveRecord::RecordInvalid) do
+      @item.adjust!(delta: 20, participant: nil, reason: :entrega)
+    end
+    assert_match(/no aplica para sumar/, error.record.errors.full_messages.to_sentence)
+
+    assert_raises(ActiveRecord::RecordInvalid) do
+      @item.adjust!(delta: -5, participant: nil, reason: :compra)
+    end
+
+    # El conteo físico sirve en los dos sentidos, que para eso se cuenta.
+    assert @item.adjust!(delta: -5, participant: nil, reason: :conteo)
+    assert @item.adjust!(delta: 5, participant: nil, reason: :conteo)
+  end
+
+  test "the modal is offered only the reasons that fit the sign" do
+    assert_equal %w[compra devolucion conteo], InventoryMovement.reasons_for(:in).keys
+    assert_equal %w[entrega perdida conteo], InventoryMovement.reasons_for(:out).keys
+    assert_not_includes InventoryMovement.reasons_for(:in).keys, "inicial", "lo pone la creación del artículo"
+  end
+
   test "the QR carries the item code" do
     assert_equal "MAT-0001", @item.qr_payload
   end

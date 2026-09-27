@@ -72,6 +72,44 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Administrador del sistema", movement.participant_name
   end
 
+  test "after adjusting from a scan the dialog does not reopen on top of the result" do
+    post inventory_item_movements_path(@item),
+         params: { sign: "1", quantity: 5, reason: "compra", source: "escaneo" },
+         headers: { "HTTP_REFERER" => inventory_item_path(@item, ajuste: 1, origen: "escaneo") }
+
+    assert_redirected_to inventory_item_path(@item, escaneado: 1)
+    assert_equal 67, @item.reload.quantity
+    assert_equal "escaneo", @item.movements.first.source
+    assert_match(/queda en 67/, flash[:notice])
+  end
+
+  test "after a scanned adjustment the next box is one tap away" do
+    post inventory_item_movements_path(@item),
+         params: { sign: "1", quantity: 1, reason: "compra", source: "escaneo" },
+         headers: { "HTTP_REFERER" => inventory_item_path(@item, ajuste: 1, origen: "escaneo") }
+    follow_redirect!
+
+    assert_select "[data-scan-again]", 1
+    assert_select "[data-scan-again] a[href='#{scan_inventories_path}']", text: /Escanear otro/
+  end
+
+  test "a manual adjustment does not offer to keep scanning" do
+    post inventory_item_movements_path(@item),
+         params: { sign: "1", quantity: 1, reason: "compra" },
+         headers: { "HTTP_REFERER" => inventory_item_path(@item) }
+    follow_redirect!
+
+    assert_select "[data-scan-again]", 0
+  end
+
+  test "adjusting from the table keeps you where you were, search included" do
+    post inventory_item_movements_path(@item),
+         params: { sign: "-1", quantity: 2, reason: "entrega" },
+         headers: { "HTTP_REFERER" => inventory_path(@inventory, query: "manilla", ajuste: 1) }
+
+    assert_redirected_to inventory_path(@inventory, query: "manilla")
+  end
+
   test "it refuses to take out more than there is" do
     post inventory_item_movements_path(@item), params: { sign: "-1", quantity: 100, reason: "entrega" }
 

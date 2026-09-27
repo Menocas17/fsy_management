@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :push_subscriptions, dependent: :destroy
   belongs_to :participant, optional: true
 
   validates :password, length: { minimum: 8 }, allow_nil: true
@@ -31,6 +32,14 @@ class User < ApplicationRecord
   def agenda_manager?
     return true if participant_id.nil?
     participant&.director? || participant&.coordinador?
+  end
+
+  # Quién registra llegadas: el acceso total, el director de logística y el comité de logística
+  # cuya área está marcada para el registro (hoy, «Registro»).
+  def checkin_registrar?
+    return true if full_access? || participant&.director_logistica?
+
+    participant&.logistica? && participant.logistics_area&.checkin? || false
   end
 
   # El inventario lo mueve logística entera, más el acceso total.

@@ -38,10 +38,10 @@
 
     <div>
       <%= label_tag :reason, "Motivo", class: field_label_classes %>
-      <select name="reason" id="reason" class="<%= field_select_classes %>">
-        <% InventoryMovement::REASON_LABELS.except("inicial").each do |key, label| %>
-          <option value="<%= key %>"><%= label %></option>
-        <% end %>
+      <%# Las opciones las arma el controlador según se esté sumando o restando. %>
+      <select name="reason" id="reason" class="<%= field_select_classes %>"
+              data-inventory-adjust-target="reason"
+              data-reasons="<%= { in: InventoryMovement.reasons_for(:in), out: InventoryMovement.reasons_for(:out) }.to_json %>">
       </select>
     </div>
 

@@ -1,0 +1,84 @@
+<% content_for :title, "Registro de llegadas" %>
+<% content_for :eyebrow, "Registro" %>
+<% back_to "Inicio", dashboard_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto"
+     data-controller="checkin-scanner"
+     data-checkin-scanner-roster-url-value="<%= checkins_roster_path %>"
+     data-checkin-scanner-sync-url-value="<%= register_checkins_path %>"
+     data-checkin-scanner-total-value="<%= @jovenes %>"
+     data-checkin-scanner-arrived-value="<%= @arrived %>">
+
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div>
+      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 dark:text-slate-100">Registro de llegadas</h1>
+      <p class="text-[12.5px] font-semibold text-ink-500 dark:text-slate-400">
+        <span class="text-ink-900 dark:text-slate-100 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @arrived %></span>
+        de <%= @jovenes %> jóvenes registrados
+      </p>
+    </div>
+    <span hidden data-checkin-scanner-target="pending" data-pending
+          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-cat-amber/15 text-[12.5px] font-bold text-amber-700 dark:text-cat-amber"></span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
+    <section class="<%= card_classes("overflow-hidden") %>">
+      <div class="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-line-soft dark:border-slate-700">
+        <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Escáner</p>
+        <p class="text-[11.5px] font-semibold text-ink-500 dark:text-slate-400" data-checkin-scanner-target="status">
+          Activá la cámara para empezar
+        </p>
+      </div>
+
+      <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-square flex items-center justify-center">
+        <video data-checkin-scanner-target="video" class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
+        <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
+        <div class="relative w-44 h-44 pointer-events-none">
+          <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-xl", "top-0 right-0 border-l-0 border-b-0 rounded-tr-xl",
+               "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-xl", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-xl" ].each do |corner| %>
+            <span class="absolute w-9 h-9 border-[3px] border-white/90 <%= corner %>"></span>
+          <% end %>
+        </div>
+        <button type="button" data-action="checkin-scanner#start" data-checkin-scanner-target="start"
+                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-[11px] bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+          <%= icon "scan-qr-code", class: "w-4 h-4" %>
+          Activar la cámara
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div hidden data-checkin-scanner-target="card"></div>
+        <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "flex gap-2" do %>
+          <%= text_field_tag :code, nil, placeholder: "Código del gafete", autocomplete: "off",
+                data: { checkin_scanner_target: "manual" }, class: "#{field_input_classes} font-mono" %>
+          <%= tag.button type: "submit", class: "shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-sm font-semibold text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700 transition" do %>
+            Registrar
+          <% end %>
+        <% end %>
+        <p class="text-[11.5px] font-medium text-ink-500 dark:text-slate-400">
+          Funciona sin señal: el padrón queda guardado en este dispositivo y lo escaneado se envía solo al volver el internet.
+        </p>
+      </div>
+    </section>
+
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Últimos registrados", "clipboard-check" %>
+      <% if @recent.any? %>
+        <ul class="divide-y divide-line-soft dark:divide-slate-700" data-recent-checkins>
+          <% @recent.each do |checkin| %>
+            <li class="flex items-baseline gap-3 py-2.5 first:pt-0">
+              <span class="text-[12px] font-bold tabular-nums text-ink-500 dark:text-slate-400"><%= checkin.recorded_at.strftime("%H:%M") %></span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-[13.5px] font-bold text-ink-900 dark:text-slate-100 truncate"><%= checkin.participant.full_name %></span>
+                <span class="block text-[11.5px] font-semibold text-ink-500 dark:text-slate-400">
+                  <%= checkin.participant.company&.name || "Sin compañía" %> · registró <%= checkin.recorded_by_name %>
+                </span>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-[13px] text-ink-500 dark:text-slate-400">Todavía no hay nadie registrado.</p>
+      <% end %>
+    </section>
+  </div>
+</div>

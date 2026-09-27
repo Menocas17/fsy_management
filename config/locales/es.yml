@@ -9,7 +9,24 @@ es:
       participant: 'Participante'
       company: 'Compañía'
       auxiliar_company: 'Compañía auxiliar'
+      inventory: 'Inventario'
+      inventory_item: 'Artículo'
+      inventory_movement: 'Movimiento'
+      checkin: 'Registro de llegada'
     attributes:
+      inventory:
+        name: 'Nombre'
+        code_prefix: 'Prefijo de los códigos'
+      inventory_item:
+        name: 'Nombre'
+        unit: 'Unidad'
+        minimum: 'Mínimo'
+        quantity: 'Existencia'
+        location: 'Ubicación'
+      inventory_movement:
+        reason: 'Motivo'
+        delta: 'Cantidad'
+        inventory_item: 'Artículo'
       auxiliar_company:
         name: 'Nombre'
         coordinator: 'Coordinador'
@@ -48,6 +65,15 @@ es:
         emergency_contact_relation: 'Parentesco del contacto de emergencia'
         avatar: 'Imagen de Perfil'
     errors:
+      # Sin esto, cualquier save! fallido muestra «Translation missing» en vez del motivo.
+      messages:
+        record_invalid: 'No se pudo guardar: %{errors}'
+        required: 'es obligatorio'
+        blank: 'no puede estar en blanco'
+        taken: 'ya está en uso'
+        restrict_dependent_destroy:
+          has_one: 'No se puede eliminar porque existe %{record} asociado'
+          has_many: 'No se puede eliminar porque existen %{record} asociados'
       models:
         participant:
           attributes:
