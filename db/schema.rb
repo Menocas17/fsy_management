@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_192131) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -89,6 +89,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_192131) do
     t.index ["recipient_id"], name: "index_alerts_on_recipient_id"
     t.index ["sender_id"], name: "index_alerts_on_sender_id"
     t.index ["target_roles"], name: "index_alerts_on_target_roles", using: :gin
+  end
+
+  create_table "app_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.string "value"
+    t.index ["key"], name: "index_app_settings_on_key", unique: true
   end
 
   create_table "assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -296,6 +304,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_192131) do
     t.string "location"
     t.string "name", null: false
     t.text "notes"
+    t.integer "scan_mode", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["held_on"], name: "index_trainings_on_held_on", unique: true
   end

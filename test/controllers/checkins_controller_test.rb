@@ -6,6 +6,8 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     @company = Company.create!(number: 3)
     @joven = participants(:juan)
     @joven.update!(company: @company, room: "204", allergies: "Maní")
+    # La llegada solo se escanea el día del evento; estas pruebas la abren a mano, como haría el admin.
+    AppSetting[ScanWindow::ARRIVAL_KEY] = "open"
   end
 
   test "the screen shows how many are still missing" do
@@ -110,5 +112,61 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
 
     get checkins_path
     assert_redirected_to dashboard_path
+  end
+
+  test "outside its day the arrival is closed: no scanner, no roster, no registrations" do
+    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
+
+    travel_to Rails.configuration.x.event_start_on - 10.days do
+      get checkins_path
+      assert_select "[data-scan-closed-card]", text: /Se abre el/
+      assert_select "[data-controller='checkin-scanner']", 0
+
+      get checkins_roster_path, headers: { "Accept" => "application/json" }
+      assert_response :forbidden
+
+      assert_no_difference -> { Checkin.count } do
+        post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "x1" } ] }, as: :json
+      end
+      assert_equal "closed", response.parsed_body["results"].first["status"]
+    end
+  end
+
+  test "on its day the arrival opens by itself, and what was scanned that day syncs the day after" do
+    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
+    day = Rails.configuration.x.event_start_on
+
+    travel_to day.in_time_zone.change(hour: 9) do
+      get checkins_path
+      assert_select "[data-controller='checkin-scanner']", 1
+    end
+
+    travel_to (day + 1).in_time_zone.change(hour: 8) do
+      scanned_at = day.in_time_zone.change(hour: 18).iso8601
+      assert_difference -> { Checkin.count }, 1 do
+        post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "late", recorded_at: scanned_at } ] }, as: :json
+      end
+    end
+  end
+
+  test "a training that is not today is not offered for scanning" do
+    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
+    december = Training.create!(name: "Diciembre", held_on: 2.months.from_now.to_date)
+    today = Training.create!(name: "Hoy", held_on: Date.current)
+
+    get checkins_path(training_id: today.id)
+    assert_select "[data-scan-mode='training-#{today.id}']"
+    assert_select "[data-scan-mode='training-#{december.id}']", 0
+
+    get checkins_path(training_id: december.id)
+    assert_select "[data-scan-closed-card]"
+  end
+
+  test "with the arrival closed, the scanner goes straight to the training open today" do
+    AppSetting[ScanWindow::ARRIVAL_KEY] = "closed"
+    today = Training.create!(name: "Hoy", held_on: Date.current)
+
+    get checkins_path
+    assert_redirected_to checkins_path(training_id: today.id)
   end
 end

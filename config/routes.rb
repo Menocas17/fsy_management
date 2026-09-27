@@ -67,6 +67,7 @@ Rails.application.routes.draw do
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   resource :settings, only: [ :show ] do
     post :send_password_reset
+    patch :scan_windows
   end
   resources :auxiliar_companies do
     member do

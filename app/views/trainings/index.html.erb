@@ -23,7 +23,7 @@
         <%= icon "printer", class: "w-4 h-4" %>
         PDF de asistencia
       <% end %>
-      <% if can_check_in? && (next_training = @trainings.find { |training| !training.past? }) %>
+      <% if can_check_in? && (next_training = @trainings.find { |training| training.scan_window.open? }) %>
         <%= link_to checkins_path(training_id: next_training.id),
               class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
