@@ -29,7 +29,12 @@
     <% end %>
   </div>
 <% else %>
+  <%# Una lista vacía por filtros ofrece la salida ahí mismo. %>
+  <% filtered = request.query_parameters.except("page", "from", "return_to").values.any?(&:present?) %>
   <div class="bg-surface rounded-card shadow-md border border-line-soft p-10 text-center">
     <p class="text-ink-500"><%= empty_message %></p>
+    <% if filtered %>
+      <%= link_to "Limpiar filtros", list_path, data: { turbo_frame: "_top" }, class: button_classes(:secondary, extra: "mt-4") %>
+    <% end %>
   </div>
 <% end %>

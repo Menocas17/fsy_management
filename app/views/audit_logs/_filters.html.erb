@@ -16,7 +16,7 @@
       <label class="shrink-0 cursor-pointer">
         <%= f.radio_button :category, value, checked: params[:category].to_s == value, class: "peer sr-only",
               data: { action: "change->auto-submit#changed" } %>
-        <span class="inline-flex items-center h-9 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 transition peer-checked:bg-primary-700 peer-checked:border-transparent peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500/40">
+        <span class="inline-flex items-center h-9 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 transition peer-checked:bg-primary-700 peer-checked:border-transparent peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500">
           <%= label %>
         </span>
       </label>

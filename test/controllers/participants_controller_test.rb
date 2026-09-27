@@ -141,7 +141,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     [ "javascript:alert(1)", "//evil.example", "/\\evil.example" ].each do |unsafe|
       get edit_participant_path(juan, return_to: unsafe)
       assert_select "a", text: "Cancelar" do |links|
-        assert_equal dashboard_path, links.first["href"], "#{unsafe} should fall back to the dashboard"
+        assert_equal participant_path(juan), links.first["href"], "#{unsafe} should fall back to the ficha being edited"
       end
     end
 

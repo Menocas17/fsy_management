@@ -9,7 +9,7 @@
   ]
 %>
 <%= link_to auxiliar_company_path(auxiliar_company), data: { auxiliar_company_card: auxiliar_company.name },
-      class: card_classes("group block px-5 pt-[18px] pb-4 transition duration-200 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-lg focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500/30") do %>
+      class: card_classes("group block px-5 pt-[18px] pb-4 transition duration-200 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-lg focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas") do %>
   <div class="flex items-center gap-3">
     <span class="w-11 h-11 shrink-0 rounded-tile bg-brand-tile text-white text-[17px] font-extrabold flex items-center justify-center shadow-sm"><%= auxiliar_company.initial %></span>
     <div class="min-w-0 flex-1">

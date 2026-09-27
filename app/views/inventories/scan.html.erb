@@ -30,7 +30,7 @@
   <section class="<%= card_classes("p-5") %>">
     <%= section_heading "O escribe el código", "keyboard" %>
     <%= form_with url: lookup_inventory_items_path, method: :get, class: "flex gap-2" do %>
-      <%= text_field_tag :code, nil, required: true, placeholder: "Ej. MAT-0042", autocomplete: "off",
+      <%= text_field_tag :code, nil, required: true, placeholder: "Ej. MAT-0042", autocomplete: "off", aria: { label: "Código del artículo" },
             class: "#{field_input_classes} font-mono uppercase" %>
       <%= tag.button type: "submit", class: button_classes(:primary, extra: "shrink-0") do %>
         <%= icon "arrow-right", class: "w-4 h-4" %>

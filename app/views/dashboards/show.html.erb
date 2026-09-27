@@ -12,7 +12,9 @@
       <div class="max-w-xl">
         <span class="lg:hidden inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %></span>
         <% countdown = event_countdown %>
-        <h1 class="mt-4" data-controller="countdown" data-countdown-starts-at-value="<%= event_start_at.iso8601 %>">
+        <%# El título de la página es estable; la cuenta regresiva cambia cada segundo y no debe ser el h1. %>
+        <h1 class="sr-only">Inicio · <%= Rails.configuration.x.event_name %></h1>
+        <div class="mt-4" data-controller="countdown" data-countdown-starts-at-value="<%= event_start_at.iso8601 %>">
           <% if countdown[:started] %>
             <span class="block text-2xl md:text-[32px] font-extrabold leading-tight tracking-tight text-white">¡El FSY ya comenzó!</span>
           <% else %>
@@ -28,7 +30,7 @@
               <% end %>
             </span>
           <% end %>
-        </h1>
+        </div>
         <p class="mt-3 text-[13px] font-semibold text-white/80">Comienza el <%= event_start_label %></p>
         <figure class="mt-4 rounded-tile bg-white/10 border border-white/15 px-5 py-4">
           <blockquote class="text-[13px] md:text-[14.5px] leading-relaxed italic text-white/90">

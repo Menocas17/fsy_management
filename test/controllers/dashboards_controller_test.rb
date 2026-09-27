@@ -7,7 +7,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_response :success
-    assert_select "h1[data-controller='countdown'][data-countdown-starts-at-value]", text: /Faltan para el inicio/
+    assert_select "h1", text: /Inicio/
+    assert_select "[data-controller='countdown'][data-countdown-starts-at-value]", text: /Faltan para el inicio/
     assert_select "[data-countdown-target='days']"
     assert_includes response.body, "Comienza el lunes 11 de enero de 2027"
     assert_select "[data-kpi='total_jovenes']", text: "1"

@@ -3,17 +3,17 @@
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="border-b border-line-soft">
-          <th class="<%= header_cell_classes %>">Nombre completo</th>
-          <th class="<%= header_cell_classes %>">Estaca</th>
-          <th class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
+          <th scope="col" class="<%= header_cell_classes %>">Nombre completo</th>
+          <th scope="col" class="<%= header_cell_classes %>">Estaca</th>
+          <th scope="col" class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
           <% if @is_staff %>
-            <th class="<%= header_cell_classes %>">Rol</th>
+            <th scope="col" class="<%= header_cell_classes %>">Rol</th>
           <% end %>
-          <th class="<%= header_cell_classes %> hidden lg:table-cell">Edad</th>
-          <th class="<%= header_cell_classes %> hidden xl:table-cell">Género</th>
-          <th class="<%= header_cell_classes %>">Compañía</th>
-          <th class="<%= header_cell_classes %> hidden lg:table-cell">Cuarto</th>
-          <th class="<%= header_cell_classes %>"><span class="sr-only">Acciones</span></th>
+          <th scope="col" class="<%= header_cell_classes %> hidden lg:table-cell">Edad</th>
+          <th scope="col" class="<%= header_cell_classes %> hidden xl:table-cell">Género</th>
+          <th scope="col" class="<%= header_cell_classes %>">Compañía</th>
+          <th scope="col" class="<%= header_cell_classes %> hidden lg:table-cell">Cuarto</th>
+          <th scope="col" class="<%= header_cell_classes %>"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-line-soft">

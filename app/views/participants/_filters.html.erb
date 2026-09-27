@@ -12,6 +12,7 @@
     <%= f.text_field :query,
           value: params[:query],
           placeholder: "Buscar por nombre…",
+          aria: { label: "Buscar por nombre" },
           class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           data: { action: "input->auto-submit#typed" } %>
   </div>
@@ -19,21 +20,21 @@
   <div class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:flex-1 lg:min-w-0">
     <%= f.select :stake,
           options_for_select(Participant.stakes.keys.map { |key| [ key.titleize, key ] }, params[:stake]),
-          { include_blank: "Estaca" }, class: chip_classes, data: { action: "change->auto-submit#changed" } %>
+          { include_blank: "Estaca" }, class: chip_classes, aria: { label: "Filtrar por estaca" }, data: { action: "change->auto-submit#changed" } %>
     <%= f.select :ward,
           options_for_select(Participant.wards.keys.map { |key| [ key.titleize, key ] }, params[:ward]),
-          { include_blank: "Barrio" }, class: chip_classes, data: { action: "change->auto-submit#changed" } %>
+          { include_blank: "Barrio" }, class: chip_classes, aria: { label: "Filtrar por barrio" }, data: { action: "change->auto-submit#changed" } %>
     <%= f.select :gender,
           options_for_select(Participant::GENDER_LABELS.map { |key, label| [ label, key ] }, params[:gender]),
-          { include_blank: "Género" }, class: chip_classes, data: { action: "change->auto-submit#changed" } %>
+          { include_blank: "Género" }, class: chip_classes, aria: { label: "Filtrar por género" }, data: { action: "change->auto-submit#changed" } %>
     <% if show_role %>
       <%= f.select :rol,
             options_for_select(staff_roles.map { |key| [ Participant.role_label(key), key ] }, params[:rol]),
-            { include_blank: "Rol" }, class: chip_classes, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Rol" }, class: chip_classes, aria: { label: "Filtrar por rol" }, data: { action: "change->auto-submit#changed" } %>
     <% else %>
       <%= f.select :care,
             options_for_select(Participant::CARE_FILTERS.map { |key, label| [ label, key ] }, params[:care]),
-            { include_blank: "Cocina y salud" }, class: chip_classes, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Cocina y salud" }, class: chip_classes, aria: { label: "Filtrar por cocina y salud" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <%# Ahora que «Limpiar» bajó con las fichas de filtros, este campo puede decir qué es y respirar. %>
     <%= f.text_field :company,

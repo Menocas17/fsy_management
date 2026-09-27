@@ -17,7 +17,11 @@
     <% end %>
   </div>
   <div class="flex gap-2.5 sm:justify-end">
-    <%= link_to "Cancelar", safe_return_to(dashboard_path),
+    <%# Sin return_to, cancelar vuelve a la ficha que se editaba o a la lista de la que se vino, no a Inicio. %>
+    <% cancel_fallback = if participant.persisted? then participant_path(participant)
+                         elsif params[:from] == "staff" then staff_participants_path
+                         else participants_path end %>
+    <%= link_to "Cancelar", safe_return_to(cancel_fallback),
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
     <button type="submit" form="participant-form" data-turbo-submits-with="Guardando…"
             class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none") %>">
