@@ -174,19 +174,30 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # El builder remoto (docker sobre ssh://) usa el cliente ssh del sistema, que
+      # rechaza hosts desconocidos: sin esto falla con "Host key verification failed".
+      - name: Registrar la huella SSH del servidor
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$ORACLE_SERVER_IP" >> ~/.ssh/known_hosts
+        env:
+          ORACLE_SERVER_IP: ${{ secrets.ORACLE_SERVER_IP }}
+
+      # El .kamal/secrets versionado lee config/master.key, que no existe en CI;
+      # se reemplaza (no se agrega al final) para que todo salga del entorno.
       - name: Preparar Secretos de Kamal
         run: |
-          mkdir -p .kamal
-          touch .kamal/secrets
-          echo "KAMAL_REGISTRY_PASSWORD=\$KAMAL_REGISTRY_PASSWORD" >> .kamal/secrets
-          echo "RAILS_MASTER_KEY=\$RAILS_MASTER_KEY" >> .kamal/secrets
-          echo "POSTGRES_PASSWORD=\$POSTGRES_PASSWORD" >> .kamal/secrets
+          cat > .kamal/secrets <<'EOF'
+          KAMAL_REGISTRY_PASSWORD=$KAMAL_REGISTRY_PASSWORD
+          RAILS_MASTER_KEY=$RAILS_MASTER_KEY
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          EOF
 
-      - name: Instalar y Desplegar con Kamal
-        run: |
-          gem install kamal
-          kamal deploy
+      - name: Desplegar con Kamal
+        run: bin/kamal deploy
         env:
+          ORACLE_SERVER_IP: ${{ secrets.ORACLE_SERVER_IP }}
+          APP_HOST: ${{ secrets.APP_HOST }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
