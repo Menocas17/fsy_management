@@ -4,6 +4,7 @@ class Participant < ApplicationRecord
   belongs_to :logistics_area, optional: true
 
   has_one :checkin, dependent: :destroy
+  has_many :training_attendances, dependent: :destroy
   has_many :assignments, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
@@ -82,6 +83,11 @@ class Participant < ApplicationRecord
 
   def arrived?
     checkin.present?
+  end
+
+  # Las capacitaciones son del staff: los jóvenes no van.
+  def staff_member?
+    !joven?
   end
 
   def self.role_label(rol)

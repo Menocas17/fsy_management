@@ -79,6 +79,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "before the event it lists the trainings that are left and the start" do
+    seed_trainings
+
     get dashboard_path
 
     assert_select "[data-next-up]", 1
@@ -89,6 +91,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a training that already happened drops off the list" do
+    seed_trainings
+
     travel_to Date.new(2026, 10, 18) do
       get dashboard_path
 
@@ -163,6 +167,13 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     age_chart = css_select("[data-controller='chart'][aria-label^='Jóvenes por edad']").first
     assert_includes age_chart["aria-label"], "20: 1"
     refute_includes age_chart["aria-label"], "25"
+  end
+
+  # Las capacitaciones ya no son constantes: viven en la base, así que la prueba las crea.
+  def seed_trainings
+    Training.create!(name: "Primera capacitación", held_on: Date.new(2026, 10, 17))
+    Training.create!(name: "Segunda capacitación", held_on: Date.new(2026, 11, 17))
+    Training.create!(name: "Tercera capacitación", held_on: Date.new(2026, 12, 17))
   end
 
   test "counts shirt sizes, defaulting missing sizes to zero" do

@@ -54,6 +54,11 @@
           <%= icon "list", class: "w-3.5 h-3.5" %>
           Día
         <% end %>
+        <%# Las capacitaciones son fechas del staff previas al evento: viven aquí, junto a la agenda. %>
+        <%= link_to agenda_trainings_path, class: idle_toggle, data: { agenda_view: "capacitaciones" } do %>
+          <%= icon "graduation-cap", class: "w-3.5 h-3.5" %>
+          Capacitaciones
+        <% end %>
       </nav>
       <% if can_manage_agenda? %>
         <%= link_to new_activity_path(date: @selected_day), class: "inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>

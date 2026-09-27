@@ -1,6 +1,7 @@
 class ReportsController < ApplicationController
   before_action :require_reports_access!
   before_action :require_participant_reports!, only: %i[participants rooms agenda badges]
+  skip_before_action :require_reports_access!, only: :trainings
   before_action :require_logistics_reports!, only: %i[inventory labels]
 
   def index
@@ -18,10 +19,13 @@ class ReportsController < ApplicationController
     send_report AgendaReport.new
   end
 
-  # El QR de cada gafete abre la ficha del participante, igual que el del perfil.
   def badges
     send_report BadgeLabelsReport.new(scope: params[:scope], company: Company.find_by(id: params[:company]),
                                       qr_url: ->(participant) { participant_url(participant) })
+  end
+
+  def trainings
+    send_report TrainingAttendanceReport.new(training: Training.find_by(id: params[:training]))
   end
 
   def inventory

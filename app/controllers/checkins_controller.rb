@@ -1,22 +1,23 @@
-# El registro de llegadas del día del evento. Pensado para escanear sin parar y para aguantar
-# que se caiga la señal: el dispositivo se lleva el padrón y encola lo que no pudo enviar.
+
 class CheckinsController < ApplicationController
   before_action :require_checkin_access!
+  before_action :set_mode
 
   def index
-    @jovenes = Participant.joven.count
-    @arrived = Checkin.count
-    @recent = Checkin.recent.includes(participant: :company).limit(12)
+    @trainings = Training.upcoming.to_a
+    @expected = expected_scope.count
+    @registered = registered_count
+    @recent = recent_registrations
   end
 
-  # El padrón que el teléfono guarda para poder reconocer a quien escanea aunque no haya internet.
+  # El padrón que el teléfono guarda para reconocer a quien escanea aunque no haya internet.
   def roster
-    people = Participant.joven.includes(:company).order(:first_name, :last_name)
-    arrived = Checkin.arrived_ids
+    people = expected_scope.includes(:company).order(:first_name, :last_name)
+    already = registered_ids
 
     render json: {
-      generated_at: Time.current.iso8601,
-      people: people.map { |person| roster_entry(person, arrived) }
+      mode: @mode, generated_at: Time.current.iso8601,
+      people: people.map { |person| card(person).merge(arrived: already.include?(person.id)) }
     }
   end
 
@@ -24,38 +25,70 @@ class CheckinsController < ApplicationController
   def create
     results = Array(params[:checkins]).map { |scan| register(scan) }
 
-    render json: { results: results, arrived: Checkin.count, total: Participant.joven.count }
+    render json: { results: results, arrived: registered_count, total: expected_scope.count }
   end
 
   private
+    # El modo llega como "llegada" o como el id de una capacitación.
+    def set_mode
+      @training = Training.find_by(id: params[:training_id]) if params[:training_id].present?
+      @mode = @training ? "training" : "arrival"
+    end
+
+    def expected_scope
+      @training ? Training.expected : Participant.joven
+    end
+
+    def registered_count
+      @training ? @training.attendances.count : Checkin.count
+    end
+
+    def registered_ids
+      @training ? @training.attendances.pluck(:participant_id).to_set : Checkin.arrived_ids
+    end
+
+    def recent_registrations
+      if @training
+        @training.attendances.recent.includes(participant: :company).limit(12)
+      else
+        Checkin.recent.includes(participant: :company).limit(12)
+      end
+    end
+
     def register(scan)
-      participant = Participant.joven.includes(:company).find_by(id: scan[:participant_id])
+      participant = expected_scope.includes(:company).find_by(id: scan[:participant_id])
       return { client_token: scan[:client_token], status: "unknown" } if participant.nil?
 
-      checkin, status = Checkin.register(
+      record, status = record_for(participant, scan)
+
+      { client_token: scan[:client_token], status: status.to_s, participant: card(participant),
+        recorded_at: record&.recorded_at&.iso8601 }
+    end
+
+    def record_for(participant, scan)
+      attributes = {
         participant: participant,
         recorded_by: Current.user&.participant,
         recorded_at: parse_time(scan[:recorded_at]),
         source: scan[:source] == "manual" ? :manual : :qr,
         client_token: scan[:client_token]
-      )
+      }
 
-      { client_token: scan[:client_token], status: status.to_s, participant: card(participant),
-        recorded_at: checkin&.recorded_at&.iso8601 }
+      if @training
+        TrainingAttendance.register(training: @training, **attributes)
+      else
+        Checkin.register(**attributes)
+      end
     end
 
     def card(participant)
       {
         id: participant.id,
         name: participant.full_name,
-        company: participant.company&.name,
+        company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
         room: participant.room.presence,
         care: participant.allergies.presence
       }
-    end
-
-    def roster_entry(person, arrived)
-      card(person).merge(arrived: arrived.include?(person.id))
     end
 
     # La hora la pone el dispositivo cuando escanea, no cuando logra sincronizar; si viene rara, manda el servidor.
