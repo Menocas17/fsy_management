@@ -21,11 +21,12 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{new_participant_path}']", text: /Nuevo participante/
   end
 
-  test "the QR shortcut sits next to it, still inert" do
+  test "the QR shortcut sits next to it and opens the scanner" do
     get dashboard_path
 
-    assert_select "[data-shortcut='qr'][aria-disabled='true']", text: /Escanear QR/
+    assert_select "a[data-shortcut='qr'][href='#{scan_path}']", text: /Escanear QR/
     assert_select "a[data-shortcut='my-company']", false
+    assert_select "[data-shortcut='my-qr']", false
   end
 
   test "a consejero only gets a shortcut to the company they staff" do
@@ -38,6 +39,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-shortcut='my-company'][href='#{company_path(company)}']", text: /Ver mi compañía/
     assert_select "a[href='#{new_participant_path}']", false
     assert_select "[data-shortcut='qr']", false
+    assert_select "button[data-shortcut='my-qr']", text: /Mi código QR/
+    assert_select "dialog[data-dialog-name='qr']", text: /#{participants(:maria).full_name}/
   end
 
   test "an auxiliar is sent to their auxiliar company instead" do
@@ -59,6 +62,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "a[data-shortcut='my-company']", false
     assert_select "a[href='#{new_participant_path}']", false
+    assert_select "button[data-shortcut='my-qr']", 1, "su propio código sí lo tiene"
   end
 
   test "the hero shows the FSY lockup, with the pill as its small-screen stand-in" do

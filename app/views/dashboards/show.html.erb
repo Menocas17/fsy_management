@@ -48,16 +48,28 @@
             <%= icon "plus", class: "w-4 h-4" %>
             Nuevo participante
           <% end %>
-          <%# El escáner todavía no existe: se muestra inerte, igual que Logística o Reportes en el menú lateral. %>
-          <span aria-disabled="true" data-shortcut="qr"
-                class="<%= shortcut_base %> border border-white/20 bg-white/10 text-white/60 cursor-not-allowed">
+          <%= link_to scan_path, data: { shortcut: "qr" },
+                class: "#{shortcut_base} border border-white/25 bg-white/10 text-white hover:bg-white/20" do %>
             <%= icon "scan-qr-code", class: "w-4 h-4" %>
             Escanear QR
-          </span>
-        <% elsif (my_company = my_company_link) %>
-          <%= link_to my_company, data: { shortcut: "my-company" }, class: shortcut_primary do %>
-            <%= icon "building-2", class: "w-4 h-4" %>
-            Ver mi compañía
+          <% end %>
+        <% else %>
+          <% if (my_company = my_company_link) %>
+            <%= link_to my_company, data: { shortcut: "my-company" }, class: shortcut_primary do %>
+              <%= icon "building-2", class: "w-4 h-4" %>
+              Ver mi compañía
+            <% end %>
+          <% end %>
+          <%# Quien no registra a nadie muestra su propio código: el mismo del gafete, por si no lo trae puesto. %>
+          <% if (me = Current.user&.participant) %>
+            <div data-controller="dialog" class="contents">
+              <button type="button" data-action="dialog#open" data-dialog-name="qr" data-shortcut="my-qr"
+                      class="<%= shortcut_base %> <%= my_company ? "border border-white/25 bg-white/10 text-white hover:bg-white/20" : "bg-white text-primary-800 shadow-sm hover:bg-primary-50" %> cursor-pointer">
+                <%= icon "qr-code", class: "w-4 h-4" %>
+                Mi código QR
+              </button>
+              <%= render "participants/qr_dialog", participant: me %>
+            </div>
           <% end %>
         <% end %>
       </div>

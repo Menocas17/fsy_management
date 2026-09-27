@@ -6,16 +6,19 @@
   mode_on = "#{mode_base} bg-primary-700 text-white shadow-sm"
   mode_off = "#{mode_base} border border-line dark:border-slate-600 bg-surface dark:bg-slate-800 text-ink-700 dark:text-slate-300 hover:bg-canvas dark:hover:bg-slate-700"
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto"
-     data-controller="checkin-scanner"
-     data-checkin-scanner-roster-url-value="<%= checkins_roster_path(training_id: @training&.id) %>"
-     data-checkin-scanner-sync-url-value="<%= register_checkins_path(training_id: @training&.id) %>"
-     data-checkin-scanner-mode-value="<%= @training ? "training-#{@training.id}" : "arrival" %>"
-     data-checkin-scanner-total-value="<%= @expected %>"
-     data-checkin-scanner-arrived-value="<%= @registered %>">
+<% open = @window.open? %>
+<%= tag.div class: "px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto",
+            data: (open ? { controller: "checkin-scanner",
+                            checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id),
+                            checkin_scanner_sync_url_value: register_checkins_path(training_id: @training&.id),
+                            checkin_scanner_mode_value: @training ? "training-#{@training.id}" : "arrival",
+                            checkin_scanner_total_value: @expected,
+                            checkin_scanner_arrived_value: @registered } : { scan_closed: true }) do %>
 
   <%# Primero se elige qué se está registrando: cambia a quién se espera y dónde se guarda. %>
   <div class="flex flex-wrap gap-2 mb-4" data-scan-modes>
+    <%# Solo los registros abiertos hoy (y el que se está viendo): la de diciembre no se escanea en octubre. %>
+    <% if @arrival_open || @training.nil? %>
     <%= link_to checkins_path, class: @training ? mode_off : mode_on, data: { scan_mode: "arrival" } do %>
       <%= icon "user-check", class: "w-[17px] h-[17px]" %>
       <span>
@@ -23,7 +26,8 @@
         <span class="block text-[11px] font-semibold opacity-75"><%= pluralize(Participant.joven.count, "joven", plural: "jóvenes") %></span>
       </span>
     <% end %>
-    <% @trainings.each do |training| %>
+    <% end %>
+    <% (@trainings | [ @training ].compact).sort_by(&:held_on).each do |training| %>
       <%= link_to checkins_path(training_id: training.id), class: @training == training ? mode_on : mode_off,
                   data: { scan_mode: "training-#{training.id}" } do %>
         <%= icon "graduation-cap", class: "w-[17px] h-[17px]" %>
@@ -50,6 +54,7 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
+    <% if open %>
     <section class="<%= card_classes("overflow-hidden") %>">
       <div class="px-5 py-3.5 border-b border-line-soft dark:border-slate-700">
         <p class="text-[14px] font-bold text-ink-900 dark:text-slate-100">Escáner</p>
@@ -95,6 +100,20 @@
       </div>
     </section>
 
+    <% else %>
+      <section class="<%= card_classes("p-6 text-center") %>" data-scan-closed-card>
+        <span class="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300">
+          <%= icon "lock", class: "w-6 h-6" %>
+        </span>
+        <p class="text-[15px] font-bold text-ink-900 dark:text-slate-100">Este registro no está abierto</p>
+        <p class="mt-1 text-[13px] text-ink-500 dark:text-slate-400"><%= @window.closed_reason %></p>
+        <% if Current.user.superadmin? %>
+          <%= link_to "Abrirlo desde Configuración", settings_path(anchor: "settings-scan"),
+                class: "mt-4 inline-flex items-center min-h-11 text-[13px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2" %>
+        <% end %>
+      </section>
+    <% end %>
+
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check" %>
       <% if @recent.any? %>
@@ -123,4 +142,4 @@
       <% end %>
     </section>
   </div>
-</div>
+<% end %>

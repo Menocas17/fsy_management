@@ -4,7 +4,14 @@ class CheckinsController < ApplicationController
   before_action :set_mode
 
   def index
-    @trainings = Training.upcoming.to_a
+    @trainings = Training.chronological.select { |training| training.scan_window.open? }
+    @arrival_open = ScanWindow.arrival.open?
+
+    # Sin nada elegido y con la llegada cerrada, se entra directo al registro que sí está abierto hoy.
+    if @training.nil? && !@arrival_open && @trainings.any?
+      return redirect_to checkins_path(training_id: @trainings.first.id)
+    end
+
     @expected = expected_scope.count
     @registered = registered_count
     @recent = recent_registrations
@@ -12,6 +19,8 @@ class CheckinsController < ApplicationController
 
   # El padrón que el teléfono guarda para reconocer a quien escanea aunque no haya internet.
   def roster
+    return render json: { error: @window.closed_reason }, status: :forbidden unless @window.open?
+
     people = expected_scope.includes(:company).order(:first_name, :last_name)
     already = registered_ids
 
@@ -33,6 +42,7 @@ class CheckinsController < ApplicationController
     def set_mode
       @training = Training.find_by(id: params[:training_id]) if params[:training_id].present?
       @mode = @training ? "training" : "arrival"
+      @window = ScanWindow.for(@training)
     end
 
     def expected_scope
@@ -56,6 +66,9 @@ class CheckinsController < ApplicationController
     end
 
     def register(scan)
+      # Se juzga por la hora del escaneo: lo que se tomó sin señal el día que tocaba entra aunque llegue después.
+      return { client_token: scan[:client_token], status: "closed" } unless @window.open?(parse_time(scan[:recorded_at]))
+
       participant = expected_scope.includes(:company).find_by(id: scan[:participant_id])
       return { client_token: scan[:client_token], status: "unknown" } if participant.nil?
 

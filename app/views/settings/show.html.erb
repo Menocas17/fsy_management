@@ -78,5 +78,44 @@
         </div>
       </div>
     </section>
+
+    <% if Current.user.superadmin? %>
+      <%# Solo la cuenta del sistema: por defecto cada registro se escanea únicamente el día que toca. %>
+      <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-scan" aria-labelledby="settings-scan-title">
+        <h2 id="settings-scan-title" class="<%= card_heading %>">
+          <%= icon "scan-line", class: "w-[17px] h-[17px]" %>
+          Registro por escaneo
+        </h2>
+        <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500 dark:text-slate-400">
+          «Solo el día» abre el escáner únicamente en la fecha del registro. «Abierto» lo deja disponible
+          cualquier día, por ejemplo para una prueba, y «Cerrado» lo bloquea aunque sea el día.
+        </p>
+        <%= form_with url: scan_windows_settings_path, method: :patch do %>
+          <% rows = [ [ "arrival", "Llegada de los jóvenes", ScanWindow.arrival ] ] +
+                    @trainings.map { |training| [ "trainings[#{training.id}]", training.name, training.scan_window ] } %>
+          <ul class="divide-y divide-line-soft dark:divide-slate-700">
+            <% rows.each do |name, label, window| %>
+              <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 first:pt-0" data-scan-window="<%= name %>">
+                <div class="min-w-0 flex-1">
+                  <%= label_tag name.parameterize(separator: "_"), label, class: "block text-[13.5px] font-semibold text-ink-900 dark:text-slate-100" %>
+                  <p class="text-[12px] font-semibold text-ink-500 dark:text-slate-400">
+                    <%= SpanishDates.long(window.day) %> ·
+                    <span class="<%= window.open? ? "text-emerald-700 dark:text-cat-green" : "text-ink-500 dark:text-slate-400" %>">
+                      <%= window.open? ? "abierto ahora" : "cerrado ahora" %>
+                    </span>
+                  </p>
+                </div>
+                <%= select_tag name, options_for_select(ScanWindow::MODES.invert, window.mode),
+                      id: name.parameterize(separator: "_"), class: "#{field_select_classes} sm:w-44" %>
+              </li>
+            <% end %>
+          </ul>
+          <button type="submit" class="mt-4 inline-flex items-center gap-2 h-10 px-4 rounded-[11px] bg-primary-700 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 cursor-pointer transition">
+            <%= icon "check", class: "w-4 h-4" %>
+            Guardar
+          </button>
+        <% end %>
+      </section>
+    <% end %>
   </div>
 </div>

@@ -25,6 +25,10 @@ Rails.application.routes.draw do
     end
   end
 
+  # Lector general del panel: un gafete abre la ficha de la persona; un artículo, su ficha de inventario.
+  get "escanear" => "scans#show", as: :scan
+  get "escanear/buscar" => "scans#lookup", as: :scan_lookup
+
   # Registro de llegadas: la pantalla de escaneo, el padrón que se guarda en el dispositivo y la sincronización.
   get "registro" => "checkins#index", as: :checkins
   get "registro/padron" => "checkins#roster", as: :checkins_roster
@@ -67,6 +71,7 @@ Rails.application.routes.draw do
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   resource :settings, only: [ :show ] do
     post :send_password_reset
+    patch :scan_windows
   end
   resources :auxiliar_companies do
     member do

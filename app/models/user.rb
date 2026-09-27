@@ -9,6 +9,11 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
+  # La cuenta del sistema, sin ficha de participante: la única que abre o cierra los registros a mano.
+  def superadmin?
+    participant_id.nil?
+  end
+
   # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
   def full_access?
     return true if participant_id.nil?

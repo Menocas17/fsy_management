@@ -3,6 +3,9 @@ class Training < ApplicationRecord
   has_many :attendances, class_name: "TrainingAttendance", dependent: :destroy
   has_many :participants, through: :attendances
 
+  # Ver ScanWindow: automático es solo el día de la capacitación.
+  enum :scan_mode, { auto: 0, open: 1, closed: 2 }, prefix: :scan
+
   validates :name, presence: true
   validates :held_on, presence: true, uniqueness: { message: "ya hay una capacitación ese día" }
 
@@ -70,6 +73,10 @@ class Training < ApplicationRecord
 
       [ label, { attended: roles.sum { |role| present[role].to_i }, expected: total } ]
     end.to_h
+  end
+
+  def scan_window
+    ScanWindow.for(self)
   end
 
   def attended?(participant)
