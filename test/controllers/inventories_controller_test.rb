@@ -141,6 +141,16 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-inventory-appearance-target='summary']", text: "Paquete · Azul marino"
   end
 
+  # Anidado dentro del formulario de edición, el navegador descartaba el <form> de borrar: «Guardar» no
+  # hacía nada y «Borrar» se enviaba sin confirmación.
+  test "editing keeps delete and save as separate forms" do
+    get edit_inventory_path(@inventory)
+
+    assert_select "form[data-turbo-confirm][action='#{inventory_path(@inventory)}']", 1
+    assert_select "button[type='submit'][form='inventory-form']", text: "Guardar cambios"
+    assert_select "form#inventory-form"
+  end
+
   test "a new icon and color are saved and painted" do
     post inventories_path, params: { inventory: { name: "Deportes", icon: "volleyball", color: "orange" } }
 

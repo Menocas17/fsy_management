@@ -1,4 +1,4 @@
-<%= form_with model: inventory, class: "space-y-5" do |form| %>
+<%= form_with model: inventory, id: "inventory-form", class: "space-y-5" do |form| %>
   <% if inventory.errors.any? %>
     <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
       <% inventory.errors.full_messages.each do |message| %>
@@ -91,23 +91,25 @@
       </div>
     </fieldset>
   </section>
-
-  <div class="<%= card_classes("px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
-    <div>
-      <% if inventory.persisted? %>
-        <%= button_to inventory_path(inventory), method: :delete,
-              form: { data: { turbo_confirm: "Esto borra el inventario y todos sus artículos. ¿Seguro?" } },
-              class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
-          <%= icon "trash-2", class: "w-4 h-4" %>
-          Borrar inventario
-        <% end %>
-      <% end %>
-    </div>
-    <div class="flex gap-2.5 sm:justify-end">
-      <%= link_to "Cancelar", inventory.persisted? ? inventory : inventories_path,
-            class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-      <%= form.submit inventory.persisted? ? "Guardar cambios" : "Crear inventario",
-            class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
-    </div>
-  </div>
 <% end %>
+
+<%# Los botones van fuera del formulario: «Borrar» es su propio formulario (button_to) y no puede ir
+    anidado; «Guardar» apunta al formulario por su id. %>
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if inventory.persisted? %>
+      <%= button_to inventory_path(inventory), method: :delete,
+            form: { data: { turbo_confirm: "Esto borra el inventario y todos sus artículos. ¿Seguro?" } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar inventario
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", inventory.persisted? ? inventory : inventories_path,
+          class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button inventory.persisted? ? "Guardar cambios" : "Crear inventario", type: "submit", form: "inventory-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+  </div>
+</div>

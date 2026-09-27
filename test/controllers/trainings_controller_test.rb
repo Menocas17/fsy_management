@@ -133,4 +133,59 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-trainings-card]", 0
   end
+
+  test "whoever edits the agenda creates a training, and the date opens its scan by itself" do
+    get new_agenda_training_path
+    assert_select "input[name='training[name]'][value='Tercera capacitación']", 1, "suggests the next ordinal"
+
+    assert_difference -> { Training.count }, 1 do
+      post agenda_trainings_path, params: { training: { name: "Tercera", held_on: Date.current, location: "Capilla", notes: "Traer manual" } }
+    end
+    training = Training.find_by!(name: "Tercera")
+    assert_redirected_to agenda_training_path(training)
+    assert training.scan_window.open?
+    assert_equal "created", AuditLog.last.action
+
+    follow_redirect!
+    assert_select "[data-training-notes]", text: /Traer manual/
+  end
+
+  test "a training's date and name can be changed" do
+    patch agenda_training_path(@next_one), params: { training: { name: "Segunda (reprogramada)", held_on: 4.weeks.from_now.to_date } }
+
+    assert_redirected_to agenda_training_path(@next_one)
+    assert_equal [ "Segunda (reprogramada)", 4.weeks.from_now.to_date ], [ @next_one.reload.name, @next_one.held_on ]
+  end
+
+  test "two trainings cannot share a day" do
+    post agenda_trainings_path, params: { training: { name: "Otra", held_on: @past.held_on } }
+
+    assert_response :unprocessable_entity
+    assert_select "[role='alert']", text: /ya hay una capacitación ese día/
+  end
+
+  test "deleting warns how many attendances go with it" do
+    TrainingAttendance.create!(training: @past, participant: @counselor, recorded_at: @past.held_on)
+
+    get edit_agenda_training_path(@past)
+    assert_select "form[data-turbo-confirm-detail*='de 1 persona']"
+
+    assert_difference -> { Training.count }, -1 do
+      delete agenda_training_path(@past)
+    end
+    assert_redirected_to agenda_trainings_path
+  end
+
+  test "someone who does not edit the agenda can look but not create or change" do
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: @counselor))
+
+    get agenda_trainings_path
+    assert_select "a[href='#{new_agenda_training_path}']", 0
+
+    assert_no_difference -> { Training.count } do
+      post agenda_trainings_path, params: { training: { name: "Pirata", held_on: Date.current } }
+    end
+    patch agenda_training_path(@past), params: { training: { name: "Cambiada" } }
+    assert_equal "Primera", @past.reload.name
+  end
 end

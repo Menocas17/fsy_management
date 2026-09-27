@@ -1,0 +1,58 @@
+<%= form_with model: training, url: training.persisted? ? agenda_training_path(training) : agenda_trainings_path, id: "training-form", class: "space-y-5" do |form| %>
+  <% if training.errors.any? %>
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
+      <% training.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Datos de la capacitación", "graduation-cap" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :name, "Nombre", class: field_label_classes %>
+        <%= form.text_field :name, required: true, maxlength: 80, placeholder: "Ej. Cuarta capacitación", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :held_on, "Fecha", class: field_label_classes %>
+        <%= form.date_field :held_on, required: true, class: field_input_classes %>
+        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Ese día se abre sola la asistencia por escaneo.</p>
+      </div>
+      <div class="sm:col-span-2">
+        <%= form.label :location, "Lugar", class: field_label_classes %>
+        <%= form.text_field :location, maxlength: 120, placeholder: "Ej. Centro de estaca Bello Horizonte", class: field_input_classes %>
+      </div>
+      <div class="sm:col-span-2">
+        <%= form.label :notes, "Notas", class: field_label_classes %>
+        <%= form.text_area :notes, rows: 3, placeholder: "Ej. Traer el manual del consejero. Déjalo vacío si no hay nada que avisar.", class: field_textarea_classes %>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<%# Los botones van fuera del formulario: «Borrar» es su propio formulario (button_to) y no puede ir
+    anidado; «Guardar» apunta al formulario por su id. %>
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if training.persisted? %>
+      <% attended = training.attended_count %>
+      <%= button_to agenda_training_path(training), method: :delete,
+            form: { data: { turbo_confirm: "¿Borrar «#{training.name}»?",
+                            turbo_confirm_detail: if attended.zero? then "No tiene asistencias registradas. No se puede deshacer."
+                                                elsif attended == 1 then "Se pierde también la asistencia registrada de 1 persona. No se puede deshacer."
+                                                else "Se pierden también las asistencias registradas de #{attended} personas. No se puede deshacer." end,
+                            turbo_confirm_button: "Sí, borrar" } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar capacitación
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", training.persisted? ? agenda_training_path(training) : agenda_trainings_path,
+          class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button training.persisted? ? "Guardar cambios" : "Crear capacitación", type: "submit", form: "training-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+  </div>
+</div>

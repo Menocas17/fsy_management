@@ -16,14 +16,29 @@
         </p>
       </div>
     </div>
-    <% if can_check_in? && @training.scan_window.open? %>
-      <%= link_to checkins_path(training_id: @training.id),
-            class: button_classes do %>
-        <%= icon "scan-qr-code", class: "w-4 h-4" %>
-        Escanear asistencia
+    <div class="flex flex-wrap gap-2">
+      <% if can_manage_agenda? %>
+        <%= link_to edit_agenda_training_path(@training), class: button_classes(:secondary) do %>
+          <%= icon "pencil", class: "w-4 h-4" %>
+          Editar
+        <% end %>
       <% end %>
-    <% end %>
+      <% if can_check_in? && @training.scan_window.open? %>
+        <%= link_to checkins_path(training_id: @training.id),
+              class: button_classes do %>
+          <%= icon "scan-qr-code", class: "w-4 h-4" %>
+          Escanear asistencia
+        <% end %>
+      <% end %>
+    </div>
   </div>
+
+  <% if @training.notes.present? %>
+    <div class="mb-5 rounded-tile border border-line-soft bg-canvas px-5 py-4" data-training-notes>
+      <p class="text-[13px] font-bold text-ink-700">Notas</p>
+      <p class="mt-1 text-[13.5px] leading-relaxed text-ink-900 whitespace-pre-line"><%= @training.notes %></p>
+    </div>
+  <% end %>
 
   <%= render "trainings/roster", training: @training %>
 </div>
