@@ -130,6 +130,27 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     assert_match(/No encontramos/, flash[:alert])
   end
 
+  test "icon and color are picked by sight, with their names in Spanish" do
+    get new_inventory_path
+
+    assert_response :success
+    assert_select "input[type='radio'][name='inventory[icon]']", Inventory::ICONS.size
+    assert_select "input[type='radio'][name='inventory[icon]'][value='scissors'] + span", text: /Tijeras/
+    assert_select "input[type='radio'][name='inventory[color]']", Inventory::COLORS.size
+    assert_select "input[type='radio'][name='inventory[color]'][value='violet'] + span", text: /Morado/
+    assert_select "[data-inventory-appearance-target='summary']", text: "Paquete · Azul marino"
+  end
+
+  test "a new icon and color are saved and painted" do
+    post inventories_path, params: { inventory: { name: "Deportes", icon: "volleyball", color: "orange" } }
+
+    inventory = Inventory.find_by!(name: "Deportes")
+    assert_equal [ "volleyball", "orange" ], [ inventory.icon, inventory.color ]
+
+    get inventories_path
+    assert_select ".bg-orange-600"
+  end
+
   test "a logistics member adjusts stock but cannot create inventories" do
     member = Participant.create!(first_name: "Luis", last_name: "Mena", age: 30, stake: "las_americas",
                                  shirt_number: "l", gender: "H", rol: :logistica)

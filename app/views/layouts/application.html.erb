@@ -41,7 +41,9 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="h-dvh overflow-hidden bg-canvas text-ink-900">
+  <%# overflow-clip y no overflow-hidden: el body no debe desplazarse nunca (solo <main>), y con hidden el
+      navegador igual lo corría al enfocar algo fuera de vista, dejando la página cortada sin forma de volver. %>
+  <body class="h-dvh overflow-clip bg-canvas text-ink-900">
     <%# Canal propio de cada persona: por aquí llega la campanita al instante, sin recargar. %>
     <%= turbo_stream_from Current.user if Current.user %>
     <%= render "shared/toast"%>
