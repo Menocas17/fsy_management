@@ -87,6 +87,7 @@ class CheckinsController < ApplicationController
       {
         id: participant.id,
         name: participant.full_name,
+        company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
         stake: participant.stake&.titleize,
         gender: Participant::GENDER_LABELS[participant.gender],
         url: participant_path(participant)

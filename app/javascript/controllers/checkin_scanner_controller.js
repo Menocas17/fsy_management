@@ -220,7 +220,7 @@ export default class extends Controller {
   }
 
   summary(person) {
-    return [ person.stake, person.gender ].filter(Boolean).join(" · ")
+    return [ person.company, person.stake, person.gender ].filter(Boolean).join(" · ")
   }
 
   // Dos escaneos «ok» seguidos se ven iguales: el pulso y las esquinas de color marcan que hubo uno nuevo.
