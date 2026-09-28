@@ -8,7 +8,8 @@ module Authorization
                   :can_manage_staff?, :can_manage_alerts?, :can_manage_agenda?, :can_assign_to?,
                   :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
-                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?
+                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?,
+                  :can_view_finances?, :can_operate_finances?, :can_configure_finances?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -116,6 +117,19 @@ module Authorization
     Current.user&.checkin_registrar? || false
   end
 
+  # Finanzas ------------------------------------------------------------------
+  def can_view_finances?
+    Current.user&.finance_viewer? || false
+  end
+
+  def can_operate_finances?
+    Current.user&.finance_operator? || false
+  end
+
+  def can_configure_finances?
+    Current.user&.finance_configurator? || false
+  end
+
   # Inventario ------------------------------------------------------------------
   # Cualquier miembro de logística ve y ajusta existencias; crear o borrar un inventario entero
   # queda para el acceso total y el director de logística.
@@ -189,6 +203,18 @@ module Authorization
     # Quién es la persona y dónde encaja en el evento.
     IDENTITY_ATTRIBUTES = %i[first_name last_name age m_person_in_charge h_person_in_charge identity_document
                              gender stake ward rol company_id logistics_area_id].freeze
+
+    def require_finance_viewer!
+      redirect_to dashboard_path, alert: "Finanzas es del área de Finanzas y la dirección" unless can_view_finances?
+    end
+
+    def require_finance_operator!
+      redirect_to finances_path, alert: "Solo el área de Finanzas y el director de logística mueven gastos" unless can_operate_finances?
+    end
+
+    def require_finance_configurator!
+      redirect_to finances_path, alert: "El presupuesto lo define el director de logística" unless can_configure_finances?
+    end
 
     def require_checkin_access!
       unless can_check_in?

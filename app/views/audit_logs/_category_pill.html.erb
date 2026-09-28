@@ -2,7 +2,8 @@
   colors = {
     "logistica" => "bg-cat-amber/20 text-cat-amber-ink",
     "companias" => "bg-cat-blue/15 text-cat-blue-ink",
-    "asignaciones" => "bg-cat-green/15 text-cat-green-ink"
+    "asignaciones" => "bg-cat-green/15 text-cat-green-ink",
+    "finanzas" => "bg-cat-teal/15 text-cat-teal-ink"
   }
 %>
 <span class="<%= colors.fetch(log.category, "bg-canvas text-ink-500") %> inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap"><%= log.category_label %></span>

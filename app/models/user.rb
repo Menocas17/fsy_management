@@ -47,6 +47,26 @@ class User < ApplicationRecord
     participant&.logistica? && participant.logistics_area&.checkin? || false
   end
 
+  # Finanzas (docs/finanzas.md). Presentan y aprueban gastos quien está en el área de Finanzas y el director
+  # de logística, nunca la misma persona en dos pasos seguidos; dirección y coordinación solo ven.
+  def finance_member?
+    participant&.logistica? && participant.logistics_area&.finance? || false
+  end
+
+  def finance_operator?
+    finance_member? || participant&.director_logistica? || false
+  end
+
+  def finance_viewer?
+    finance_operator? || full_access?
+  end
+
+  # Presupuesto, categorías y tipo de cambio: solo el director de logística. El superadmin, como dirección
+  # y coordinación, solo ve.
+  def finance_configurator?
+    participant&.director_logistica? || false
+  end
+
   # El inventario lo mueve logística entera, más el acceso total.
   def inventory_member?
     full_access? || participant&.logistica? || participant&.director_logistica? || false

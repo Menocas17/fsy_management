@@ -31,7 +31,11 @@ module NavigationHelper
          else
            { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),
-        { text: "Finanzas", lucide_icon: "wallet", disabled: true },
+        (if Current.user&.finance_viewer?
+           { text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] }
+         else
+           { text: "Finanzas", lucide_icon: "wallet", disabled: true, hint: "Solo para el área de Finanzas, logística y la dirección" }
+         end),
         ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?),
         ({ text: "Accesos", url: accesses_path, lucide_icon: "shield-check" } if Current.user&.superadmin?)

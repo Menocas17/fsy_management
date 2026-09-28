@@ -1,0 +1,20 @@
+<%# Lo que se sabe al comprar: el monto real (puede no ser el estimado), cuándo y cómo se pagó. %>
+<div>
+  <%= label_tag "#{prefix}_actual_amount", "Monto real (#{Money::CURRENCIES[expense.currency]})", class: field_label_classes %>
+  <%= text_field_tag :actual_amount, Money.to_input(expense.estimated_cents), id: "#{prefix}_actual_amount", required: true,
+        inputmode: "decimal", class: field_input_classes %>
+</div>
+<div>
+  <%= label_tag "#{prefix}_spent_on", "Fecha de la compra", class: field_label_classes %>
+  <%= date_field_tag :spent_on, Date.current, id: "#{prefix}_spent_on", class: field_input_classes %>
+</div>
+<div>
+  <%= label_tag "#{prefix}_payment_method", "Forma de pago", class: field_label_classes %>
+  <%= select_tag :payment_method, options_for_select(Expense::PAYMENT_LABELS.invert), id: "#{prefix}_payment_method", class: field_select_classes %>
+</div>
+<% if expense.usd? %>
+  <div>
+    <%= label_tag "#{prefix}_exchange_rate", "Tipo de cambio de la factura", class: field_label_classes %>
+    <%= text_field_tag :exchange_rate, expense.exchange_rate, id: "#{prefix}_exchange_rate", inputmode: "decimal", class: field_input_classes %>
+  </div>
+<% end %>

@@ -170,6 +170,59 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.index ["number"], name: "index_companies_on_number", unique: true
   end
 
+  create_table "expense_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.bigint "budget_cents"
+    t.string "color", default: "primary", null: false
+    t.datetime "created_at", null: false
+    t.string "icon", default: "wallet", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_expense_categories_on_lower_name", unique: true
+  end
+
+  create_table "expenses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.bigint "actual_cents"
+    t.datetime "approved_at"
+    t.uuid "approved_by_id"
+    t.string "approved_by_name"
+    t.string "concept", null: false
+    t.datetime "consolidated_at"
+    t.uuid "consolidated_by_id"
+    t.string "consolidated_by_name"
+    t.datetime "created_at", null: false
+    t.string "currency", default: "NIO", null: false
+    t.bigint "estimated_cents", null: false
+    t.decimal "exchange_rate", precision: 10, scale: 4, default: "1.0", null: false
+    t.uuid "expense_category_id"
+    t.text "justification"
+    t.text "justification_rejection"
+    t.datetime "justified_at"
+    t.uuid "justified_by_id"
+    t.string "justified_by_name"
+    t.uuid "logistics_area_id"
+    t.text "notes"
+    t.integer "payment_method"
+    t.date "planned_on"
+    t.uuid "presented_by_id"
+    t.string "presented_by_name", null: false
+    t.datetime "rejected_at"
+    t.uuid "rejected_by_id"
+    t.string "rejected_by_name"
+    t.text "rejection_reason"
+    t.date "spent_on"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.string "vendor"
+    t.index ["approved_by_id"], name: "index_expenses_on_approved_by_id"
+    t.index ["consolidated_by_id"], name: "index_expenses_on_consolidated_by_id"
+    t.index ["expense_category_id"], name: "index_expenses_on_expense_category_id"
+    t.index ["justified_by_id"], name: "index_expenses_on_justified_by_id"
+    t.index ["logistics_area_id"], name: "index_expenses_on_logistics_area_id"
+    t.index ["presented_by_id"], name: "index_expenses_on_presented_by_id"
+    t.index ["rejected_by_id"], name: "index_expenses_on_rejected_by_id"
+    t.index ["status"], name: "index_expenses_on_status"
+  end
+
   create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "code_prefix", null: false
     t.string "color", default: "primary", null: false
@@ -228,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.boolean "checkin", default: false, null: false
     t.datetime "created_at", null: false
     t.string "description"
+    t.boolean "finance", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_logistics_areas_on_name", unique: true
@@ -349,6 +403,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
   add_foreign_key "checkins", "participants"
   add_foreign_key "checkins", "participants", column: "recorded_by_id"
   add_foreign_key "companies", "auxiliar_companies"
+  add_foreign_key "expenses", "expense_categories"
+  add_foreign_key "expenses", "logistics_areas"
+  add_foreign_key "expenses", "participants", column: "approved_by_id"
+  add_foreign_key "expenses", "participants", column: "consolidated_by_id"
+  add_foreign_key "expenses", "participants", column: "justified_by_id"
+  add_foreign_key "expenses", "participants", column: "presented_by_id"
+  add_foreign_key "expenses", "participants", column: "rejected_by_id"
   add_foreign_key "inventory_items", "inventories"
   add_foreign_key "inventory_movements", "inventory_items"
   add_foreign_key "inventory_movements", "participants"
