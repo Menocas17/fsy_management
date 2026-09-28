@@ -54,7 +54,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_no_difference -> { Participant.count } do
       second = ParticipantImporter.new(FIXTURE).call
       assert_equal 0, second.imported_count
-      assert(second.skipped.all? { |row| row.reason.include?("ya estaba registrado") || row.reason.match?(/Edad/i) })
+      assert(second.skipped.all? { |row| row.reason.include?("duplicado") || row.reason.match?(/Edad/i) })
     end
   end
 
@@ -73,7 +73,8 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal 1, import.imported_count
     assert_equal "0010101900001A", Participant.find_by(first_name: "Luis").identity_document
     assert_equal "001-010190-0001A", Participant.find_by(first_name: "Luis").formatted_identity_document
-    assert_equal [ "ya estaba registrado" ], import.skipped.map(&:reason)
+    assert_equal [ "duplicado: ya existe esta persona" ], import.skipped.map(&:reason)
+    assert_equal Participant.find_by(first_name: "Luis"), import.skipped.first.match
   end
 
   test "two people with the same name are not merged unless age and stake match too" do

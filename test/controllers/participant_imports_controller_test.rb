@@ -11,6 +11,7 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input[type=file][name=file]"
+    assert_select "form[data-turbo='false']", 1, "Turbo drops a 200 response to a form: the results would never show"
     assert_includes response.body, "Compañía"
   end
 
@@ -23,6 +24,15 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-import='imported']", text: "3"
     assert_select "[data-import='skipped']", text: "1"
     assert_includes response.body, "Pedro SinEdad"
+  end
+
+  test "a second upload of the same file flags every row as a duplicate, linking to the existing ficha" do
+    post participant_import_path, params: { file: spreadsheet }
+    post participant_import_path, params: { file: spreadsheet }
+
+    assert_select "[role='alert']", text: /no entraron/
+    ana = Participant.find_by(first_name: "Ana", last_name: "Ruiz")
+    assert_select "[data-import-skipped] a[href='#{participant_path(ana)}']", text: /ya existe/
   end
 
   test "the upload is written to the history" do

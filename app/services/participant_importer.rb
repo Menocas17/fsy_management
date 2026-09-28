@@ -6,7 +6,9 @@ require "roo"
 class ParticipantImporter
   class UnreadableFile < StandardError; end
 
-  Row = Struct.new(:number, :name, :reason, keyword_init: true)
+  # match: la ficha que ya existe y con la que choca la fila, para revisarla y resolver a mano.
+  # record: la ficha que se creó con esa fila (en los avisos).
+  Row = Struct.new(:number, :name, :reason, :match, :record, keyword_init: true)
 
   HEADERS = {
     "nombre" => :first_name, "nombres" => :first_name, "primer nombre" => :first_name,
@@ -96,8 +98,8 @@ class ParticipantImporter
       name = [ values[:first_name], values[:last_name] ].compact_blank.join(" ")
       return if values.values.all?(&:blank?)
 
-      if duplicate?(values)
-        @skipped << Row.new(number: number, name: name, reason: "ya estaba registrado")
+      if (existing = duplicate_of(values))
+        @skipped << Row.new(number: number, name: name, reason: "duplicado: ya existe esta persona", match: existing)
         return
       end
 
@@ -161,13 +163,13 @@ class ParticipantImporter
 
     # La cédula manda cuando viene (escrita con o sin guiones). Sin cédula, es la misma persona si coinciden
     # el nombre completo, la edad y la estaca; solo el nombre no basta: dos «María López» pueden existir.
-    def duplicate?(values)
+    def duplicate_of(values)
       document = Participant.normalize_value_for(:identity_document, values[:identity_document])
-      return Participant.exists?(identity_document: document) if document
+      return Participant.find_by(identity_document: document) if document
+      return if values[:first_name].blank?
 
-      values[:first_name].present? &&
-        Participant.exists?(first_name: values[:first_name], last_name: values[:last_name],
-                            age: whole_number(values[:age]), stake: enum_key(Participant.stakes, values[:stake]))
+      Participant.find_by(first_name: values[:first_name], last_name: values[:last_name],
+                          age: whole_number(values[:age]), stake: enum_key(Participant.stakes, values[:stake]))
     end
 
     def staff_role?(values)
@@ -178,14 +180,21 @@ class ParticipantImporter
     def warn_about(participant, values, number)
       others = Participant.where.not(id: participant.id)
       notes = []
-      notes << "mismo nombre que otra persona" if others.exists?(first_name: participant.first_name, last_name: participant.last_name)
-      if participant.email_address.present? && others.where("lower(contact_info ->> 'email_address') = ?", participant.email_address.downcase).exists?
+      matches = []
+      if (same = others.find_by(first_name: participant.first_name, last_name: participant.last_name))
+        notes << "mismo nombre que otra persona"
+        matches << same
+      end
+      if participant.email_address.present? &&
+         (same = others.find_by("lower(contact_info ->> 'email_address') = ?", participant.email_address.downcase))
         notes << "mismo correo que otra persona"
+        matches << same
       end
       # Los últimos 8 dígitos: «+505 8888 1111» y «8888-1111» son el mismo número.
       if (phone = participant.phone_number.to_s.gsub(/\D/, "").last(8)).length == 8 &&
-         others.where("right(regexp_replace(contact_info ->> 'phone_number', '\\D', '', 'g'), 8) = ?", phone).exists?
+         (same = others.find_by("right(regexp_replace(contact_info ->> 'phone_number', '\\D', '', 'g'), 8) = ?", phone))
         notes << "mismo teléfono que otra persona"
+        matches << same
       end
       if values[:company_number].present?
         if staff_role?(values)
@@ -194,6 +203,6 @@ class ParticipantImporter
           notes << "la compañía #{values[:company_number]} no existe: quedó sin compañía"
         end
       end
-      @warnings << Row.new(number: number, name: participant.full_name, reason: notes.join(" · ")) if notes.any?
+      @warnings << Row.new(number: number, name: participant.full_name, reason: notes.join(" · "), match: matches.first, record: participant) if notes.any?
     end
 end

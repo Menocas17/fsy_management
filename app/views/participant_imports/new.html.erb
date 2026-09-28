@@ -16,14 +16,26 @@
         </div>
       </div>
 
+      <% if @import.skipped.any? || @import.warnings.any? %>
+        <div class="mb-5 rounded-tile border border-cat-amber/30 bg-cat-amber/10 px-4 py-3 text-[13px] font-semibold text-cat-amber-ink" role="alert">
+          <%= [ (pluralize(@import.skipped_count, "fila no entró", plural: "filas no entraron") if @import.skipped.any?),
+                (pluralize(@import.warnings.size, "fila entró con aviso", plural: "filas entraron con aviso") if @import.warnings.any?) ].compact.join(" y ") %>.
+          Revísalas abajo: los duplicados no se cargaron, compáralos con la ficha que ya existe y corrige a mano si hace falta.
+        </div>
+      <% end %>
+
       <% if @import.skipped.any? %>
         <p class="mb-2 text-[12px] font-bold text-ink-700">Filas que no entraron</p>
-        <ul class="divide-y divide-line-soft border border-line-soft rounded-tile overflow-hidden">
+        <ul class="divide-y divide-line-soft border border-line-soft rounded-tile overflow-hidden" data-import-skipped>
           <% @import.skipped.each do |row| %>
             <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5 text-[13px]">
               <span class="font-bold text-ink-900 tabular-nums">Fila <%= row.number %></span>
               <span class="font-semibold text-ink-700"><%= row.name %></span>
               <span class="text-ink-500">· <%= row.reason %></span>
+              <% if row.match %>
+                <%= link_to "Ver la ficha que ya existe (#{row.match.full_name})", participant_path(row.match), target: "_blank", rel: "noopener",
+                      class: "ml-auto text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline" %>
+              <% end %>
             </li>
           <% end %>
         </ul>
@@ -37,6 +49,12 @@
               <span class="font-bold text-ink-900 tabular-nums">Fila <%= row.number %></span>
               <span class="font-semibold text-ink-700"><%= row.name %></span>
               <span class="text-ink-500">· <%= row.reason %></span>
+              <span class="ml-auto flex flex-wrap gap-x-3">
+                <%= link_to "Ver la nueva", participant_path(row.record), target: "_blank", rel: "noopener",
+                      class: "text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline" if row.record %>
+                <%= link_to "Ver la otra (#{row.match.full_name})", participant_path(row.match), target: "_blank", rel: "noopener",
+                      class: "text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline" if row.match %>
+              </span>
             </li>
           <% end %>
         </ul>
@@ -54,7 +72,9 @@
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading "Subir archivo", "upload" %>
-      <%= form_with url: participant_import_path, multipart: true, class: "space-y-4" do |form| %>
+      <%# Sin Turbo: el resultado es una página, no una redirección, y Turbo descarta en silencio la respuesta
+          a un formulario que no redirige (se cargaba todo pero nunca se veía qué se saltó). %>
+      <%= form_with url: participant_import_path, multipart: true, data: { turbo: false }, class: "space-y-4" do |form| %>
         <div>
           <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
           <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
