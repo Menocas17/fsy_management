@@ -61,9 +61,10 @@ class User < ApplicationRecord
     finance_operator? || full_access?
   end
 
-  # Presupuesto, categorías y tipo de cambio: el director de logística (y la cuenta del sistema).
+  # Presupuesto, categorías y tipo de cambio: solo el director de logística. El superadmin, como dirección
+  # y coordinación, solo ve.
   def finance_configurator?
-    superadmin? || participant&.director_logistica? || false
+    participant&.director_logistica? || false
   end
 
   # El inventario lo mueve logística entera, más el acceso total.

@@ -14,7 +14,7 @@ Fuera por ahora: cuotas de los jóvenes, fondos entregados (caja chica) e ingres
 | Logística del área **Finanzas** (`logistics_areas.finance`) | Sí | Sí¹ | Sí¹ | Ve |
 | **Director de logística** | Sí | Sí¹ | Sí¹ | Define |
 | Dirección y coordinación | Solo ven | | | Ven |
-| Superadmin | Solo ve | | | Define (cuenta del sistema) |
+| Superadmin | Solo ve | | | Ve |
 | Resto del staff | No ve Finanzas | | | |
 
 ¹ **Nunca la misma persona que dio el paso anterior**: quien presenta un gasto no lo aprueba, y quien

@@ -47,6 +47,24 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-timeline] li", 3
   end
 
+  test "the superadmin only looks: no budget, no categories, no expenses" do
+    sign_in_as(users(:one))
+
+    get finances_path
+    assert_response :success
+    assert_select "a[href='#{edit_finances_path}']", 0
+    assert_select "a[href='#{new_expense_path}']", 0
+
+    patch finances_path, params: { budget: "1" }
+    assert_equal 500_000, FinanceSettings.budget_cents
+    assert_no_difference -> { ExpenseCategory.count } do
+      post expense_categories_path, params: { name: "Pirata" }
+    end
+    assert_no_difference -> { Expense.count } do
+      post expenses_path, params: { expense: { concept: "Pirata", currency: "NIO", estimated_amount: "10" } }
+    end
+  end
+
   test "dirección and coordinación see finances but cannot move expenses or the budget" do
     sign_in_as(@coordinator_user)
 
