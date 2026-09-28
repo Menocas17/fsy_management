@@ -97,13 +97,22 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal [ "mismo correo que otra persona · mismo teléfono que otra persona" ], import.warnings.map(&:reason)
   end
 
-  test "staff can be imported with any role, and more than two coordinators is fine" do
-    rows = (1..3).map { |i| "Coord#{i},Apellido,40,H,Villa Flor,L,Coordinador" }
-    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol" ] + rows + [ "Ana,Consejera,25,M,Villa Flor,M,consejero" ]
+  test "the leadership is one man and one woman per role: a third one does not go in and is flagged" do
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol",
+                          "Pedro,Director,55,H,Villa Flor,L,Director",
+                          "Rosa,Directora,53,M,Villa Flor,M,Director",
+                          "Luis,Coord,45,H,Villa Flor,L,Coordinador",
+                          "Ana,Coord,44,M,Villa Flor,M,Coordinador",
+                          "Beto,Coord,46,H,Villa Flor,L,Coordinador",
+                          "Juan,Logística,42,H,Villa Flor,L,Director de logística",
+                          "Otro,Logística,43,H,Villa Flor,L,Director de logística" ]
 
-    assert_equal 4, import.imported_count
-    assert_equal 3, Participant.coordinador.count
-    assert Participant.find_by(first_name: "Ana").consejero?
+    assert_equal 5, import.imported_count
+    assert_equal [ 2, 2, 1 ], [ Participant.director.count, Participant.coordinador.count, Participant.director_logistica.count ]
+    beto = import.skipped.find { |row| row.name == "Beto Coord" }
+    assert_match(/Ya hay coordinador hombre: Luis Coord .*resuélvelo a mano/, beto.reason)
+    assert_equal Participant.find_by(first_name: "Luis"), beto.match
+    assert import.skipped.any? { |row| row.name == "Otro Logística" && row.reason.include?("director de logística hombre") }
   end
 
   test "counselors are staffed on their company: one man and one woman, the rest flagged to resolve by hand" do
@@ -157,4 +166,16 @@ class ParticipantImporterTest < ActiveSupport::TestCase
         ParticipantImporter.new(file.path).call
       end
     end
+
+  test "roles are read by their Spanish name, in feminine too, and an unknown one is flagged" do
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol",
+                          "Ana,Uno,40,M,Villa Flor,M,Directora de logística",
+                          "Sara,Dos,38,M,Villa Flor,S,Coordinadora",
+                          "Eva,Tres,25,M,Villa Flor,S,consejera",
+                          "Juan,Cuatro,30,H,Villa Flor,M,Voluntario" ]
+
+    assert_equal %w[director_logistica coordinador consejero joven],
+                 %w[Ana Sara Eva Juan].map { |name| Participant.find_by(first_name: name).rol }
+    assert import.warnings.any? { |row| row.name == "Juan Cuatro" && row.reason.include?("«Voluntario» no existe") }
+  end
 end

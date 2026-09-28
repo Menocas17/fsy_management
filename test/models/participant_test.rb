@@ -53,4 +53,17 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_equal participant, Participant.find_by_badge("https://fsy.example/participants/#{participant.id}")
     assert_nil Participant.normalize_code("MAT-0042"), "an inventory code is not a badge code"
   end
+
+  test "there is only one man and one woman in each leadership role" do
+    attrs = { last_name: "Líder", age: 45, stake: "villa_flor", shirt_number: "l" }
+    Participant.create!(attrs.merge(first_name: "Luis", gender: "H", rol: :coordinador))
+    Participant.create!(attrs.merge(first_name: "Ana", gender: "M", rol: :coordinador))
+
+    third = Participant.new(attrs.merge(first_name: "Beto", gender: "H", rol: :coordinador))
+    refute third.valid?
+    assert_match(/Ya hay coordinador hombre: Luis Líder/, third.errors.full_messages.to_sentence)
+
+    counselor = participants(:maria)
+    refute counselor.update(rol: :coordinador, gender: "M"), "nor can an edit sneak in a third one"
+  end
 end

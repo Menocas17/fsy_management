@@ -35,6 +35,12 @@ class ParticipantImporter
   }.freeze
 
   # «M» es mujer, como en la app (H/M); «F» (femenino) también, porque así vienen muchos formularios.
+  # Los roles en femenino, como vienen en muchas planillas.
+  ROLE_ALIASES = {
+    "directora" => "director", "coordinadora" => "coordinador", "consejera" => "consejero",
+    "registradora" => "registrador", "directora de logistica" => "director_logistica", "jovenes" => "joven"
+  }.freeze
+
   GENDERS = { "h" => "H", "hombre" => "H", "masculino" => "H", "varon" => "H",
               "m" => "M", "mujer" => "M", "femenino" => "M", "f" => "M" }.freeze
 
@@ -109,8 +115,11 @@ class ParticipantImporter
         @imported << participant
         warn_about(participant, values, number, staffing_notes(participant, values))
       else
-        @skipped << Row.new(number: number, name: name.presence || "sin nombre",
-                            reason: participant.errors.full_messages.to_sentence)
+        # Un tercer director, coordinador o director de logística no entra: se resuelve a mano con quien ya está.
+        occupant = participant.leadership_occupant
+        reason = participant.errors.full_messages.to_sentence
+        reason += ": resuélvelo a mano" if occupant
+        @skipped << Row.new(number: number, name: name.presence || "sin nombre", reason: reason, match: occupant)
       end
     end
 
@@ -125,7 +134,7 @@ class ParticipantImporter
         stake: enum_key(Participant.stakes, values[:stake]),
         ward: enum_key(Participant.wards, values[:ward]),
         shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
-        rol: enum_key(Participant.rols, values[:rol]) || "joven",
+        rol: role_key(values[:rol]) || "joven",
         identity_document: values[:identity_document].presence&.to_s,
         room: values[:room]&.to_s,
         # La compañía de un joven es la suya; el staff se asigna a una compañía desde la compañía misma.
@@ -155,6 +164,15 @@ class ParticipantImporter
       value.to_s.strip.match?(/\A\d+(\.0+)?\z/) ? value.to_i : value
     end
 
+    # El rol se reconoce por su clave o por su nombre en español: «Director de logística» → director_logistica.
+    # Un rol que no se reconoce entra como joven, pero queda avisado.
+    def role_key(value)
+      return nil if value.blank?
+
+      enum_key(Participant.rols, value) || ROLE_ALIASES[normalize(value)] ||
+        Participant.rols.keys.find { |key| normalize(Participant.role_label(key)) == normalize(value) }
+    end
+
     def company_id_for(number)
       return nil if number.blank?
 
@@ -174,7 +192,7 @@ class ParticipantImporter
     end
 
     def staff_role?(values)
-      rol = enum_key(Participant.rols, values[:rol])
+      rol = role_key(values[:rol])
       rol.present? && rol != "joven"
     end
 
@@ -246,6 +264,7 @@ class ParticipantImporter
         notes << "mismo teléfono que otra persona"
         matches << same
       end
+      notes << "el rol «#{values[:rol]}» no existe: entró como joven" if values[:rol].present? && role_key(values[:rol]).nil?
       if values[:company_number].present? && !staff_role?(values) && participant.company_id.nil?
         notes << "la compañía #{values[:company_number]} no existe: quedó sin compañía"
       end

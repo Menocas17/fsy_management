@@ -38,6 +38,12 @@ class Participant < ApplicationRecord
   normalizes :identity_document, with: ->(value) { value.to_s.upcase.gsub(/[^0-9A-Z]/, "").presence }
   before_create :assign_code
 
+  # La dirección del evento es de parejas: un director y una directora (el matrimonio), un coordinador y
+  # una coordinadora, un director y una directora de logística. Nunca un tercero: son roles con acceso
+  # total (o a todo su comité), así que un duplicado por error sería un problema de seguridad.
+  LEADERSHIP_ROLES = %w[director coordinador director_logistica].freeze
+  validate :one_per_gender_in_leadership, if: -> { new_record? || will_save_change_to_rol? || will_save_change_to_gender? }
+
   # Código corto del gafete: una letra (los prefijos del inventario tienen de 2 a 5, así que no chocan) y
   # un número correlativo. Es lo que se escribe a mano cuando el QR no se lee.
   CODE_PREFIX = "P".freeze
@@ -47,6 +53,13 @@ class Participant < ApplicationRecord
   def self.normalize_code(input)
     match = input.to_s.strip.match(/\A#{CODE_PREFIX}?[\s-]*(\d{1,6})\z/i)
     match && format("#{CODE_PREFIX}-%04d", match[1].to_i)
+  end
+
+  # Quien ya ocupa el lugar de este rol y género en la dirección, si lo hay.
+  def leadership_occupant
+    return unless LEADERSHIP_ROLES.include?(rol.to_s) && gender.present?
+
+    Participant.where(rol: rol, gender: gender).where.not(id: id).first
   end
 
   # 0010101900001A → 001-010190-0001A. Otros formatos se muestran tal cual.
@@ -187,6 +200,13 @@ class Participant < ApplicationRecord
       if saved_change_to_gender?
         memberships.update_all(gender: gender)
       end
+    end
+
+    def one_per_gender_in_leadership
+      occupant = leadership_occupant
+      return unless occupant
+
+      errors.add(:base, "Ya hay #{Participant.role_label(rol).downcase} #{gender == 'M' ? 'mujer' : 'hombre'}: #{occupant.full_name} (solo uno por género)")
     end
 
     def assign_code
