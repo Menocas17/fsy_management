@@ -9,7 +9,7 @@ class Alert < ApplicationRecord
 
   enum :audience, { todos: 0, por_roles: 1, individual: 2 }, prefix: true
   enum :priority, { informativa: 0, importante: 1, critica: 2 }, prefix: true
-  enum :source, { manual: 0, agenda: 1, asignacion: 2 }, prefix: true
+  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3 }, prefix: true
 
   PRIORITY_LABELS = { "informativa" => "Informativa", "importante" => "Importante", "critica" => "Crítica" }.freeze
   PRIORITY_STYLES = {

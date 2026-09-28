@@ -75,6 +75,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.integer "audience", default: 0, null: false
     t.text "body", null: false
     t.datetime "created_at", null: false
+    t.string "link_path"
     t.integer "priority", default: 0, null: false
     t.uuid "recipient_id"
     t.boolean "send_email", default: false, null: false
