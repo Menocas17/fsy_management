@@ -139,7 +139,7 @@ class DemoSeed
       @demo["director-logistica"] = person(rol: "director_logistica", gender: pick(%w[H M]), ages: 40..55)
 
       LOGISTICS_AREAS.each do |name, (members, description)|
-        area = LogisticsArea.create!(name: name, description: description)
+        area = LogisticsArea.create!(name: name, description: description, checkin: name == "Registro", finance: name == "Finanzas")
         members.times do |index|
           member = person(rol: "logistica", gender: index.even? ? "M" : "H", ages: 20..55, logistics_area: area)
           @demo["logistica"] ||= member

@@ -1,0 +1,9 @@
+<% content_for :title, "Presentar gasto" %>
+<% content_for :eyebrow, "Finanzas" %>
+<% back_to "Finanzas", finances_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl">
+  <p class="mb-5 text-[13px] font-medium text-ink-500">
+    Se presenta antes de comprar. Lo aprueba otra persona y, hecha la compra, se consolida con la foto de la factura.
+  </p>
+  <%= render "expenses/form", expense: @expense %>
+</div>

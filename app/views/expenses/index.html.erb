@@ -1,0 +1,52 @@
+<% content_for :title, "Gastos" %>
+<% content_for :eyebrow, "Finanzas" %>
+<% back_to "Finanzas", finances_path %>
+<%
+  tab_base = "inline-flex items-center h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
+  tabs = [ [ "Todos", nil ], [ "Esperan aprobación", "espera" ], [ "Sin factura", "sin-factura" ], [ "Consolidados", "consolidados" ], [ "Cerrados", "cerrados" ] ]
+%>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <nav class="flex gap-0.5 p-1 rounded-control bg-canvas border border-line overflow-x-auto max-w-full" aria-label="Etapa">
+      <% tabs.each do |label, value| %>
+        <% current = params[:etapa] == value %>
+        <%= link_to label, expenses_path(etapa: value), aria: { current: (current ? "page" : nil) },
+              class: "#{tab_base} #{current ? "bg-surface shadow-sm font-bold text-ink-900" : "font-semibold text-ink-500 hover:text-ink-900"}" %>
+      <% end %>
+    </nav>
+    <% if can_operate_finances? %>
+      <%= link_to new_expense_path, class: button_classes do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Presentar gasto
+      <% end %>
+    <% end %>
+  </div>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <% if @expenses.any? %>
+      <ul class="divide-y divide-line-soft" data-expenses>
+        <% @expenses.each do |expense| %>
+          <li>
+            <%= link_to expense, class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-lg hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+              <span class="min-w-0 flex-1">
+                <span class="block text-[14px] font-bold text-ink-900 truncate">
+                  <%= expense.concept %>
+                  <% if expense.without_receipt? %><span class="ml-1 text-[11px] font-bold text-cat-amber-ink">· sin factura</span><% end %>
+                </span>
+                <span class="block text-[12px] font-semibold text-ink-500 truncate">
+                  <%= [ expense.category_name, expense.logistics_area&.name, expense.vendor.presence, expense.presented_by_name ].compact.join(" · ") %>
+                </span>
+              </span>
+              <span class="text-[14px] font-bold tabular-nums text-ink-900 shrink-0">
+                <%= money(expense.actual_cents || expense.estimated_cents, expense.currency) %>
+              </span>
+              <%= expense_status_chip(expense) %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-[13px] text-ink-500">No hay gastos en esta vista.</p>
+    <% end %>
+  </section>
+</div>

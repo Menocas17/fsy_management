@@ -1,0 +1,69 @@
+<% content_for :title, "Presupuesto" %>
+<% content_for :eyebrow, "Finanzas" %>
+<% back_to "Finanzas", finances_path %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl space-y-5">
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Presupuesto general y tipo de cambio", "wallet" %>
+    <%= form_with url: finances_path, method: :patch, class: "grid grid-cols-1 sm:grid-cols-2 gap-4" do %>
+      <div>
+        <%= label_tag :budget, "Presupuesto general (C$)", class: field_label_classes %>
+        <%= text_field_tag :budget, Money.to_input(FinanceSettings.budget_cents), required: true, inputmode: "decimal",
+              placeholder: "Ej. 250000", class: field_input_classes %>
+        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Todo el gasto del evento cuenta contra este monto.</p>
+      </div>
+      <div>
+        <%= label_tag :usd_rate, "Tipo de cambio (C$ por US$)", class: field_label_classes %>
+        <%= text_field_tag :usd_rate, FinanceSettings.usd_rate, inputmode: "decimal", placeholder: "Ej. 36.62", class: field_input_classes %>
+        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Fíjalo antes de la semana del evento; se puede cambiar en un gasto puntual.</p>
+      </div>
+      <div class="sm:col-span-2">
+        <%= tag.button "Guardar", type: "submit", data: { turbo_submits_with: "Guardando…" }, class: button_classes %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-categories>
+    <%= section_heading "Categorías", "tags" %>
+    <p class="-mt-2 mb-4 text-[12.5px] text-ink-500">
+      Opcionales. Con presupuesto propio, el panel muestra cuánto les queda; sin él, solo lo gastado. Un gasto sin categoría cuenta como «General».
+    </p>
+    <% if @categories.any? %>
+      <ul class="divide-y divide-line-soft mb-5">
+        <% @categories.each do |category| %>
+          <li class="py-3 first:pt-0">
+            <%= form_with url: expense_category_path(category), method: :patch, class: "flex flex-wrap items-end gap-2" do %>
+              <div class="flex-1 min-w-40">
+                <%= label_tag "name_#{category.id}", "Nombre", class: "sr-only" %>
+                <%= text_field_tag :name, category.name, id: "name_#{category.id}", required: true, maxlength: 60, class: field_input_classes %>
+              </div>
+              <div class="w-40">
+                <%= label_tag "budget_#{category.id}", "Presupuesto (C$)", class: "sr-only" %>
+                <%= text_field_tag :budget, Money.to_input(category.budget_cents), id: "budget_#{category.id}", inputmode: "decimal",
+                      placeholder: "Sin presupuesto", class: field_input_classes %>
+              </div>
+              <%= tag.button "Guardar", type: "submit", class: button_classes(:secondary) %>
+            <% end %>
+            <%= button_to "Borrar", expense_category_path(category), method: :delete,
+                  form: { class: "mt-1.5", data: { turbo_confirm: "¿Borrar la categoría «#{category.name}»?", turbo_confirm_detail: "Solo se puede si no tiene gastos." } },
+                  class: "text-[12px] font-bold text-cat-rose-ink hover:underline cursor-pointer" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%= form_with url: expense_categories_path, method: :post, class: "flex flex-wrap items-end gap-2 rounded-tile bg-canvas p-3" do %>
+      <div class="flex-1 min-w-40">
+        <%= label_tag :new_category_name, "Nueva categoría", class: field_label_classes %>
+        <%= text_field_tag :name, nil, id: "new_category_name", required: true, maxlength: 60, placeholder: "Ej. Alimentación", class: field_input_classes %>
+      </div>
+      <div class="w-40">
+        <%= label_tag :new_category_budget, "Presupuesto (opcional)", class: field_label_classes %>
+        <%= text_field_tag :budget, nil, id: "new_category_budget", inputmode: "decimal", placeholder: "C$", class: field_input_classes %>
+      </div>
+      <%= tag.button type: "submit", class: button_classes do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Agregar
+      <% end %>
+    <% end %>
+  </section>
+</div>

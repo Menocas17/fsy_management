@@ -1,0 +1,65 @@
+<%= form_with model: expense, id: "expense-form", class: "space-y-5" do |form| %>
+  <% if expense.errors.any? %>
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
+      <% expense.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Qué se va a comprar", "shopping-cart" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div class="sm:col-span-2">
+        <%= form.label :concept, "Concepto", class: field_label_classes %>
+        <%= form.text_field :concept, required: true, maxlength: 120, placeholder: "Ej. Agua para el primer día", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :expense_category_id, "Categoría", class: field_label_classes %>
+        <%= form.select :expense_category_id, ExpenseCategory.by_name.map { |c| [ c.name, c.id ] }, { include_blank: "General" }, class: field_select_classes %>
+      </div>
+      <div>
+        <%= form.label :logistics_area_id, "Área que lo pide", class: field_label_classes %>
+        <%= form.select :logistics_area_id, LogisticsArea.order(:name).map { |a| [ a.name, a.id ] }, { include_blank: "Ninguna en particular" }, class: field_select_classes %>
+      </div>
+      <div>
+        <%= form.label :vendor, "Proveedor", class: field_label_classes %>
+        <%= form.text_field :vendor, maxlength: 120, placeholder: "Si ya se sabe", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :planned_on, "Fecha prevista", class: field_label_classes %>
+        <%= form.date_field :planned_on, class: field_input_classes %>
+      </div>
+    </div>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Monto estimado", "banknote" %>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :currency, "Moneda", class: field_label_classes %>
+        <%= form.select :currency, Money::CURRENCY_LABELS.invert, {}, class: field_select_classes %>
+      </div>
+      <div>
+        <%= form.label :estimated_amount, "Monto", class: field_label_classes %>
+        <%= form.text_field :estimated_amount, value: Money.to_input(expense.estimated_cents), required: true, inputmode: "decimal",
+              placeholder: "Ej. 1500", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :exchange_rate, "Tipo de cambio (si es en US$)", class: field_label_classes %>
+        <%= form.text_field :exchange_rate, value: (expense.usd? ? expense.exchange_rate : nil), inputmode: "decimal",
+              placeholder: FinanceSettings.usd_rate ? "#{FinanceSettings.usd_rate} (el del evento)" : "Aún no fijado", class: field_input_classes %>
+      </div>
+      <div class="sm:col-span-3">
+        <%= form.label :notes, "Notas", class: field_label_classes %>
+        <%= form.text_area :notes, rows: 2, placeholder: "Para qué es, cotizaciones, lo que ayude a aprobarlo.", class: field_textarea_classes %>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<div class="<%= card_classes("mt-5 px-5 py-4 flex gap-2.5 justify-end") %>">
+  <%= link_to "Cancelar", expense.persisted? ? expense : finances_path, class: button_classes(:secondary) %>
+  <%= tag.button expense.persisted? ? "Guardar cambios" : "Presentar gasto", type: "submit", form: "expense-form",
+        data: { turbo_submits_with: "Guardando…" }, class: button_classes %>
+</div>

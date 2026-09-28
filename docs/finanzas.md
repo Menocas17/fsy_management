@@ -1,6 +1,6 @@
 # Módulo de Finanzas — plan
 
-Estado: **acordado, por implementar (fase 1)**. Menú: el ítem «Finanzas», hoy deshabilitado.
+Estado: **fase 1 implementada**. Menú: el ítem «Finanzas», hoy deshabilitado.
 
 ## Alcance
 
@@ -9,16 +9,17 @@ Fuera por ahora: cuotas de los jóvenes, fondos entregados (caja chica) e ingres
 
 ## Quién hace qué
 
-| Quién | Presenta | Aprueba | Consolida | Presupuesto y tipo de cambio |
+| Quién | Presenta | Aprueba | Consolida | Presupuesto, categorías y tipo de cambio |
 |---|---|---|---|---|
-| Logística del área **Finanzas** | Sí | Sí¹ | Sí¹ | Ve |
+| Logística del área **Finanzas** (`logistics_areas.finance`) | Sí | Sí¹ | Sí¹ | Ve |
 | **Director de logística** | Sí | Sí¹ | Sí¹ | Define |
-| Acceso total (dirección, coordinación, superadmin) | — | Sí¹ (respaldo) | Sí¹ (respaldo) | Define |
-| Resto del staff | No ve Finanzas |||
+| Dirección y coordinación | Solo ven | | | Ven |
+| Superadmin | Solo ve | | | Define (cuenta del sistema) |
+| Resto del staff | No ve Finanzas | | | |
 
 ¹ **Nunca la misma persona que dio el paso anterior**: quien presenta un gasto no lo aprueba, y quien
-escribe una justificación no la aprueba. Normalmente lo hacen dos personas: la de Finanzas y el director
-de logística. La dirección queda como respaldo si alguno falta.
+escribe una justificación no la aprueba. Lo hacen las dos personas de siempre: la de Finanzas y el
+director de logística.
 
 ## Ciclo de un gasto
 
@@ -55,16 +56,19 @@ Historial (categoría nueva «Finanzas»).
 
 ## Presupuesto
 
-Montos aprobados por **categoría**, en C$. Por categoría el panel muestra:
+Un **presupuesto general** del evento, en C$, siempre. Además se pueden **agregar categorías** y, si se
+quiere, darles **presupuesto propio**; sin categorías (o sin presupuesto propio) todo cuenta solo contra
+el general. Un gasto sin categoría figura como «General». Una categoría con gastos no se puede borrar.
 
-- **Presupuesto** — lo aprobado para la categoría.
+Para el general y cada categoría con presupuesto, el panel muestra:
+
+- **Presupuesto** — lo aprobado.
 - **Comprometido** — gastos aprobados que aún no se consolidan (monto estimado).
 - **Ejecutado** — gastos consolidados (monto real).
 - **Disponible** — presupuesto − comprometido − ejecutado. Ámbar desde el 80 %, rojo al pasarse.
 - Aparte, lo **presentado** sin aprobar, para ver lo que viene.
 
-Categorías iniciales (editables): Alimentación, Materiales, Transporte, Hospedaje, Decoración,
-Impresiones, Botiquín y salud, Actividades, Otros.
+Si los presupuestos de las categorías suman más que el general, el panel lo avisa.
 
 ## Pantallas
 
@@ -89,6 +93,6 @@ Impresiones, Botiquín y salud, Actividades, Otros.
 3. Avisos push al acercarse al límite de una categoría o cuando un gasto espera aprobación, y
    reembolsos a quien pagó de su bolsillo.
 
-## Pendiente de confirmar
+## Pendiente (fase 1)
 
-- Que dirección y coordinación funcionen como aprobadores de respaldo (supuesto de este plan).
+- Corregir un gasto ya consolidado con otro movimiento (devolución o ajuste): por ahora no hay pantalla.

@@ -1,0 +1,83 @@
+<% content_for :title, @expense.concept %>
+<% content_for :eyebrow, "Finanzas" %>
+<% back_to "Gastos", expenses_path %>
+<% me = Current.user.participant %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-4xl space-y-5">
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-[12px] font-semibold text-ink-500"><%= [ @expense.category_name, @expense.logistics_area&.name ].compact.join(" · ") %></p>
+        <h2 class="text-[20px] font-extrabold tracking-tight text-ink-900 break-words"><%= @expense.concept %></h2>
+        <% if @expense.vendor.present? %><p class="text-[13px] font-semibold text-ink-500"><%= @expense.vendor %></p><% end %>
+      </div>
+      <%= expense_status_chip(@expense) %>
+    </div>
+
+    <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[13px]">
+      <div>
+        <dt class="font-bold text-ink-500">Estimado</dt>
+        <dd class="text-[16px] font-extrabold tabular-nums text-ink-900"><%= expense_amount(@expense, @expense.estimated_cents) %></dd>
+      </div>
+      <div>
+        <dt class="font-bold text-ink-500">Real (factura)</dt>
+        <dd class="text-[16px] font-extrabold tabular-nums text-ink-900" data-actual><%= expense_amount(@expense, @expense.actual_cents) %></dd>
+      </div>
+      <div>
+        <dt class="font-bold text-ink-500">Moneda</dt>
+        <dd class="font-semibold text-ink-900"><%= Money::CURRENCY_LABELS[@expense.currency] %><%= " · C$ #{@expense.exchange_rate} por dólar" if @expense.usd? %></dd>
+      </div>
+    </dl>
+    <% if @expense.notes.present? %>
+      <p class="mt-4 text-[13.5px] leading-relaxed text-ink-700 whitespace-pre-line"><%= @expense.notes %></p>
+    <% end %>
+
+    <%# Quién dio cada paso: es lo que se revisa al rendir cuentas. %>
+    <ol class="mt-5 space-y-2 border-t border-line-soft pt-4 text-[12.5px]" data-timeline>
+      <li><span class="font-bold text-ink-900">Presentado</span> <span class="text-ink-500">por <%= @expense.presented_by_name %> · <%= SpanishDates.short_with_time(@expense.created_at) %><%= " · para el #{SpanishDates.long(@expense.planned_on, capitalize: false)}" if @expense.planned_on %></span></li>
+      <% if @expense.approved_at %>
+        <li><span class="font-bold text-ink-900">Aprobado</span> <span class="text-ink-500">por <%= @expense.approved_by_name %> · <%= SpanishDates.short_with_time(@expense.approved_at) %></span></li>
+      <% end %>
+      <% if @expense.rejected_at %>
+        <li><span class="font-bold text-cat-rose-ink">Rechazado</span> <span class="text-ink-500">por <%= @expense.rejected_by_name %> · <%= SpanishDates.short_with_time(@expense.rejected_at) %> · «<%= @expense.rejection_reason %>»</span></li>
+      <% end %>
+      <% if @expense.justified_at %>
+        <li><span class="font-bold text-ink-900">Justificado sin factura</span> <span class="text-ink-500">por <%= @expense.justified_by_name %> · <%= SpanishDates.short_with_time(@expense.justified_at) %></span></li>
+      <% end %>
+      <% if @expense.consolidated_at %>
+        <li><span class="font-bold text-cat-green-ink">Consolidado</span> <span class="text-ink-500">por <%= @expense.consolidated_by_name %> · <%= SpanishDates.short_with_time(@expense.consolidated_at) %><%= " · pagado el #{SpanishDates.long(@expense.spent_on, capitalize: false)}" if @expense.spent_on %><%= " · #{Expense::PAYMENT_LABELS[@expense.payment_method]}" if @expense.payment_method %></span></li>
+      <% end %>
+    </ol>
+  </section>
+
+  <% if @expense.justification.present? %>
+    <section class="rounded-tile border border-cat-amber/30 bg-cat-amber/10 px-5 py-4" data-justification>
+      <p class="text-[13px] font-bold text-cat-amber-ink">Justificación sin factura</p>
+      <p class="mt-1 text-[13.5px] text-ink-900 whitespace-pre-line"><%= @expense.justification %></p>
+    </section>
+  <% end %>
+  <% if @expense.approved? && @expense.justification_rejection.present? %>
+    <section class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-4" role="status">
+      <p class="text-[13px] font-bold text-cat-rose-ink">La justificación no se aceptó</p>
+      <p class="mt-1 text-[13.5px] text-ink-900">«<%= @expense.justification_rejection %>». Sube la factura o escribe una justificación nueva.</p>
+    </section>
+  <% end %>
+
+  <% if @expense.receipt.attached? %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-receipt>
+      <%= section_heading "Factura", "receipt" %>
+      <% if @expense.receipt.image? && !@expense.receipt.content_type.in?(%w[image/heic image/heif]) %>
+        <%= link_to rails_blob_path(@expense.receipt, disposition: "inline"), target: "_blank", rel: "noopener" do %>
+          <%= image_tag rails_blob_path(@expense.receipt, disposition: "inline"), alt: "Factura de #{@expense.concept}",
+                loading: "lazy", class: "max-h-[70vh] w-auto rounded-tile border border-line-soft bg-canvas" %>
+        <% end %>
+      <% else %>
+        <%= link_to "Abrir la factura (#{@expense.receipt.filename})", rails_blob_path(@expense.receipt, disposition: "inline"),
+              target: "_blank", rel: "noopener", class: "font-bold text-primary-700 dark:text-primary-300 underline" %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if can_operate_finances? %>
+    <%= render "expenses/next_step", expense: @expense, me: me %>
+  <% end %>
+</div>
