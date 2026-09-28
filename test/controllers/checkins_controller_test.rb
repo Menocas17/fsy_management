@@ -125,6 +125,7 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
 
     travel_to Rails.configuration.x.event_start_on - 10.days do
+      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
       get checkins_path
       assert_select "[data-scan-closed-card]", text: /Se abre el/
       assert_select "[data-controller='checkin-scanner']", 0
@@ -144,11 +145,13 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     day = Rails.configuration.x.event_start_on
 
     travel_to day.in_time_zone.change(hour: 9) do
+      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
       get checkins_path
       assert_select "[data-controller='checkin-scanner']", 1
     end
 
     travel_to (day + 1).in_time_zone.change(hour: 8) do
+      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
       scanned_at = day.in_time_zone.change(hour: 18).iso8601
       assert_difference -> { Checkin.count }, 1 do
         post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "late", recorded_at: scanned_at } ] }, as: :json

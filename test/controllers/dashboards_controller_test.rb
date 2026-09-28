@@ -115,6 +115,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     end
 
     travel_to Time.zone.local(day.year, day.month, day.day, 6) do
+      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
       get dashboard_path
 
       assert_select "[data-next-item^='activity-']", 2, "durante la semana manda la agenda"

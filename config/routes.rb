@@ -18,6 +18,9 @@ Rails.application.routes.draw do
   resource :dashboard, only: [ :show ]
   resource :organigrama, only: [ :show ], controller: "organigrama"
   resources :audit_logs, only: [ :index ], path: "historial"
+  # Quién está en línea, sus sesiones abiertas y los intentos de entrar: solo para el superadmin.
+  resources :accesses, only: [ :index ], path: "accesos"
+  delete "accesos/sesiones/:id" => "accesses#destroy_session", as: :access_session
   # El resumen de capacitaciones vive dentro de la agenda, que es donde se buscan las fechas.
   scope path: "agenda", as: :agenda do
     resources :trainings, path: "capacitaciones", path_names: { new: "nueva", edit: "editar" } do
