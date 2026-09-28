@@ -20,6 +20,14 @@ class AccessesControllerTest < ActionDispatch::IntegrationTest
     refute LoginAttempt.column_names.any? { |column| column.include?("passw") }
   end
 
+  test "Accesos is in the superadmin's account menu, not in the side menu" do
+    sign_in_as(@admin)
+
+    get dashboard_path
+    assert_select "[data-account-menu='accesses'][href='#{accesses_path}']", 1
+    assert_select "aside a[href='#{accesses_path}']", 0
+  end
+
   test "the superadmin sees who is online, the open sessions and the attempts" do
     LoginAttempt.create!(email_address: "intruso@fsy.com", result: :failed, ip_address: "1.2.3.4")
     sign_in_as(@admin)
@@ -50,7 +58,7 @@ class AccessesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
 
     get dashboard_path
-    assert_select "a[href='#{accesses_path}']", 0
+    assert_select "a[href='#{accesses_path}']", 0, "neither in the side menu nor in the account menu"
   end
 
   test "a session unused for too long is closed instead of revived" do
