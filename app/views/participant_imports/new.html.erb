@@ -29,6 +29,19 @@
         </ul>
       <% end %>
 
+      <% if @import.warnings.any? %>
+        <p class="mt-5 mb-2 text-[12px] font-bold text-cat-amber-ink">Entraron, pero conviene revisarlas</p>
+        <ul class="divide-y divide-line-soft border border-cat-amber/30 rounded-tile overflow-hidden" data-import-warnings>
+          <% @import.warnings.each do |row| %>
+            <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5 text-[13px]">
+              <span class="font-bold text-ink-900 tabular-nums">Fila <%= row.number %></span>
+              <span class="font-semibold text-ink-700"><%= row.name %></span>
+              <span class="text-ink-500">· <%= row.reason %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
       <% if @import.imported_count.positive? %>
         <%= link_to participants_path, class: button_classes(:primary, extra: "mt-5") do %>
           <%= icon "users", class: "w-4 h-4" %>

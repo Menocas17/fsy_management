@@ -29,9 +29,13 @@ class Participant < ApplicationRecord
   store_accessor :medical_info, :allergies, :medicines, :diet, :additional_medical_notes
 
   validates :first_name, :last_name, :age, :stake, :shirt_number, :gender, presence: true
-  validates :age, presence: true, numericality: { greater_than: 0, less_than: 80 }
+  validates :age, presence: true, numericality: { greater_than: 0, less_than: 80, allow_nil: true }
 
   after_save :sync_membership_gender
+
+  # Cédula: se guarda en mayúsculas y sin guiones ni espacios (001-010190-0001A → 0010101900001A), así
+  # la misma cédula escrita de dos formas es la misma. formatted_identity_document le devuelve los guiones.
+  normalizes :identity_document, with: ->(value) { value.to_s.upcase.gsub(/[^0-9A-Z]/, "").presence }
   before_create :assign_code
 
   # Código corto del gafete: una letra (los prefijos del inventario tienen de 2 a 5, así que no chocan) y
@@ -43,6 +47,12 @@ class Participant < ApplicationRecord
   def self.normalize_code(input)
     match = input.to_s.strip.match(/\A#{CODE_PREFIX}?[\s-]*(\d{1,6})\z/i)
     match && format("#{CODE_PREFIX}-%04d", match[1].to_i)
+  end
+
+  # 0010101900001A → 001-010190-0001A. Otros formatos se muestran tal cual.
+  def formatted_identity_document
+    doc = identity_document.to_s
+    doc.match?(/\A\d{13}[A-Z]\z/) ? "#{doc[0, 3]}-#{doc[3, 6]}-#{doc[9, 5]}" : doc.presence
   end
 
   # Por id (lo que trae el QR) o por código corto (lo que se escribe).

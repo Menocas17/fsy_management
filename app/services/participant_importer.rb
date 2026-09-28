@@ -31,20 +31,25 @@ class ParticipantImporter
     "notas" => :additional_instructions, "observaciones" => :additional_instructions
   }.freeze
 
-  GENDERS = { "h" => "H", "hombre" => "H", "masculino" => "H", "m" => "M", "mujer" => "M", "femenino" => "M" }.freeze
+  # «M» es mujer, como en la app (H/M); «F» (femenino) también, porque así vienen muchos formularios.
+  GENDERS = { "h" => "H", "hombre" => "H", "masculino" => "H", "varon" => "H",
+              "m" => "M", "mujer" => "M", "femenino" => "M", "f" => "M" }.freeze
 
-  attr_reader :imported, :skipped, :fatal
+  attr_reader :imported, :skipped, :warnings, :fatal
 
   def initialize(file)
     @file = file
     @imported = []
     @skipped = []
+    # Filas que sí entraron pero conviene revisar: mismo nombre, correo o teléfono que otra persona, o
+    # una compañía que no se pudo usar.
+    @warnings = []
   end
 
   def call
     sheet = open_sheet
     headers = map_headers(sheet.row(1))
-    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisá la primera fila)." if headers.values.none?
+    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisa la primera fila)." if headers.values.none?
 
     Participant.transaction do
       (2..sheet.last_row).each { |number| process(sheet.row(number), headers, number) }
@@ -99,6 +104,7 @@ class ParticipantImporter
       participant = Participant.new(attributes_for(values))
       if participant.save
         @imported << participant
+        warn_about(participant, values, number)
       else
         @skipped << Row.new(number: number, name: name.presence || "sin nombre",
                             reason: participant.errors.full_messages.to_sentence)
@@ -112,14 +118,15 @@ class ParticipantImporter
     def attributes_for(values)
       {
         first_name: values[:first_name], last_name: values[:last_name],
-        age: values[:age]&.to_i, gender: GENDERS[normalize(values[:gender])],
+        age: whole_number(values[:age]), gender: GENDERS[normalize(values[:gender])],
         stake: enum_key(Participant.stakes, values[:stake]),
         ward: enum_key(Participant.wards, values[:ward]),
         shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
         rol: enum_key(Participant.rols, values[:rol]) || "joven",
-        identity_document: values[:identity_document].presence&.to_s&.gsub(/\D/, "").presence&.to_i,
+        identity_document: values[:identity_document].presence&.to_s,
         room: values[:room]&.to_s,
-        company_id: company_id_for(values[:company_number]),
+        # La compañía de un joven es la suya; el staff se asigna a una compañía desde la compañía misma.
+        company_id: (staff_role?(values) ? nil : company_id_for(values[:company_number])),
         phone_number: values[:phone_number]&.to_s, email_address: values[:email_address],
         emergency_contact_name: values[:emergency_contact_name],
         emergency_contact_number: values[:emergency_contact_number]&.to_s,
@@ -137,6 +144,14 @@ class ParticipantImporter
       mapping.keys.find { |key| key == needle || normalize(key.tr("_", " ")) == normalize(value) }
     end
 
+    # «15», 15 o 15.0 → 15. Lo que no es número se deja tal cual, para que el error diga «debe ser un número»
+    # en vez de convertirse en 0.
+    def whole_number(value)
+      return value.to_i if value.is_a?(Numeric)
+
+      value.to_s.strip.match?(/\A\d+(\.0+)?\z/) ? value.to_i : value
+    end
+
     def company_id_for(number)
       return nil if number.blank?
 
@@ -144,12 +159,41 @@ class ParticipantImporter
       @companies[number.to_s.gsub(/\D/, "").to_i]
     end
 
-    # La cédula manda cuando viene; si no, el nombre completo evita duplicar a la misma persona.
+    # La cédula manda cuando viene (escrita con o sin guiones). Sin cédula, es la misma persona si coinciden
+    # el nombre completo, la edad y la estaca; solo el nombre no basta: dos «María López» pueden existir.
     def duplicate?(values)
-      document = values[:identity_document].presence&.to_s&.gsub(/\D/, "").presence
-      return Participant.exists?(identity_document: document.to_i) if document
+      document = Participant.normalize_value_for(:identity_document, values[:identity_document])
+      return Participant.exists?(identity_document: document) if document
 
       values[:first_name].present? &&
-        Participant.exists?(first_name: values[:first_name], last_name: values[:last_name])
+        Participant.exists?(first_name: values[:first_name], last_name: values[:last_name],
+                            age: whole_number(values[:age]), stake: enum_key(Participant.stakes, values[:stake]))
+    end
+
+    def staff_role?(values)
+      rol = enum_key(Participant.rols, values[:rol])
+      rol.present? && rol != "joven"
+    end
+
+    def warn_about(participant, values, number)
+      others = Participant.where.not(id: participant.id)
+      notes = []
+      notes << "mismo nombre que otra persona" if others.exists?(first_name: participant.first_name, last_name: participant.last_name)
+      if participant.email_address.present? && others.where("lower(contact_info ->> 'email_address') = ?", participant.email_address.downcase).exists?
+        notes << "mismo correo que otra persona"
+      end
+      # Los últimos 8 dígitos: «+505 8888 1111» y «8888-1111» son el mismo número.
+      if (phone = participant.phone_number.to_s.gsub(/\D/, "").last(8)).length == 8 &&
+         others.where("right(regexp_replace(contact_info ->> 'phone_number', '\\D', '', 'g'), 8) = ?", phone).exists?
+        notes << "mismo teléfono que otra persona"
+      end
+      if values[:company_number].present?
+        if staff_role?(values)
+          notes << "la compañía no se asigna al staff desde el archivo (se hace en la compañía)"
+        elsif participant.company_id.nil?
+          notes << "la compañía #{values[:company_number]} no existe: quedó sin compañía"
+        end
+      end
+      @warnings << Row.new(number: number, name: participant.full_name, reason: notes.join(" · ")) if notes.any?
     end
 end

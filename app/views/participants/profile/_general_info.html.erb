@@ -5,7 +5,7 @@
     <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
     <%= info_row "Cuarto", "door-open", participant.room %>
     <%= info_row "Consejeros a cargo", "users", [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
-    <%= info_row "Identificación", "id-card", participant.identity_document %>
+    <%= info_row "Identificación", "id-card", participant.formatted_identity_document %>
     <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>
     <%= info_row "Talla de camisa", "shirt", participant.shirt_number&.upcase %>
   </div>

@@ -310,7 +310,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.date "date_of_inscription"
     t.string "first_name"
     t.integer "gender"
-    t.integer "identity_document"
+    t.string "identity_document"
     t.string "last_name"
     t.uuid "logistics_area_id"
     t.jsonb "medical_info"
