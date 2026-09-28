@@ -18,6 +18,9 @@ Rails.application.routes.draw do
   resource :dashboard, only: [ :show ]
   resource :organigrama, only: [ :show ], controller: "organigrama"
   resources :audit_logs, only: [ :index ], path: "historial"
+  # Quién está en línea, sus sesiones abiertas y los intentos de entrar: solo para el superadmin.
+  resources :accesses, only: [ :index ], path: "accesos"
+  delete "accesos/sesiones/:id" => "accesses#destroy_session", as: :access_session
   # Finanzas: el panel y su configuración, las categorías y los gastos con sus tres etapas (docs/finanzas.md).
   resource :finances, only: %i[show edit update], path: "finanzas", path_names: { edit: "configurar" }
   resources :expense_categories, only: %i[new create edit update destroy], path: "finanzas/categorias",

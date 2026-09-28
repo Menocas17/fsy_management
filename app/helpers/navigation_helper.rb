@@ -37,7 +37,8 @@ module NavigationHelper
            { text: "Finanzas", lucide_icon: "wallet", disabled: true, hint: "Solo para el área de Finanzas, logística y la dirección" }
          end),
         ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
-        ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
+        ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?),
+        ({ text: "Accesos", url: accesses_path, lucide_icon: "shield-check" } if Current.user&.superadmin?)
       ] }
     ]
     # "Mi perfil" lives in the account menu of the top bar; a section with no items is dropped.
