@@ -75,7 +75,15 @@ Rails.application.routes.draw do
       get :trainings, path: "capacitaciones"
     end
   end
-  resource :participant_import, only: [ :new, :create ], path: "carga-de-participantes"
+  # Carga masiva: subir el archivo y, de cada carga, su informe con las filas que esperan resolverse a mano.
+  resources :participant_imports, only: %i[new create show], path: "carga-de-participantes", path_names: { new: "subir" } do
+    resources :rows, only: %i[edit update], controller: "participant_import_rows", path: "filas", path_names: { edit: "corregir" } do
+      member do
+        patch :approve, path: "aprobar"
+        patch :discard, path: "descartar"
+      end
+    end
+  end
   resources :notifications, only: [ :index ], path: "notificaciones" do
     collection do
       # La campanita pregunta por su número cuando vuelve de la caché de Turbo, donde viene congelado.

@@ -1,0 +1,52 @@
+<%# Una fila en espera: sus problemas (los que bloquean, en rojo; los avisos, en ámbar), la ficha con la que
+    choca y qué hacer. Las fichas se abren en otra pestaña para no perder el informe. %>
+<% matches = row.matches %>
+<article class="<%= card_classes("p-5") %> scroll-mt-4" id="fila-<%= row.row_number %>" data-pending-row="<%= row.row_number %>">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <p class="text-[15px] font-bold text-ink-900">
+      <span class="text-ink-500 tabular-nums">Fila <%= row.row_number %> ·</span> <%= row.name %>
+    </p>
+    <p class="text-[12px] font-semibold text-ink-500">
+      <%= [ row.values["rol"].presence || "Joven", row.values["stake"], (row.values["age"].present? ? "#{row.values["age"]} años" : nil) ].compact.join(" · ") %>
+    </p>
+  </div>
+
+  <ul class="mt-3 space-y-1.5">
+    <% row.issues.each do |issue| %>
+      <% match = matches[issue["match_id"]] %>
+      <li class="flex flex-wrap items-baseline gap-x-2 text-[13px] <%= issue["blocking"] ? "text-cat-rose-ink" : "text-cat-amber-ink" %>">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold <%= issue["blocking"] ? "bg-cat-rose/15" : "bg-cat-amber/20" %>">
+          <%= issue["blocking"] ? "Bloquea" : "Aviso" %>
+        </span>
+        <span class="font-semibold"><%= issue["text"] %></span>
+        <% if match %>
+          <%= link_to "Ver la ficha de #{match.full_name}", participant_path(match), target: "_blank", rel: "noopener",
+                class: "text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <%= link_to edit_participant_import_row_path(import, row), class: button_classes(:secondary, size: :sm) do %>
+      <%= icon "pencil", class: "w-4 h-4" %>
+      Corregir
+    <% end %>
+    <% if row.blocking? %>
+      <span class="text-[12px] font-semibold text-ink-500">Corrige lo que bloquea para poder aprobarla.</span>
+    <% else %>
+      <%= button_to approve_participant_import_row_path(import, row), method: :patch, class: button_classes(size: :sm),
+            data: { turbo_submits_with: "Aprobando…" } do %>
+        <%= icon "check", class: "w-4 h-4" %>
+        Aprobar y hacer entrar
+      <% end %>
+    <% end %>
+    <%= button_to discard_participant_import_row_path(import, row), method: :patch,
+          form: { class: "ml-auto", data: { turbo_confirm: "¿Descartar la fila #{row.row_number} (#{row.name})?",
+                                            turbo_confirm_detail: "No entra a la base. Queda en «Descartadas» del informe.", turbo_confirm_button: "Sí, descartar" } },
+          class: button_classes(:ghost, size: :sm, extra: "text-cat-rose-ink") do %>
+      <%= icon "x", class: "w-4 h-4" %>
+      Descartar
+    <% end %>
+  </div>
+</article>

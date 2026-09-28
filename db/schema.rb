@@ -300,6 +300,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.index ["participant_id"], name: "index_memberships_on_participant_id"
   end
 
+  create_table "participant_import_rows", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "issues", default: [], null: false
+    t.uuid "participant_id"
+    t.uuid "participant_import_id", null: false
+    t.datetime "resolved_at"
+    t.string "resolved_by_name"
+    t.integer "row_number", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "values", default: {}, null: false
+    t.index ["participant_id"], name: "index_participant_import_rows_on_participant_id"
+    t.index ["participant_import_id", "status"], name: "idx_on_participant_import_id_status_d5a7a48eac"
+    t.index ["participant_import_id"], name: "index_participant_import_rows_on_participant_import_id"
+  end
+
+  create_table "participant_imports", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uploaded_by_id"
+    t.string "uploaded_by_name", null: false
+    t.index ["uploaded_by_id"], name: "index_participant_imports_on_uploaded_by_id"
+  end
+
   create_table "participants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "additional_instructions"
     t.integer "age"
@@ -415,6 +440,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
   add_foreign_key "inventory_movements", "participants"
   add_foreign_key "login_attempts", "users", on_delete: :nullify
   add_foreign_key "memberships", "participants"
+  add_foreign_key "participant_import_rows", "participant_imports", on_delete: :cascade
+  add_foreign_key "participant_import_rows", "participants", on_delete: :nullify
+  add_foreign_key "participant_imports", "participants", column: "uploaded_by_id", on_delete: :nullify
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify
   add_foreign_key "push_subscriptions", "users"
