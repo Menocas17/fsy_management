@@ -47,7 +47,7 @@ class PushNotificationJob < ApplicationJob
           # Android respeta esta vibración; en iPhone el sonido lo gobierna el sistema.
           vibrate: alert.priority_critica? ? [ 100, 60, 100, 60, 200 ] : [ 90, 60, 90 ],
           silent: false,
-          data: { path: "/alertas/#{alert.id}", priority: alert.priority }
+          data: { path: alert.link_path.presence || "/alertas/#{alert.id}", priority: alert.priority }
         }
       }
     end

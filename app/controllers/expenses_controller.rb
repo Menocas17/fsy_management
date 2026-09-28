@@ -31,6 +31,7 @@ class ExpensesController < ApplicationController
 
     if @expense.save
       audit(@expense, "created", "Presentó el gasto «#{@expense.concept}» por #{Money.format(@expense.estimated_cents, @expense.currency)}")
+      FinanceNotifier.presented(@expense)
       redirect_to @expense, notice: "Gasto presentado. Ahora lo tiene que aprobar otra persona."
     else
       render :new, status: :unprocessable_entity
@@ -54,11 +55,11 @@ class ExpensesController < ApplicationController
   end
 
   def approve
-    run(@expense.approve(actor), "Aprobó el gasto «#{@expense.concept}»", "Gasto aprobado. Falta la factura para consolidarlo.")
+    run(@expense.approve(actor), "Aprobó el gasto «#{@expense.concept}»", "Gasto aprobado. Falta la factura para consolidarlo.", notify: :approved)
   end
 
   def reject
-    run(@expense.reject(actor, params[:reason]), "Rechazó el gasto «#{@expense.concept}»", "Gasto rechazado.")
+    run(@expense.reject(actor, params[:reason]), "Rechazó el gasto «#{@expense.concept}»", "Gasto rechazado.", notify: :rejected)
   end
 
   def withdraw
@@ -69,23 +70,24 @@ class ExpensesController < ApplicationController
     done = @expense.consolidate(actor, receipt: params[:receipt], actual_cents: Money.parse(params[:actual_amount]),
                                 spent_on: params[:spent_on], payment_method: params[:payment_method],
                                 exchange_rate: rate_param)
-    run(done, "Consolidó el gasto «#{@expense.concept}» con su factura", "Gasto consolidado con su factura.")
+    run(done, "Consolidó el gasto «#{@expense.concept}» con su factura", "Gasto consolidado con su factura.", notify: :consolidated)
   end
 
   def justify
     done = @expense.justify(actor, text: params[:justification], actual_cents: Money.parse(params[:actual_amount]),
                             spent_on: params[:spent_on], payment_method: params[:payment_method],
                             exchange_rate: rate_param)
-    run(done, "Justificó el gasto «#{@expense.concept}» sin factura", "Justificación enviada. La tiene que aprobar otra persona.")
+    run(done, "Justificó el gasto «#{@expense.concept}» sin factura", "Justificación enviada. La tiene que aprobar otra persona.", notify: :justified)
   end
 
   def approve_justification
-    run(@expense.approve_justification(actor), "Aprobó la justificación del gasto «#{@expense.concept}»", "Justificación aprobada: gasto consolidado.")
+    run(@expense.approve_justification(actor), "Aprobó la justificación del gasto «#{@expense.concept}»", "Justificación aprobada: gasto consolidado.",
+        notify: :justification_approved)
   end
 
   def reject_justification
     run(@expense.reject_justification(actor, params[:reason]), "Rechazó la justificación del gasto «#{@expense.concept}»",
-        "Justificación rechazada: el gasto sigue esperando la factura.")
+        "Justificación rechazada: el gasto sigue esperando la factura.", notify: :justification_rejected)
   end
 
   private
@@ -117,9 +119,11 @@ class ExpensesController < ApplicationController
       params[:exchange_rate].to_s.tr(",", ".").presence
     end
 
-    def run(done, summary, notice)
+    # notify: el aviso de FinanceNotifier que corresponde al paso (a quien le toca el siguiente, o a quien lo pidió).
+    def run(done, summary, notice, notify: nil)
       if done
         audit(@expense, "updated", summary)
+        FinanceNotifier.public_send(notify, @expense) if notify
         redirect_to @expense, notice: notice
       else
         redirect_to @expense, alert: @expense.errors.full_messages.to_sentence

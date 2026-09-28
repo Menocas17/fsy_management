@@ -1,6 +1,6 @@
 # Módulo de Finanzas — plan
 
-Estado: **fases 1 y 2 implementadas**. Menú: el ítem «Finanzas», hoy deshabilitado.
+Estado: **fases 1 y 2 implementadas; de la 3, los avisos**. Menú: el ítem «Finanzas», hoy deshabilitado.
 
 ## Alcance
 
@@ -97,8 +97,11 @@ Finanzas.
 
 1. Presupuesto, tipo de cambio, gastos con sus tres etapas, facturas, justificaciones y panel.
 2. PDF de rendición y Excel.
-3. Avisos push al acercarse al límite de una categoría o cuando un gasto espera aprobación, y
-   reembolsos a quien pagó de su bolsillo.
+3. **Avisos** (hecho, `FinanceNotifier`): a la campanita y como push, abriendo el gasto. Gasto
+   presentado o justificación → a quien puede aprobar (nunca a quien la escribió); aprobado,
+   rechazado o justificación resuelta → a quien lo pidió; una categoría o el general pasan del 80 %
+   o del 100 % → al área de Finanzas y al director de logística, una vez por umbral.
+   **Reembolsos** a quien pagó de su bolsillo: pendiente.
 
 ## Pendiente (fase 1)
 

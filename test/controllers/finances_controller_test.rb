@@ -28,6 +28,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
 
     patch approve_expense_path(expense)
     assert expense.reload.presented?, "and the server refuses it too"
+    assert Alert.exists?(recipient: @director, title: "Gasto por aprobar: Agua"), "the approver was told"
 
     sign_in_as(@director_user)
     patch approve_expense_path(expense)
