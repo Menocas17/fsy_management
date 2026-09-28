@@ -73,6 +73,8 @@ Rails.application.routes.draw do
       get :inventory, path: "inventario"
       get :labels, path: "etiquetas"
       get :trainings, path: "capacitaciones"
+      get :expenses, path: "gastos"
+      get :expenses_workbook, path: "gastos-excel"
     end
   end
   resource :participant_import, only: [ :new, :create ], path: "carga-de-participantes"

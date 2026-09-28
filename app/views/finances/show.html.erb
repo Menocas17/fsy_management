@@ -11,6 +11,14 @@
         <%= icon "list", class: "w-4 h-4" %>
         Ver gastos
       <% end %>
+      <%= link_to expenses_reports_path, target: "_blank", rel: "noopener", class: button_classes(:secondary) do %>
+        <%= icon "printer", class: "w-4 h-4" %>
+        Rendición PDF
+      <% end %>
+      <%= link_to expenses_workbook_reports_path, class: button_classes(:secondary) do %>
+        <%= icon "sheet", class: "w-4 h-4" %>
+        Excel
+      <% end %>
       <% if can_configure_finances? %>
         <%= link_to edit_finances_path, class: button_classes(:secondary) do %>
           <%= icon "settings", class: "w-4 h-4" %>

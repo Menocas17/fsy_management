@@ -113,8 +113,10 @@ class ApplicationReport
         return
       end
 
-      pdf.table([ headers ] + rows, header: true, width: pdf.bounds.width,
-                column_widths: widths, cell_style: { size: 8.5, padding: [ 5, 6 ], border_color: LINE, borders: [ :bottom ] }) do |t|
+      # Sin anchos, Prawn reparte el ancho entre las columnas (column_widths: nil no lo acepta).
+      options = { header: true, width: pdf.bounds.width, cell_style: { size: 8.5, padding: [ 5, 6 ], border_color: LINE, borders: [ :bottom ] } }
+      options[:column_widths] = widths if widths
+      pdf.table([ headers ] + rows, **options) do |t|
         t.row(0).font_style = :bold
         t.row(0).size = 8
         t.row(0).text_color = NAVY
