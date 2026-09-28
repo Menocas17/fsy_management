@@ -1,6 +1,6 @@
 # Módulo de Finanzas — plan
 
-Estado: **fase 1 implementada**. Menú: el ítem «Finanzas», hoy deshabilitado.
+Estado: **fases 1 y 2 implementadas**. Menú: el ítem «Finanzas», hoy deshabilitado.
 
 ## Alcance
 
@@ -82,9 +82,16 @@ Si los presupuestos de las categorías suman más que el general, el panel lo av
 
 ## Reportes (fase 2)
 
-- **PDF de rendición para tesorería**: totales por categoría y por área, detalle de cada gasto, los
-  justificados sin factura marcados, y las facturas anexas al final.
-- **Exportación a Excel**.
+En el panel de Finanzas («Rendición PDF», «Excel») y en Reportes → Logística y finanzas. Los ve quien ve
+Finanzas.
+
+- **PDF de rendición** (`ExpensesReport`, horizontal): resumen del presupuesto, por categoría, ejecutado
+  por área, detalle numerado de los gastos consolidados (con quién presentó, aprobó y consolidó), los
+  aprobados que aún esperan factura, los justificados sin factura con su justificación, y un anexo por
+  factura (foto reducida a JPEG, así entran las HEIC del iPhone; una factura en PDF queda indicada para
+  adjuntarla aparte).
+- **Excel** (`ExpensesWorkbook`, gema caxlsx): hojas «Resumen», «Gastos» (todos, cualquier etapa, montos
+  como números, con filtro y encabezado fijo) y «Por categoría».
 
 ## Fases
 

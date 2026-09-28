@@ -93,3 +93,6 @@ gem "json", "~> 2.21", ">= 2.21.2"
 
 # Notificaciones push del navegador (VAPID + cifrado del payload)
 gem "web-push", "~> 3.0"
+
+# Exportación a Excel (.xlsx) de la rendición de gastos (app/reports/expenses_workbook.rb).
+gem "caxlsx", "~> 4.5"

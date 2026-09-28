@@ -1,7 +1,9 @@
 class ReportsController < ApplicationController
   before_action :require_reports_access!
   before_action :require_participant_reports!, only: %i[participants rooms agenda badges]
-  skip_before_action :require_reports_access!, only: :trainings
+  skip_before_action :require_reports_access!, only: %i[trainings expenses expenses_workbook]
+  # La rendición la ven quienes ven Finanzas (el área, el director de logística y la dirección).
+  before_action :require_finance_viewer!, only: %i[expenses expenses_workbook]
   before_action :require_logistics_reports!, only: %i[inventory labels]
 
   def index
@@ -30,6 +32,16 @@ class ReportsController < ApplicationController
 
   def inventory
     send_report InventoryReport.new(inventory: requested_inventory)
+  end
+
+  def expenses
+    send_report ExpensesReport.new
+  end
+
+  # El Excel se descarga (no se abre en el navegador como los PDF).
+  def expenses_workbook
+    workbook = ExpensesWorkbook.new
+    send_data workbook.render, filename: workbook.filename, type: ExpensesWorkbook::CONTENT_TYPE, disposition: "attachment"
   end
 
   def labels

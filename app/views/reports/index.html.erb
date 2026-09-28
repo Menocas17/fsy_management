@@ -99,10 +99,28 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <%# Estos dos esperan a que exista el modelo de gastos y la carga de ajustes en bloque. %>
+        <% if can_view_finances? %>
+          <article class="<%= card %>" data-report="expenses">
+            <div class="flex items-center gap-2.5">
+              <%= icon "wallet", class: "w-[18px] h-[18px] text-primary-500 dark:text-primary-300" %>
+              <h3 class="text-[14.5px] font-bold text-ink-900">Rendición de gastos</h3>
+            </div>
+            <p class="text-[13px] leading-relaxed text-ink-500 flex-1">Presupuesto contra lo gastado por categoría y por área, cada gasto con quién lo aprobó, y las facturas al final. Para tesorería.</p>
+            <div class="flex flex-wrap gap-2">
+              <%= link_to expenses_reports_path, target: "_blank", rel: "noopener", class: action do %>
+                <%= icon "printer", class: "w-4 h-4" %>
+                Generar PDF
+              <% end %>
+              <%= link_to expenses_workbook_reports_path, class: secondary do %>
+                <%= icon "sheet", class: "w-4 h-4" %>
+                Excel
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+        <%# Espera a que exista la carga de ajustes en bloque. %>
         <% [
-             { title: "Ajustes de inventario", text: "Subir un archivo con entradas y salidas en bloque, para no ajustar artículo por artículo.", icon: "upload", label: "Subir ajustes" },
-             { title: "Reporte de gastos", text: "Gastos del evento por área y por categoría, con totales para tesorería.", icon: "wallet", label: "Generar PDF" }
+             { title: "Ajustes de inventario", text: "Subir un archivo con entradas y salidas en bloque, para no ajustar artículo por artículo.", icon: "upload", label: "Subir ajustes" }
            ].each do |report| %>
           <article class="<%= card %>">
             <div class="flex items-center gap-2.5">
