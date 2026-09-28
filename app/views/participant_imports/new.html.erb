@@ -2,8 +2,52 @@
 <% content_for :eyebrow, "Reportes" %>
 <% back_to "Reportes", reports_path %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto space-y-5">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Subir archivo", "upload" %>
+      <%# Sin Turbo: el resultado es una página, no una redirección, y Turbo descarta en silencio la respuesta
+          a un formulario que no redirige (se cargaba todo pero nunca se veía qué se saltó). %>
+      <%# El ancla lleva la página, ya cargada, directo al resultado, que va debajo de estas tarjetas. %>
+      <%= form_with url: participant_import_path(anchor: "resultado"), multipart: true, data: { turbo: false }, class: "space-y-4" do |form| %>
+        <div>
+          <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
+          <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
+                class: "w-full text-[13px] text-ink-700 file:mr-3 file:h-10 file:px-4 file:rounded-control file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-[13px] file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
+          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">
+            La primera fila tiene que ser la de los títulos de columna.
+          </p>
+        </div>
+        <%= tag.button type: "submit", data: { turbo_submits_with: "Cargando participantes…" }, class: button_classes do %>
+          <%= icon "upload", class: "w-4 h-4" %>
+          Cargar participantes
+        <% end %>
+      <% end %>
+    </section>
+
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Columnas que reconoce", "table" %>
+      <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500">
+        No importan mayúsculas, acentos ni el orden. Las columnas que no aparezcan aquí se ignoran, y lo que falte
+        se puede completar después desde la ficha.
+      </p>
+      <div class="flex flex-wrap gap-1.5">
+        <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Compañía\ auxiliar Teléfono Correo
+              Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
+          <span class="px-2.5 py-1 rounded-lg bg-canvas dark:bg-slate-900/60 border border-line-soft text-[11.5px] font-semibold text-ink-700"><%= column %></span>
+        <% end %>
+      </div>
+      <ul class="mt-4 space-y-1.5 text-[12.5px] leading-relaxed text-ink-500 list-disc list-inside">
+        <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
+        <li><strong>Compañía</strong> se busca por número: la del joven, o la del consejero que la acompaña.</li>
+        <li><strong>Compañía auxiliar</strong> (Alfa, «Auxiliar Beta»…) es la del auxiliar; sin ella, se toma la de su compañía.</li>
+        <li>Un hombre y una mujer por rol en cada compañía: si el lugar ya está ocupado, o al consejero o auxiliar le falta la compañía, entra igual y queda marcado para resolverlo a mano.</li>
+        <li>Se omiten las filas repetidas: manda la cédula y, si no viene, el nombre completo con la edad y la estaca.</li>
+      </ul>
+    </section>
+  </div>
+
   <% if @import && !@import.fatal %>
-    <section class="<%= card_classes("p-5 md:p-6") %>" data-import-result>
+    <section id="resultado" class="<%= card_classes("p-5 md:p-6 scroll-mt-4") %>" data-import-result>
       <%= section_heading "Resultado de la carga", "clipboard-check" %>
       <div class="grid grid-cols-2 gap-3 mb-5">
         <div class="rounded-tile border border-cat-green/25 bg-cat-green/10 px-4 py-3">
@@ -42,7 +86,7 @@
       <% end %>
 
       <% if @import.warnings.any? %>
-        <p class="mt-5 mb-2 text-[12px] font-bold text-cat-amber-ink">Entraron, pero conviene revisarlas</p>
+        <p class="mt-5 mb-2 text-[12px] font-bold text-cat-amber-ink">Entraron, pero hay que resolverlas a mano</p>
         <ul class="divide-y divide-line-soft border border-cat-amber/30 rounded-tile overflow-hidden" data-import-warnings>
           <% @import.warnings.each do |row| %>
             <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5 text-[13px]">
@@ -68,45 +112,4 @@
       <% end %>
     </section>
   <% end %>
-
-  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
-    <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading "Subir archivo", "upload" %>
-      <%# Sin Turbo: el resultado es una página, no una redirección, y Turbo descarta en silencio la respuesta
-          a un formulario que no redirige (se cargaba todo pero nunca se veía qué se saltó). %>
-      <%= form_with url: participant_import_path, multipart: true, data: { turbo: false }, class: "space-y-4" do |form| %>
-        <div>
-          <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
-          <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
-                class: "w-full text-[13px] text-ink-700 file:mr-3 file:h-10 file:px-4 file:rounded-control file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-[13px] file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">
-            La primera fila tiene que ser la de los títulos de columna.
-          </p>
-        </div>
-        <%= tag.button type: "submit", data: { turbo_submits_with: "Cargando participantes…" }, class: button_classes do %>
-          <%= icon "upload", class: "w-4 h-4" %>
-          Cargar participantes
-        <% end %>
-      <% end %>
-    </section>
-
-    <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading "Columnas que reconoce", "table" %>
-      <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500">
-        No importan mayúsculas, acentos ni el orden. Las columnas que no aparezcan aquí se ignoran, y lo que falte
-        se puede completar después desde la ficha.
-      </p>
-      <div class="flex flex-wrap gap-1.5">
-        <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Teléfono Correo
-              Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
-          <span class="px-2.5 py-1 rounded-lg bg-canvas dark:bg-slate-900/60 border border-line-soft text-[11.5px] font-semibold text-ink-700"><%= column %></span>
-        <% end %>
-      </div>
-      <ul class="mt-4 space-y-1.5 text-[12.5px] leading-relaxed text-ink-500 list-disc list-inside">
-        <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
-        <li><strong>Compañía</strong> se busca por número; si no existe, la ficha queda sin compañía.</li>
-        <li>Se omiten las filas repetidas: manda la cédula y, si no viene, el nombre completo.</li>
-      </ul>
-    </section>
-  </div>
 </div>

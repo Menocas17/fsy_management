@@ -106,12 +106,38 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert Participant.find_by(first_name: "Ana").consejero?
   end
 
-  test "a staff member's company column is not applied, and says so" do
+  test "counselors are staffed on their company: one man and one woman, the rest flagged to resolve by hand" do
     import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol,Compañía",
-                          "Ana,Consejera,25,M,Villa Flor,M,Consejero,3" ]
+                          "Luis,Uno,25,H,Villa Flor,M,Consejero,3",
+                          "Ana,Dos,24,M,Villa Flor,S,Consejero,3",
+                          "Beto,Tres,26,H,Villa Flor,L,Consejero,3",
+                          "Sara,Cuatro,23,M,Villa Flor,S,Consejero,",
+                          "Juan,Cinco,27,H,Villa Flor,M,Consejero,99" ]
 
-    assert_nil Participant.find_by(first_name: "Ana").company
-    assert_match(/no se asigna al staff/, import.warnings.first.reason)
+    assert_equal 5, import.imported_count, "everyone goes in; only the staffing is left to resolve"
+    assert_equal [ "Luis", "Ana" ], @company.memberships.includes(:participant).map { |m| m.participant.first_name }
+    reasons = import.warnings.to_h { |row| [ row.name, row.reason ] }
+    assert_match(/Compañía 3 ya tiene consejero \(Luis Uno\): no se asignó, resuélvelo a mano/, reasons["Beto Tres"])
+    assert_equal Participant.find_by(first_name: "Luis"), import.warnings.find { |row| row.name == "Beto Tres" }.match
+    assert_match(/consejero sin compañía/, reasons["Sara Cuatro"])
+    assert_match(/compañía 99 no existe/, reasons["Juan Cinco"])
+  end
+
+  test "auxiliaries are staffed on their auxiliary company by name, or through their company" do
+    beta = AuxiliarCompany.create!(name: "Auxiliar Beta")
+    @company.update!(auxiliar_company: beta)
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol,Compañía auxiliar,Compañía",
+                          "Luis,Uno,30,H,Villa Flor,M,Auxiliar,beta,",
+                          "Ana,Dos,31,M,Villa Flor,S,Auxiliar,,3",
+                          "Beto,Tres,32,H,Villa Flor,L,Auxiliar,Auxiliar Beta,",
+                          "Sara,Cuatro,33,M,Villa Flor,S,Auxiliar,Zeta,",
+                          "Juan,Cinco,34,H,Villa Flor,M,Auxiliar,," ]
+
+    assert_equal [ "Luis", "Ana" ], beta.auxiliars.map(&:first_name).sort.reverse
+    reasons = import.warnings.to_h { |row| [ row.name, row.reason ] }
+    assert_match(/Auxiliar Beta ya tiene auxiliar hombre \(Luis Uno\)/, reasons["Beto Tres"])
+    assert_match(/«Zeta» no existe/, reasons["Sara Cuatro"])
+    assert_match(/auxiliar sin compañía auxiliar/, reasons["Juan Cinco"])
   end
 
   test "F means mujer, and an age in words is refused as not a number" do

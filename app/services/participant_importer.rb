@@ -22,6 +22,7 @@ class ParticipantImporter
     "cedula" => :identity_document, "identificacion" => :identity_document, "documento" => :identity_document,
     "cuarto" => :room, "habitacion" => :room,
     "compania" => :company_number, "numero de compania" => :company_number,
+    "compania auxiliar" => :auxiliar_company, "auxiliar asignada" => :auxiliar_company,
     "telefono" => :phone_number, "celular" => :phone_number,
     "correo" => :email_address, "email" => :email_address, "correo electronico" => :email_address,
     "contacto de emergencia" => :emergency_contact_name,
@@ -106,7 +107,7 @@ class ParticipantImporter
       participant = Participant.new(attributes_for(values))
       if participant.save
         @imported << participant
-        warn_about(participant, values, number)
+        warn_about(participant, values, number, staffing_notes(participant, values))
       else
         @skipped << Row.new(number: number, name: name.presence || "sin nombre",
                             reason: participant.errors.full_messages.to_sentence)
@@ -177,10 +178,59 @@ class ParticipantImporter
       rol.present? && rol != "joven"
     end
 
-    def warn_about(participant, values, number)
+    # El staff se asigna como en la app: consejeros a su compañía y auxiliares a su compañía auxiliar, un
+    # hombre y una mujer por rol en cada una. Lo que no se puede asignar se avisa para resolverlo a mano;
+    # nunca se fuerza (y un choque en el índice único abortaría toda la carga).
+    # Devuelve [notas, ficha con la que choca].
+    def staffing_notes(participant, values)
+      case participant.rol
+      when "consejero"
+        company = Company.find_by(number: values[:company_number].to_s.gsub(/\D/, "").presence&.to_i) if values[:company_number].present?
+        return [ [ "consejero sin compañía: asígnalo a mano" ], nil ] if values[:company_number].blank?
+        return [ [ "la compañía #{values[:company_number]} no existe: asígnalo a mano" ], nil ] unless company
+
+        assign(participant, company, "#{company.name} ya tiene consejer#{participant.gender == 'M' ? 'a' : 'o'}")
+      when "auxiliar"
+        auxiliar_company = auxiliar_company_for(values)
+        return [ [ "auxiliar sin compañía auxiliar: asígnalo a mano" ], nil ] if auxiliar_company == :missing
+        return [ [ "la compañía auxiliar «#{values[:auxiliar_company] || values[:company_number]}» no existe: asígnalo a mano" ], nil ] if auxiliar_company.nil?
+
+        assign(participant, auxiliar_company, "#{auxiliar_company.name} ya tiene auxiliar #{participant.gender == 'M' ? 'mujer' : 'hombre'}")
+      else
+        # El joven usa la compañía como la suya (company_id); al resto del staff no le aplica.
+        staff_role?(values) && values[:company_number].present? ? [ [ "la compañía no aplica a su rol: se ignoró" ], nil ] : [ [], nil ]
+      end
+    end
+
+    def assign(participant, target, full_message)
+      gender = Participant.genders[participant.gender]
+      occupant = Membership.find_by(associable: target, role: participant.rol, gender: gender)&.participant
+      return [ [ "#{full_message} (#{occupant.full_name}): no se asignó, resuélvelo a mano" ], occupant ] if occupant
+
+      membership = Membership.new(associable: target, participant: participant)
+      return [ [], nil ] if membership.save
+
+      [ [ "no se pudo asignar a #{target.name} (#{membership.errors.full_messages.to_sentence}): resuélvelo a mano" ], nil ]
+    end
+
+    # Por nombre, con o sin «Auxiliar» y sin importar acentos («Épsilon», «auxiliar epsilon»). Si no viene,
+    # la de su compañía, cuando trae número de compañía.
+    def auxiliar_company_for(values)
+      if values[:auxiliar_company].present?
+        wanted = normalize(values[:auxiliar_company]).delete_prefix("auxiliar ").strip
+        AuxiliarCompany.all.find { |auxiliar| normalize(auxiliar.name).delete_prefix("auxiliar ").strip == wanted }
+      elsif values[:company_number].present?
+        Company.find_by(number: values[:company_number].to_s.gsub(/\D/, "").to_i)&.auxiliar_company
+      else
+        :missing
+      end
+    end
+
+    def warn_about(participant, values, number, staffing = [ [], nil ])
       others = Participant.where.not(id: participant.id)
-      notes = []
-      matches = []
+      notes, staffing_match = staffing
+      notes = notes.dup
+      matches = [ staffing_match ].compact
       if (same = others.find_by(first_name: participant.first_name, last_name: participant.last_name))
         notes << "mismo nombre que otra persona"
         matches << same
@@ -196,12 +246,8 @@ class ParticipantImporter
         notes << "mismo teléfono que otra persona"
         matches << same
       end
-      if values[:company_number].present?
-        if staff_role?(values)
-          notes << "la compañía no se asigna al staff desde el archivo (se hace en la compañía)"
-        elsif participant.company_id.nil?
-          notes << "la compañía #{values[:company_number]} no existe: quedó sin compañía"
-        end
+      if values[:company_number].present? && !staff_role?(values) && participant.company_id.nil?
+        notes << "la compañía #{values[:company_number]} no existe: quedó sin compañía"
       end
       @warnings << Row.new(number: number, name: participant.full_name, reason: notes.join(" · "), match: matches.first, record: participant) if notes.any?
     end
