@@ -32,6 +32,24 @@ class Participant < ApplicationRecord
   validates :age, presence: true, numericality: { greater_than: 0, less_than: 80 }
 
   after_save :sync_membership_gender
+  before_create :assign_code
+
+  # Código corto del gafete: una letra (los prefijos del inventario tienen de 2 a 5, así que no chocan) y
+  # un número correlativo. Es lo que se escribe a mano cuando el QR no se lee.
+  CODE_PREFIX = "P".freeze
+  CODE_FORMAT = /\A#{CODE_PREFIX}-\d{4,}\z/
+
+  # Acepta como se escriba: «P-0421», «p0421», «P 421» o solo «421». nil si no parece un código.
+  def self.normalize_code(input)
+    match = input.to_s.strip.match(/\A#{CODE_PREFIX}?[\s-]*(\d{1,6})\z/i)
+    match && format("#{CODE_PREFIX}-%04d", match[1].to_i)
+  end
+
+  # Por id (lo que trae el QR) o por código corto (lo que se escribe).
+  def self.find_by_badge(value)
+    value = value.to_s.strip.split("/").last.to_s.split("?").first.to_s
+    find_by(id: value) || ((code = normalize_code(value)) && find_by(code: code))
+  end
 
   scope :jovenes, -> { where(rol: "joven") }
   scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
@@ -159,5 +177,12 @@ class Participant < ApplicationRecord
       if saved_change_to_gender?
         memberships.update_all(gender: gender)
       end
+    end
+
+    def assign_code
+      return if code.present?
+
+      last = Participant.where.not(code: nil).maximum(Arel.sql("substring(code from 3)::int")) || 0
+      self.code = format("#{CODE_PREFIX}-%04d", last + 1)
     end
 end

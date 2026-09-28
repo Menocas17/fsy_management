@@ -43,4 +43,14 @@ class ScansControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "a[title='Volver a Escáner'][href='#{back}']"
   end
+
+  test "the short badge code opens the ficha, and the QR dialog shows it" do
+    @joven.update_columns(code: "P-0421")
+
+    get scan_lookup_path(code: "p421")
+    assert_redirected_to participant_path(@joven, from: "escaner", return_to: scan_path)
+
+    get participant_path(@joven)
+    assert_select "dialog[data-dialog-name='qr'] [data-badge-code]", text: "P-0421"
+  end
 end

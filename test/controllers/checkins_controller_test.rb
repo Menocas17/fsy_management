@@ -176,4 +176,15 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     get checkins_path
     assert_redirected_to checkins_path(training_id: today.id)
   end
+
+  test "the short badge code typed by hand registers too" do
+    @joven.update_columns(code: "P-0421")
+
+    assert_difference -> { Checkin.count }, 1 do
+      post register_checkins_path, params: { checkins: [ { participant_id: "421", client_token: "by-code" } ] }, as: :json
+    end
+
+    get checkins_roster_path, headers: { "Accept" => "application/json" }
+    assert_equal "P-0421", response.parsed_body["people"].first["code"]
+  end
 end
