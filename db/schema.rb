@@ -213,6 +213,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
     t.index ["participant_id"], name: "index_inventory_movements_on_participant_id"
   end
 
+  create_table "login_attempts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email_address", null: false
+    t.string "ip_address"
+    t.integer "result", default: 0, null: false
+    t.string "user_agent"
+    t.uuid "user_id"
+    t.index ["created_at"], name: "index_login_attempts_on_created_at"
+    t.index ["user_id"], name: "index_login_attempts_on_user_id"
+  end
+
   create_table "logistics_areas", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "checkin", default: false, null: false
     t.datetime "created_at", null: false
@@ -341,6 +352,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
   add_foreign_key "inventory_items", "inventories"
   add_foreign_key "inventory_movements", "inventory_items"
   add_foreign_key "inventory_movements", "participants"
+  add_foreign_key "login_attempts", "users", on_delete: :nullify
   add_foreign_key "memberships", "participants"
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify

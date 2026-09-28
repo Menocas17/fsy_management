@@ -25,8 +25,20 @@ module Authentication
       Current.session ||= find_session_by_cookie
     end
 
+    # Una sesión sin uso por más de Session::IDLE_LIMIT se cierra en vez de revivir; si sigue viva, se anota
+    # que se usó (cada pocos minutos), que es lo que «Accesos» muestra como «en línea».
     def find_session_by_cookie
-      Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      session = Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      return unless session
+
+      if session.expired?
+        session.destroy
+        cookies.delete(:session_id)
+        return
+      end
+
+      session.seen!
+      session
     end
 
     def request_authentication

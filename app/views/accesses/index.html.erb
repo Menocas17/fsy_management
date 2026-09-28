@@ -1,0 +1,100 @@
+<% content_for :title, "Accesos" %>
+<% content_for :eyebrow, "Gestión" %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl space-y-5">
+  <p class="text-[13px] font-medium text-ink-500">
+    Quién está usando la app, desde dónde, y quién intentó entrar. Las sesiones sin uso en <%= Session::IDLE_LIMIT.in_days.to_i %> días se cierran solas.
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <% [ [ "En línea ahora", @online.size, "Usaron la app en los últimos #{Session::ONLINE_WINDOW.in_minutes.to_i} minutos", "online" ],
+         [ "Sesiones abiertas", Session.count, "Dispositivos con una sesión iniciada", "sessions" ],
+         [ "Intentos fallidos hoy", @failed_today, "Contraseña equivocada o bloqueados", "failed" ] ].each do |label, value, hint, key| %>
+      <div class="<%= card_classes("px-5 py-4") %>">
+        <p class="text-[30px] font-extrabold leading-none tabular-nums text-ink-900" data-access-count="<%= key %>"><%= value %></p>
+        <p class="mt-1 text-[13px] font-bold text-ink-700"><%= label %></p>
+        <p class="text-[11.5px] font-medium text-ink-500"><%= hint %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-online>
+    <%= section_heading "En línea ahora", "radio" %>
+    <% if @online.any? %>
+      <ul class="divide-y divide-line-soft">
+        <% @online.each do |session_record| %>
+          <li class="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2.5 first:pt-0">
+            <span class="w-2 h-2 rounded-full bg-cat-green shrink-0" aria-hidden="true"></span>
+            <span class="text-[13.5px] font-bold text-ink-900"><%= session_record.user.email_address %></span>
+            <span class="text-[12px] font-semibold text-ink-500"><%= account_label(session_record.user) %></span>
+            <span class="w-full sm:w-auto sm:ml-auto text-[12px] font-semibold text-ink-500 tabular-nums">
+              <%= session_record.device_label %> · <%= session_record.ip_address %> · <%= ago_label(session_record.updated_at) %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-[13px] text-ink-500">Nadie ha usado la app en los últimos <%= Session::ONLINE_WINDOW.in_minutes.to_i %> minutos.</p>
+    <% end %>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-sessions>
+    <%= section_heading "Sesiones abiertas", "monitor-smartphone" %>
+    <p class="-mt-2 mb-4 text-[12.5px] text-ink-500">Si una no la reconoces, ciérrala: en ese dispositivo le pedirá entrar de nuevo.</p>
+    <ul class="divide-y divide-line-soft">
+      <% @sessions.each do |session_record| %>
+        <li class="flex flex-wrap items-center gap-x-3 gap-y-1 py-3 first:pt-0" data-session="<%= session_record.id %>">
+          <span class="min-w-0 flex-1">
+            <span class="block text-[13.5px] font-bold text-ink-900 truncate">
+              <%= session_record.user.email_address %>
+              <% if session_record == Current.session %>
+                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 dark:bg-primary-700/40 dark:text-primary-100 text-[10.5px] font-bold">Esta sesión</span>
+              <% end %>
+            </span>
+            <span class="block text-[12px] font-semibold text-ink-500">
+              <%= session_record.device_label %> · <%= session_record.ip_address %> ·
+              entró <%= SpanishDates.short_with_time(session_record.created_at) %> · último uso <%= ago_label(session_record.updated_at) %>
+            </span>
+          </span>
+          <%= button_to access_session_path(session_record), method: :delete,
+                form: { data: { turbo_confirm: "¿Cerrar la sesión de #{session_record.user.email_address} en #{session_record.device_label}?",
+                                turbo_confirm_detail: "Tendrá que volver a entrar en ese dispositivo.", turbo_confirm_button: "Sí, cerrar" } },
+                class: button_classes(:secondary, size: :sm) do %>
+            Cerrar
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-attempts>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <%= section_heading "Intentos de inicio de sesión", "log-in" %>
+      <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line -mt-4" aria-label="Filtrar intentos">
+        <% [ [ "Todos", nil ], [ "Solo fallidos", "fallidos" ] ].each do |label, value| %>
+          <% current = params[:solo] == value %>
+          <%= link_to label, accesses_path(solo: value), aria: { current: (current ? "page" : nil) },
+                class: "inline-flex items-center h-8 px-3 rounded-lg text-[12.5px] #{current ? "bg-surface shadow-sm font-bold text-ink-900" : "font-semibold text-ink-500 hover:text-ink-900"}" %>
+        <% end %>
+      </nav>
+    </div>
+    <% if @attempts.any? %>
+      <ul class="divide-y divide-line-soft">
+        <% @attempts.each do |attempt| %>
+          <li class="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 first:pt-0" data-attempt="<%= attempt.result %>">
+            <span class="w-24 shrink-0 text-[12px] font-bold tabular-nums text-ink-500"><%= ago_label(attempt.created_at) %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-[13.5px] font-bold text-ink-900 truncate">
+                <%= attempt.email_address %>
+                <% unless attempt.user %><span class="text-[11.5px] font-semibold text-ink-500">· sin cuenta</span><% end %>
+              </span>
+              <span class="block text-[12px] font-semibold text-ink-500"><%= attempt.device_label %> · <%= attempt.ip_address %></span>
+            </span>
+            <%= login_result_chip(attempt) %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-[13px] text-ink-500">Todavía no hay intentos registrados.</p>
+    <% end %>
+  </section>
+</div>
