@@ -1,0 +1,231 @@
+# Lo que dice una fila de la carga masiva (del archivo, o ya corregida a mano): qué ficha saldría, qué
+# problemas tiene y a qué compañía iría su staff. La usan la carga (para decidir si entra directo o queda
+# en espera) y la pantalla de conflictos (para volver a revisarla al editarla y al aprobarla).
+#
+# Cada problema es { "text", "blocking", "match_id" }:
+#   blocking: true  → impide aprobar hasta corregirlo (dato inválido, duplicado, lugar ocupado…).
+#   blocking: false → aviso: se puede aprobar igual, sabiéndolo (mismo teléfono, sin compañía…).
+#   match_id        → la ficha con la que choca, para abrirla y comparar.
+class ImportRowEvaluator
+  # Los roles en femenino, como vienen en muchas planillas.
+  ROLE_ALIASES = {
+    "directora" => "director", "coordinadora" => "coordinador", "consejera" => "consejero",
+    "registradora" => "registrador", "directora de logistica" => "director_logistica", "jovenes" => "joven"
+  }.freeze
+
+  # «M» es mujer, como en la app (H/M); «F» (femenino) también, porque así vienen muchos formularios.
+  GENDERS = { "h" => "H", "hombre" => "H", "masculino" => "H", "varon" => "H",
+              "m" => "M", "mujer" => "M", "femenino" => "M", "f" => "M" }.freeze
+
+  attr_reader :values, :participant, :issues
+
+  def initialize(values)
+    @values = values.to_h.transform_keys(&:to_sym).transform_values { |value| value.is_a?(String) ? value.strip.presence : value }
+    @issues = []
+  end
+
+  def self.normalize(value)
+    value.to_s.unicode_normalize(:nfd).gsub(/\p{Mn}/, "").downcase.squish
+  end
+
+  def evaluate
+    @issues = []
+    @participant = Participant.new(attributes)
+    check_duplicate
+    check_validity
+    check_staffing
+    check_lookalikes
+    check_role_and_company
+    self
+  end
+
+  def clean?
+    issues.empty?
+  end
+
+  def blocking?
+    issues.any? { |issue| issue["blocking"] }
+  end
+
+  def name
+    [ values[:first_name], values[:last_name] ].compact_blank.join(" ").presence || "sin nombre"
+  end
+
+  # Crea la ficha y la asigna a su compañía o compañía auxiliar. Solo sin problemas que bloqueen.
+  def apply!
+    evaluate
+    return false if blocking?
+
+    Participant.transaction do
+      participant.save!
+      Membership.create!(associable: staffing_target, participant: participant) if staffing_target
+    end
+    participant
+  end
+
+  private
+    def attributes
+      {
+        first_name: values[:first_name], last_name: values[:last_name],
+        age: whole_number(values[:age]), gender: GENDERS[normalize(values[:gender])],
+        stake: enum_key(Participant.stakes, values[:stake]),
+        ward: enum_key(Participant.wards, values[:ward]),
+        shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
+        rol: role_key || "joven",
+        identity_document: values[:identity_document]&.to_s,
+        room: values[:room]&.to_s,
+        # La compañía de un joven es la suya; el staff se asigna a una compañía por su membresía.
+        company_id: (company&.id unless staff?),
+        phone_number: values[:phone_number]&.to_s, email_address: values[:email_address],
+        emergency_contact_name: values[:emergency_contact_name],
+        emergency_contact_number: values[:emergency_contact_number]&.to_s,
+        emergency_contact_relation: values[:emergency_contact_relation],
+        allergies: values[:allergies], medicines: values[:medicines], diet: values[:diet],
+        additional_instructions: values[:additional_instructions]
+      }.compact
+    end
+
+    def add(text, blocking:, match: nil)
+      @issues << { "text" => text, "blocking" => blocking, "match_id" => match&.id }
+    end
+
+    # La cédula manda cuando viene (escrita como sea). Sin ella, es la misma persona si coinciden el nombre
+    # completo, la edad y la estaca; solo el nombre no basta: dos «María López» pueden existir.
+    def check_duplicate
+      document = participant.identity_document
+      existing = if document
+        Participant.find_by(identity_document: document)
+      elsif values[:first_name].present?
+        Participant.find_by(first_name: participant.first_name, last_name: participant.last_name,
+                            age: participant.age, stake: participant.stake)
+      end
+      add("Duplicado: esta persona ya existe", blocking: true, match: existing) if existing
+    end
+
+    def check_validity
+      return if participant.valid?
+
+      # Un tercer director, coordinador o director de logística: se compara con quien ya ocupa el lugar.
+      occupant = participant.leadership_occupant
+      participant.errors.full_messages.each do |message|
+        add(message, blocking: true, match: (occupant if message.start_with?("Ya hay")))
+      end
+    end
+
+    # Consejeros a su compañía y auxiliares a su compañía auxiliar: un hombre y una mujer por rol en cada una.
+    def check_staffing
+      case participant.rol
+      when "consejero"
+        if values[:company_number].blank?
+          add("Consejero sin compañía: se puede aprobar y asignarlo después", blocking: false)
+        elsif company.nil?
+          add("La compañía #{values[:company_number]} no existe", blocking: true)
+        else
+          check_slot(company, "#{company.name} ya tiene consejer#{participant.gender == 'M' ? 'a' : 'o'}")
+        end
+      when "auxiliar"
+        if auxiliar_company == :missing
+          add("Auxiliar sin compañía auxiliar: se puede aprobar y asignarlo después", blocking: false)
+        elsif auxiliar_company.nil?
+          add("La compañía auxiliar «#{values[:auxiliar_company] || values[:company_number]}» no existe", blocking: true)
+        else
+          check_slot(auxiliar_company, "#{auxiliar_company.name} ya tiene auxiliar #{participant.gender == 'M' ? 'mujer' : 'hombre'}")
+        end
+      end
+    end
+
+    def check_slot(target, message)
+      occupant = Membership.find_by(associable: target, role: participant.rol, gender: Participant.genders[participant.gender])&.participant
+      add("#{message}: #{occupant.full_name}", blocking: true, match: occupant) if occupant
+    end
+
+    def staffing_target
+      return company if participant.consejero?
+      return auxiliar_company if participant.auxiliar? && auxiliar_company.is_a?(AuxiliarCompany)
+
+      nil
+    end
+
+    def check_lookalikes
+      return if issues.any? { |issue| issue["text"].start_with?("Duplicado") }
+
+      others = Participant.all
+      if participant.first_name.present? && (same = others.find_by(first_name: participant.first_name, last_name: participant.last_name))
+        add("Mismo nombre que otra persona", blocking: false, match: same)
+      end
+      if participant.email_address.present? &&
+         (same = others.find_by("lower(contact_info ->> 'email_address') = ?", participant.email_address.downcase))
+        add("Mismo correo que otra persona", blocking: false, match: same)
+      end
+      # Los últimos 8 dígitos: «+505 8888 1111» y «8888-1111» son el mismo número.
+      phone = participant.phone_number.to_s.gsub(/\D/, "").last(8)
+      if phone.length == 8 &&
+         (same = others.find_by("right(regexp_replace(contact_info ->> 'phone_number', '\\D', '', 'g'), 8) = ?", phone))
+        add("Mismo teléfono que otra persona", blocking: false, match: same)
+      end
+    end
+
+    def check_role_and_company
+      add("El rol «#{values[:rol]}» no existe: entraría como joven", blocking: false) if values[:rol].present? && role_key.nil?
+      return if values[:company_number].blank?
+
+      if staff? && !participant.consejero? && !participant.auxiliar?
+        add("La compañía no aplica a su rol: se ignora", blocking: false)
+      elsif !staff? && company.nil?
+        add("La compañía #{values[:company_number]} no existe: quedaría sin compañía", blocking: false)
+      end
+    end
+
+    def staff?
+      (role_key || "joven") != "joven"
+    end
+
+    def role_key
+      value = values[:rol]
+      return nil if value.blank?
+
+      enum_key(Participant.rols, value) || ROLE_ALIASES[normalize(value)] ||
+        Participant.rols.keys.find { |key| normalize(Participant.role_label(key)) == normalize(value) }
+    end
+
+    def company
+      return @company if defined?(@company)
+
+      number = values[:company_number].to_s.gsub(/\D/, "").presence
+      @company = number && Company.find_by(number: number.to_i)
+    end
+
+    # Por nombre, con o sin «Auxiliar» y sin importar acentos. Si no viene, la de su compañía.
+    def auxiliar_company
+      return @auxiliar_company if defined?(@auxiliar_company)
+
+      @auxiliar_company =
+        if values[:auxiliar_company].present?
+          wanted = normalize(values[:auxiliar_company]).delete_prefix("auxiliar ").strip
+          AuxiliarCompany.all.find { |auxiliar| normalize(auxiliar.name).delete_prefix("auxiliar ").strip == wanted }
+        elsif values[:company_number].present?
+          company&.auxiliar_company
+        else
+          :missing
+        end
+    end
+
+    # «15», 15 o 15.0 → 15. Lo que no es número se deja tal cual, para que el error diga «debe ser un número».
+    def whole_number(value)
+      return value.to_i if value.is_a?(Numeric)
+
+      value.to_s.strip.match?(/\A\d+(\.0+)?\z/) ? value.to_i : value
+    end
+
+    # «Bello Horizonte» → bello_horizonte, «M» → m.
+    def enum_key(mapping, value)
+      return nil if value.blank?
+
+      needle = normalize(value).tr(" ", "_")
+      mapping.keys.find { |key| key == needle || normalize(key.tr("_", " ")) == normalize(value) }
+    end
+
+    def normalize(value)
+      self.class.normalize(value)
+    end
+end

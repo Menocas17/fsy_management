@@ -27,7 +27,7 @@ module NavigationHelper
          end),
         (if Current.user&.reports_viewer?
            { text: "Reportes", url: reports_path, lucide_icon: "file-text",
-             active_paths: [ reports_path, new_participant_import_path ] }
+             active_paths: [ reports_path, participant_imports_path ] }
          else
            { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),

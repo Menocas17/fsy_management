@@ -3,10 +3,12 @@ require "roo"
 # Carga masiva de participantes desde un Excel. Las cabeceras se reconocen sin importar mayúsculas,
 # acentos ni espacios, así que el archivo real del registro debería entrar sin retoques; si trae otras
 # columnas, se agregan a HEADERS y listo.
+#
+# Cada carga queda guardada (ParticipantImport) con una fila por persona: las limpias entran directo y
+# las que traen un problema o un aviso quedan en espera, fuera de la base, hasta resolverlas a mano en su
+# informe. Qué es un problema lo decide ImportRowEvaluator.
 class ParticipantImporter
   class UnreadableFile < StandardError; end
-
-  Row = Struct.new(:number, :name, :reason, keyword_init: true)
 
   HEADERS = {
     "nombre" => :first_name, "nombres" => :first_name, "primer nombre" => :first_name,
@@ -20,6 +22,7 @@ class ParticipantImporter
     "cedula" => :identity_document, "identificacion" => :identity_document, "documento" => :identity_document,
     "cuarto" => :room, "habitacion" => :room,
     "compania" => :company_number, "numero de compania" => :company_number,
+    "compania auxiliar" => :auxiliar_company, "auxiliar asignada" => :auxiliar_company,
     "telefono" => :phone_number, "celular" => :phone_number,
     "correo" => :email_address, "email" => :email_address, "correo electronico" => :email_address,
     "contacto de emergencia" => :emergency_contact_name,
@@ -31,32 +34,26 @@ class ParticipantImporter
     "notas" => :additional_instructions, "observaciones" => :additional_instructions
   }.freeze
 
-  GENDERS = { "h" => "H", "hombre" => "H", "masculino" => "H", "m" => "M", "mujer" => "M", "femenino" => "M" }.freeze
+  attr_reader :import, :fatal
 
-  attr_reader :imported, :skipped, :fatal
-
-  def initialize(file)
+  def initialize(file, uploaded_by: nil)
     @file = file
-    @imported = []
-    @skipped = []
+    @uploaded_by = uploaded_by
   end
 
   def call
     sheet = open_sheet
     headers = map_headers(sheet.row(1))
-    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisá la primera fila)." if headers.values.none?
+    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisa la primera fila)." if headers.values.none?
 
-    Participant.transaction do
-      (2..sheet.last_row).each { |number| process(sheet.row(number), headers, number) }
-    end
+    @import = ParticipantImport.create!(filename: filename, uploaded_by: @uploaded_by,
+                                        uploaded_by_name: @uploaded_by&.full_name || "Administrador del sistema")
+    (2..sheet.last_row).each { |number| process(sheet.row(number), headers, number) }
     self
   rescue UnreadableFile => error
     @fatal = error.message
     self
   end
-
-  def imported_count = imported.size
-  def skipped_count = skipped.size
 
   private
     def open_sheet
@@ -69,87 +66,42 @@ class ParticipantImporter
       file.respond_to?(:tempfile) ? file.tempfile.path : file.to_s
     end
 
+    def filename
+      @file.respond_to?(:original_filename) ? @file.original_filename : File.basename(@file.to_s)
+    end
+
     def extension_for(file)
       name = file.respond_to?(:original_filename) ? file.original_filename : file.to_s
       File.extname(name).delete(".").downcase.presence&.to_sym || :xlsx
     end
 
-    # Posición de cada columna reconocida: { first_name: 0, edad: 1, ... }
+    # Posición de cada columna reconocida: { first_name: 0, age: 1, ... }
     def map_headers(row)
       row.each_with_index.each_with_object({}) do |(cell, index), found|
-        key = HEADERS[normalize(cell)]
+        key = HEADERS[ImportRowEvaluator.normalize(cell)]
         found[key] ||= index if key
       end
     end
 
-    def normalize(value)
-      value.to_s.unicode_normalize(:nfd).gsub(/\p{Mn}/, "").downcase.squish
-    end
-
     def process(row, headers, number)
       values = headers.transform_values { |index| clean(row[index]) }
-      name = [ values[:first_name], values[:last_name] ].compact_blank.join(" ")
       return if values.values.all?(&:blank?)
 
-      if duplicate?(values)
-        @skipped << Row.new(number: number, name: name, reason: "ya estaba registrado")
-        return
-      end
-
-      participant = Participant.new(attributes_for(values))
-      if participant.save
-        @imported << participant
+      evaluation = ImportRowEvaluator.new(values).evaluate
+      participant = evaluation.clean? && evaluation.apply!
+      if participant
+        @import.rows.create!(row_number: number, values: values, status: :imported, participant: participant)
       else
-        @skipped << Row.new(number: number, name: name.presence || "sin nombre",
-                            reason: participant.errors.full_messages.to_sentence)
+        @import.rows.create!(row_number: number, values: values, status: :pending, issues: evaluation.issues)
       end
     end
 
+    # Texto sin espacios de más; un número entero de Excel (15.0, 88881111.0) sin su «.0».
     def clean(value)
-      value.is_a?(String) ? value.strip.presence : value
-    end
-
-    def attributes_for(values)
-      {
-        first_name: values[:first_name], last_name: values[:last_name],
-        age: values[:age]&.to_i, gender: GENDERS[normalize(values[:gender])],
-        stake: enum_key(Participant.stakes, values[:stake]),
-        ward: enum_key(Participant.wards, values[:ward]),
-        shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
-        rol: enum_key(Participant.rols, values[:rol]) || "joven",
-        identity_document: values[:identity_document].presence&.to_s&.gsub(/\D/, "").presence&.to_i,
-        room: values[:room]&.to_s,
-        company_id: company_id_for(values[:company_number]),
-        phone_number: values[:phone_number]&.to_s, email_address: values[:email_address],
-        emergency_contact_name: values[:emergency_contact_name],
-        emergency_contact_number: values[:emergency_contact_number]&.to_s,
-        emergency_contact_relation: values[:emergency_contact_relation],
-        allergies: values[:allergies], medicines: values[:medicines], diet: values[:diet],
-        additional_instructions: values[:additional_instructions]
-      }.compact
-    end
-
-    # "Bello Horizonte" → :bello_horizonte, "M" → :m, "Joven" → :joven.
-    def enum_key(mapping, value)
-      return nil if value.blank?
-
-      needle = normalize(value).tr(" ", "_")
-      mapping.keys.find { |key| key == needle || normalize(key.tr("_", " ")) == normalize(value) }
-    end
-
-    def company_id_for(number)
-      return nil if number.blank?
-
-      @companies ||= Company.pluck(:number, :id).to_h
-      @companies[number.to_s.gsub(/\D/, "").to_i]
-    end
-
-    # La cédula manda cuando viene; si no, el nombre completo evita duplicar a la misma persona.
-    def duplicate?(values)
-      document = values[:identity_document].presence&.to_s&.gsub(/\D/, "").presence
-      return Participant.exists?(identity_document: document.to_i) if document
-
-      values[:first_name].present? &&
-        Participant.exists?(first_name: values[:first_name], last_name: values[:last_name])
+      case value
+      when String then value.strip.presence
+      when Float then value == value.floor ? value.to_i : value
+      else value
+      end
     end
 end

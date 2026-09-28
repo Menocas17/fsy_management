@@ -1,0 +1,45 @@
+<% content_for :title, "Corregir fila #{@row.row_number}" %>
+<% content_for :eyebrow, "Carga de participantes" %>
+<% back_to "Informe de la carga", participant_import_path(@import, anchor: "fila-#{@row.row_number}") %>
+<% matches = @row.matches %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto space-y-5">
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <p class="text-[12.5px] font-semibold text-ink-500">Fila <%= @row.row_number %> de «<%= @import.filename %>» · todavía no está en la base</p>
+    <ul class="mt-3 space-y-1.5">
+      <% @row.issues.each do |issue| %>
+        <% match = matches[issue["match_id"]] %>
+        <li class="text-[13px] font-semibold <%= issue["blocking"] ? "text-cat-rose-ink" : "text-cat-amber-ink" %>">
+          <%= issue["blocking"] ? "Bloquea:" : "Aviso:" %> <%= issue["text"] %>
+          <% if match %>
+            · <%= link_to "ver la ficha de #{match.full_name}", participant_path(match), target: "_blank", rel: "noopener", class: "underline" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <%= form_with url: participant_import_row_path(@import, @row), method: :patch, scope: :row, id: "row-form" do |form| %>
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Datos de la fila", "pencil" %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+        <% ParticipantImportRow::EDITABLE.each do |field, label| %>
+          <% current = @row.values[field.to_s] %>
+          <div class="<%= "sm:col-span-2" if field.in?(%i[additional_instructions]) %>">
+            <%= form.label field, label, class: field_label_classes %>
+            <% if (options = import_field_options(field)) %>
+              <%= form.select field, import_select_options(options, current.to_s), {}, class: field_select_classes %>
+            <% else %>
+              <%= form.text_field field, value: current, class: field_input_classes %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <p class="mt-4 text-[12px] text-ink-500">Al guardar se vuelve a revisar la fila. Entra a la base solo cuando la apruebes en el informe.</p>
+    </section>
+  <% end %>
+
+  <div class="<%= card_classes("px-5 py-4 flex gap-2.5 justify-end") %>">
+    <%= link_to "Cancelar", participant_import_path(@import, anchor: "fila-#{@row.row_number}"), class: button_classes(:secondary) %>
+    <%= tag.button "Guardar y revisar", type: "submit", form: "row-form", data: { turbo_submits_with: "Revisando…" }, class: button_classes %>
+  </div>
+</div>

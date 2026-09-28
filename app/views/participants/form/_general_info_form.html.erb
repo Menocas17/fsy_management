@@ -42,7 +42,7 @@
       </div>
       <div class="sm:col-span-2">
         <%= form.label :identity_document, "Documento de identidad", class: field_label_classes %>
-        <%= form.text_field :identity_document, class: field_input_classes %>
+        <%= form.text_field :identity_document, value: form.object.formatted_identity_document, placeholder: "001-010190-0001A", class: field_input_classes %>
       </div>
     <% end %>
     <div>
