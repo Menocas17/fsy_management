@@ -53,6 +53,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     get finances_path
     assert_response :success
     assert_select "a[href='#{new_expense_path}']", 0
+    assert_select "[data-finance-readonly]", text: /Solo lectura/
 
     assert_no_difference -> { Expense.count } do
       post expenses_path, params: { expense: { concept: "Pirata", currency: "NIO", estimated_amount: "10" } }
@@ -86,6 +87,10 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
 
   test "the finance member operates but does not set the budget" do
     sign_in_as(@finance_user)
+
+    get finances_path
+    assert_select "a[href='#{new_expense_path}']", text: /Nuevo gasto/
+    assert_select "[data-finance-readonly]", 0
 
     patch finances_path, params: { budget: "1" }
     assert_redirected_to finances_path
