@@ -49,6 +49,14 @@
             <%= icon "user-round", class: "w-4 h-4" %>
             Mi perfil
           <% end %>
+          <%# Accesos es cosa de la cuenta del sistema, no del trabajo del evento: vive aquí y no en el menú lateral. %>
+          <% if Current.user.superadmin? %>
+            <%= link_to accesses_path, data: { account_menu: "accesses" },
+                  class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-lg text-[13.5px] font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 transition" do %>
+              <%= icon "shield-check", class: "w-4 h-4" %>
+              Accesos
+            <% end %>
+          <% end %>
           <div class="border-t border-line-soft my-1.5"></div>
           <%= button_to session_path, method: :delete, form_class: "mx-1.5",
                 class: "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13.5px] font-medium text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition" do %>
