@@ -68,11 +68,14 @@
     <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" data-finance-categories>
       <% @summary.rows.each do |row| %>
         <div class="<%= card_classes("p-5") %>" data-category-row="<%= row.name.parameterize %>">
-          <div class="flex items-baseline justify-between gap-2">
-            <p class="text-[14.5px] font-bold text-ink-900 truncate"><%= row.name %></p>
-            <p class="text-[12px] font-semibold text-ink-500 tabular-nums shrink-0">
-              <%= row.budget ? "de #{money(row.budget)}" : "sin presupuesto propio" %>
-            </p>
+          <div class="flex items-center gap-3">
+            <%= category_tile(row.category) %>
+            <div class="min-w-0">
+              <p class="text-[14.5px] font-bold text-ink-900 truncate"><%= row.name %></p>
+              <p class="text-[12px] font-semibold text-ink-500 tabular-nums">
+                <%= row.budget ? "de #{money(row.budget)}" : "sin presupuesto propio" %>
+              </p>
+            </div>
           </div>
           <p class="mt-1 text-[22px] font-extrabold tabular-nums text-ink-900"><%= money(row.spent) %></p>
           <% if row.budget %>

@@ -1,0 +1,48 @@
+<%= form_with model: category, id: "category-form", class: "space-y-5" do |form| %>
+  <% if category.errors.any? %>
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
+      <% category.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Categoría", "tags" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :name, "Nombre", class: field_label_classes %>
+        <%= form.text_field :name, required: true, maxlength: 60, placeholder: "Ej. Alimentación", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :budget, "Presupuesto propio (C$, opcional)", class: field_label_classes %>
+        <%= form.text_field :budget, value: Money.to_input(category.budget_cents), inputmode: "decimal", placeholder: "Sin presupuesto propio", class: field_input_classes %>
+        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Sin él, sus gastos cuentan solo contra el presupuesto general.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Icono y color", "palette" %>
+    <%= render "shared/appearance_picker", form: form, icon: category.icon, color: category.color, default_icon: "wallet" %>
+  </section>
+<% end %>
+
+<%# Los botones van fuera del formulario: «Borrar» es su propio formulario y no puede ir anidado. %>
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if category.persisted? %>
+      <%= button_to expense_category_path(category), method: :delete,
+            form: { data: { turbo_confirm: "¿Borrar la categoría «#{category.name}»?", turbo_confirm_detail: "Solo se puede si no tiene gastos." } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar categoría
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", edit_finances_path, class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button category.persisted? ? "Guardar cambios" : "Agregar categoría", type: "submit", form: "category-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+  </div>
+</div>

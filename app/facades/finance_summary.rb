@@ -25,14 +25,19 @@ class FinanceSummary
     @total ||= build(nil, "Presupuesto general", FinanceSettings.budget_cents, @expenses)
   end
 
-  # Cada categoría, más «General» si hay gastos sin categoría. Las que no tienen presupuesto propio
-  # muestran lo gastado, sin barra.
+  # Una tarjeta por categoría, más «General» con los gastos sin categoría. Sin categorías no hay tarjetas:
+  # todo es el presupuesto general, que el panel ya muestra arriba.
   def rows
     @rows ||= begin
-      by_category = @expenses.group_by(&:expense_category_id)
-      categories = ExpenseCategory.by_name.map { |category| build(category, category.name, category.budget_cents, by_category[category.id] || []) }
-      uncategorized = by_category[nil]
-      uncategorized ? categories + [ build(nil, "General", nil, uncategorized) ] : categories
+      categories = ExpenseCategory.by_name.to_a
+      if categories.empty?
+        []
+      else
+        by_category = @expenses.group_by(&:expense_category_id)
+        rows = categories.map { |category| build(category, category.name, category.budget_cents, by_category[category.id] || []) }
+        uncategorized = by_category[nil]
+        uncategorized ? rows + [ build(nil, "General", nil, uncategorized) ] : rows
+      end
     end
   end
 

@@ -5,12 +5,6 @@ module InventoryHelper
     out: "text-cat-rose-ink bg-cat-rose/10"
   }.freeze
 
-  INVENTORY_COLORS = {
-    "primary" => "bg-primary-600", "blue" => "bg-cat-blue", "sky" => "bg-sky-600", "teal" => "bg-cat-teal",
-    "green" => "bg-cat-green", "lime" => "bg-lime-600", "amber" => "bg-cat-amber", "orange" => "bg-orange-600",
-    "brown" => "bg-amber-800", "rose" => "bg-cat-rose", "pink" => "bg-pink-600", "indigo" => "bg-cat-indigo",
-    "violet" => "bg-violet-600", "slate" => "bg-slate-600"
-  }.freeze
 
   def inventory_status_chip(item)
     tag.span(item.status_label,
@@ -22,7 +16,7 @@ module InventoryHelper
   end
 
   def inventory_color_class(color)
-    INVENTORY_COLORS.fetch(color.to_s, INVENTORY_COLORS["primary"])
+    Appearance.color_class(color)
   end
 
   def inventory_qr_tag(item, size: 132)

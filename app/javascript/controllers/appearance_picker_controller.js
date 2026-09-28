@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
-// La vista previa del formulario de inventario: al elegir un icono o un color, la baldosa de arriba
+// La vista previa del selector de icono y color (inventarios, categorías de gasto): al elegir, la baldosa de arriba
 // cambia y dice en palabras lo que se eligió.
 export default class extends Controller {
   static targets = ['tile', 'icon', 'summary'];

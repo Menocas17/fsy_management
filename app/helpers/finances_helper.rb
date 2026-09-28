@@ -9,6 +9,15 @@ module FinancesHelper
   }.freeze
   BAR_TONES = { ok: "bg-cat-green", warn: "bg-cat-amber", over: "bg-cat-rose", none: "bg-primary-500" }.freeze
 
+  # La baldosa de color con el icono de la categoría; «General» (sin categoría) va en gris con una billetera.
+  def category_tile(category, size: :md)
+    box = size == :sm ? "w-8 h-8 rounded-control" : "w-10 h-10 rounded-tile"
+    glyph = size == :sm ? "w-4 h-4" : "w-5 h-5"
+    color = category ? Appearance.color_class(category.color) : "bg-slate-500"
+    tag.span(icon(category&.icon || "wallet", class: glyph), aria: { hidden: true },
+             class: "#{box} shrink-0 text-white flex items-center justify-center #{color}")
+  end
+
   def money(cents, currency = "NIO")
     Money.format(cents, currency)
   end

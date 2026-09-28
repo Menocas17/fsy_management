@@ -138,7 +138,7 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type='radio'][name='inventory[icon]'][value='scissors'] + span", text: /Tijeras/
     assert_select "input[type='radio'][name='inventory[color]']", Inventory::COLORS.size
     assert_select "input[type='radio'][name='inventory[color]'][value='violet'] + span", text: /Morado/
-    assert_select "[data-inventory-appearance-target='summary']", text: "Paquete · Azul marino"
+    assert_select "[data-appearance-picker-target='summary']", text: "Paquete · Azul marino"
   end
 
   # Anidado dentro del formulario de edición, el navegador descartaba el <form> de borrar: «Guardar» no

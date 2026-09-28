@@ -20,7 +20,8 @@ Rails.application.routes.draw do
   resources :audit_logs, only: [ :index ], path: "historial"
   # Finanzas: el panel y su configuración, las categorías y los gastos con sus tres etapas (docs/finanzas.md).
   resource :finances, only: %i[show edit update], path: "finanzas", path_names: { edit: "configurar" }
-  resources :expense_categories, only: %i[create update destroy], path: "finanzas/categorias"
+  resources :expense_categories, only: %i[new create edit update destroy], path: "finanzas/categorias",
+                                 path_names: { new: "nueva", edit: "editar" }
   resources :expenses, path: "finanzas/gastos", path_names: { new: "presentar", edit: "editar" } do
     member do
       patch :approve, path: "aprobar"

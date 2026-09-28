@@ -58,7 +58,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     patch finances_path, params: { budget: "1" }
     assert_equal 500_000, FinanceSettings.budget_cents
     assert_no_difference -> { ExpenseCategory.count } do
-      post expense_categories_path, params: { name: "Pirata" }
+      post expense_categories_path, params: { expense_category: { name: "Pirata" } }
     end
     assert_no_difference -> { Expense.count } do
       post expenses_path, params: { expense: { concept: "Pirata", currency: "NIO", estimated_amount: "10" } }
@@ -94,13 +94,38 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 25_000_000, FinanceSettings.budget_cents
     assert_equal BigDecimal("36.62"), FinanceSettings.usd_rate
 
-    post expense_categories_path, params: { name: "Alimentación", budget: "80000" }
-    post expense_categories_path, params: { name: "Otros", budget: "" }
-    assert_equal 8_000_000, ExpenseCategory.find_by(name: "Alimentación").budget_cents
+    post expense_categories_path, params: { expense_category: { name: "Alimentación", budget: "80000", icon: "utensils", color: "orange" } }
+    post expense_categories_path, params: { expense_category: { name: "Otros", budget: "", icon: "package", color: "slate" } }
+    food = ExpenseCategory.find_by(name: "Alimentación")
+    assert_equal [ 8_000_000, "utensils", "orange" ], [ food.budget_cents, food.icon, food.color ]
     assert_nil ExpenseCategory.find_by(name: "Otros").budget_cents
 
     get finances_path
     assert_select "[data-finance-total]", text: /C\$ 250,000.00/
+  end
+
+  test "without categories there is no «General» card: the general budget already says it" do
+    Expense.create!(concept: "Agua", estimated_cents: 1000, presented_by: @finance, presented_by_name: "Fina")
+    sign_in_as(@director_user)
+
+    get finances_path
+    assert_select "[data-finance-categories]", 0
+
+    ExpenseCategory.create!(name: "Transporte", icon: "bus", color: "sky")
+    get finances_path
+    assert_select "[data-category-row='transporte'] .bg-sky-600"
+    assert_select "[data-category-row='general']", 1, "with categories, the uncategorized ones show as General"
+  end
+
+  test "a category is edited on its own page with the icon and color picker" do
+    category = ExpenseCategory.create!(name: "Transporte")
+    sign_in_as(@director_user)
+
+    get edit_expense_category_path(category)
+    assert_select "input[type='radio'][name='expense_category[icon]']", Appearance::ICONS.size
+
+    patch expense_category_path(category), params: { expense_category: { name: "Transporte", icon: "bus", color: "violet", budget: "5000" } }
+    assert_equal [ "bus", "violet", 500_000 ], category.reload.values_at(:icon, :color, :budget_cents)
   end
 
   test "the finance member operates but does not set the budget" do

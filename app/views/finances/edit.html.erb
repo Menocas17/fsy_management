@@ -23,47 +23,33 @@
   </section>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-categories>
-    <%= section_heading "Categorías", "tags" %>
-    <p class="-mt-2 mb-4 text-[12.5px] text-ink-500">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+      <%= section_heading "Categorías", "tags" %>
+      <%= link_to new_expense_category_path, class: button_classes(extra: "-mt-4") do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Nueva categoría
+      <% end %>
+    </div>
+    <p class="mb-4 text-[12.5px] text-ink-500">
       Opcionales. Con presupuesto propio, el panel muestra cuánto les queda; sin él, solo lo gastado. Un gasto sin categoría cuenta como «General».
     </p>
     <% if @categories.any? %>
-      <ul class="divide-y divide-line-soft mb-5">
+      <ul class="divide-y divide-line-soft">
         <% @categories.each do |category| %>
-          <li class="py-3 first:pt-0">
-            <%= form_with url: expense_category_path(category), method: :patch, class: "flex flex-wrap items-end gap-2" do %>
-              <div class="flex-1 min-w-40">
-                <%= label_tag "name_#{category.id}", "Nombre", class: "sr-only" %>
-                <%= text_field_tag :name, category.name, id: "name_#{category.id}", required: true, maxlength: 60, class: field_input_classes %>
-              </div>
-              <div class="w-40">
-                <%= label_tag "budget_#{category.id}", "Presupuesto (C$)", class: "sr-only" %>
-                <%= text_field_tag :budget, Money.to_input(category.budget_cents), id: "budget_#{category.id}", inputmode: "decimal",
-                      placeholder: "Sin presupuesto", class: field_input_classes %>
-              </div>
-              <%= tag.button "Guardar", type: "submit", class: button_classes(:secondary) %>
+          <li>
+            <%= link_to edit_expense_category_path(category), class: "flex items-center gap-3 py-3 -mx-2 px-2 rounded-lg hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+              <%= category_tile(category) %>
+              <span class="min-w-0 flex-1">
+                <span class="block text-[14px] font-bold text-ink-900 truncate"><%= category.name %></span>
+                <span class="block text-[12px] font-semibold text-ink-500"><%= category.budget_cents ? money(category.budget_cents) : "Sin presupuesto propio" %></span>
+              </span>
+              <%= icon "chevron-right", class: "w-4 h-4 text-ink-500 shrink-0" %>
             <% end %>
-            <%= button_to "Borrar", expense_category_path(category), method: :delete,
-                  form: { class: "mt-1.5", data: { turbo_confirm: "¿Borrar la categoría «#{category.name}»?", turbo_confirm_detail: "Solo se puede si no tiene gastos." } },
-                  class: "text-[12px] font-bold text-cat-rose-ink hover:underline cursor-pointer" %>
           </li>
         <% end %>
       </ul>
-    <% end %>
-
-    <%= form_with url: expense_categories_path, method: :post, class: "flex flex-wrap items-end gap-2 rounded-tile bg-canvas p-3" do %>
-      <div class="flex-1 min-w-40">
-        <%= label_tag :new_category_name, "Nueva categoría", class: field_label_classes %>
-        <%= text_field_tag :name, nil, id: "new_category_name", required: true, maxlength: 60, placeholder: "Ej. Alimentación", class: field_input_classes %>
-      </div>
-      <div class="w-40">
-        <%= label_tag :new_category_budget, "Presupuesto (opcional)", class: field_label_classes %>
-        <%= text_field_tag :budget, nil, id: "new_category_budget", inputmode: "decimal", placeholder: "C$", class: field_input_classes %>
-      </div>
-      <%= tag.button type: "submit", class: button_classes do %>
-        <%= icon "plus", class: "w-4 h-4" %>
-        Agregar
-      <% end %>
+    <% else %>
+      <p class="text-[13px] text-ink-500">Todavía no hay categorías: todo cuenta contra el presupuesto general.</p>
     <% end %>
   </section>
 </div>

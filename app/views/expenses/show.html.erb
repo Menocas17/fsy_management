@@ -5,10 +5,13 @@
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-4xl space-y-5">
   <section class="<%= card_classes("p-5 md:p-6") %>">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <div class="min-w-0">
+      <div class="min-w-0 flex items-start gap-3">
+        <%= category_tile(@expense.expense_category) %>
+        <div class="min-w-0">
         <p class="text-[12px] font-semibold text-ink-500"><%= [ @expense.category_name, @expense.logistics_area&.name ].compact.join(" · ") %></p>
         <h2 class="text-[20px] font-extrabold tracking-tight text-ink-900 break-words"><%= @expense.concept %></h2>
         <% if @expense.vendor.present? %><p class="text-[13px] font-semibold text-ink-500"><%= @expense.vendor %></p><% end %>
+        </div>
       </div>
       <%= expense_status_chip(@expense) %>
     </div>

@@ -172,7 +172,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_220000) do
 
   create_table "expense_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.bigint "budget_cents"
+    t.string "color", default: "primary", null: false
     t.datetime "created_at", null: false
+    t.string "icon", default: "wallet", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index "lower((name)::text)", name: "index_expense_categories_on_lower_name", unique: true

@@ -5,6 +5,8 @@ class ExpenseCategory < ApplicationRecord
   validates :name, presence: true, length: { maximum: 60 }
   validates :name, uniqueness: { case_sensitive: false }
   validates :budget_cents, numericality: { greater_than: 0 }, allow_nil: true
+  validates :icon, inclusion: { in: Appearance::ICONS.keys }
+  validates :color, inclusion: { in: Appearance::COLORS.keys }
 
   scope :by_name, -> { order(Arel.sql("lower(name)")) }
 
