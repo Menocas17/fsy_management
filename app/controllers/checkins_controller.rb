@@ -103,7 +103,8 @@ class CheckinsController < ApplicationController
         company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
         stake: participant.stake&.titleize,
         gender: Participant::GENDER_LABELS[participant.gender],
-        url: participant_path(participant)
+        # Desde la ficha, «Volver» regresa a este mismo registro (llegada o la capacitación elegida).
+        url: participant_path(participant, from: "escaner", return_to: checkins_path(training_id: @training&.id))
       }
     end
 

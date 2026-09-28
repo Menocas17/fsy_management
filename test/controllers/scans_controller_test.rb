@@ -15,10 +15,10 @@ class ScansControllerTest < ActionDispatch::IntegrationTest
 
   test "a badge, whole URL or bare id, opens that person's ficha" do
     get scan_lookup_path(code: participant_url(@joven))
-    assert_redirected_to participant_path(@joven)
+    assert_redirected_to participant_path(@joven, from: "escaner", return_to: scan_path)
 
     get scan_lookup_path(code: @joven.id)
-    assert_redirected_to participant_path(@joven)
+    assert_redirected_to participant_path(@joven, from: "escaner", return_to: scan_path)
   end
 
   test "an inventory label opens the item for those who handle inventory" do
@@ -33,5 +33,14 @@ class ScansControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to scan_path
     assert_match(/no es de ningún gafete/, flash[:alert])
+  end
+
+  test "the ficha opened from a scanner goes back to that scanner" do
+    training = Training.create!(name: "Hoy", held_on: Date.current)
+    back = checkins_path(training_id: training.id)
+
+    get participant_path(@joven, from: "escaner", return_to: back)
+
+    assert_select "a[title='Volver a Escáner'][href='#{back}']"
   end
 end
