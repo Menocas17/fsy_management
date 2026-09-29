@@ -13,9 +13,9 @@
     <%= link_to "Cancelar", company.persisted? ? company_path(company) : companies_path,
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
     <button type="submit" form="company-form"
-            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none") %>">
+            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>">
       <%= icon "check", class: "w-4 h-4" %>
-      <%= company.persisted? ? "Guardar cambios" : "Crear compañía" %>
+      <%= company.persisted? ? "Actualizar" : "Crear" %>
     </button>
   </div>
 </div>

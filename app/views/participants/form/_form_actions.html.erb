@@ -24,7 +24,7 @@
     <%= link_to "Cancelar", safe_return_to(cancel_fallback),
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
     <button type="submit" form="participant-form" data-turbo-submits-with="Guardando…"
-            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none") %>">
+            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>">
       <%= icon "check", class: "w-4 h-4" %>
       <%= submit_button_text(participant) %>
     </button>

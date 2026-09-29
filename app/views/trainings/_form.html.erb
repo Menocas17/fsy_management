@@ -52,7 +52,7 @@
   <div class="flex gap-2.5 sm:justify-end">
     <%= link_to "Cancelar", training.persisted? ? agenda_training_path(training) : agenda_trainings_path,
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-    <%= tag.button training.persisted? ? "Guardar cambios" : "Crear capacitación", type: "submit", form: "training-form",
-          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button training.persisted? ? "Actualizar" : "Crear", type: "submit", form: "training-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
   </div>
 </div>

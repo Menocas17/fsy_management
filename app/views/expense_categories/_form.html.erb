@@ -42,7 +42,7 @@
   </div>
   <div class="flex gap-2.5 sm:justify-end">
     <%= link_to "Cancelar", edit_finances_path, class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-    <%= tag.button category.persisted? ? "Guardar cambios" : "Agregar categoría", type: "submit", form: "category-form",
-          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button category.persisted? ? "Actualizar" : "Agregar", type: "submit", form: "category-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
   </div>
 </div>
