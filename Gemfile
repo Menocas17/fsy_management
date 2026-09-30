@@ -89,7 +89,7 @@ gem "prawn-table", "~> 0.2.2"
 gem "roo", "~> 3.0"
 gem "csv", "~> 3.3"
 # json 3.0 rompe ActiveSupport::JSON.decode (y con él todas las columnas jsonb): nos quedamos en la 2.x parcheada.
-gem "json", "~> 2.21", ">= 2.21.2"
+gem "json", "~> 3.0"
 
 # Notificaciones push del navegador (VAPID + cifrado del payload)
 gem "web-push", "~> 3.0"
