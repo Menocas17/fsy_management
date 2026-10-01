@@ -1,6 +1,6 @@
 # User accounts: login/logout review and account-creation plan
 
-Status: **proposal only, no code written.** Email delivery (password reset, account notices) is out of scope for now.
+Status: **implemented** (sections 2–5) on `claude/wonderful-volta-ritwqr`. Decisions taken: the logistics director creates accounts for anyone (they run registration), except a director's or coordinator's account, which only full access touches; the "Restablecer a contraseña predeterminada" button (§5) is included. Email delivery stays out of scope.
 
 ## 1. Review of the current login / logout
 

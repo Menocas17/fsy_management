@@ -27,7 +27,7 @@ class PasswordsController < ApplicationController
   def update
     if params[:password].blank?
       @user.errors.add(:password, :blank)
-    elsif @user.update(params.permit(:password, :password_confirmation))
+    elsif @user.update(params.permit(:password, :password_confirmation).merge(must_change_password: false))
       @user.sessions.destroy_all
       return redirect_to new_session_path, notice: "La contraseña ha sido restablecida."
     end

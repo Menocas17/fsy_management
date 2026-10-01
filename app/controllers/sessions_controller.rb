@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
   layout "auth"
   allow_unauthenticated_access only: %i[ new create ]
+  allow_pending_password_change only: :destroy
   before_action :redirect_if_authenticated, only: %i[ new create ]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> {
     LoginAttempt.record!(email: params[:email_address], result: :blocked, request: request)
