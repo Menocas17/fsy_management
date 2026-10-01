@@ -1,5 +1,6 @@
 class Participant < ApplicationRecord
-  has_one :user, dependent: :nullify
+  # Borrar la ficha borra su cuenta: una cuenta sin ficha no tiene a quién representar.
+  has_one :user, dependent: :destroy
   belongs_to :company, optional: true
   belongs_to :logistics_area, optional: true
 

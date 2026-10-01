@@ -30,4 +30,44 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.valid?
     assert_includes user.errors[:password].join, "mayúscula"
   end
+
+  test "superadmin es la columna, no la falta de participante" do
+    assert users(:one).superadmin?
+    assert users(:one).full_access?
+
+    orphan = User.new(email_address: "huerfano@fsy.com", password: "Password123!")
+    assert_not orphan.superadmin?
+    assert_not orphan.full_access?
+    assert_not orphan.alert_manager?
+    assert_not orphan.agenda_manager?
+    assert_not orphan.linked?
+  end
+
+  test "borrar la ficha borra su cuenta en vez de volverla superadmin" do
+    maria = participants(:maria)
+    user = User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: maria)
+    user.sessions.create!
+
+    maria.destroy
+
+    assert_not User.exists?(user.id)
+    assert_equal 0, Session.where(user_id: user.id).count
+  end
+
+  test "el correo es obligatorio, válido y único sin importar mayúsculas" do
+    assert_not User.new(email_address: "", password: "Password123!").valid?
+    assert_not User.new(email_address: "sin-arroba", password: "Password123!").valid?
+
+    duplicate = User.new(email_address: " ADMIN@fsy.com ", password: "Password123!")
+    assert_not duplicate.valid?
+    assert_includes duplicate.errors[:email_address], "ya está en uso"
+  end
+
+  test "un participante tiene a lo sumo una cuenta" do
+    User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria))
+    second = User.new(email_address: "maria2@fsy.com", password: "Consejera1!", participant: participants(:maria))
+
+    assert_not second.valid?
+    assert second.errors.key?(:participant_id)
+  end
 end

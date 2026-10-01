@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   mount RailsIcons::Engine, at: "/rails_icons"
   resource :session
   resources :passwords, param: :token
+  # Cambiar la contraseña ya adentro, con la actual: no depende del correo.
+  resource :password_change, only: %i[edit update], path: "contrasena", path_names: { edit: "cambiar" }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -98,7 +100,6 @@ Rails.application.routes.draw do
   resource :agenda, only: [ :show ], controller: "agenda"
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   resource :settings, only: [ :show ] do
-    post :send_password_reset
     patch :scan_windows
   end
   resources :auxiliar_companies do
@@ -122,9 +123,6 @@ Rails.application.routes.draw do
       collection do
         get :staff
         get :myprofile
-      end
-      member do
-        post :send_password_reset
       end
   end
 end

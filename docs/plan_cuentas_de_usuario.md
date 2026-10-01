@@ -25,7 +25,7 @@ Status: **proposal only, no code written.** Email delivery (password reset, acco
 | 8 | Low | Sessions have only an idle limit; no absolute lifetime. Changing a password from a reset kills all sessions (good), but there is no "change password while logged in" flow at all. | `Session`, `Authentication` |
 | 9 | Cosmetic | `PasswordsMailer` subject is in English ("Reset your password"). | `app/mailers/passwords_mailer.rb` |
 
-Items 1–4 should be fixed **before or together with** the account-creation feature; 1 and 2 are independent and worth fixing right away.
+**Update:** all nine are fixed on this branch (first step, before the account-creation feature): explicit `users.superadmin` column + `dependent: :destroy` + unlinked accounts can't sign in (#1), `:passw`/`:email` log filtering (#2), `User` email/participant validations and a unique `participant_id` index (#3, #4), email resets gated by `config.x.password_reset_emails` and the email-only buttons replaced (#5), resets render their real errors and are rate-limited (#6), the reset link opens with a session open (#7), sessions capped at 90 days and a logged-in "Cambiar contraseña" page (#8), Spanish mailer (#9).
 
 ## 2. Proposed design: create an account from a profile
 

@@ -6,17 +6,23 @@ class User < ApplicationRecord
 
   validates :password, length: { minimum: 8 }, allow_nil: true
   validate :password_complexity
+  validates :email_address, presence: true, uniqueness: true,
+                            format: { with: URI::MailTo::EMAIL_REGEXP, allow_blank: true }
+  validates :participant_id, uniqueness: true, allow_nil: true
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
-  # La cuenta del sistema, sin ficha de participante: la única que abre o cierra los registros a mano.
-  def superadmin?
-    participant_id.nil?
+  # superadmin? (la columna) marca la cuenta del sistema: la única que abre o cierra los registros a mano.
+  # Antes era «la cuenta sin participante», y borrar una ficha volvía superadmin a su cuenta.
+
+  # Una cuenta sirve si es la del sistema o si sigue atada a una ficha; una que perdió su ficha no entra.
+  def linked?
+    superadmin? || participant_id.present?
   end
 
   # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
   def full_access?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.coordinador? || participant&.director? || false
   end
 
@@ -29,13 +35,13 @@ class User < ApplicationRecord
   # Who may send alerts and edit the agenda: the director couple, the coordinators, the logistics director
   # and the superadmin.
   def alert_manager?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.director? || participant&.coordinador? || participant&.director_logistica?
   end
 
   # The agenda is edited by the director couple, the coordinators and the superadmin.
   def agenda_manager?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.director? || participant&.coordinador?
   end
 

@@ -41,7 +41,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     expense.reload
     assert expense.consolidated?
     assert_equal 142_000, expense.actual_cents
-    assert_equal "finanzas", AuditLog.last.category
+    assert_equal "finanzas", AuditLog.order(:created_at).last.category
 
     get expense_path(expense)
     assert_select "[data-receipt] img"
