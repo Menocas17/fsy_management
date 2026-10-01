@@ -31,7 +31,7 @@ class SessionsTest < ApplicationSystemTestCase
   test "cerrar sesión desde el menú de cuenta vuelve a pedir la contraseña" do
     sign_in_as(users(:one))
 
-    find("button[aria-label='Menú de cuenta']").click
+    click_on "Menú de cuenta"
     click_on "Cerrar sesión"
     assert_current_path new_session_path
 

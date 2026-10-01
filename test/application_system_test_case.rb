@@ -1,5 +1,8 @@
 require "test_helper"
 
+# Varios controles solo tienen aria-label (el menú de cuenta, la cantidad del ajuste, el código del artículo).
+Capybara.enable_aria_label = true
+
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # CHROME_BIN apunta a otro Chrome/Chromium cuando el del sistema no sirve (p. ej. un contenedor sin Chrome).
   driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1000 ] do |options|
@@ -15,6 +18,12 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in "Contraseña", with: password
     click_on "Entrar"
     assert_current_path dashboard_path
+  end
+
+  def sign_out
+    click_on "Menú de cuenta"
+    click_on "Cerrar sesión"
+    assert_current_path new_session_path
   end
 
   # El ancho de un celular común, para las pruebas que cuidan el diseño en pantallas angostas.
