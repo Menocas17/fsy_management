@@ -2,7 +2,7 @@ require "test_helper"
 
 class NavigationHelperTest < ActionView::TestCase
   test "lists the sections in sidebar order" do
-    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Librería", "Inventario", "Reportes", "Finanzas" ],
+    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Inventario", "Finanzas", "Librería", "Reportes" ],
                  nav_items.map { |item| item[:text] }
   end
 
@@ -25,15 +25,31 @@ class NavigationHelperTest < ActionView::TestCase
   test "not-yet-built sections are disabled and have no destination" do
     disabled = nav_items.select { |item| item[:disabled] }
 
-    assert_equal [ "Librería", "Inventario", "Reportes", "Finanzas" ], disabled.map { |item| item[:text] }
+    assert_equal [ "Inventario", "Finanzas", "Librería", "Reportes" ], disabled.map { |item| item[:text] }
     assert disabled.all? { |item| item[:url].nil? }
   end
 
   test "groups items under the sidebar categories" do
-    assert_equal [ nil, "Participantes", "Gestión" ], nav_sections.map { |section| section[:label] },
-                 "Mi perfil moved to the account menu, so the Cuenta section is gone"
-    assert_equal [ "Compañías", "Organigrama", "Agenda", "Librería", "Inventario", "Reportes", "Finanzas" ],
-                 nav_sections.third[:items].map { |item| item[:text] }
+    Current.session = users(:one).sessions.create!
+
+    groups = nav_sections.to_h { |section| [ section[:label], section[:items].map { |item| item[:text] } ] }
+    assert_equal({ nil => [ "Inicio" ],
+                   "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
+                   "Evento" => [ "Agenda", "Registro", "Alertas" ],
+                   "Logística" => [ "Áreas", "Inventario", "Finanzas", "Librería" ],
+                   "Seguimiento" => [ "Reportes", "Historial" ] }, groups)
+  ensure
+    Current.reset
+  end
+
+  test "a group starts open unless the person closed it, and the open page's group is always open" do
+    participantes = { id: "participantes", active: false }
+    assert nav_group_open?(participantes)
+
+    cookies[:fsy_nav_closed] = "participantes.seguimiento"
+    assert_not nav_group_open?(participantes)
+    assert nav_group_open?(participantes.merge(active: true))
+    assert nav_group_open?({ id: "evento", active: false })
   end
 
   test "every nav item uses a Lucide icon" do

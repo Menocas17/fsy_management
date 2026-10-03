@@ -1,10 +1,34 @@
-<nav class="flex flex-col gap-1" aria-label="Navegación principal">
+<%# Grupos desplegables: el encabezado abre y cierra su grupo; cerrado dice cuántas opciones tiene y, si
+    la página abierta está adentro, un punto de sol. Lo que la persona cierra se recuerda en una cookie
+    (nav_groups_controller), así el servidor ya lo dibuja cerrado; el grupo de la página abierta llega abierto. %>
+<nav class="flex flex-col gap-1" aria-label="Navegación principal" data-controller="nav-groups">
   <% nav_sections.each do |section| %>
     <% if section[:label] %>
-      <p class="px-3.5 mt-3 mb-0.5 text-[10.5px] font-bold tracking-[.08em] uppercase text-ink-300"><%= section[:label] %></p>
-    <% end %>
-    <% section[:items].each do |item| %>
-      <%= render(ButtonComponent.new(**item)) %>
+      <% panel_id = "nav-group-#{section[:id]}-#{local_assigns.fetch(:context, "aside")}" %>
+      <% open = nav_group_open?(section) %>
+      <div data-nav-group="<%= section[:id] %>" data-open="<%= open %>" class="group/nav mt-2">
+        <button type="button" data-action="nav-groups#toggle" aria-expanded="<%= open %>" aria-controls="<%= panel_id %>"
+                class="w-full flex items-center gap-2 h-8 px-3.5 rounded-lg text-[10.5px] font-bold tracking-[.08em] uppercase text-ink-500 hover:text-ink-700 dark:hover:text-slate-200 cursor-pointer transition-colors">
+          <span class="flex-1 text-left"><%= section[:label] %></span>
+          <% if section[:active] %>
+            <span class="hidden group-data-[open=false]/nav:block size-[7px] rounded-full bg-sun" title="La página abierta está en este grupo"></span>
+          <% end %>
+          <span class="hidden group-data-[open=false]/nav:inline text-[11px] font-semibold tracking-normal text-ink-500 tabular-nums"><%= section[:items].size %></span>
+          <%= icon "chevron-down", class: "w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-data-[open=false]/nav:-rotate-90" %>
+        </button>
+        <%# Cerrado queda inert: invisible y además fuera del Tab y de los lectores de pantalla. %>
+        <div id="<%= panel_id %>" class="nav-group-panel" <%= "inert" unless open %>>
+          <div class="flex flex-col gap-1 pt-0.5">
+            <% section[:items].each do |item| %>
+              <%= render(ButtonComponent.new(**item)) %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <% section[:items].each do |item| %>
+        <%= render(ButtonComponent.new(**item)) %>
+      <% end %>
     <% end %>
   <% end %>
 </nav>

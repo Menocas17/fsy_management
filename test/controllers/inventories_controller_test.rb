@@ -204,6 +204,6 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     get inventories_path
 
     assert_select "aside a[aria-current='page']", text: "Inventario"
-    assert_select "aside", { text: /Logística/, count: 0 }
+    assert_select "aside a", { text: /\ALogística\z/, count: 0 }
   end
 end

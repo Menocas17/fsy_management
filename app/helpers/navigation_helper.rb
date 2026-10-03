@@ -1,23 +1,28 @@
 module NavigationHelper
-  # Sidebar and mobile drawer share this structure: an unlabeled "Inicio" group, then one group per category.
+  # El menú lateral y el cajón del teléfono comparten esta estructura: «Inicio» suelto y luego grupos
+  # desplegables (shared/_nav_sections + nav_groups_controller). Cada grupo tiene un id estable: con él se
+  # recuerda en el dispositivo si la persona lo dejó abierto o cerrado.
   def nav_sections
     sections = [
-      { label: nil, items: [
+      { id: nil, label: nil, items: [
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" }
       ] },
-      { label: "Participantes", items: [
+      { id: "participantes", label: "Participantes", items: [
         { text: "Jóvenes", url: participants_path, lucide_icon: "users", section: "jovenes",
           active_paths: [ participants_path ], except_paths: [ staff_participants_path, myprofile_participants_path ] },
         { text: "Staff", url: staff_participants_path, lucide_icon: "user-check", section: "staff",
-          active_paths: [ staff_participants_path ] }
-      ] },
-      { label: "Gestión", items: [
+          active_paths: [ staff_participants_path ] },
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
-        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
+        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" }
+      ] },
+      { id: "evento", label: "Evento", items: [
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
         # El registro de llegadas solo aparece para el comité que lo hace.
         ({ text: "Registro", url: checkins_path, lucide_icon: "scan-line", active_paths: [ checkins_path ] } if Current.user&.checkin_registrar?),
-        { text: "Librería", lucide_icon: "library", disabled: true },
+        ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?)
+      ] },
+      { id: "logistica", label: "Logística", items: [
+        ({ text: "Áreas", url: logistics_areas_path, lucide_icon: "layout-grid", active_paths: [ logistics_areas_path ] } if Current.user&.logistics_areas_manager?),
         (if Current.user&.inventory_member?
            { text: "Inventario", url: inventories_path, lucide_icon: "boxes",
              # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
@@ -25,26 +30,47 @@ module NavigationHelper
          else
            { text: "Inventario", lucide_icon: "boxes", disabled: true, hint: "Solo para el comité de logística" }
          end),
+        (if Current.user&.finance_viewer?
+           { text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] }
+         else
+           { text: "Finanzas", lucide_icon: "wallet", disabled: true, hint: "Solo para el área de Finanzas, logística y la dirección" }
+         end),
+        { text: "Librería", lucide_icon: "library", disabled: true }
+      ] },
+      { id: "seguimiento", label: "Seguimiento", items: [
         (if Current.user&.reports_viewer?
            { text: "Reportes", url: reports_path, lucide_icon: "file-text",
              active_paths: [ reports_path, participant_imports_path ] }
          else
            { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),
-        (if Current.user&.finance_viewer?
-           { text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] }
-         else
-           { text: "Finanzas", lucide_icon: "wallet", disabled: true, hint: "Solo para el área de Finanzas, logística y la dirección" }
-         end),
-        ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]
     # "Mi perfil" lives in the account menu of the top bar; a section with no items is dropped.
     sections.filter_map do |section|
       items = section[:items].compact.map { |item| item.merge(is_nav: true) }
-      section.merge(items: items) if items.any?
+      section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
     end
+  end
+
+  # Un grupo arranca abierto salvo que la persona lo haya cerrado (cookie de nav_groups_controller); el de
+  # la página abierta, siempre abierto.
+  def nav_group_open?(section)
+    section[:active] || !cookies[:fsy_nav_closed].to_s.split(".").include?(section[:id])
+  end
+
+  # Si una opción del menú es la página abierta. La usan ButtonComponent (para pintarla) y los grupos (para
+  # abrir siempre el que la contiene). active_paths la mantiene encendida en sus páginas anidadas (nueva,
+  # editar, ver); except_paths evita que se encienda una hermana (Jóvenes y Staff viven bajo /participants).
+  def nav_item_active?(url: nil, section: nil, active_paths: [], except_paths: [], disabled: false, **)
+    return false if disabled || url.nil?
+    # A ?from= param says which list the person came from, and that wins over path matching.
+    return section.present? && params[:from] == section if params[:from].present?
+    return true if current_page?(url)
+    return false if except_paths.any? { |path| request.path.start_with?(path) }
+
+    active_paths.any? { |path| request.path.start_with?(path) }
   end
 
   def nav_items

@@ -109,6 +109,16 @@ class User < ApplicationRecord
     participant&.logistica? && participant.logistics_area&.finance? || false
   end
 
+  # Alimentación: el módulo todavía no existe; esto dice quién tendrá acceso (áreas con la bandera food).
+  def food_member?
+    participant&.logistica? && participant.logistics_area&.food? || false
+  end
+
+  # Quién administra las áreas de logística (crearlas, sus banderas y sus miembros).
+  def logistics_areas_manager?
+    full_access? || participant&.director_logistica? || false
+  end
+
   def finance_operator?
     finance_member? || participant&.director_logistica? || false
   end

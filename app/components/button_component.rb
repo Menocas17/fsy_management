@@ -51,16 +51,9 @@ class ButtonComponent < ViewComponent::Base
     @disabled
   end
 
-  # A nav item stays highlighted on its nested pages (new, edit, show) through active_paths;
-  # except_paths keeps a sibling from lighting up too (Jóvenes vs Staff, both under /participants).
   def active?
-    return false if disabled? || @url.nil?
-    # A ?from= param says which list the person came from, and that wins over path matching.
-    return @section.present? && params[:from] == @section if params[:from].present?
-    return true if current_page?(@url)
-    return false if @except_paths.any? { |path| request.path.start_with?(path) }
-
-    @active_paths.any? { |path| request.path.start_with?(path) }
+    helpers.nav_item_active?(url: @url, section: @section, active_paths: @active_paths,
+                             except_paths: @except_paths, disabled: disabled?)
   end
 
   def active_classes
