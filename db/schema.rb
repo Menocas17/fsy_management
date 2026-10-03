@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_03_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -68,6 +68,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_130000) do
     t.index ["activity_id", "participant_id"], name: "index_activity_responsibles_on_activity_id_and_participant_id", unique: true
     t.index ["activity_id"], name: "index_activity_responsibles_on_activity_id"
     t.index ["participant_id"], name: "index_activity_responsibles_on_participant_id"
+  end
+
+  create_table "alert_dismissals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "alert_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["alert_id"], name: "index_alert_dismissals_on_alert_id"
+    t.index ["user_id", "alert_id"], name: "index_alert_dismissals_on_user_id_and_alert_id", unique: true
   end
 
   create_table "alerts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -412,6 +420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_130000) do
     t.datetime "alerts_read_at"
     t.boolean "superadmin", default: false, null: false
     t.datetime "first_signed_in_at"
+    t.datetime "alerts_cleared_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["participant_id"], name: "index_users_on_participant_id", unique: true
   end
@@ -420,6 +429,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_03_130000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_responsibles", "activities"
   add_foreign_key "activity_responsibles", "participants"
+  add_foreign_key "alert_dismissals", "alerts", on_delete: :cascade
+  add_foreign_key "alert_dismissals", "users", on_delete: :cascade
   add_foreign_key "alerts", "activities", on_delete: :nullify
   add_foreign_key "alerts", "participants", column: "recipient_id", on_delete: :cascade
   add_foreign_key "alerts", "participants", column: "sender_id", on_delete: :nullify

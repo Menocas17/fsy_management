@@ -24,8 +24,30 @@ module Auditable
       target.respond_to?(:full_name) ? target.full_name : target.name
     end
 
+    # Solo lo que de verdad cambió. Un formulario guardado sin tocar manda "" donde había nil, y en las
+    # columnas jsonb agrega llaves vacías: Rails lo ve como cambio y el historial decía «Actualizó contacto
+    # y notas» sin que nadie cambiara nada. Un valor de labels puede ser un Hash para una columna jsonb
+    # (llave → etiqueta), y entonces nombra lo que cambió adentro («teléfono», «alergias»).
     def changed_field_labels(record, labels)
-      labels.filter_map { |key, label| label if record.saved_changes.key?(key) }.uniq
+      labels.flat_map { |column, label|
+        before, after = record.saved_changes[column]
+        next [] unless record.saved_changes.key?(column)
+
+        if label.is_a?(Hash)
+          before, after = audit_hash(before), audit_hash(after)
+          (before.keys | after.keys).filter_map { |key| label.fetch(key, nil) if before[key] != after[key] }
+        else
+          audit_value(before) == audit_value(after) ? [] : [ label ]
+        end
+      }.uniq
+    end
+
+    def audit_value(value)
+      value.is_a?(String) ? value.strip.presence : value
+    end
+
+    def audit_hash(value)
+      value.to_h.transform_values { |item| audit_value(item) }.compact_blank
     end
 
     def spanish_list(words)

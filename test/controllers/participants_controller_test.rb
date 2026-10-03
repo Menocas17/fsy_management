@@ -274,7 +274,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     patch participant_path(juan), params: { participant: { room: "204", company_id: company.id } }
 
     log = AuditLog.recent.first
-    assert log.asignaciones?
+    assert log.participantes?
     assert_equal "Actualizó cuarto y compañía de Juan Pérez", log.summary
   end
 
@@ -284,6 +284,26 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference -> { AuditLog.count } do
       patch participant_path(juan), params: { participant: { room: juan.room } }
     end
+  end
+
+  test "saving the form untouched adds no history, even though it sends every field blank" do
+    juan = participants(:juan)
+    juan.update!(contact_info: { "phone_number" => "8888 1111" }, medical_info: { "diet" => "Sin gluten" })
+    untouched = { phone_number: "8888 1111", email_address: "", emergency_contact_number: "", emergency_contact_name: "",
+                  emergency_contact_relation: "", allergies: "", medicines: "", diet: "Sin gluten", additional_medical_notes: "",
+                  additional_instructions: "" }
+
+    assert_no_difference -> { AuditLog.count } do
+      patch participant_path(juan), params: { participant: untouched }
+    end
+  end
+
+  test "an edit inside contact or medical info names what changed" do
+    juan = participants(:juan)
+
+    patch participant_path(juan), params: { participant: { phone_number: "8888 2222", allergies: "Maní", email_address: "" } }
+
+    assert_equal "Actualizó teléfono y alergias de Juan Pérez", AuditLog.recent.first.summary
   end
 
   test "destroy records the deleted participant by name" do

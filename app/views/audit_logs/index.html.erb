@@ -4,6 +4,6 @@
   <p class="mb-5 text-[13px] font-medium text-ink-500">Quién cambió qué y cuándo.</p>
   <%= render "audit_logs/filters" %>
   <%= turbo_frame_tag "audit_logs_table" do %>
-    <%= render "audit_logs/results", audit_logs: @audit_logs, pagy: @pagy %>
+    <%= render "audit_logs/results", audit_logs: @audit_logs, pagy: @pagy, targets: @targets, filtered: @filtered %>
   <% end %>
 </div>

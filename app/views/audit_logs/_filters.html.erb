@@ -1,25 +1,29 @@
-<% categories = [ [ "", "Todos" ] ] + AuditLog::CATEGORY_LABELS.to_a %>
+<%
+  # Igual que los filtros de Jóvenes y Staff: la búsqueda cede ancho y los selects, si no caben, se deslizan
+  # de lado con la barra discreta (scroll-reveal), en vez de desbordar la página en el teléfono.
+  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-[13px] font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
+%>
 <%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance", controller: "auto-submit" },
-      class: "flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5" do |f| %>
-  <div class="relative w-full lg:w-72 lg:shrink-0">
+      class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-4" do |f| %>
+  <div class="relative w-full lg:w-auto lg:flex-[1_100_20rem] lg:min-w-44 lg:max-w-96">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
-    <%= f.text_field :query,
+    <%= f.search_field :query,
           value: params[:query],
-          placeholder: "Buscar por nombre…",
-          aria: { label: "Buscar por nombre" },
+          placeholder: "Buscar persona o acción…",
+          aria: { label: "Buscar por persona, registro o acción" },
           class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           data: { action: "input->auto-submit#typed" } %>
   </div>
-  <fieldset class="flex items-start gap-2 overflow-x-auto pb-1 lg:pb-0 lg:flex-wrap lg:justify-end">
-    <legend class="sr-only">Categoría</legend>
-    <% categories.each do |value, label| %>
-      <label class="relative shrink-0 cursor-pointer">
-        <%= f.radio_button :category, value, checked: params[:category].to_s == value, class: "peer sr-only",
-              data: { action: "change->auto-submit#changed" } %>
-        <span class="inline-flex items-center h-9 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 transition peer-checked:bg-primary-700 peer-checked:border-transparent peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500">
-          <%= label %>
-        </span>
-      </label>
-    <% end %>
-  </fieldset>
+  <div data-controller="scroll-reveal" data-audit-filters
+       class="scroll-reveal-x flex items-start gap-2 overflow-x-auto p-0.5 -m-0.5 pb-1.5 lg:flex-none">
+    <%= f.select :category,
+          options_for_select(AuditLog::CATEGORY_LABELS.map { |key, label| [ label, key ] }, params[:category]),
+          { include_blank: "Categoría" }, class: chip_classes, aria: { label: "Filtrar por categoría" }, data: { action: "change->auto-submit#changed" } %>
+    <%= f.select :kind,
+          options_for_select(AuditLog::ACTION_KINDS.map { |key, meta| [ meta[:label], key ] }, params[:kind]),
+          { include_blank: "Acción" }, class: chip_classes, aria: { label: "Filtrar por acción" }, data: { action: "change->auto-submit#changed" } %>
+    <%= f.select :period,
+          options_for_select(AuditLog::PERIODS.map { |key, label| [ label, key ] }, params[:period]),
+          { include_blank: "Cualquier fecha" }, class: chip_classes, aria: { label: "Filtrar por fecha" }, data: { action: "change->auto-submit#changed" } %>
+  </div>
 <% end %>

@@ -45,7 +45,7 @@ class ParticipantsController < ApplicationController
     return redirect_to(participants_path, alert: "No estás autorizado para registrar este tipo de participante") unless can_edit_participant?(@participant)
 
     if @participant.save
-      record_audit!(category: :asignaciones, action: "created", target: @participant, summary: "Registró a #{@participant.full_name}")
+      record_audit!(category: :participantes, action: "created", target: @participant, summary: "Registró a #{@participant.full_name}")
       redirect_to @participant
     else
       render :new, status: :unprocessable_entity
@@ -79,7 +79,7 @@ class ParticipantsController < ApplicationController
 
   def destroy
     @participant.destroy
-    record_audit!(category: :asignaciones, action: "destroyed", target: @participant, summary: "Eliminó el registro de #{@participant.full_name}")
+    record_audit!(category: :participantes, action: "destroyed", target: @participant, summary: "Eliminó el registro de #{@participant.full_name}")
     redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end
 
@@ -87,8 +87,15 @@ class ParticipantsController < ApplicationController
   FIELD_LABELS = {
     "first_name" => "nombre", "last_name" => "apellido", "age" => "edad", "rol" => "rol", "stake" => "estaca",
     "ward" => "barrio", "gender" => "género", "shirt_number" => "talla", "identity_document" => "identificación",
-    "room" => "cuarto", "company_id" => "compañía", "contact_info" => "contacto", "medical_info" => "información médica",
-    "person_in_charge" => "consejeros", "additional_instructions" => "notas", "logistics_area_id" => "área de logística"
+    "room" => "cuarto", "company_id" => "compañía", "additional_instructions" => "notas", "logistics_area_id" => "área de logística",
+    "contact_info" => {
+      "phone_number" => "teléfono", "email_address" => "correo", "emergency_contact_number" => "contacto de emergencia",
+      "emergency_contact_name" => "contacto de emergencia", "emergency_contact_relation" => "contacto de emergencia"
+    },
+    "medical_info" => {
+      "allergies" => "alergias", "medicines" => "medicinas", "diet" => "dieta", "additional_medical_notes" => "notas médicas"
+    },
+    "person_in_charge" => { "m_person_in_charge" => "consejeros", "h_person_in_charge" => "consejeros" }
   }.freeze
 
   def audit_participant_update
@@ -96,7 +103,7 @@ class ParticipantsController < ApplicationController
     fields << "foto" if params.dig(:participant, :avatar).present?
     return if fields.empty?
 
-    record_audit!(category: :asignaciones, action: "updated", target: @participant,
+    record_audit!(category: :participantes, action: "updated", target: @participant,
                   summary: "Actualizó #{spanish_list(fields)} de #{@participant.full_name}")
   end
 
