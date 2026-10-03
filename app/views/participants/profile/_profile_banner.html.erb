@@ -1,16 +1,17 @@
 <div data-controller="dialog">
   <%= render "shared/event_banner" %>
 
-  <%# Qué botón de cuenta toca (crear o restablecer), para repartir la grilla del celular. %>
-  <% account_action = if can_create_account_for?(participant) then :create elsif can_reset_account_of?(participant) then :reset end %>
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">
     <%# En celular todo se apila a lo ancho (la foto asoma sobre el banner, debajo el nombre y los datos, y los
-        botones en grilla); desde sm vuelve a la fila de siempre. flex-wrap deja caer los botones bajo el nombre
-        cuando no caben, así nunca se encima nada en tablet. %>
+        botones parejos); desde sm vuelve a la fila de siempre. flex-wrap deja caer los botones bajo el nombre
+        cuando no caben, así nunca se encima nada en tablet. Crear o restablecer la cuenta vive en Contacto,
+        junto al correo: aquí solo queda lo propio de la ficha. %>
     <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-x-5 gap-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 md:gap-[18px] min-w-0 sm:flex-1 sm:basis-72">
-        <button type="button" data-action="click->dialog#open" data-dialog-name="photo" aria-label="Ver fotografía"
-                class="self-start sm:self-auto -mt-12 sm:-mt-10 md:-mt-[46px] shrink-0 rounded-panel md:rounded-panel shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+        <%# Anclada arriba (self-start) y subida con margen negativo: siempre sobresale de la tarjeta y queda en
+            parte sobre el banner, por alta que sea la tarjeta (centrada, se hundía en lo blanco). %>
+        <button type="button" data-action="click->dialog#open" data-dialog-name="photo" aria-label="Ver fotografía" data-profile-photo
+                class="self-start -mt-12 sm:-mt-10 md:-mt-[46px] shrink-0 rounded-panel md:rounded-panel shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
           <%= render(AvatarComponent.new(participant: participant, is_profile: true)) %>
         </button>
         <div class="min-w-0">
@@ -23,33 +24,17 @@
           </p>
         </div>
       </div>
-      <%# Celular: Editar arriba a todo lo ancho y el resto en dos columnas parejas. %>
-      <div class="grid grid-cols-2 gap-2.5 w-full sm:flex sm:flex-wrap sm:w-auto sm:ml-auto shrink-0" data-profile-actions>
+      <% can_edit = can_edit_participant?(participant) %>
+      <div class="grid <%= can_edit ? "grid-cols-2" : "grid-cols-1" %> gap-2.5 w-full sm:flex sm:w-auto sm:ml-auto shrink-0" data-profile-actions>
         <%# El volver vive en la barra superior; acá va el QR de la persona, que es lo propio de esta ficha. %>
         <button type="button" data-action="click->dialog#open" data-dialog-name="qr" data-profile-qr
-                class="<%= button_classes(:secondary, extra: "whitespace-nowrap #{"col-span-2" unless account_action}") %>">
+                class="<%= button_classes(:secondary, extra: "whitespace-nowrap") %>">
           <%= icon "qr-code", class: "w-4 h-4" %>
           Código QR
         </button>
-        <% if account_action == :create %>
-          <button type="button" data-action="click->dialog#open" data-dialog-name="account"
-                  class="<%= button_classes(:secondary, extra: "whitespace-nowrap") %>">
-            <%= icon "user-plus", class: "w-4 h-4" %>
-            Crear cuenta
-          </button>
-        <% elsif account_action == :reset %>
-          <%= button_to participant_account_path(participant), method: :patch, form_class: "contents",
-                form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
-                                turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
-                                turbo_confirm_button: "Sí, restablecer" } },
-                class: button_classes(:secondary, extra: "w-full sm:w-auto whitespace-nowrap") do %>
-            <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
-            <span class="sm:hidden">Restablecer</span><span class="hidden sm:inline">Restablecer contraseña</span>
-          <% end %>
-        <% end %>
-        <% if can_edit_participant?(participant) %>
+        <% if can_edit %>
           <%= link_to edit_participant_path(participant, from: edit_from, return_to: request.fullpath),
-                class: button_classes(:primary, extra: "col-span-2 -order-1 sm:order-none") do %>
+                class: button_classes(:primary, extra: "whitespace-nowrap") do %>
             <%= icon "square-pen", class: "w-4 h-4" %>
             Editar
           <% end %>
@@ -76,6 +61,5 @@
     </dialog>
 
     <%= render "participants/qr_dialog", participant: participant %>
-    <%= render "participants/profile/account_dialog", participant: participant if can_create_account_for?(participant) %>
   </div>
 </div>

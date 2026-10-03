@@ -538,3 +538,24 @@ turbo-frame[aria-busy='true'] {
 .scroll-reveal[data-scrolling]::-webkit-scrollbar-thumb {
   background: color-mix(in oklch, var(--color-ink-300) 85%, transparent);
 }
+
+/* Lo mismo para una fila que se desliza de lado (los filtros de las tablas): la barra solo mientras se
+   desliza. Sin scrollbar-gutter, que es para la barra vertical. */
+.scroll-reveal-x {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 300ms ease-out;
+}
+.scroll-reveal-x[data-scrolling] {
+  scrollbar-color: color-mix(in oklch, var(--color-ink-300) 85%, transparent) transparent;
+}
+.scroll-reveal-x::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-reveal-x::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+.scroll-reveal-x[data-scrolling]::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--color-ink-300) 85%, transparent);
+}
