@@ -30,7 +30,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-shortcut='my-qr']", false
   end
 
-  test "a consejero only gets a shortcut to the company they staff" do
+  test "a consejero gets their company, their own code and a badge scanner, but not registration" do
     company = Company.create!(number: 7)
     Membership.create!(associable: company, participant: participants(:maria))
     sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
@@ -39,7 +39,8 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "a[data-shortcut='my-company'][href='#{company_path(company)}']", text: /Ver mi compañía/
     assert_select "a[href='#{new_participant_path}']", false
-    assert_select "[data-shortcut='qr']", false
+    assert_select "a[data-shortcut='qr'][href='#{scan_path}']", text: /Escanear gafete/
+    assert_select "a[href='#{checkins_path}']", false
     assert_select "button[data-shortcut='my-qr']", text: /Mi código QR/
     assert_select "dialog[data-dialog-name='qr']", text: /#{participants(:maria).full_name}/
   end

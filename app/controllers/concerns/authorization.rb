@@ -131,7 +131,8 @@ module Authorization
 
   # Registro de llegadas ---------------------------------------------------------
   # Consultar una ficha escaneando la puede hacer cualquiera del staff; registrar la llegada, solo
-  # el acceso total, el director de logística y el comité de logística marcado para el registro.
+  # el acceso total, el director de logística, los registradores y el comité de logística marcado para el
+  # registro. Quien registra también anula (CheckinsController#void).
   def can_check_in?
     Current.user&.checkin_registrar? || false
   end

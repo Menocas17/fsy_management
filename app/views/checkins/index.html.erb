@@ -107,6 +107,55 @@
           Funciona sin señal: el padrón queda guardado en este dispositivo y lo escaneado se envía solo al volver el internet.
         </p>
       </div>
+
+      <%# Anular un registro: llegó alguien con el gafete de otra persona o se escaneó el que no era. El motivo
+          es de una lista; el detalle, opcional. Va en la misma cola que los escaneos (sirve sin señal). %>
+      <dialog data-checkin-scanner-target="voidDialog" data-void-dialog aria-labelledby="void-title"
+              data-action="click->checkin-scanner#closeVoidOutside"
+              class="p-0 m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+        <form data-action="submit->checkin-scanner#confirmVoid" class="p-5 md:p-6 bg-surface rounded-2xl">
+          <div class="flex items-start gap-3">
+            <span class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-cat-rose/12 text-cat-rose-ink">
+              <%= icon "user-x", class: "w-5 h-5" %>
+            </span>
+            <div class="min-w-0">
+              <h2 id="void-title" class="text-[16px] font-bold text-ink-900 text-balance">
+                ¿Anular <%= @training ? "la asistencia" : "la llegada" %> de <span data-checkin-scanner-target="voidName"></span>?
+              </h2>
+              <p class="mt-1 text-[12.5px] text-ink-500">Vuelve a quedar como que no ha llegado. Queda anotado en el Historial.</p>
+            </div>
+          </div>
+
+          <fieldset class="mt-5 space-y-2">
+            <legend class="mb-2 text-[12px] font-bold text-ink-700">Motivo</legend>
+            <% [ [ "otra_persona", "No era la persona", "Llegó alguien con el gafete de otra persona." ],
+                 [ "escaneo_incorrecto", "Escaneo incorrecto", "Se escaneó o se escribió el gafete equivocado." ],
+                 [ "otro", "Otro", nil ] ].each_with_index do |(value, label, hint), index| %>
+              <label class="flex items-start gap-3 rounded-xl border border-line px-3.5 py-2.5 cursor-pointer transition hover:bg-canvas has-[:checked]:border-cat-rose has-[:checked]:bg-cat-rose/8" data-void-reason="<%= value %>">
+                <input type="radio" name="void_reason" value="<%= value %>" <%= "checked" if index.zero? %> class="mt-[3px] w-4 h-4 accent-cat-rose">
+                <span>
+                  <span class="block text-[13.5px] font-bold text-ink-900"><%= label %></span>
+                  <% if hint %><span class="block text-[12px] font-medium text-ink-500"><%= hint %></span><% end %>
+                </span>
+              </label>
+            <% end %>
+          </fieldset>
+
+          <div class="mt-4">
+            <label for="void_detail" class="<%= field_label_classes %>">Detalles <span class="font-medium text-ink-500">(opcional)</span></label>
+            <textarea id="void_detail" name="void_detail" rows="2" maxlength="300" data-checkin-scanner-target="voidDetail"
+                      placeholder="Ej.: llegó su hermano con el gafete" class="<%= field_input_classes %> h-auto py-2.5 resize-none"></textarea>
+          </div>
+
+          <div class="mt-5 flex gap-2.5 justify-end">
+            <button type="button" data-action="checkin-scanner#closeVoid" class="<%= button_classes(:secondary) %>">Cancelar</button>
+            <button type="submit" class="<%= button_classes(:danger) %>">
+              <%= icon "user-x", class: "w-4 h-4" %>
+              Anular
+            </button>
+          </div>
+        </form>
+      </dialog>
     </section>
 
     <% else %>
@@ -128,7 +177,7 @@
       <% if @recent.any? %>
         <ul class="divide-y divide-line-soft" data-recent-checkins>
           <% @recent.each do |record| %>
-            <li class="flex items-baseline gap-3 py-2.5 first:pt-0">
+            <li class="flex items-center gap-3 py-2.5 first:pt-0" data-recent-record="<%= record.id %>">
               <span class="text-[12px] font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
               <span class="min-w-0 flex-1">
                 <span class="block text-[13.5px] font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
@@ -136,6 +185,14 @@
                   <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
                 </span>
               </span>
+              <% if open %>
+                <button type="button" data-action="checkin-scanner#askVoid"
+                        data-record-id="<%= record.id %>" data-participant-id="<%= record.participant_id %>"
+                        data-name="<%= record.participant.full_name %>"
+                        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-[12px] font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
+                  Anular
+                </button>
+              <% end %>
             </li>
           <% end %>
         </ul>
