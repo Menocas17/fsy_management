@@ -33,7 +33,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the profile offers the button and a dialog with the ficha's email filled in" do
+  test "with an email on the ficha, the dialog asks whether to use it or another" do
     @juan.update!(email_address: "juan@correo.com")
     sign_in_as(@admin)
 
@@ -41,10 +41,66 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-profile-actions] button[data-dialog-name='account']", text: /Crear cuenta/
     assert_select "dialog[data-dialog-name='account'] form[action='#{participant_account_path(@juan)}']" do
-      assert_select "input[name='email_address'][value='juan@correo.com']"
-      assert_select "input[name='email_address_confirmation']:not([value])"
+      assert_select "[data-email-choice='ficha']", text: /juan@correo.com/
+      assert_select "input[name='email_choice'][value='ficha'][checked]"
+      assert_select "input[name='email_address'][disabled]"
     end
-    assert_select "[data-account-status]", text: /Sin cuenta/
+  end
+
+  test "using the ficha's email needs no typing" do
+    @juan.update!(email_address: "Juan@Correo.com")
+    sign_in_as(@admin)
+
+    post participant_account_path(@juan), params: { email_choice: "ficha" }
+
+    assert_equal "juan@correo.com", @juan.reload.user.email_address
+  end
+
+  test "another email becomes the ficha's email too" do
+    @juan.update!(email_address: "viejo@correo.com")
+    sign_in_as(@admin)
+
+    post participant_account_path(@juan), params: { email_choice: "otro", email_address: "nuevo@correo.com", email_address_confirmation: "nuevo@correo.com" }
+
+    assert_equal "nuevo@correo.com", @juan.reload.user.email_address
+    assert_equal "nuevo@correo.com", @juan.email_address
+  end
+
+  test "a ficha without email asks for one and keeps it" do
+    sign_in_as(@admin)
+
+    get participant_path(@juan)
+    assert_select "dialog[data-dialog-name='account']" do
+      assert_select "input[name='email_choice']", 0
+      assert_select "input[name='email_address']:not([disabled])"
+    end
+
+    post participant_account_path(@juan), params: { email_address: "juan@fsy.com", email_address_confirmation: "juan@fsy.com" }
+    assert_equal "juan@fsy.com", @juan.reload.email_address
+  end
+
+  test "a mistyped other email changes neither the account nor the ficha" do
+    @juan.update!(email_address: "viejo@correo.com")
+    sign_in_as(@admin)
+
+    assert_no_difference -> { User.count } do
+      post participant_account_path(@juan), params: { email_choice: "otro", email_address: "nuevo@correo.com", email_address_confirmation: "nuveo@correo.com" }
+    end
+    assert_equal "viejo@correo.com", @juan.reload.email_address
+  end
+
+  test "the contact section says when an account has never been used, until its first sign-in" do
+    account = User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: @juan)
+    sign_in_as(@admin)
+
+    get participant_path(@juan)
+    assert_select "[data-contact-email]", text: /juan@fsy.com/
+    assert_select "[data-contact-email] [data-info-badge]", text: "Todavía no entra"
+
+    account.signed_in!
+    account.sessions.destroy_all # cerró sesión: sigue contando como que ya entró
+    get participant_path(@juan)
+    assert_select "[data-contact-email] [data-info-badge]", 0
   end
 
   test "a mistyped confirmation creates nothing and says why" do
@@ -74,7 +130,6 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
     get participant_path(@juan)
     assert_select "button[data-dialog-name='account']", 0
     assert_select "form[action='#{participant_account_path(@juan)}'] button", text: /Restablecer contraseña/
-    assert_select "[data-account-status]", text: /juan@fsy.com/
 
     assert_no_difference -> { User.count } do
       post participant_account_path(@juan), params: { email_address: "otro@fsy.com", email_address_confirmation: "otro@fsy.com" }
@@ -87,7 +142,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
       get participant_path(@juan)
       assert_select "button[data-dialog-name='account']", 0
-      assert_select "[data-account-status]", 0
+      assert_select "[data-contact-email] [data-info-badge]", 0
 
       assert_no_difference -> { User.count } do
         post participant_account_path(@juan), params: { email_address: "juan@fsy.com", email_address_confirmation: "juan@fsy.com" }

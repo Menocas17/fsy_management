@@ -50,9 +50,21 @@
     <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
     <div class="flex h-full">
       <%= render "shared/aside"%>
-      <div class="flex flex-col flex-1 min-w-0 min-h-0">
+      <div class="relative flex flex-col flex-1 min-w-0 min-h-0" data-controller="pull-refresh">
         <%= render "shared/top_menu"%>
-        <main data-controller="scroll-memory" class="flex-1 min-h-0 overflow-y-auto bg-canvas">
+        <%# Jalar para recargar (pull_refresh_controller): baja desde el borde de <main>, bajo la barra superior. %>
+        <div class="relative z-20 h-0">
+          <div data-pull-refresh-target="indicator" data-state="idle" aria-hidden="true"
+               style="opacity: 0; transform: translate(-50%, -48px)"
+               class="group absolute left-1/2 top-0 w-10 h-10 rounded-full flex items-center justify-center bg-surface border border-line shadow-lg text-ink-500 pointer-events-none transition-[transform,opacity] duration-200 ease-out data-[state=armed]:text-primary-600 data-[state=refreshing]:text-primary-600 dark:data-[state=armed]:text-primary-300 dark:data-[state=refreshing]:text-primary-300">
+            <span class="block group-data-[state=refreshing]:animate-spin">
+              <span data-pull-refresh-target="icon" class="block">
+                <%= icon "refresh-cw", class: "w-[18px] h-[18px]" %>
+              </span>
+            </span>
+          </div>
+        </div>
+        <main data-controller="scroll-memory" data-pull-refresh-target="scroller" class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-canvas">
           <%# En pantallas chicas el volver encabeza el contenido, lejos del botón de menú y con su etiqueta visible. %>
           <% if content_for?(:back) %>
             <div data-page-back-mobile class="sm:hidden px-4 pt-4 -mb-1"><%= yield :back %></div>

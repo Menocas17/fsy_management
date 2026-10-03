@@ -71,7 +71,7 @@
           encima del video, porque quien registra mira la cámara, y se va solo a los 5 segundos (o al tocarlo)
           para no tapar al siguiente; el último queda anotado debajo. %>
       <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-square max-h-[72dvh] lg:max-h-none w-full flex items-center justify-center">
-        <video data-checkin-scanner-target="video" class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
+        <video data-checkin-scanner-target="video" data-no-pull-refresh class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
         <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
         <%# El recuadro guía vive en la zona de arriba (todo menos la franja de 96px de abajo), así la tarjeta
             del resultado nunca lo tapa, sea cual sea el alto de la pantalla. %>

@@ -1,64 +1,55 @@
 <div data-controller="dialog">
   <%= render "shared/event_banner" %>
 
+  <%# Qué botón de cuenta toca (crear o restablecer), para repartir la grilla del celular. %>
+  <% account_action = if can_create_account_for?(participant) then :create elsif can_reset_account_of?(participant) then :reset end %>
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">
-    <%# flex-wrap (instead of a breakpoint switch) lets the buttons drop below the name whenever they don't fit, so they never overlap on tablet widths. %>
-    <div class="flex flex-wrap items-center justify-between gap-x-5 gap-y-4">
-      <div class="flex items-center gap-4 md:gap-[18px] min-w-0 flex-1 basis-72">
+    <%# En celular todo se apila a lo ancho (la foto asoma sobre el banner, debajo el nombre y los datos, y los
+        botones en grilla); desde sm vuelve a la fila de siempre. flex-wrap deja caer los botones bajo el nombre
+        cuando no caben, así nunca se encima nada en tablet. %>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-x-5 gap-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 md:gap-[18px] min-w-0 sm:flex-1 sm:basis-72">
         <button type="button" data-action="click->dialog#open" data-dialog-name="photo" aria-label="Ver fotografía"
-                class="-mt-10 md:-mt-[46px] shrink-0 rounded-panel md:rounded-panel shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                class="self-start sm:self-auto -mt-12 sm:-mt-10 md:-mt-[46px] shrink-0 rounded-panel md:rounded-panel shadow-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
           <%= render(AvatarComponent.new(participant: participant, is_profile: true)) %>
         </button>
         <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900 break-words"><%= participant.full_name %></h1>
+          <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            <h1 class="text-[22px] font-extrabold leading-tight tracking-tight text-ink-900 text-balance break-words"><%= participant.full_name %></h1>
             <%= render(RoleSpanComponent.new(role: participant.rol)) %>
           </div>
-          <p class="mt-1 text-[13px] font-medium text-ink-500">
+          <p class="mt-1.5 sm:mt-1 text-[13.5px] sm:text-[13px] font-medium text-ink-500 text-pretty">
             <%= [ participant.stake&.titleize.then { |s| s && "Estaca #{s}" }, participant.ward&.titleize.then { |w| w && "Barrio #{w}" }, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
-          <%# Si la ficha tiene cuenta y con qué correo: solo para quien las crea y restablece. %>
-          <% if can_manage_accounts? %>
-            <p class="mt-1 flex items-center gap-1.5 text-[12.5px] font-semibold text-ink-500 break-all" data-account-status>
-              <%= icon "user-round-key", class: "w-3.5 h-3.5 shrink-0" %>
-              <% if (account = participant.user) %>
-                Cuenta: <%= account.email_address %>
-                <% unless account.sessions.exists? %>
-                  <span class="text-cat-amber-ink">· todavía no entra</span>
-                <% end %>
-              <% else %>
-                Sin cuenta para entrar
-              <% end %>
-            </p>
-          <% end %>
         </div>
       </div>
-      <div class="flex flex-wrap gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0" data-profile-actions>
+      <%# Celular: Editar arriba a todo lo ancho y el resto en dos columnas parejas. %>
+      <div class="grid grid-cols-2 gap-2.5 w-full sm:flex sm:flex-wrap sm:w-auto sm:ml-auto shrink-0" data-profile-actions>
         <%# El volver vive en la barra superior; acá va el QR de la persona, que es lo propio de esta ficha. %>
         <button type="button" data-action="click->dialog#open" data-dialog-name="qr" data-profile-qr
-                class="<%= button_classes(:secondary, extra: "flex-1 sm:flex-none") %>">
+                class="<%= button_classes(:secondary, extra: "whitespace-nowrap #{"col-span-2" unless account_action}") %>">
           <%= icon "qr-code", class: "w-4 h-4" %>
           Código QR
         </button>
-        <% if can_create_account_for?(participant) %>
+        <% if account_action == :create %>
           <button type="button" data-action="click->dialog#open" data-dialog-name="account"
-                  class="<%= button_classes(:secondary, extra: "flex-1 sm:flex-none") %>">
+                  class="<%= button_classes(:secondary, extra: "whitespace-nowrap") %>">
             <%= icon "user-plus", class: "w-4 h-4" %>
             Crear cuenta
           </button>
-        <% elsif can_reset_account_of?(participant) %>
-          <%= button_to participant_account_path(participant), method: :patch, form_class: "flex-1 sm:flex-none",
+        <% elsif account_action == :reset %>
+          <%= button_to participant_account_path(participant), method: :patch, form_class: "contents",
                 form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
                                 turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
                                 turbo_confirm_button: "Sí, restablecer" } },
-                class: button_classes(:secondary, extra: "w-full") do %>
+                class: button_classes(:secondary, extra: "w-full sm:w-auto whitespace-nowrap") do %>
             <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
-            Restablecer contraseña
+            <span class="sm:hidden">Restablecer</span><span class="hidden sm:inline">Restablecer contraseña</span>
           <% end %>
         <% end %>
         <% if can_edit_participant?(participant) %>
           <%= link_to edit_participant_path(participant, from: edit_from, return_to: request.fullpath),
-                class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
+                class: button_classes(:primary, extra: "col-span-2 -order-1 sm:order-none") do %>
             <%= icon "square-pen", class: "w-4 h-4" %>
             Editar
           <% end %>

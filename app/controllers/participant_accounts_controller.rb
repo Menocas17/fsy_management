@@ -9,8 +9,12 @@ class ParticipantAccountsController < ApplicationController
       return redirect_to participant_path(@participant), alert: "No puedes crear una cuenta para esta ficha."
     end
 
-    user = User.create_for_participant(@participant, email: params[:email_address],
-                                                     email_confirmation: params[:email_address_confirmation])
+    email, confirmation = chosen_email
+    user = User.transaction do
+      User.create_for_participant(@participant, email: email, email_confirmation: confirmation).tap do |created|
+        save_email_on_ficha(created.email_address) if created.persisted?
+      end
+    end
     if user.persisted?
       PasswordsMailer.invitation(user, reason: :new).deliver_later
       record_audit!(category: :cuentas, action: "created", target: @participant,
@@ -43,6 +47,24 @@ class ParticipantAccountsController < ApplicationController
   private
     def set_participant
       @participant = Participant.includes(:user).find(params[:participant_id])
+    end
+
+    # «Usar el de su ficha» no pide escribirlo de nuevo: ya está en la ficha. Si no, el escrito dos veces.
+    def chosen_email
+      if params[:email_choice] == "ficha" && @participant.email_address.present?
+        [ @participant.email_address, @participant.email_address ]
+      else
+        [ params[:email_address], params[:email_address_confirmation] ]
+      end
+    end
+
+    # La cuenta y la ficha quedan con el mismo correo. Sin validar el resto de la ficha: una ficha cargada
+    # a medias (sin talla, por ejemplo) no debe impedir que se le cree la cuenta.
+    def save_email_on_ficha(email)
+      return if @participant.email_address.to_s.strip.downcase == email
+
+      @participant.email_address = email
+      @participant.save!(validate: false)
     end
 
     # En desarrollo sin correo real (los correos solo van al log), el enlace se muestra aquí para poder probar.
