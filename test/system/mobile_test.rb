@@ -10,6 +10,13 @@ class MobileTest < ApplicationSystemTestCase
     User.create!(email_address: "andrea.chavarria.martinez@gmail.com", password: "Consejera1!", participant: @andrea)
   end
 
+  # La emulación del teléfono vive en el navegador, que se reusa entre pruebas: sin esto, la siguiente
+  # prueba de sistema correría también como celular.
+  teardown do
+    cdp("Emulation.clearDeviceMetricsOverride")
+    cdp("Emulation.setTouchEmulationEnabled", enabled: false)
+  end
+
   test "the profile header stacks cleanly on a phone" do
     sign_in_as(@admin)
     emulate_phone
@@ -21,11 +28,44 @@ class MobileTest < ApplicationSystemTestCase
       assert_in_delta qr.y, reset.y, 1, "QR and reset share a row"
       assert_in_delta qr.height, reset.height, 1, "and neither wraps to two lines"
     end
-    status = find("[data-account-status]")
-    assert_text "Todavía no entra"
-    assert_operator status.rect.x + status.rect.width, :<=, find("[data-profile-actions]").rect.then { |r| r.x + r.width } + 1
+    # El correo vive en Contacto, no bajo el nombre.
+    within("[data-profile-actions]") { assert_no_text "andrea.chavarria.martinez@gmail.com" }
+    assert_no_selector "[data-account-status]"
+    within("[data-contact-email]") { assert_text "Todavía no entra" }
 
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
+  end
+
+  test "on a wide screen the profile buttons stay in one row" do
+    page.driver.browser.manage.window.resize_to(1400, 1000) # otras pruebas dejan la ventana angosta
+    sign_in_as(@admin)
+    visit participant_path(@andrea)
+
+    within "[data-profile-actions]" do
+      tops = [ find("[data-profile-qr]"), find_button("Restablecer contraseña"), find_link("Editar") ].map { |b| b.rect.y }
+      assert_equal 1, tops.map(&:round).uniq.size, "QR, reset and edit side by side"
+    end
+  end
+
+  test "creating an account offers the ficha's email or another one" do
+    @andrea.user.destroy
+    @andrea.update!(email_address: "andrea@gmail.com")
+    sign_in_as(@admin)
+    visit participant_path(@andrea)
+
+    click_on "Crear cuenta"
+    within "dialog[data-dialog-name='account']" do
+      assert_text "andrea@gmail.com"
+      assert_no_field "Correo electrónico"
+      choose "Usar otro correo"
+      fill_in "Correo electrónico", with: "andrea.nueva@gmail.com"
+      fill_in "Confirmar el correo", with: "andrea.nueva@gmail.com"
+      save_screenshot(File.join(ENV["SCREENSHOTS"], "dialogo-cuenta.png")) if ENV["SCREENSHOTS"]
+      click_on "Crear cuenta"
+    end
+
+    assert_text "Se creó la cuenta"
+    within("[data-contact-email]") { assert_text "andrea.nueva@gmail.com" }
   end
 
   test "pulling down from the top reloads the page" do

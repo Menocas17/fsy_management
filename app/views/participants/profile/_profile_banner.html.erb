@@ -21,23 +21,6 @@
           <p class="mt-1.5 sm:mt-1 text-[13.5px] sm:text-[13px] font-medium text-ink-500 text-pretty">
             <%= [ participant.stake&.titleize.then { |s| s && "Estaca #{s}" }, participant.ward&.titleize.then { |w| w && "Barrio #{w}" }, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
-          <%# Si la ficha tiene cuenta y con qué correo: solo para quien las crea y restablece. El correo se corta
-              solo si no cabe entero (overflow-wrap:anywhere), nunca a media palabra porque sí. %>
-          <% if can_manage_accounts? %>
-            <p class="mt-3 sm:mt-2 inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-line-soft bg-canvas dark:bg-slate-900/40 px-2.5 py-1.5 text-[12.5px] font-semibold text-ink-500" data-account-status>
-              <span class="inline-flex items-center gap-1.5 min-w-0">
-                <%= icon "user-round-key", class: "w-3.5 h-3.5 shrink-0" %>
-                <% if (account = participant.user) %>
-                  <span class="text-ink-700 [overflow-wrap:anywhere]"><%= account.email_address %></span>
-                <% else %>
-                  Sin cuenta para entrar
-                <% end %>
-              </span>
-              <% if account && !account.sessions.exists? %>
-                <span class="px-2 py-px rounded-full bg-cat-amber/15 text-[11.5px] font-bold text-cat-amber-ink whitespace-nowrap">Todavía no entra</span>
-              <% end %>
-            </p>
-          <% end %>
         </div>
       </div>
       <%# Celular: Editar arriba a todo lo ancho y el resto en dos columnas parejas. %>
@@ -59,7 +42,7 @@
                 form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
                                 turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
                                 turbo_confirm_button: "Sí, restablecer" } },
-                class: button_classes(:secondary, extra: "w-full whitespace-nowrap") do %>
+                class: button_classes(:secondary, extra: "w-full sm:w-auto whitespace-nowrap") do %>
             <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
             <span class="sm:hidden">Restablecer</span><span class="hidden sm:inline">Restablecer contraseña</span>
           <% end %>

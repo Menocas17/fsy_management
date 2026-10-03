@@ -14,6 +14,7 @@ class SessionsController < ApplicationController
     # Una cuenta cuya ficha se borró no entra, aunque la contraseña sea la correcta.
     if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.linked?
       LoginAttempt.record!(email: params[:email_address], result: :success, request: request, user: user)
+      user.signed_in!
       start_new_session_for user
       redirect_to after_authentication_url
     else

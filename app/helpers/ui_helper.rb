@@ -70,9 +70,10 @@ module UiHelper
   end
 
   # href convierte el valor en enlace (p. ej. tel: para llamar desde la ficha); sin valor no hay enlace.
-  def info_row(label, icon_name, value, href: nil)
+  # badge: una etiqueta ámbar junto al valor; note: una línea chica debajo (p. ej. el estado de la cuenta).
+  def info_row(label, icon_name, value, href: nil, badge: nil, note: nil)
     display = Array(value).compact_blank.join(" · ").presence || "—"
-    value_classes = "mt-px text-[13.5px] font-semibold text-ink-900 break-words"
+    value_classes = "mt-px text-[13.5px] font-semibold text-ink-900 [overflow-wrap:anywhere]"
     tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft") do
       tag.span(icon(icon_name, class: "w-4 h-4"),
                class: "w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
@@ -82,7 +83,9 @@ module UiHelper
               tag.p(link_to(display, href, class: "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"), class: value_classes)
             else
               tag.p(display, class: value_classes)
-            end
+            end +
+            (badge ? tag.span(badge, class: "inline-block mt-1.5 px-2 py-px rounded-full bg-cat-amber/15 text-[11.5px] font-bold text-cat-amber-ink whitespace-nowrap", data: { info_badge: true }) : "".html_safe) +
+            (note ? tag.p(note, class: "mt-1 text-[12px] font-medium text-ink-500 [overflow-wrap:anywhere]") : "".html_safe)
         end
     end
   end

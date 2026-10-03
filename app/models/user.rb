@@ -45,6 +45,15 @@ class User < ApplicationRecord
     end
   end
 
+  # La primera vez que entra queda anotada: es lo que dice en la ficha si la cuenta ya se usó.
+  def signed_in!
+    update_column(:first_signed_in_at, Time.current) if first_signed_in_at.nil?
+  end
+
+  def signed_in_before?
+    first_signed_in_at.present?
+  end
+
   def invitation_token
     generate_token_for(:invitation)
   end
