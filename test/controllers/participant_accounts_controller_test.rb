@@ -39,7 +39,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     get participant_path(@juan)
 
-    assert_select "[data-contact-email] button[data-dialog-name='account']", text: /Crear cuenta/
+    assert_select "[data-contact-account] button[data-dialog-name='account']", text: /Crear cuenta/
     assert_select "[data-profile-actions] button[data-dialog-name='account']", 0
     assert_select "dialog[data-dialog-name='account'] form[action='#{participant_account_path(@juan)}']" do
       assert_select "[data-email-choice='ficha']", text: /juan@correo.com/
@@ -96,12 +96,13 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     get participant_path(@juan)
     assert_select "[data-contact-email]", text: /juan@fsy.com/
-    assert_select "[data-contact-email] [data-info-badge]", text: "Todavía no entra"
+    assert_select "[data-contact-account] [data-account-badge]", text: "Todavía no entra"
 
     account.signed_in!
     account.sessions.destroy_all # cerró sesión: sigue contando como que ya entró
     get participant_path(@juan)
-    assert_select "[data-contact-email] [data-info-badge]", 0
+    assert_select "[data-contact-account] [data-account-badge]", 0
+    assert_select "[data-contact-account]", text: /Ya entró a la app/
   end
 
   test "a mistyped confirmation creates nothing and says why" do
@@ -130,7 +131,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     get participant_path(@juan)
     assert_select "button[data-dialog-name='account']", 0
-    assert_select "[data-contact-email] form[action='#{participant_account_path(@juan)}'] button", text: /Restablecer contraseña/
+    assert_select "[data-contact-account] form[action='#{participant_account_path(@juan)}'] button", text: /Restablecer contraseña/
 
     assert_no_difference -> { User.count } do
       post participant_account_path(@juan), params: { email_address: "otro@fsy.com", email_address_confirmation: "otro@fsy.com" }
@@ -143,7 +144,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
       get participant_path(@juan)
       assert_select "button[data-dialog-name='account']", 0
-      assert_select "[data-contact-email] [data-info-badge]", 0
+      assert_select "[data-contact-account]", 0
 
       assert_no_difference -> { User.count } do
         post participant_account_path(@juan), params: { email_address: "juan@fsy.com", email_address_confirmation: "juan@fsy.com" }
