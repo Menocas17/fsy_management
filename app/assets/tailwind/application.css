@@ -80,6 +80,9 @@
   --radius-tile: 13px;
   --radius-card: 18px;
   --radius-panel: 22px;
+  /* Avatares: cuadrados como la foto de la ficha (22 px a 92 px), en la misma proporción a 40 y 28 px. */
+  --radius-avatar: 10px;
+  --radius-avatar-sm: 7px;
 
   --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);

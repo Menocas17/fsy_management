@@ -52,11 +52,11 @@ module ApplicationHelper
     participant = Current.user&.participant
 
     if participant&.avatar&.attached?
-      image_tag participant.avatar.variant(:thumb), alt: "Tu foto de perfil", class: "#{size_classes} rounded-full object-cover shrink-0"
+      image_tag participant.avatar.variant(:thumb), alt: "Tu foto de perfil", class: "#{size_classes} rounded-avatar object-cover shrink-0"
     else
       initials = participant&.full_name.to_s.split.map(&:first).first(2).join.upcase.presence || "FSY"
 
-      content_tag(:span, initials, class: "#{size_classes} rounded-full shrink-0 bg-avatar-gradient text-white font-bold flex items-center justify-center")
+      content_tag(:span, initials, class: "#{size_classes} rounded-avatar shrink-0 bg-avatar-gradient text-white font-bold flex items-center justify-center")
     end
   end
 end

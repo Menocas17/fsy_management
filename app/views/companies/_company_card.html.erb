@@ -28,14 +28,14 @@
     <% if counselors.any? %>
       <span class="flex shrink-0">
         <% counselors.each_with_index do |counselor, index| %>
-          <span class="rounded-full ring-2 ring-surface <%= "-ml-2" if index.positive? %>">
+          <span class="rounded-avatar-sm ring-2 ring-surface <%= "-ml-2" if index.positive? %>">
             <%= render(AvatarComponent.new(participant: counselor, size: :sm)) %>
           </span>
         <% end %>
       </span>
       <span class="text-[12px] font-semibold text-ink-700 truncate"><%= counselors.map(&:full_name).join(" · ") %></span>
     <% else %>
-      <span class="w-7 h-7 shrink-0 rounded-full border-[1.5px] border-dashed border-line"></span>
+      <span class="w-7 h-7 shrink-0 rounded-avatar-sm border-[1.5px] border-dashed border-line"></span>
       <span class="text-[12px] font-semibold text-ink-500">Consejeros por asignar</span>
     <% end %>
   </div>
