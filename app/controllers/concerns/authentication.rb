@@ -3,18 +3,12 @@ module Authentication
 
   included do
     before_action :require_authentication
-    before_action :require_password_change
     helper_method :authenticated?, :password_reset_emails?
   end
 
   class_methods do
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
-    end
-
-    # Lo que sí se puede con la contraseña predeterminada pendiente de cambio: cambiarla y salir.
-    def allow_pending_password_change(**options)
-      skip_before_action :require_password_change, **options
     end
   end
 
@@ -49,19 +43,6 @@ module Authentication
 
       session.seen!
       session
-    end
-
-    # Quien entró con la contraseña predeterminada no hace nada más hasta cambiarla. Las páginas lo mandan a
-    # cambiarla (y recuerdan a dónde iba); lo que no es una página (la campanita, el padrón) recibe un 403.
-    def require_password_change
-      return unless Current.user&.must_change_password?
-
-      if request.format.html? || request.format.turbo_stream?
-        session[:return_to_after_password_change] = request.url if request.get?
-        redirect_to edit_password_change_path
-      else
-        head :forbidden
-      end
     end
 
     def request_authentication

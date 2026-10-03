@@ -53,6 +53,7 @@ Rails.application.configure do
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = GmailSmtp.settings
     config.action_mailer.raise_delivery_errors = true
+    config.x.password_reset_emails = GmailSmtp.configured?
   end
 
   # Print deprecation notices to the Rails logger.

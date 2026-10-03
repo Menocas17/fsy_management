@@ -63,6 +63,8 @@ Rails.application.configure do
   require Rails.root.join("config/gmail_smtp")
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = GmailSmtp.settings
+  # «¿Olvidaste tu contraseña?» solo aparece si de verdad hay con qué mandar el correo.
+  config.x.password_reset_emails = GmailSmtp.configured?
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

@@ -1,29 +1,22 @@
-<% forced = @user.must_change_password? %>
 <% content_for :title, "Cambiar contraseña" %>
 <% content_for :eyebrow, "Cuenta" %>
-<% back_to "Configuración", settings_path unless forced %>
+<% back_to "Configuración", settings_path %>
 
 <div class="px-4 md:px-8 pt-6 md:pt-7 pb-10">
-  <section class="max-w-[640px] <%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="password-change" data-password-change="<%= forced ? "forced" : "voluntary" %>">
+  <section class="max-w-[640px] <%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="password-change" data-password-change>
     <h2 id="password-change" class="flex items-center gap-[9px] text-[15px] font-bold text-ink-900">
       <%= icon "key-round", class: "w-[17px] h-[17px]" %>
-      <%= forced ? "Elige tu propia contraseña" : "Cambiar contraseña" %>
+      Cambiar contraseña
     </h2>
     <p class="mt-1.5 text-[13px] text-ink-500">
-      <% if forced %>
-        Entraste con la contraseña predeterminada, que conoce todo el equipo. Antes de seguir, elige una que solo sepas tú.
-      <% else %>
-        Al guardarla se cierran tus sesiones en otros dispositivos; en este sigues adentro.
-      <% end %>
+      Al guardarla se cierran tus sesiones en otros dispositivos; en este sigues adentro.
     </p>
 
     <%= render "shared/password_errors", user: @user %>
 
     <%= form_with url: password_change_path, method: :patch, class: "mt-6 space-y-4" do |form| %>
-      <% unless forced %>
-        <%= render "shared/password_field", form: form, attribute: :password_challenge, label: "Contraseña actual",
-                   autocomplete: "current-password", placeholder: "La que usas ahora" %>
-      <% end %>
+      <%= render "shared/password_field", form: form, attribute: :password_challenge, label: "Contraseña actual",
+                 autocomplete: "current-password", placeholder: "La que usas ahora" %>
 
       <%= render "shared/password_field", form: form, attribute: :password, label: "Nueva contraseña",
                  autocomplete: "new-password", placeholder: "Tu nueva contraseña", rules: true %>
@@ -32,24 +25,11 @@
                  autocomplete: "new-password", placeholder: "Escríbela de nuevo" %>
 
       <div class="flex gap-2.5 sm:justify-end">
-        <% unless forced %>
-          <%= link_to "Cancelar", settings_path, class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-        <% end %>
+        <%= link_to "Cancelar", settings_path, class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
         <button type="submit" data-turbo-submits-with="Guardando…" class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none") %>">
           <%= icon "check", class: "w-4 h-4" %>
           Guardar contraseña
         </button>
-      </div>
-    <% end %>
-
-    <% if forced %>
-      <%# Mientras no la cambie, lo único que puede hacer además es salir. %>
-      <div class="mt-5 pt-4 border-t border-line-soft flex justify-end">
-        <%= button_to session_path, method: :delete,
-              class: "inline-flex items-center gap-2 text-[13px] font-semibold text-cat-rose-ink hover:underline cursor-pointer" do %>
-          <%= icon "log-out", class: "w-4 h-4" %>
-          Cerrar sesión
-        <% end %>
       </div>
     <% end %>
   </section>

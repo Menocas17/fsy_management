@@ -1,0 +1,8 @@
+<p>Hola, <%= @user.participant&.first_name || @user.email_address %>:</p>
+<% if @reason == :new %>
+  <p>Te crearon una cuenta en la app de <strong><%= Rails.configuration.x.event_name %></strong> con este correo. Para entrar, elige tu contraseña:</p>
+<% else %>
+  <p>Se restableció la contraseña de tu cuenta en la app de <strong><%= Rails.configuration.x.event_name %></strong>. La anterior ya no sirve. Elige una nueva:</p>
+<% end %>
+<p><%= link_to "Elegir mi contraseña", @url %></p>
+<p>El enlace vale <%= User::INVITATION_VALID_FOR.in_days.to_i %> días y solo se puede usar una vez. Si no esperabas este correo, avísale a tu coordinación.</p>

@@ -1,6 +1,6 @@
 # User accounts: login/logout review and account-creation plan
 
-Status: **implemented** (sections 2–5) on `claude/wonderful-volta-ritwqr`. Decisions taken: the logistics director creates accounts for anyone (they run registration), except a director's or coordinator's account, which only full access touches; the "Restablecer a contraseña predeterminada" button (§5) is included. Email delivery stays out of scope.
+Status: **implemented** (sections 2–5) on `claude/wonderful-volta-ritwqr`, then **revised on `rmenocal/cuentas-staff`**: the shared default password (`FsyManagua2026!`) was dropped. The repo is public, so anyone who knew a staff member's email could sign in before them and pick the password themselves — including on a coordinator's account. Now that Gmail SMTP works, a new or reset account gets a random password nobody sees and an emailed link (`PasswordsMailer.invitation`, valid `User::INVITATION_VALID_FOR`, single use) to choose its own; `must_change_password` and the forced-change screen went away with it. Sections 2–5 below describe the original default-password design and are kept for history. Decisions still in force: the logistics director creates accounts for anyone (they run registration), except a director's or coordinator's account, which only full access touches.
 
 ## 1. Review of the current login / logout
 

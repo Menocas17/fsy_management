@@ -24,10 +24,10 @@
       </div>
 
       <div class="flex items-start gap-2.5 rounded-xl bg-primary-50 dark:bg-primary-700/30 px-3.5 py-3 text-[12.5px] text-ink-700 dark:text-slate-200">
-        <%= icon "key-round", class: "w-4 h-4 shrink-0 mt-px" %>
+        <%= icon "mail", class: "w-4 h-4 shrink-0 mt-px" %>
         <p>
-          Entra con la contraseña predeterminada <strong class="font-mono"><%= User::DEFAULT_PASSWORD %></strong>;
-          lo primero que hará es elegir la suya.
+          Le llega a ese correo un enlace para elegir su contraseña (vale <%= User::INVITATION_VALID_FOR.in_days.to_i %> días).
+          Nadie más la conoce.
         </p>
       </div>
 

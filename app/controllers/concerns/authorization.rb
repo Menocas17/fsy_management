@@ -113,9 +113,10 @@ module Authorization
 
   # Cuentas ---------------------------------------------------------------------
   # El matrimonio director, los coordinadores, el director de logística y el superadmin crean la cuenta de
-  # cualquier ficha y la devuelven a la contraseña predeterminada. Quien lo hace conoce esa contraseña, así que
-  # nadie lo hace sobre una cuenta con más poder que la suya: la del director o un coordinador solo la toca
-  # el acceso total. La propia no se restablece: para eso está «Cambiar contraseña».
+  # cualquier ficha y la restablecen (la persona elige otra con el enlace que le llega por correo). Restablecer
+  # deja a alguien afuera hasta que abra ese correo, así que nadie lo hace sobre una cuenta con más poder que
+  # la suya: la del director o un coordinador solo la toca el acceso total. La propia no se restablece: para
+  # eso está «Cambiar contraseña».
   def can_manage_accounts?
     Current.user&.account_manager? || false
   end

@@ -120,7 +120,7 @@ Rails.application.routes.draw do
   resources :assignments, only: [ :update, :destroy ], path: "asignaciones"
   resources :participants do
       resources :assignments, only: [ :new, :create ], path: "asignaciones"
-      # Crear la cuenta de la ficha (POST) o devolverla a la contraseña predeterminada (PATCH).
+      # Crear la cuenta de la ficha (POST) o restablecerla (PATCH); en los dos casos le llega un enlace por correo.
       resource :account, only: %i[create update], controller: "participant_accounts", path: "cuenta"
       collection do
         get :staff

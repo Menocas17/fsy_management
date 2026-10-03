@@ -4,9 +4,13 @@ class User < ApplicationRecord
   has_many :push_subscriptions, dependent: :destroy
   belongs_to :participant, optional: true
 
-  # La contraseña con la que nace una cuenta creada desde una ficha (o restablecida). Es conocida a propósito:
-  # quien entra con ella no puede hacer nada más que cambiarla (must_change_password).
-  DEFAULT_PASSWORD = ENV.fetch("DEFAULT_ACCOUNT_PASSWORD", "FsyManagua2026!").freeze
+  # Cuánto vale el enlace con el que alguien elige su contraseña: al crearle la cuenta o al restablecerla.
+  INVITATION_VALID_FOR = 7.days
+
+  # El enlace deja de servir en cuanto se usa: el token depende de la contraseña actual.
+  generates_token_for :invitation, expires_in: INVITATION_VALID_FOR do
+    password_salt&.last(10)
+  end
 
   validates :password, length: { minimum: 8 }, allow_nil: true
   validate :password_complexity
@@ -14,7 +18,6 @@ class User < ApplicationRecord
                             format: { with: URI::MailTo::EMAIL_REGEXP, allow_blank: true }
   validates :participant_id, uniqueness: true, allow_nil: true
   validates :email_address, confirmation: { case_sensitive: false }
-  validate :password_not_default, unless: :must_change_password?
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
@@ -26,18 +29,29 @@ class User < ApplicationRecord
     superadmin? || participant_id.present?
   end
 
-  # Crea la cuenta de una ficha con la contraseña predeterminada; quien la crea escribe el correo dos veces.
+  # Crea la cuenta de una ficha con una contraseña aleatoria que nadie conoce: la persona elige la suya con el
+  # enlace que le llega por correo (PasswordsMailer.invitation). Quien la crea escribe el correo dos veces.
   def self.create_for_participant(participant, email:, email_confirmation:)
     create(participant: participant, email_address: email, email_address_confirmation: email_confirmation.to_s.strip,
-           password: DEFAULT_PASSWORD, must_change_password: true)
+           password: random_password)
   end
 
-  # Sin correo para recuperarla, la coordinación la devuelve a la predeterminada y cierra sus sesiones.
-  def reset_to_default_password!
+  # Restablecer desde la ficha: la contraseña vieja deja de servir, se cierran sus sesiones y la persona
+  # elige otra con un enlace nuevo. Nadie más llega a saberla.
+  def revoke_password!
     transaction do
-      update!(password: DEFAULT_PASSWORD, must_change_password: true)
+      update!(password: self.class.random_password)
       sessions.destroy_all
     end
+  end
+
+  def invitation_token
+    generate_token_for(:invitation)
+  end
+
+  # Cumple las reglas de complejidad (número, mayúscula, signo) y nadie la ve nunca.
+  def self.random_password
+    "#{SecureRandom.base58(24)}A1!"
   end
 
   # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
@@ -127,11 +141,6 @@ class User < ApplicationRecord
   end
 
   private
-  # Al cambiarla (fuera de crear o restablecer), la nueva no puede ser la predeterminada que todos conocen.
-  def password_not_default
-    errors.add(:password, "no puede ser la contraseña predeterminada.") if password.present? && password == DEFAULT_PASSWORD
-  end
-
   def password_complexity
     return if password.blank?
 

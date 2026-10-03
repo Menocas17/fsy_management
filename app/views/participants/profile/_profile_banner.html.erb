@@ -23,8 +23,8 @@
               <%= icon "user-round-key", class: "w-3.5 h-3.5 shrink-0" %>
               <% if (account = participant.user) %>
                 Cuenta: <%= account.email_address %>
-                <% if account.must_change_password? %>
-                  <span class="text-cat-amber-ink">· aún con la contraseña predeterminada</span>
+                <% unless account.sessions.exists? %>
+                  <span class="text-cat-amber-ink">· todavía no entra</span>
                 <% end %>
               <% else %>
                 Sin cuenta para entrar
@@ -48,7 +48,9 @@
           </button>
         <% elsif can_reset_account_of?(participant) %>
           <%= button_to participant_account_path(participant), method: :patch, form_class: "flex-1 sm:flex-none",
-                form: { data: { turbo_confirm: "¿Devolver la contraseña de #{participant.full_name} a la predeterminada (#{User::DEFAULT_PASSWORD})? Se cerrarán sus sesiones y al entrar tendrá que elegir una nueva." } },
+                form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
+                                turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
+                                turbo_confirm_button: "Sí, restablecer" } },
                 class: button_classes(:secondary, extra: "w-full") do %>
             <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
             Restablecer contraseña

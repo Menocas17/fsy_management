@@ -27,7 +27,7 @@ class PasswordsController < ApplicationController
   def update
     if params[:password].blank?
       @user.errors.add(:password, :blank)
-    elsif @user.update(params.permit(:password, :password_confirmation).merge(must_change_password: false))
+    elsif @user.update(params.permit(:password, :password_confirmation))
       @user.sessions.destroy_all
       return redirect_to new_session_path, notice: "La contraseña ha sido restablecida."
     end
@@ -36,8 +36,11 @@ class PasswordsController < ApplicationController
   end
 
   private
+    # El enlace de «¿Olvidaste tu contraseña?» (vale minutos) o el de la invitación al crear o restablecer
+    # la cuenta desde la ficha (vale días). Los dos dejan de servir en cuanto se cambia la contraseña.
     def set_user_by_token
-      @user = User.find_by_password_reset_token!(params[:token])
+      @welcome = params[:bienvenida].present?
+      @user = User.find_by_token_for(:invitation, params[:token]) || User.find_by_password_reset_token!(params[:token])
     rescue ActiveSupport::MessageVerifier::InvalidSignature
       redirect_to password_reset_emails? ? new_password_path : new_session_path,
                   alert: "El enlace para restablecer la contraseña no es válido o ha caducado."
@@ -46,7 +49,7 @@ class PasswordsController < ApplicationController
     def require_password_reset_emails
       return if password_reset_emails?
 
-      redirect_to new_session_path, alert: "Por ahora la contraseña no se recupera por correo: pídele a tu coordinación que la restablezca."
+      redirect_to new_session_path, alert: "Por ahora la contraseña no se recupera por correo: pídele a tu coordinación que te mande un enlace nuevo desde tu ficha."
     end
 
     def redirect_if_authenticated
