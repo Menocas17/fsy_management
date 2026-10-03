@@ -190,4 +190,86 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     get checkins_roster_path, headers: { "Accept" => "application/json" }
     assert_equal "P-0421", response.parsed_body["people"].first["code"]
   end
+
+  test "the last scan can be voided with a reason: the person is back to not arrived, and it is in the history" do
+    post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "scan-1" } ] }, as: :json
+
+    assert_difference -> { AuditLog.registro.count }, 1 do
+      post register_checkins_path, as: :json, params: { checkins: [
+        { kind: "void", client_token: "void-1", target_token: "scan-1", participant_id: @joven.id,
+          reason: "otra_persona", detail: "Llegó su hermano con el gafete" } ] }
+    end
+
+    assert_equal "voided", response.parsed_body["results"].first["status"]
+    assert_equal 0, response.parsed_body["arrived"]
+    assert_not @joven.reload.arrived?
+    log = AuditLog.registro.sole
+    assert_equal @joven.id, log.target_id
+    assert_equal "Anuló la llegada de #{@joven.full_name} (No era la persona: Llegó su hermano con el gafete)", log.summary
+  end
+
+  test "a scan and its void taken without signal arrive together and cancel out" do
+    post register_checkins_path, as: :json, params: { checkins: [
+      { participant_id: @joven.id, client_token: "offline-scan" },
+      { kind: "void", client_token: "offline-void", target_token: "offline-scan", participant_id: @joven.id, reason: "escaneo_incorrecto" } ] }
+
+    assert_equal %w[registered voided], response.parsed_body["results"].map { |r| r["status"] }
+    assert_equal 0, Checkin.count
+    assert_match(/\(Escaneo incorrecto\)\z/, AuditLog.registro.sole.summary)
+  end
+
+  test "voiding a scan that found the person already in never removes the real arrival" do
+    post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "real" } ] }, as: :json
+    post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "impostor" } ] }, as: :json
+
+    post register_checkins_path, as: :json, params: { checkins: [
+      { kind: "void", client_token: "v", target_token: "impostor", participant_id: @joven.id, reason: "otra_persona" } ] }
+
+    assert_equal "void_missing", response.parsed_body["results"].first["status"]
+    assert @joven.reload.arrived?
+  end
+
+  test "a record from the recent list is voided by its id, and the list offers it" do
+    post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "x" } ] }, as: :json
+    checkin = Checkin.sole
+
+    get checkins_path
+    assert_select "[data-recent-record='#{checkin.id}'] button[data-action='checkin-scanner#askVoid'][data-record-id='#{checkin.id}']", text: "Anular"
+    assert_select "dialog[data-void-dialog] [data-void-reason]", 3
+
+    post register_checkins_path, as: :json, params: { checkins: [ { kind: "void", client_token: "v", record_id: checkin.id, participant_id: @joven.id, reason: "otro" } ] }
+    assert_not @joven.reload.arrived?
+  end
+
+  test "a void needs a reason from the list" do
+    post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "x" } ] }, as: :json
+
+    post register_checkins_path, as: :json, params: { checkins: [ { kind: "void", client_token: "v", target_token: "x", reason: "porque si" } ] }
+
+    assert_equal "invalid", response.parsed_body["results"].first["status"]
+    assert @joven.reload.arrived?
+  end
+
+  test "voiding a training attendance only touches that training" do
+    training = Training.create!(name: "Primeros auxilios", held_on: Date.current)
+    staff = participants(:maria)
+    Checkin.register(participant: @joven, recorded_by: nil, client_token: "llegada")
+
+    post register_checkins_path(training_id: training.id), params: { checkins: [ { participant_id: staff.id, client_token: "t1" } ] }, as: :json
+    post register_checkins_path(training_id: training.id), as: :json, params: { checkins: [
+      { kind: "void", client_token: "v", target_token: "t1", participant_id: staff.id, reason: "escaneo_incorrecto" } ] }
+
+    assert_equal 0, training.attendances.count
+    assert_equal 1, Checkin.count, "the arrival is a different registry"
+    assert_match(/Anuló la asistencia a Primeros auxilios/, AuditLog.registro.sole.summary)
+  end
+
+  test "registradores register and void too" do
+    registrador = Participant.create!(first_name: "Rita", last_name: "Registro", age: 30, stake: "villa_flor",
+                                      shirt_number: "m", gender: "M", rol: "registrador")
+    sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Registro1!", participant: registrador))
+
+    get checkins_path
+    assert_response :success
+  end
 end

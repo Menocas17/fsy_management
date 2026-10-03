@@ -95,10 +95,10 @@ class User < ApplicationRecord
     participant&.director? || participant&.coordinador?
   end
 
-  # Quién registra llegadas: el acceso total, el director de logística y el comité de logística
-  # cuya área está marcada para el registro (hoy, «Registro»).
+  # Quién registra llegadas: el acceso total, el director de logística, los registradores y el comité de
+  # logística cuya área está marcada para el registro (hoy, «Registro»).
   def checkin_registrar?
-    return true if full_access? || participant&.director_logistica?
+    return true if full_access? || participant&.director_logistica? || participant&.registrador?
 
     participant&.logistica? && participant.logistics_area&.checkin? || false
   end

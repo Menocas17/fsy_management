@@ -22,7 +22,8 @@ const TONES = {
 }
 
 export default class extends Controller {
-  static targets = ["video", "canvas", "start", "status", "card", "last", "corner", "arrived", "pending", "manual"]
+  static targets = ["video", "canvas", "start", "status", "card", "last", "corner", "arrived", "pending", "manual",
+                    "voidDialog", "voidName", "voidDetail"]
   static values = { rosterUrl: String, syncUrl: String, mode: String, total: Number, arrived: Number }
 
   connect() {
@@ -166,15 +167,15 @@ export default class extends Controller {
 
     const person = this.roster[id]
     if (!person) return this.show({ tone: "unknown", title: "Código no reconocido", detail: "No aparece en el padrón de este registro." }, [ 200 ])
-    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: this.summary(person), url: person.url }, [ 60, 50, 60 ])
+    if (person.arrived) return this.show({ tone: "already", title: person.name, detail: this.summary(person), gender: person.gender, url: person.url }, [ 60, 50, 60 ])
 
     person.arrived = true
     this.writeStore(this.rosterKey, this.roster)
-    this.arrivedValue += 1
-    this.arrivedTarget.textContent = this.arrivedValue
+    this.setArrived(this.arrivedValue + 1)
 
+    const token = `${id}-${now}`
     this.enqueue({
-      client_token: `${id}-${now}`,
+      client_token: token,
       participant_id: id,
       recorded_at: new Date().toISOString(),
       source: force ? "manual" : "qr"
@@ -184,8 +185,83 @@ export default class extends Controller {
       tone: "ok",
       title: person.name,
       detail: this.summary(person),
-      url: person.url
+      gender: person.gender,
+      url: person.url,
+      // Solo lo que registró este escaneo se puede anular (no un «ya estaba»: esa llegada es de antes).
+      void: { token, participantId: id, name: person.name }
     }, [ 90 ])
+  }
+
+  // Anular --------------------------------------------------------------------
+  // Llegó alguien con el gafete de otra persona, o se escaneó el que no era. Se anula el último escaneo
+  // (desde «Último», debajo de la cámara) o uno de la lista de recientes; el motivo sale de una lista.
+  askVoid(event) {
+    const data = event.currentTarget.dataset
+    this.voiding = { token: data.token, recordId: data.recordId, participantId: data.participantId,
+                     name: data.name, row: event.currentTarget.closest("[data-recent-record]") }
+    this.voidNameTarget.textContent = data.name
+    this.voidDialogTarget.querySelector("form").reset()
+    this.voidDialogTarget.showModal()
+  }
+
+  closeVoid() {
+    this.voidDialogTarget.close()
+    this.voiding = null
+  }
+
+  closeVoidOutside(event) {
+    if (event.target === this.voidDialogTarget) this.closeVoid()
+  }
+
+  confirmVoid(event) {
+    event.preventDefault()
+    const voiding = this.voiding
+    if (!voiding) return
+    const form = new FormData(event.target)
+
+    this.enqueue({
+      kind: "void",
+      client_token: `void-${voiding.participantId}-${Date.now()}`,
+      target_token: voiding.token,
+      record_id: voiding.recordId,
+      participant_id: voiding.participantId,
+      reason: form.get("void_reason"),
+      detail: form.get("void_detail")
+    })
+
+    const person = this.roster[voiding.participantId]
+    if (person?.arrived) {
+      person.arrived = false
+      this.writeStore(this.rosterKey, this.roster)
+      this.setArrived(Math.max(0, this.arrivedValue - 1))
+    }
+    voiding.row?.remove()
+    // El dueño verdadero del gafete puede pasar enseguida: no se ignora como «el mismo código de recién».
+    this.lastCode = null
+    this.hideCard()
+    this.paintVoided(voiding.name)
+    this.say(`Se anuló el registro de ${voiding.name}.`)
+    this.closeVoid()
+  }
+
+  paintVoided(name) {
+    if (!this.hasLastTarget) return
+
+    const time = new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })
+    this.lastTarget.innerHTML = `
+      <span class="w-2.5 h-2.5 shrink-0 rounded-full bg-cat-rose" aria-hidden="true"></span>
+      <span class="min-w-0 flex-1">
+        <span class="block text-[11px] font-bold text-ink-500">Último · ${time} · <span class="text-cat-rose-ink">Anulado</span></span>
+        <span class="block text-[13.5px] font-bold text-ink-900 truncate line-through decoration-ink-300">${this.escape(name)}</span>
+        <span class="block text-[11.5px] font-semibold text-ink-500 truncate">Vuelve a quedar como que no ha llegado</span>
+      </span>
+    `
+    this.lastTarget.hidden = false
+  }
+
+  setArrived(count) {
+    this.arrivedValue = count
+    this.arrivedTarget.textContent = count
   }
 
   // El QR trae el id; a mano se escribe el código corto del gafete (P-0421, p421 o solo 421).
@@ -228,10 +304,7 @@ export default class extends Controller {
       this.queue = this.queue.filter((scan) => !sent.has(scan.client_token))
       this.writeStore(this.queueKey, this.queue)
 
-      if (typeof body.arrived === "number") {
-        this.arrivedValue = body.arrived
-        this.arrivedTarget.textContent = body.arrived
-      }
+      if (typeof body.arrived === "number") this.setArrived(body.arrived)
     } catch (error) {
       // Sin señal o servidor caído: la cola se queda y se reintenta sola.
     } finally {
@@ -256,8 +329,10 @@ export default class extends Controller {
       const body = await response.json()
       const roster = {}
       for (const person of body.people) roster[person.id] = person
-      // Lo que se escaneó sin señal sigue contando como llegado hasta que el servidor lo confirme.
-      for (const scan of this.queue) if (roster[scan.participant_id]) roster[scan.participant_id].arrived = true
+      // Lo que se escaneó (o se anuló) sin señal sigue valiendo hasta que el servidor lo confirme, en orden.
+      for (const scan of this.queue) {
+        if (roster[scan.participant_id]) roster[scan.participant_id].arrived = scan.kind !== "void"
+      }
 
       this.roster = roster
       this.writeStore(this.rosterKey, roster)
@@ -281,7 +356,7 @@ export default class extends Controller {
     this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex flex-col justify-center rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg dark:border-slate-700 transition-opacity duration-200`
     this.cardTarget.innerHTML = `
       <p class="text-[11px] font-bold uppercase tracking-[.06em] leading-tight ${tone.text}">${tone.label}</p>
-      <p class="text-[15px] font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</p>
+      <p class="flex items-center gap-2 min-w-0"><span class="text-[15px] font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</p>
       ${result.detail ? `<p class="text-[12px] font-semibold leading-tight text-ink-700 dark:text-slate-300 truncate">${this.escape(result.detail)}</p>` : ""}
     `
     this.cardTarget.hidden = false
@@ -294,7 +369,15 @@ export default class extends Controller {
   }
 
   summary(person) {
-    return [ person.company, person.stake, person.gender ].filter(Boolean).join(" · ")
+    return [ person.company, person.stake ].filter(Boolean).join(" · ")
+  }
+
+  // El género va aparte y con color: es lo primero que delata a alguien con el gafete de otra persona.
+  genderChip(gender) {
+    if (!gender) return ""
+    const woman = gender === "Mujer"
+    const color = woman ? "bg-cat-rose/15 text-cat-rose-ink" : "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100"
+    return `<span class="shrink-0 inline-flex items-center px-2 py-px rounded-full text-[11px] font-extrabold uppercase tracking-[.04em] ${color}" data-gender-chip>${woman ? "♀ Mujer" : "♂ Hombre"}</span>`
   }
 
   // La tarjeta sobre la cámara se va sola a los 5 segundos para no tapar al siguiente; tocarla la quita ya.
@@ -325,10 +408,13 @@ export default class extends Controller {
       <span class="w-2.5 h-2.5 shrink-0 rounded-full ${tone.dot}" aria-hidden="true"></span>
       <span class="min-w-0 flex-1">
         <span class="block text-[11px] font-bold text-ink-500">Último · ${time} · <span class="${tone.text}">${tone.label}</span></span>
-        <span class="block text-[13.5px] font-bold text-ink-900 truncate">${this.escape(result.title)}</span>
+        <span class="flex items-center gap-2 min-w-0"><span class="text-[13.5px] font-bold text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</span>
         ${result.detail ? `<span class="block text-[11.5px] font-semibold text-ink-500 truncate">${this.escape(result.detail)}</span>` : ""}
       </span>
       ${result.url ? `<a href="${this.escape(result.url)}" class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
+      ${result.void ? `<button type="button" data-action="checkin-scanner#askVoid" data-token="${this.escape(result.void.token)}"
+          data-participant-id="${this.escape(result.void.participantId)}" data-name="${this.escape(result.void.name)}" data-void-last
+          class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-cat-rose-ink underline underline-offset-2 cursor-pointer">Anular</button>` : ""}
     `
     this.lastTarget.hidden = false
   }
@@ -398,10 +484,11 @@ export default class extends Controller {
     this.statusTarget.classList.toggle("text-cat-rose-ink", isError)
   }
 
+  // También las comillas: los nombres van dentro de atributos (data-name del botón «Anular»).
   escape(text) {
     const node = document.createElement("span")
     node.textContent = text
-    return node.innerHTML
+    return node.innerHTML.replace(/"/g, "&quot;")
   }
 
   get csrfToken() {

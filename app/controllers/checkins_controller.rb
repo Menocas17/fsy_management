@@ -1,5 +1,8 @@
 
 class CheckinsController < ApplicationController
+  # Por qué se anula un registro hecho en la fila (ver #void).
+  VOID_REASONS = { "otra_persona" => "No era la persona", "escaneo_incorrecto" => "Escaneo incorrecto", "otro" => "Otro" }.freeze
+
   before_action :require_checkin_access!
   before_action :set_mode
 
@@ -30,9 +33,10 @@ class CheckinsController < ApplicationController
     }
   end
 
-  # Acepta un escaneo o el montón que quedó pendiente sin señal; repetir un envío no duplica nada.
+  # Acepta un escaneo o el montón que quedó pendiente sin señal; repetir un envío no duplica nada. En la misma
+  # cola van las anulaciones (kind: "void"), en orden: un escaneo y su anulación hechos sin señal llegan juntos.
   def create
-    results = Array(params[:checkins]).map { |scan| register(scan) }
+    results = Array(params[:checkins]).map { |scan| scan[:kind] == "void" ? void(scan) : register(scan) }
 
     render json: { results: results, arrived: registered_count, total: expected_scope.count }
   end
@@ -77,6 +81,33 @@ class CheckinsController < ApplicationController
 
       { client_token: scan[:client_token], status: status.to_s, participant: card(participant),
         recorded_at: record&.recorded_at&.iso8601 }
+    end
+
+    # Anular lo que registró un escaneo (llegó alguien con el gafete de otra persona, o se escaneó el que no
+    # era): la persona vuelve a quedar sin llegar y queda constancia en el Historial con el motivo.
+    # Solo se anula el registro que creó ese escaneo (su client_token) o el que se eligió en la lista
+    # (record_id): si el escaneo encontró a la persona «ya registrada», no hay nada suyo que anular, y así
+    # nunca se borra la llegada verdadera.
+    def void(scan)
+      reason = VOID_REASONS[scan[:reason].to_s]
+      return { client_token: scan[:client_token], status: "invalid" } if reason.nil?
+
+      records = @training ? @training.attendances : Checkin.all
+      record = if scan[:record_id].present?
+        records.find_by(id: scan[:record_id])
+      elsif scan[:target_token].present?
+        records.find_by(client_token: scan[:target_token])
+      end
+      return { client_token: scan[:client_token], status: "void_missing" } if record.nil?
+
+      participant = record.participant
+      detail = scan[:detail].to_s.squish.first(300).presence
+      record.destroy!
+      record_audit!(category: :registro, action: "voided", target: participant,
+                    summary: "Anuló #{@training ? "la asistencia a #{@training.name}" : "la llegada"} de #{participant.full_name} " \
+                             "(#{[ reason, detail ].compact.join(": ")})")
+
+      { client_token: scan[:client_token], status: "voided", participant_id: participant.id }
     end
 
     def record_for(participant, scan)

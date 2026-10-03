@@ -76,6 +76,13 @@
               <%= render "participants/qr_dialog", participant: me %>
             </div>
           <% end %>
+          <%# Ver la ficha de cualquiera escaneando su gafete (un consejero con un joven que no conoce). Solo
+              abre la ficha: registrar llegadas sigue siendo del registro. %>
+          <%= link_to scan_path, data: { shortcut: "qr" },
+                class: "#{shortcut_base} border border-white/25 bg-white/10 text-white hover:bg-white/20" do %>
+            <%= icon "scan-qr-code", class: "w-4 h-4" %>
+            Escanear gafete
+          <% end %>
         <% end %>
       </div>
     </div>
