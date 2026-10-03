@@ -41,8 +41,19 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Los enlaces de los correos: localhost, o el dominio del túnel si se da APP_HOST (p. ej. el de Cloudflare).
+  config.action_mailer.default_url_options =
+    ENV["APP_HOST"].present? ? { host: ENV["APP_HOST"], protocol: "https" } : { host: "localhost", port: 3000 }
+
+  # En desarrollo los correos solo se ven en el log. Con SMTP_EN_DESARROLLO=1 salen de verdad por Gmail,
+  # para probar con el túnel (bin/rails correo:prueba[tu@correo.com] confirma que la cuenta funciona).
+  config.action_mailer.delivery_method = :test
+  if ENV["SMTP_EN_DESARROLLO"] == "1"
+    require Rails.root.join("config/gmail_smtp")
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = GmailSmtp.settings
+    config.action_mailer.raise_delivery_errors = true
+  end
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

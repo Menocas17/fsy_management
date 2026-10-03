@@ -119,10 +119,18 @@ pasa las pruebas. Necesita estos secrets en *Settings → Secrets and variables 
 
 ### Correo
 
-Todavía no hay servidor SMTP configurado (`config.action_mailer.smtp_settings` en
-`config/environments/production.rb`): los correos de «Cambiar contraseña», «¿Olvidaste tu
-contraseña?» y las alertas críticas se encolan pero no salen. Hasta configurarlo, las contraseñas
-se cambian desde `bin/kamal console`.
+Sale por Gmail con una cuenta dedicada a la app (`config/gmail_smtp.rb`): unos 500 destinatarios al
+día. Usuario y **contraseña de aplicación** (no la de la cuenta) en `bin/rails credentials:edit`:
+
+```yaml
+smtp:
+  user_name: la-cuenta@gmail.com
+  password: abcdefghijklmnop   # los 16 caracteres, sin espacios
+```
+
+Probar: `bin/kamal app exec 'bin/rails correo:prueba[tu@correo.com]'` (en desarrollo,
+`SMTP_EN_DESARROLLO=1 bin/rails 'correo:prueba[tu@correo.com]'`). Los correos se mandan en segundo
+plano (Solid Queue): si no llegan, revisar `bin/kamal logs`.
 
 ## 7. Respaldos
 
