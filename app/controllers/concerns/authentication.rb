@@ -3,7 +3,7 @@ module Authentication
 
   included do
     before_action :require_authentication
-    helper_method :authenticated?
+    helper_method :authenticated?, :password_reset_emails?
   end
 
   class_methods do
@@ -17,6 +17,10 @@ module Authentication
       resume_session
     end
 
+    def password_reset_emails?
+      Rails.configuration.x.password_reset_emails
+    end
+
     def require_authentication
       resume_session || request_authentication
     end
@@ -25,13 +29,13 @@ module Authentication
       Current.session ||= find_session_by_cookie
     end
 
-    # Una sesión sin uso por más de Session::IDLE_LIMIT se cierra en vez de revivir; si sigue viva, se anota
-    # que se usó (cada pocos minutos), que es lo que «Accesos» muestra como «en línea».
+    # Una sesión vencida (Session#expired?) o de una cuenta que perdió su ficha se cierra en vez de revivir;
+    # si sigue viva, se anota que se usó (cada pocos minutos), que es lo que «Accesos» muestra como «en línea».
     def find_session_by_cookie
-      session = Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      session = Session.includes(:user).find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
       return unless session
 
-      if session.expired?
+      if session.expired? || !session.user.linked?
         session.destroy
         cookies.delete(:session_id)
         return

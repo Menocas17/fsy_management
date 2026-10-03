@@ -15,9 +15,14 @@
     <%= render "shared/password_field", form: form, attribute: :password, label: "Contraseña",
                autocomplete: "current-password", placeholder: "Tu contraseña" %>
 
+    <%# Sin correo configurado no hay enlace que mandar: la restablece la coordinación. %>
     <div class="flex justify-end">
-      <%= link_to "¿Olvidaste tu contraseña?", new_password_path,
-            class: "text-[12.5px] font-bold text-primary-600 hover:underline" %>
+      <% if password_reset_emails? %>
+        <%= link_to "¿Olvidaste tu contraseña?", new_password_path,
+              class: "text-[12.5px] font-bold text-primary-600 hover:underline" %>
+      <% else %>
+        <p class="text-[12.5px] text-ink-500">¿Olvidaste tu contraseña? Pídele a tu coordinación que la restablezca.</p>
+      <% end %>
     </div>
 
     <%= tag.button type: "submit", class: auth_button_classes do %>

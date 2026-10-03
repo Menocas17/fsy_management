@@ -70,6 +70,12 @@ es:
         emergency_contact_name: 'Nombre del contacto de emergencia'
         emergency_contact_relation: 'Parentesco del contacto de emergencia'
         avatar: 'Foto de perfil'
+      user:
+        email_address: 'Correo electrónico'
+        password: 'La contraseña'
+        password_confirmation: 'La confirmación de la contraseña'
+        password_challenge: 'La contraseña actual'
+        participant_id: 'El participante'
       training:
         name: 'Nombre'
         held_on: 'Fecha'
@@ -114,6 +120,12 @@ es:
           has_one: 'No se puede eliminar porque existe %{record} asociado'
           has_many: 'No se puede eliminar porque existen %{record} asociados'
       models:
+        user:
+          attributes:
+            password:
+              too_short: 'debe tener al menos %{count} caracteres'
+            password_challenge:
+              invalid: 'no es correcta'
         participant:
           attributes:
             first_name:

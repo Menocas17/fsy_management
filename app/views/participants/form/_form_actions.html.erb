@@ -8,11 +8,12 @@
         Borrar participante
       <% end %>
     <% end %>
-    <% if participant.persisted? && params[:from] == "myprofile" %>
-      <%= button_to send_password_reset_participant_path(participant), method: :post,
+    <%# Solo en la propia ficha: la contraseña de otro no se toca desde aquí. %>
+    <% if participant.persisted? && participant == Current.user&.participant %>
+      <%= link_to edit_password_change_path,
             class: "inline-flex items-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition cursor-pointer" do %>
         <%= icon "key-round", class: "w-4 h-4" %>
-        Enviar enlace para restablecer contraseña
+        Cambiar contraseña
       <% end %>
     <% end %>
   </div>

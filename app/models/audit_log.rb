@@ -2,10 +2,11 @@ class AuditLog < ApplicationRecord
   belongs_to :actor, class_name: "Participant", optional: true
 
   # logistica is reserved: no logistics feature writes audit entries yet.
-  enum :category, { logistica: 0, companias: 1, asignaciones: 2, alertas: 3, agenda: 4, finanzas: 5 }
+  enum :category, { logistica: 0, companias: 1, asignaciones: 2, alertas: 3, agenda: 4, finanzas: 5, cuentas: 6 }
 
   CATEGORY_LABELS = { "logistica" => "Logística", "companias" => "Compañías", "asignaciones" => "Asignaciones",
-                      "alertas" => "Alertas", "agenda" => "Agenda", "finanzas" => "Finanzas" }.freeze
+                      "alertas" => "Alertas", "agenda" => "Agenda", "finanzas" => "Finanzas",
+                      "cuentas" => "Cuentas" }.freeze
 
   validates :actor_name, :action, :category, :summary, presence: true
 

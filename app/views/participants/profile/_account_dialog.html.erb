@@ -1,0 +1,43 @@
+<%# Crear la cuenta de la ficha: el correo se escribe dos veces, porque con uno mal escrito la persona no entra.
+    Va dentro del data-controller="dialog" del banner y lo abre el botón data-dialog-name="account". %>
+<dialog data-dialog-target="modal" data-dialog-name="account" data-action="click->dialog#clickOutside" aria-modal="true"
+        aria-labelledby="account-dialog-title"
+        class="p-0 m-auto w-full max-w-md rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+  <div class="relative p-5 md:p-6 bg-surface rounded-2xl">
+    <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
+            class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+      <%= icon "x", class: "w-4 h-4" %>
+    </button>
+    <h2 id="account-dialog-title" class="pr-10 text-[16px] font-bold text-balance break-words text-ink-900">Crear la cuenta de <%= participant.full_name %></h2>
+    <p class="mt-1.5 text-[13px] text-ink-500">Revisa el correo con cuidado: es con el que va a entrar.</p>
+
+    <%= form_with url: participant_account_path(participant), method: :post, class: "mt-5 space-y-4", data: { account_form: true } do |form| %>
+      <div>
+        <%= form.label :email_address, "Correo electrónico", class: field_label_classes %>
+        <%= form.email_field :email_address, required: true, autocomplete: "off", value: participant.email_address,
+              placeholder: "correo@ejemplo.com", class: auth_input_classes %>
+      </div>
+      <div>
+        <%= form.label :email_address_confirmation, "Confirmar el correo", class: field_label_classes %>
+        <%= form.email_field :email_address_confirmation, required: true, autocomplete: "off",
+              placeholder: "Escríbelo de nuevo", class: auth_input_classes %>
+      </div>
+
+      <div class="flex items-start gap-2.5 rounded-xl bg-primary-50 dark:bg-primary-700/30 px-3.5 py-3 text-[12.5px] text-ink-700 dark:text-slate-200">
+        <%= icon "mail", class: "w-4 h-4 shrink-0 mt-px" %>
+        <p>
+          Le llega a ese correo un enlace para elegir su contraseña (vale <%= User::INVITATION_VALID_FOR.in_days.to_i %> días).
+          Nadie más la conoce.
+        </p>
+      </div>
+
+      <div class="flex gap-2.5 justify-end">
+        <button type="button" data-action="click->dialog#close" class="<%= button_classes(:secondary) %>">Cancelar</button>
+        <button type="submit" data-turbo-submits-with="Creando…" class="<%= button_classes(:primary) %>">
+          <%= icon "user-plus", class: "w-4 h-4" %>
+          Crear cuenta
+        </button>
+      </div>
+    <% end %>
+  </div>
+</dialog>

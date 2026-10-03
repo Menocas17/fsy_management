@@ -17,10 +17,9 @@
       <div class="mt-4 pt-4 border-t border-line-soft flex flex-wrap items-center justify-between gap-4">
         <div>
           <p class="text-sm font-semibold text-ink-900">Contraseña</p>
-          <p class="mt-0.5 text-[12.5px] text-ink-500">Te enviaremos un enlace para restablecer tu contraseña.</p>
+          <p class="mt-0.5 text-[12.5px] text-ink-500">Cámbiala confirmando la que usas ahora.</p>
         </div>
-        <%= button_to send_password_reset_settings_path, method: :post,
-              class: button_classes do %>
+        <%= link_to edit_password_change_path, class: button_classes do %>
           <%= icon "key-round", class: "w-4 h-4" %>
           Cambiar contraseña
         <% end %>
