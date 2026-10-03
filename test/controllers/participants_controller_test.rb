@@ -155,7 +155,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     get new_participant_path
 
     assert_response :success
-    assert_select "button[form='participant-form']", text: /Crear Registro/
+    assert_select "button[form='participant-form']", text: /Crear/
     assert_select "button", text: /Borrar participante/, count: 0
   end
 

@@ -58,9 +58,9 @@
     <%= link_to "Cancelar", participant_path(participant),
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
     <button type="submit" form="assignment-form"
-            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none") %>">
+            class="<%= button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>">
       <%= icon "check", class: "w-4 h-4" %>
-      Guardar asignación
+      Guardar
     </button>
   </div>
 </div>

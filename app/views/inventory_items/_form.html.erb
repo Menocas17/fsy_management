@@ -52,7 +52,7 @@
   <div class="<%= card_classes("px-5 py-4 flex gap-2.5 sm:justify-end") %>">
     <%= link_to "Cancelar", item.persisted? ? item : inventory,
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-    <%= form.submit item.persisted? ? "Guardar cambios" : "Agregar artículo",
-          class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+    <%= form.submit item.persisted? ? "Actualizar" : "Agregar",
+          class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
   </div>
 <% end %>

@@ -50,7 +50,7 @@
   <div class="flex gap-2.5 sm:justify-end">
     <%= link_to "Cancelar", inventory.persisted? ? inventory : inventories_path,
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
-    <%= tag.button inventory.persisted? ? "Guardar cambios" : "Crear inventario", type: "submit", form: "inventory-form",
-          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button inventory.persisted? ? "Actualizar" : "Crear", type: "submit", form: "inventory-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
   </div>
 </div>

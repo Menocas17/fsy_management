@@ -147,7 +147,7 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
     get edit_inventory_path(@inventory)
 
     assert_select "form[data-turbo-confirm][action='#{inventory_path(@inventory)}']", 1
-    assert_select "button[type='submit'][form='inventory-form']", text: "Guardar cambios"
+    assert_select "button[type='submit'][form='inventory-form']", text: "Actualizar"
     assert_select "form#inventory-form"
   end
 

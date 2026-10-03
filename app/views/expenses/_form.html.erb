@@ -60,6 +60,6 @@
 
 <div class="<%= card_classes("mt-5 px-5 py-4 flex gap-2.5 justify-end") %>">
   <%= link_to "Cancelar", expense.persisted? ? expense : finances_path, class: button_classes(:secondary) %>
-  <%= tag.button expense.persisted? ? "Guardar cambios" : "Presentar gasto", type: "submit", form: "expense-form",
-        data: { turbo_submits_with: "Guardando…" }, class: button_classes %>
+  <%= tag.button expense.persisted? ? "Actualizar" : "Presentar", type: "submit", form: "expense-form",
+        data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "whitespace-nowrap") %>
 </div>

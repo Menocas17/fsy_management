@@ -31,7 +31,7 @@ module ApplicationHelper
 
   def submit_button_text(participant)
     if participant.new_record?
-      "Crear Registro"
+      "Crear"
     else
       "Actualizar"
     end
