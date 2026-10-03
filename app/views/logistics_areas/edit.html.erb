@@ -1,0 +1,6 @@
+<% content_for :title, "Editar #{@area.name}" %>
+<% content_for :eyebrow, "Áreas de logística" %>
+<% back_to @area.name, logistics_area_path(@area) %>
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+  <%= render "form", area: @area %>
+</div>

@@ -84,7 +84,7 @@
       </button>
     </div>
     <div class="flex-1 overflow-y-auto px-4 pt-2 pb-4">
-      <%= render "shared/nav_sections" %>
+      <%= render "shared/nav_sections", context: "drawer" %>
     </div>
     <div class="mx-4 pt-3 pb-5 border-t border-line-soft">
       <%= button_to session_path, method: :delete,

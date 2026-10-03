@@ -1,0 +1,63 @@
+<%= form_with model: area, id: "area-form", class: "space-y-5" do |form| %>
+  <% if area.errors.any? %>
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
+      <% area.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Datos del área", "layout-grid" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :name, "Nombre", class: field_label_classes %>
+        <%= form.text_field :name, required: true, maxlength: 60, placeholder: "Ej. Registro", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :description, "Descripción", class: field_label_classes %>
+        <%= form.text_field :description, maxlength: 120, placeholder: "Ej. Recibe a los jóvenes y lleva la asistencia", class: field_input_classes %>
+      </div>
+    </div>
+  </section>
+
+  <% if area.new_record? %>
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Permisos", "shield-check" %>
+      <div class="space-y-2.5">
+        <% LogisticsArea::FLAGS.each do |flag, (label, hint)| %>
+          <label class="flex items-start gap-3 rounded-xl border border-line px-3.5 py-3 cursor-pointer transition hover:bg-canvas has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-700/30">
+            <%= form.check_box flag, class: "mt-[3px] w-4 h-4 accent-primary-600" %>
+            <span>
+              <span class="block text-[13.5px] font-bold text-ink-900"><%= label %></span>
+              <span class="block mt-0.5 text-[12.5px] text-ink-500"><%= hint %></span>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+<% end %>
+
+<%# Los botones van fuera del formulario: «Borrar» es su propio formulario (button_to). %>
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if area.persisted? %>
+      <% count = area.members.size %>
+      <%= button_to logistics_area_path(area), method: :delete,
+            form: { data: { turbo_confirm: "¿Borrar el área #{area.name}?",
+                            turbo_confirm_detail: count.positive? ? "#{pluralize(count, "miembro queda", plural: "miembros quedan")} sin área." : "No tiene miembros.",
+                            turbo_confirm_button: "Sí, borrar" } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar área
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", area.persisted? ? logistics_area_path(area) : logistics_areas_path,
+          class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button area.persisted? ? "Guardar" : "Crear área", type: "submit", form: "area-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
+  </div>
+</div>

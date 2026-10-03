@@ -53,6 +53,11 @@ Rails.application.routes.draw do
   get "registro" => "checkins#index", as: :checkins
   get "registro/padron" => "checkins#roster", as: :checkins_roster
   post "registro" => "checkins#create", as: :register_checkins
+  # Áreas de logística: sus banderas (Registro, Finanzas, Alimentación) y sus miembros.
+  resources :logistics_areas, path: "areas", path_names: { new: "nueva", edit: "editar" } do
+    resources :members, only: %i[create destroy], controller: "logistics_area_members", path: "miembros"
+  end
+
   resources :inventories, only: %i[index show new create edit update destroy], path: "inventario" do
     collection do
       get :scan, path: "escanear"

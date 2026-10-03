@@ -8,7 +8,7 @@ module Authorization
                   :can_manage_staff?, :can_manage_alerts?, :can_manage_agenda?, :can_assign_to?,
                   :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
-                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?,
+                  :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?, :can_manage_logistics_areas?,
                   :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
                   :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?
   end
@@ -129,6 +129,13 @@ module Authorization
     participant&.user.present? && participant.user != Current.user && can_handle_account_of?(participant)
   end
 
+  # Áreas de logística -----------------------------------------------------------
+  # El director de logística las arma (y decide quién registra, quién lleva las finanzas y quién
+  # alimentación); el acceso total también.
+  def can_manage_logistics_areas?
+    Current.user&.logistics_areas_manager? || false
+  end
+
   # Registro de llegadas ---------------------------------------------------------
   # Consultar una ficha escaneando la puede hacer cualquiera del staff; registrar la llegada, solo
   # el acceso total, el director de logística, los registradores y el comité de logística marcado para el
@@ -241,6 +248,10 @@ module Authorization
 
     def require_finance_configurator!
       redirect_to finances_path, alert: "El presupuesto lo define el director de logística" unless can_configure_finances?
+    end
+
+    def require_logistics_areas_access!
+      redirect_to dashboard_path, alert: "Las áreas de logística las administra el director de logística" unless can_manage_logistics_areas?
     end
 
     def require_checkin_access!
