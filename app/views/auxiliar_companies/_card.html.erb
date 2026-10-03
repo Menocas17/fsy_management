@@ -25,14 +25,14 @@
     <% if auxiliars.any? %>
       <span class="flex shrink-0">
         <% auxiliars.each_with_index do |auxiliar, index| %>
-          <span class="rounded-full ring-2 ring-surface <%= "-ml-2" if index.positive? %>">
+          <span class="rounded-avatar-sm ring-2 ring-surface <%= "-ml-2" if index.positive? %>">
             <%= render(AvatarComponent.new(participant: auxiliar, size: :sm)) %>
           </span>
         <% end %>
       </span>
       <span class="text-[12px] font-semibold text-ink-700 truncate"><%= auxiliars.map(&:full_name).join(" · ") %></span>
     <% else %>
-      <span class="w-7 h-7 shrink-0 rounded-full border-[1.5px] border-dashed border-line"></span>
+      <span class="w-7 h-7 shrink-0 rounded-avatar-sm border-[1.5px] border-dashed border-line"></span>
       <span class="text-[12px] font-semibold text-ink-500">Auxiliares por asignar</span>
     <% end %>
   </div>

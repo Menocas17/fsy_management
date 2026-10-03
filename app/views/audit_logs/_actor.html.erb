@@ -2,7 +2,7 @@
   <% if log.actor %>
     <%= render(AvatarComponent.new(participant: log.actor, size: :sm)) %>
   <% else %>
-    <span class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100">
+    <span class="w-7 h-7 shrink-0 rounded-avatar-sm flex items-center justify-center bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100">
       <%= icon "key-round", class: "w-3.5 h-3.5" %>
     </span>
   <% end %>

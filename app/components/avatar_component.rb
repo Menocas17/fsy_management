@@ -25,9 +25,9 @@ class AvatarComponent < ViewComponent::Base
     if @is_profile
       "w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-panel md:rounded-panel shrink-0 text-2xl md:text-[28px] border-4 border-surface"
     elsif @size == :sm
-      "w-7 h-7 rounded-full shrink-0 text-[10px]"
+      "w-7 h-7 rounded-avatar-sm shrink-0 text-[10px]"
     else
-      "w-10 h-10 rounded-full shrink-0"
+      "w-10 h-10 rounded-avatar shrink-0"
     end
   end
 
