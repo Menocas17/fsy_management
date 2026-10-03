@@ -1,6 +1,11 @@
-<aside data-controller="scroll-reveal" class="scroll-reveal hidden md:flex md:flex-col w-64 shrink-0 overflow-y-auto px-4 pt-[22px] pb-6 bg-surface border-r border-line-soft">
-  <div class="px-2 pt-1.5 pb-[22px] mb-[18px] border-b border-line-soft">
-    <%= render "shared/brand" %>
+<%# La marca queda fija arriba; solo la lista de opciones se desplaza (con su barra discreta, .scroll-reveal). %>
+<aside class="hidden md:flex md:flex-col w-64 shrink-0 bg-surface border-r border-line-soft">
+  <div class="shrink-0 px-4 pt-[22px]">
+    <div class="px-2 pt-1.5 pb-[22px] mb-2 border-b border-line-soft">
+      <%= render "shared/brand" %>
+    </div>
   </div>
-  <%= render "shared/nav_sections" %>
+  <div data-controller="scroll-reveal" class="scroll-reveal flex-1 min-h-0 overflow-y-auto pl-4 pr-2.5 pt-2.5 pb-6">
+    <%= render "shared/nav_sections" %>
+  </div>
 </aside>

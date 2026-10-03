@@ -512,9 +512,12 @@ turbo-frame[aria-busy='true'] {
 
 /* Barra de desplazamiento del menú: delgada, del color de la tinta suave, y solo mientras se desplaza
    (scroll_reveal_controller pone data-scrolling y lo quita al detenerse). Sin desplazar es invisible pero
-   ocupa su lugar, así nada se mueve al aparecer. scrollbar-color para Chrome y Firefox; los pseudo
+   su lugar está siempre reservado (scrollbar-gutter), así nada se mueve al aparecer ni al abrir un grupo. scrollbar-color para Chrome y Firefox; los pseudo
    ::-webkit-scrollbar para Safari, que Chrome ignora cuando hay scrollbar-color. */
 .scroll-reveal {
+  /* El lugar de la barra queda reservado aunque no haga falta desplazar: si no, al abrir un grupo que
+     hace crecer la lista aparecía la barra y las opciones se angostaban de golpe. */
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 300ms ease-out;
