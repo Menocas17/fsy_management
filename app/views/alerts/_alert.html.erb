@@ -1,25 +1,58 @@
 <%
   compact = local_assigns.fetch(:compact, false)
   unread = local_assigns.fetch(:unread, false)
+  # En la campanita y en Notificaciones cada quien puede quitar la alerta de su lista (no la borra para los demás).
+  dismissible = local_assigns.fetch(:dismissible, false)
+  # Toda la tarjeta lleva a lo que anuncia, salvo en la página de la alerta misma.
+  linked = local_assigns.fetch(:linked, true)
 %>
-<article class="<%= compact ? "px-5 py-3.5" : "px-5 py-4 md:px-6" %> <%= "bg-primary-50/70 dark:bg-primary-700/15" if unread %>"
-         data-alert-id="<%= alert.id %>" data-alert-priority="<%= alert.priority %>">
+<% if dismissible %>
+<%# En el celular se desliza a la izquierda y aparece «Eliminar» detrás; en escritorio, la X al pasar el ratón. %>
+<div class="relative overflow-hidden" data-alert-item="<%= alert.id %>" data-controller="alert-item"
+     data-action="turbo:submit-start->alert-item#leave turbo:submit-end->alert-item#settle">
+  <div class="absolute inset-y-0 right-0 flex" data-alert-item-target="actions" hidden>
+    <%= button_to notification_path(alert), method: :delete, form_class: "flex",
+          class: "w-24 flex flex-col items-center justify-center gap-1 bg-danger text-white text-[12px] font-bold cursor-pointer",
+          data: { alert_swipe_delete: true } do %>
+      <%= icon "trash-2", class: "w-5 h-5" %>
+      Eliminar
+    <% end %>
+  </div>
+<% end %>
+<article class="group relative <%= compact ? "px-5 py-3.5" : "px-5 py-4 md:px-6" %> <%= unread ? "bg-primary-50 dark:bg-slate-800" : "bg-surface" %> <%= "hover:bg-canvas dark:hover:bg-slate-700/60 has-[[data-alert-open]:focus-visible]:ring-2 has-[[data-alert-open]:focus-visible]:ring-inset has-[[data-alert-open]:focus-visible]:ring-primary-500 transition-colors" if linked %> <%= "touch-pan-y" if dismissible %>"
+         data-alert-id="<%= alert.id %>" data-alert-priority="<%= alert.priority %>" <%= tag.attributes(data: { alert_item_target: "panel" }) if dismissible %>>
   <div class="flex items-start gap-3">
     <span class="mt-0.5 w-9 h-9 shrink-0 rounded-control flex items-center justify-center <%= alert.priority_styles %>">
       <%= icon alert.priority_critica? ? "triangle-alert" : "megaphone", class: "w-[18px] h-[18px]" %>
     </span>
     <div class="min-w-0 flex-1">
       <div class="flex items-start justify-between gap-3">
-        <p class="text-[13.5px] font-bold text-ink-900"><%= alert.title %></p>
-        <%# The es locale defines no date formats, so format here instead of going through I18n. %>
-        <time class="shrink-0 text-[11px] font-semibold text-ink-500" datetime="<%= alert.created_at.iso8601 %>">
-          <%= alert.created_at.strftime("%d/%m · %H:%M") %>
-        </time>
+        <p class="text-[13.5px] font-bold text-ink-900">
+          <% if linked %>
+            <%# after:inset-0 estira el enlace sobre toda la tarjeta: se toca en cualquier parte. %>
+            <%= link_to alert.title, alert_destination_path(alert), class: "after:absolute after:inset-0 focus:outline-none",
+                  data: { alert_open: true, turbo_frame: "_top" } %>
+          <% else %>
+            <%= alert.title %>
+          <% end %>
+        </p>
+        <div class="shrink-0 flex items-center gap-1">
+          <%# The es locale defines no date formats, so format here instead of going through I18n. %>
+          <time class="text-[11px] font-semibold text-ink-500" datetime="<%= alert.created_at.iso8601 %>">
+            <%= alert.created_at.strftime("%d/%m · %H:%M") %>
+          </time>
+          <% if dismissible %>
+            <%# Sobre el enlace estirado (relative z-10). En pantallas táctiles no hay hover: ahí se desliza. %>
+            <%= button_to notification_path(alert), method: :delete, form_class: "relative z-10 -my-1 -mr-1.5 [@media(hover:none)]:hidden",
+                  aria: { label: "Quitar «#{alert.title}» de mis notificaciones" }, title: "Quitar",
+                  class: "w-7 h-7 rounded-lg flex items-center justify-center text-ink-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-line-soft hover:text-ink-900 cursor-pointer transition",
+                  data: { alert_dismiss: true } do %>
+              <%= icon "x", class: "w-4 h-4" %>
+            <% end %>
+          <% end %>
+        </div>
       </div>
       <p class="mt-1 text-[12.5px] leading-relaxed text-ink-700 <%= "line-clamp-2" if compact %>"><%= alert.body %></p>
-      <% if alert.link_path.present? && alert.link_path.start_with?("/") %>
-        <%= link_to "Abrir", alert.link_path, class: "mt-1.5 inline-flex items-center gap-1 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 hover:underline", data: { alert_link: true } %>
-      <% end %>
 
       <% if alert.images.attached? && !compact %>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -54,3 +87,6 @@
     </div>
   </div>
 </article>
+<% if dismissible %>
+</div>
+<% end %>

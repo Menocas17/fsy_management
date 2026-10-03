@@ -38,4 +38,65 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-empty-state='notifications']"
   end
+
+  test "each alert opens what it announces, or itself when it points nowhere" do
+    plain = Alert.create!(title: "Bienvenida", body: "Texto", sender_name: "Marta", audience: :todos)
+    linked = Alert.create!(title: "Gasto", body: "Texto", sender_name: "Finanzas", audience: :todos, link_path: "/finanzas")
+
+    get notifications_path
+
+    assert_select "main [data-alert-id='#{plain.id}'] a[data-alert-open][href='#{alert_path(plain)}']", "Bienvenida"
+    assert_select "main [data-alert-id='#{linked.id}'] a[data-alert-open][href='/finanzas']", "Gasto"
+  end
+
+  test "deleting an alert hides it only for whoever deleted it" do
+    alert = Alert.create!(title: "Bienvenida", body: "Texto", sender_name: "Marta", audience: :todos)
+    other = User.create!(email_address: "otra@fsy.com", password: "Password1!", participant: participants(:maria))
+
+    delete notification_path(alert), as: :turbo_stream
+
+    assert_response :success
+    assert_match "remove", response.body
+    assert Alert.exists?(alert.id), "la alerta sigue existiendo para los demás"
+    assert_not_includes Alert.inbox_for(users(:one)), alert
+    assert_includes Alert.inbox_for(other), alert
+
+    get notifications_path
+    assert_select "main [data-alert-id]", 0
+    assert_select "[data-empty-state='notifications']"
+  end
+
+  test "deleting an unread alert takes it off the bell's count" do
+    alert = Alert.create!(title: "Una", body: "Texto", sender_name: "Marta", audience: :todos)
+    Alert.create!(title: "Otra", body: "Texto", sender_name: "Marta", audience: :todos)
+
+    delete notification_path(alert), as: :turbo_stream
+    get count_notifications_path, headers: { "Accept" => "application/json" }
+
+    assert_equal 1, response.parsed_body["unread"]
+  end
+
+  test "an alert meant for someone else can't be deleted from here" do
+    staff_only = Alert.create!(title: "Solo directores", body: "Texto", sender_name: "Marta", audience: :por_roles, target_roles: [ "director" ])
+    sign_in_as(User.create!(email_address: "joven@fsy.com", password: "Password1!", participant: participants(:juan)))
+
+    delete notification_path(staff_only), as: :turbo_stream
+
+    assert_response :not_found
+    assert_equal 0, AlertDismissal.count
+  end
+
+  test "clearing everything empties the list, and later alerts still arrive" do
+    Alert.create!(title: "Una", body: "Texto", sender_name: "Marta", audience: :todos, created_at: 1.minute.ago)
+    Alert.create!(title: "Otra", body: "Texto", sender_name: "Marta", audience: :todos, created_at: 1.minute.ago)
+
+    delete clear_notifications_path, as: :turbo_stream
+    assert_response :success
+    assert_empty Alert.inbox_for(users(:one).reload)
+
+    Alert.create!(title: "Nueva", body: "Texto", sender_name: "Marta", audience: :todos)
+    get notifications_path
+    assert_select "main [data-alert-id]", 1
+    assert_select "main [data-alert-id]", text: /Nueva/
+  end
 end

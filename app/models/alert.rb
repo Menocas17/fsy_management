@@ -6,6 +6,7 @@ class Alert < ApplicationRecord
   belongs_to :recipient, class_name: "Participant", optional: true
 
   has_many_attached :images
+  has_many :dismissals, class_name: "AlertDismissal", dependent: :delete_all
 
   enum :audience, { todos: 0, por_roles: 1, individual: 2 }, prefix: true
   enum :priority, { informativa: 0, importante: 1, critica: 2 }, prefix: true
@@ -40,6 +41,14 @@ class Alert < ApplicationRecord
     where(audience: :todos)
       .or(where("alerts.target_roles && ARRAY[?]::varchar[]", [ participant.rol.to_s ]))
       .or(where(recipient_id: participant.id))
+  }
+
+  # What a person's bell shows: what they can see, minus what they deleted one by one or cleared all at once.
+  scope :inbox_for, ->(user) {
+    next none if user.nil?
+
+    scope = visible_to(user.participant).where.not(id: AlertDismissal.where(user_id: user.id).select(:alert_id))
+    user.alerts_cleared_at ? scope.where("alerts.created_at > ?", user.alerts_cleared_at) : scope
   }
 
   # Everything is unread until the person opens the notifications page for the first time.
