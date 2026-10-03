@@ -8,9 +8,7 @@ namespace :correo do
     end
     abort "Faltan smtp.user_name o smtp.password en las credenciales (bin/rails credentials:edit)" unless GmailSmtp.configured?
 
-    ActionMailer::Base.mail(from: ApplicationMailer.default[:from].call, to: destino,
-                            subject: "[#{Rails.configuration.x.event_name}] Prueba de correo",
-                            body: "Si lees esto, la app ya puede mandar correos.").deliver_now
+    SmtpCheckMailer.check(destino).deliver_now
     puts "Enviado a #{destino} desde #{GmailSmtp.settings[:user_name]}."
   end
 end
