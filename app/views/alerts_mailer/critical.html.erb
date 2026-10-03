@@ -1,9 +1,28 @@
-<h1 style="font-family: sans-serif; font-size: 18px;"><%= Rails.configuration.x.event_name %> · Alerta crítica</h1>
-<h2 style="font-family: sans-serif; font-size: 16px;"><%= @alert.title %></h2>
-<p style="font-family: sans-serif; font-size: 14px; line-height: 1.5;"><%= simple_format(@alert.body) %></p>
-<p style="font-family: sans-serif; font-size: 12px; color: #555;">
-  Enviada por <%= @alert.sender_name %> · Para: <%= @alert.audience_label %>
+<% font = "Onest, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" %>
+<% content_for :preheader, @alert.title %>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td bgcolor="#FDECEC" style="background: #FDECEC; border-radius: 999px; padding: 5px 12px; font-family: <%= font %>; font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #B42318;">
+      Alerta crítica
+    </td>
+  </tr>
+</table>
+
+<h1 class="fsy-title" style="margin: 16px 0 0; font-family: <%= font %>; font-size: 25px; line-height: 31px; font-weight: 800; letter-spacing: -.01em; color: #1A2029;"><%= @alert.title %></h1>
+
+<div style="margin-top: 12px; font-size: 15px; line-height: 24px; color: #424852;"><%= simple_format(@alert.body, style: "margin: 0 0 10px;") %></div>
+
+<p style="margin: 6px 0 0; font-size: 12.5px; line-height: 19px; color: #6F757E;">
+  Enviada por <strong style="color: #424852;"><%= @alert.sender_name %></strong> · Para: <%= @alert.audience_label %>
 </p>
-<p style="font-family: sans-serif; font-size: 12px;">
-  <%= link_to "Ver en FSY Management", notifications_url %>
-</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="fsy-button" style="margin-top: 24px;">
+  <tr>
+    <td align="center" bgcolor="#1D447C" style="background: #1D447C; background-image: linear-gradient(100deg, #1D447C, #3671B2); border-radius: 12px;">
+      <a href="<%= notifications_url %>" target="_blank"
+         style="display: inline-block; padding: 14px 28px; font-family: <%= font %>; font-size: 15px; line-height: 20px; font-weight: 700; color: #FFFFFF; text-decoration: none; border-radius: 12px;">
+        Ver en la app &rarr;
+      </a>
+    </td>
+  </tr>
+</table>

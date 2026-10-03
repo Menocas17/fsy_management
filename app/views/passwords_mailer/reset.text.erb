@@ -1,4 +1,9 @@
-Puedes restablecer tu contraseña en
+Hola, <%= @user.participant&.first_name || @user.email_address %>:
+
+Recibimos una solicitud para restablecer la contraseña de <%= @user.email_address %> en la app de <%= Rails.configuration.x.event_name %>.
+Elige una nueva aquí:
+
 <%= edit_password_url(@user.password_reset_token) %>
 
-El enlace vence en <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+El enlace vale <%= @user.password_reset_token_expires_in.in_minutes.to_i %> minutos y solo sirve una vez.
+Si no lo pediste tú, ignora este correo: tu contraseña actual sigue funcionando.

@@ -1,0 +1,43 @@
+<%# Cuerpo de los correos con enlace para elegir contraseña (invitación y restablecimiento): etiqueta,
+    título, texto, el botón y, debajo, cuánto vale el enlace y el enlace escrito por si el botón no abre. %>
+<% font = "Onest, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" %>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td bgcolor="#EFF6FD" style="background: #EFF6FD; border-radius: 999px; padding: 5px 12px; font-family: <%= font %>; font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #1D447C;">
+      <%= eyebrow %>
+    </td>
+  </tr>
+</table>
+
+<h1 class="fsy-title" style="margin: 16px 0 0; font-family: <%= font %>; font-size: 25px; line-height: 31px; font-weight: 800; letter-spacing: -.01em; color: #1A2029;">
+  <%= title %>
+</h1>
+
+<p style="margin: 12px 0 0; font-size: 15px; line-height: 24px; color: #424852;">Hola, <strong style="color: #1A2029;"><%= name %></strong>:</p>
+<p style="margin: 8px 0 0; font-size: 15px; line-height: 24px; color: #424852;"><%= body %></p>
+
+<%# Botón «a prueba de clientes»: la tabla da el fondo aunque el cliente ignore el padding del enlace. %>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="fsy-button" style="margin-top: 26px;">
+  <tr>
+    <td align="center" bgcolor="#1D447C" style="background: #1D447C; background-image: linear-gradient(100deg, #1D447C, #3671B2); border-radius: 12px;">
+      <a href="<%= url %>" target="_blank"
+         style="display: inline-block; padding: 14px 28px; font-family: <%= font %>; font-size: 15px; line-height: 20px; font-weight: 700; color: #FFFFFF; text-decoration: none; border-radius: 12px;">
+        <%= button %> &rarr;
+      </a>
+    </td>
+  </tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 26px;">
+  <tr>
+    <td bgcolor="#F1F4F8" style="background: #F1F4F8; border: 1px solid #E7EAEE; border-radius: 12px; padding: 14px 16px; font-family: <%= font %>; font-size: 13px; line-height: 20px; color: #424852;">
+      <strong style="color: #1A2029;">&#9201;&nbsp; El enlace vale <%= valid_for %></strong> y solo sirve una vez.<br>
+      <%= note %>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 24px 0 0; padding-top: 18px; border-top: 1px solid #E7EAEE; font-size: 12px; line-height: 18px; color: #6F757E;">
+  ¿El botón no abre? Copia este enlace en el navegador:<br>
+  <a href="<%= url %>" style="color: #1D447C; word-break: break-all;"><%= url %></a>
+</p>
