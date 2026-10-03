@@ -23,11 +23,12 @@ class MobileTest < ApplicationSystemTestCase
     visit participant_path(@andrea)
 
     within "[data-profile-actions]" do
-      edit, qr, reset = [ find_link("Editar"), find("[data-profile-qr]"), find_button("Restablecer") ].map(&:rect)
-      assert_operator edit.y, :<, qr.y, "Editar goes first, full width"
-      assert_in_delta qr.y, reset.y, 1, "QR and reset share a row"
-      assert_in_delta qr.height, reset.height, 1, "and neither wraps to two lines"
+      qr, edit = [ find("[data-profile-qr]"), find_link("Editar") ].map(&:rect)
+      assert_in_delta qr.y, edit.y, 1, "QR and Editar share a row"
+      assert_in_delta qr.width, edit.width, 1, "evenly"
+      assert_no_button "Restablecer contraseña"
     end
+    assert_photo_over_the_banner
     # El correo vive en Contacto, no bajo el nombre.
     within("[data-profile-actions]") { assert_no_text "andrea.chavarria.martinez@gmail.com" }
     assert_no_selector "[data-account-status]"
@@ -42,9 +43,11 @@ class MobileTest < ApplicationSystemTestCase
     visit participant_path(@andrea)
 
     within "[data-profile-actions]" do
-      tops = [ find("[data-profile-qr]"), find_button("Restablecer contraseña"), find_link("Editar") ].map { |b| b.rect.y }
-      assert_equal 1, tops.map(&:round).uniq.size, "QR, reset and edit side by side"
+      tops = [ find("[data-profile-qr]"), find_link("Editar") ].map { |b| b.rect.y }
+      assert_equal 1, tops.map(&:round).uniq.size, "QR and edit side by side"
     end
+    within("[data-contact-email]") { assert_button "Restablecer contraseña" }
+    assert_photo_over_the_banner
   end
 
   test "creating an account offers the ficha's email or another one" do
@@ -84,6 +87,13 @@ class MobileTest < ApplicationSystemTestCase
   end
 
   private
+    # La foto sobresale de la tarjeta blanca hacia el banner, en vez de hundirse en ella.
+    def assert_photo_over_the_banner
+      photo = find("[data-profile-photo]").rect
+      card = find("[data-profile-photo]").find(:xpath, "ancestor::div[contains(@class, '-mt-[58px]')]").rect
+      assert_operator photo.y, :<, card.y - 10, "the photo rises above the card"
+    end
+
     def emulate_phone
       cdp("Emulation.setDeviceMetricsOverride", width: 412, height: 892, deviceScaleFactor: 2, mobile: true)
       cdp("Emulation.setTouchEmulationEnabled", enabled: true, maxTouchPoints: 1)

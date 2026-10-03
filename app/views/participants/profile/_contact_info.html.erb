@@ -2,11 +2,32 @@
   <%= section_heading "Contacto", "phone" %>
   <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6">
     <div><%= info_row "Número", "phone", participant.phone_number, href: tel_href(participant.phone_number) %></div>
-    <%# Quien administra cuentas ve aquí si la persona ya entró a la app (y con qué correo, si no es este). %>
+    <%# Quien administra cuentas ve aquí si la persona ya entró a la app (y con qué correo, si no es este), y
+        desde aquí la crea o le restablece la contraseña: todo lo de la cuenta junto al correo. %>
     <% account = participant.user if can_manage_accounts? %>
-    <div class="border-t border-line-soft pt-3 sm:border-t-0 sm:pt-0" data-contact-email><%= info_row "Correo", "mail", participant.email_address.presence || account&.email_address,
-          badge: ("Todavía no entra" if account && !account.signed_in_before?),
-          note: ("Entra a la app con #{account.email_address}" if account && participant.email_address.present? && account.email_address != participant.email_address.strip.downcase) %></div>
+    <div class="border-t border-line-soft pt-3 sm:border-t-0 sm:pt-0" data-contact-email data-controller="dialog">
+      <%= info_row "Correo", "mail", participant.email_address.presence || account&.email_address,
+            badge: ("Todavía no entra" if account && !account.signed_in_before?),
+            note: ("Entra a la app con #{account.email_address}" if account && participant.email_address.present? && account.email_address != participant.email_address.strip.downcase) %>
+      <% if can_create_account_for?(participant) %>
+        <button type="button" data-action="click->dialog#open" data-dialog-name="account" data-account-action="create"
+                class="<%= button_classes(:secondary, size: :sm, extra: "mt-2.5 ml-[46px] whitespace-nowrap") %>">
+          <%= icon "user-plus", class: "w-4 h-4" %>
+          Crear cuenta
+        </button>
+        <%= render "participants/profile/account_dialog", participant: participant %>
+      <% elsif can_reset_account_of?(participant) %>
+        <%= button_to participant_account_path(participant), method: :patch, form_class: "mt-2.5 ml-[46px]",
+              form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
+                              turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
+                              turbo_confirm_button: "Sí, restablecer" } },
+              data: { account_action: "reset" },
+              class: button_classes(:secondary, size: :sm, extra: "whitespace-nowrap") do %>
+          <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
+          Restablecer contraseña
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div class="mt-5 pt-4 border-t border-line-soft">

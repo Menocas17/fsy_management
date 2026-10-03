@@ -39,7 +39,8 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     get participant_path(@juan)
 
-    assert_select "[data-profile-actions] button[data-dialog-name='account']", text: /Crear cuenta/
+    assert_select "[data-contact-email] button[data-dialog-name='account']", text: /Crear cuenta/
+    assert_select "[data-profile-actions] button[data-dialog-name='account']", 0
     assert_select "dialog[data-dialog-name='account'] form[action='#{participant_account_path(@juan)}']" do
       assert_select "[data-email-choice='ficha']", text: /juan@correo.com/
       assert_select "input[name='email_choice'][value='ficha'][checked]"
@@ -129,7 +130,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
 
     get participant_path(@juan)
     assert_select "button[data-dialog-name='account']", 0
-    assert_select "form[action='#{participant_account_path(@juan)}'] button", text: /Restablecer contraseña/
+    assert_select "[data-contact-email] form[action='#{participant_account_path(@juan)}'] button", text: /Restablecer contraseña/
 
     assert_no_difference -> { User.count } do
       post participant_account_path(@juan), params: { email_address: "otro@fsy.com", email_address_confirmation: "otro@fsy.com" }
