@@ -115,7 +115,9 @@ pasa las pruebas. Necesita estos secrets en *Settings → Secrets and variables 
 | `RAILS_MASTER_KEY` | el contenido de `config/master.key` |
 | `POSTGRES_PASSWORD` | la misma que usaste en `kamal setup` |
 
-`kamal setup` se corre una sola vez a mano; después, cada merge a `main` despliega solo.
+`kamal setup` se corre una sola vez a mano; después, cada merge a `main` despliega solo, **siempre que
+exista la variable de repositorio `DEPLOY_ENABLED` = `true`** (Settings → Secrets and variables → Actions
+→ Variables). Sin ella el job de deploy se salta.
 
 ### Correo
 
