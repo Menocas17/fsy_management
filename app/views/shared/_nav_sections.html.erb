@@ -16,10 +16,13 @@
           <span class="hidden group-data-[open=false]/nav:inline text-[11px] font-semibold tracking-normal text-ink-500 tabular-nums"><%= section[:items].size %></span>
           <%= icon "chevron-down", class: "w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-data-[open=false]/nav:-rotate-90" %>
         </button>
-        <div id="<%= panel_id %>" class="flex flex-col gap-1 mt-0.5 group-data-[open=false]/nav:hidden">
-          <% section[:items].each do |item| %>
-            <%= render(ButtonComponent.new(**item)) %>
-          <% end %>
+        <%# Cerrado queda inert: invisible y además fuera del Tab y de los lectores de pantalla. %>
+        <div id="<%= panel_id %>" class="nav-group-panel" <%= "inert" unless open %>>
+          <div class="flex flex-col gap-1 pt-0.5">
+            <% section[:items].each do |item| %>
+              <%= render(ButtonComponent.new(**item)) %>
+            <% end %>
+          </div>
         </div>
       </div>
     <% else %>

@@ -12,6 +12,8 @@ export default class extends Controller {
     const open = group.dataset.open !== 'true';
     group.dataset.open = String(open);
     event.currentTarget.setAttribute('aria-expanded', String(open));
+    // Cerrado no se tabula ni se lee; la animación la hace el CSS (.nav-group-panel).
+    group.querySelector('.nav-group-panel').inert = !open;
 
     const closed = new Set(this.closed());
     open ? closed.delete(group.dataset.navGroup) : closed.add(group.dataset.navGroup);

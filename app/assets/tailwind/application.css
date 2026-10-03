@@ -486,3 +486,52 @@ turbo-frame[aria-busy='true'] {
     height: auto;
   }
 }
+
+/* Menú lateral: los grupos se despliegan en vez de aparecer de golpe. La fila de la grilla va de 0fr a 1fr
+   (anima hasta la altura justa sin medir nada) y el contenido se funde. El relleno con margen negativo deja
+   sitio a la barra de la opción activa y al anillo de foco, que el overflow recortaría. Con «reducir
+   movimiento» la regla de arriba deja solo el fundido. */
+.nav-group-panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 240ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 180ms ease-out;
+}
+.nav-group-panel > * {
+  min-height: 0;
+  overflow: hidden;
+  margin: -3px -4px;
+  padding: 3px 4px;
+}
+[data-open="false"] > .nav-group-panel {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+/* Barra de desplazamiento del menú: delgada, del color de la tinta suave, y solo mientras se desplaza
+   (scroll_reveal_controller pone data-scrolling y lo quita al detenerse). Sin desplazar es invisible pero
+   ocupa su lugar, así nada se mueve al aparecer. scrollbar-color para Chrome y Firefox; los pseudo
+   ::-webkit-scrollbar para Safari, que Chrome ignora cuando hay scrollbar-color. */
+.scroll-reveal {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 300ms ease-out;
+}
+.scroll-reveal[data-scrolling] {
+  scrollbar-color: color-mix(in oklch, var(--color-ink-300) 85%, transparent) transparent;
+}
+.scroll-reveal::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-reveal::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-reveal::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+.scroll-reveal[data-scrolling]::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--color-ink-300) 85%, transparent);
+}
