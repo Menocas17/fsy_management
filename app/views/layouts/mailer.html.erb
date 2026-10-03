@@ -1,13 +1,74 @@
+<%# Marco de todos los correos: la misma línea de las pantallas de acceso (banda azul noche con la marca,
+    tarjeta blanca, Onest). Los clientes de correo no entienden OKLCH ni clases, así que todo va en línea
+    y en hexadecimal (los tokens de application.css convertidos), con tablas para que Outlook no lo desarme.
+    La marca va como imagen adjunta en línea (ApplicationMailer#attach_mark): Gmail bloquea las data: URI. %>
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title><%= message.subject %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-      /* Email styles need to be inline */
+      body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+      a { color: #1D447C; }
+      @media (max-width: 600px) {
+        .fsy-pad { padding-left: 22px !important; padding-right: 22px !important; }
+        .fsy-title { font-size: 22px !important; }
+        .fsy-button a { display: block !important; }
+      }
     </style>
   </head>
+  <body style="margin: 0; padding: 0; background: #F1F4F8;">
+    <%# Lo que se lee junto al asunto en la bandeja de entrada; el relleno evita que se cuele el resto del texto. %>
+    <% if content_for?(:preheader) %>
+      <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+        <%= yield :preheader %><%= "&nbsp;&zwnj;".html_safe * 60 %>
+      </div>
+    <% end %>
 
-  <body>
-    <%= yield %>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F1F4F8" style="background: #F1F4F8;">
+      <tr>
+        <td align="center" style="padding: 28px 12px 36px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 560px; border-collapse: separate;">
+            <%# Banda de marca, como el lado izquierdo del inicio de sesión. %>
+            <tr>
+              <td bgcolor="#07254F" class="fsy-pad"
+                  style="background: #07254F; background-image: radial-gradient(120% 160% at 10% 0%, #1F4D87 0%, transparent 55%), linear-gradient(155deg, #07254F, #02193C); border-radius: 18px 18px 0 0; padding: 22px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="46" height="46" align="center" valign="middle" bgcolor="#FFFFFF" style="width: 46px; height: 46px; background: #FFFFFF; border-radius: 13px;">
+                      <img src="<%= attachments["fsy-mark.png"]&.url %>" width="30" height="30" alt="FSY" style="display: block; width: 30px; height: 30px; border: 0;">
+                    </td>
+                    <td style="padding-left: 13px; font-family: Onest, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                      <div style="font-size: 15px; line-height: 19px; font-weight: 800; color: #FFFFFF;">FSY Management</div>
+                      <div style="margin-top: 2px; font-size: 10.5px; line-height: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #B9C8DE;">
+                        <%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td bgcolor="#FFFFFF" class="fsy-pad"
+                  style="background: #FFFFFF; border: 1px solid #E7EAEE; border-top: 0; border-radius: 0 0 18px 18px; padding: 34px 32px 32px; font-family: Onest, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 24px; color: #424852;">
+                <%= yield %>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 22px 24px 0; font-family: Onest, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 18px; color: #6F757E;">
+                <%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %><br>
+                Es un correo automático: no hace falta responderlo.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

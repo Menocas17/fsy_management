@@ -1,8 +1,18 @@
-<p>Hola, <%= @user.participant&.first_name || @user.email_address %>:</p>
+<% name = @user.participant&.first_name || @user.email_address %>
+<% event = Rails.configuration.x.event_name %>
+<% valid_for = "#{User::INVITATION_VALID_FOR.in_days.to_i} días" %>
 <% if @reason == :new %>
-  <p>Te crearon una cuenta en la app de <strong><%= Rails.configuration.x.event_name %></strong> con este correo. Para entrar, elige tu contraseña:</p>
+  <% content_for :preheader, "Elige tu contraseña para entrar a la app de #{event}. El enlace vale #{valid_for}." %>
+  <%= render "passwords_mailer/link_email",
+        eyebrow: "Tu cuenta está lista", title: "Bienvenido a #{event}", name: name,
+        body: "Te crearon una cuenta en la app de #{event} con este correo (#{@user.email_address}). Para entrar, solo falta que elijas tu contraseña.",
+        button: "Elegir mi contraseña", url: @url, valid_for: valid_for,
+        note: "Nadie más conoce tu contraseña: ni la coordinación. Si no esperabas este correo, avísale a tu coordinación." %>
 <% else %>
-  <p>Se restableció la contraseña de tu cuenta en la app de <strong><%= Rails.configuration.x.event_name %></strong>. La anterior ya no sirve. Elige una nueva:</p>
+  <% content_for :preheader, "Se restableció tu contraseña de #{event}. Elige una nueva; el enlace vale #{valid_for}." %>
+  <%= render "passwords_mailer/link_email",
+        eyebrow: "Contraseña restablecida", title: "Elige una contraseña nueva", name: name,
+        body: "Tu coordinación restableció la contraseña de tu cuenta en la app de #{event}. La anterior ya no sirve y se cerraron tus sesiones abiertas.",
+        button: "Elegir contraseña nueva", url: @url, valid_for: valid_for,
+        note: "Si no pediste este cambio, avísale a tu coordinación." %>
 <% end %>
-<p><%= link_to "Elegir mi contraseña", @url %></p>
-<p>El enlace vale <%= User::INVITATION_VALID_FOR.in_days.to_i %> días y solo se puede usar una vez. Si no esperabas este correo, avísale a tu coordinación.</p>
