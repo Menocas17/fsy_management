@@ -1,7 +1,6 @@
 class NotificationsController < ApplicationController
   def index
-    scope = Alert.visible_to(Current.user&.participant)
-    @pagy, @alerts = pagy(scope.includes(images_attachments: :blob).recent)
+    @pagy, @alerts = pagy(Alert.inbox_for(Current.user).includes(images_attachments: :blob).recent)
     Current.user&.update_column(:alerts_read_at, Time.current)
   end
 
@@ -9,4 +8,43 @@ class NotificationsController < ApplicationController
   def count
     render json: { unread: Current.user&.unread_alerts_count.to_i }
   end
+
+  # Quita una alerta de la campanita de quien la borra; los demás la siguen viendo.
+  def destroy
+    alert = Alert.visible_to(Current.user.participant).find(params[:id])
+    Current.user.alert_dismissals.find_or_create_by!(alert: alert)
+
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: inbox_streams(removed: alert) }
+      format.html { redirect_back_or_to notifications_path, status: :see_other }
+    end
+  end
+
+  # Limpiar todo: lo que llegó hasta ahora se va; lo que llegue después aparece como siempre.
+  def clear
+    Current.user.update_column(:alerts_cleared_at, Time.current)
+    Current.user.alert_dismissals.delete_all # ya no hacen falta: todo lo anterior quedó fuera
+
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: inbox_streams }
+      format.html { redirect_back_or_to notifications_path, status: :see_other, notice: "Notificaciones limpias." }
+    end
+  end
+
+  private
+    # La misma alerta puede estar a la vez en la página y en el menú de la campanita: se actualizan los dos
+    # en su lugar, sin reemplazar la campanita (cerraría el menú que la persona tiene abierto).
+    def inbox_streams(removed: nil)
+      remaining = Alert.inbox_for(Current.user).count
+      unread = Current.user.unread_alerts_count
+
+      streams = [ turbo_stream.update_all("[data-unread-count]", unread.positive? ? unread.to_s : "") ]
+      streams << turbo_stream.remove_all("[data-alert-item='#{removed.id}']") if removed
+      streams << turbo_stream.update_all("[data-alerts-total]", helpers.alerts_total_label(remaining))
+      if remaining.zero?
+        streams << turbo_stream.update_all("[data-alerts-list]", partial: "notifications/empty_state")
+        streams << turbo_stream.remove_all("[data-alerts-when-any]")
+      end
+      streams
+    end
 end

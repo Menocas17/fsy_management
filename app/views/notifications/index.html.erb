@@ -2,11 +2,19 @@
 <% content_for :eyebrow, "Actividad" %>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <p class="text-[13px] font-medium text-ink-500">
-      <%= @alerts.any? ? pluralize(@pagy.count, "alerta", plural: "alertas") : "Sin alertas por ahora" %>
-    </p>
-    <% if can_manage_alerts? %>
-      <div class="flex flex-wrap gap-2">
+    <p class="text-[13px] font-medium text-ink-500" data-alerts-total><%= alerts_total_label(@pagy.count) %></p>
+    <div class="flex flex-wrap gap-2">
+      <% if @alerts.any? %>
+        <%= button_to clear_notifications_path, method: :delete,
+              form: { data: { alerts_when_any: true, turbo_confirm: "¿Limpiar todas tus notificaciones?",
+                              turbo_confirm_detail: "Se quitan de tu lista; las alertas nuevas seguirán llegando.",
+                              turbo_confirm_button: "Sí, limpiar" } },
+              class: button_classes(:secondary), data: { alerts_clear: true } do %>
+          <%= icon "check-check", class: "w-4 h-4" %>
+          Limpiar todo
+        <% end %>
+      <% end %>
+      <% if can_manage_alerts? %>
         <%= link_to alerts_path, class: button_classes(:secondary) do %>
           <%= icon "megaphone", class: "w-4 h-4" %>
           Alertas enviadas
@@ -15,17 +23,17 @@
           <%= icon "plus", class: "w-4 h-4" %>
           Nueva alerta
         <% end %>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div class="<%= card_classes("overflow-hidden") %>">
     <% if @alerts.any? %>
-      <div class="divide-y divide-line-soft">
-        <%= render partial: "alerts/alert", collection: @alerts, as: :alert, locals: { unread: false } %>
+      <div class="divide-y divide-line-soft" data-alerts-list>
+        <%= render partial: "alerts/alert", collection: @alerts, as: :alert, locals: { dismissible: true } %>
       </div>
       <% if @pagy.last > 1 %>
-        <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-line-soft">
+        <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-line-soft" data-alerts-when-any>
           <p class="text-[12.5px] font-medium text-ink-500">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
           <%== @pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %>
         </div>

@@ -93,8 +93,9 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :notifications, only: [ :index ], path: "notificaciones" do
+  resources :notifications, only: [ :index, :destroy ], path: "notificaciones" do
     collection do
+      delete "limpiar" => "notifications#clear", as: :clear
       # La campanita pregunta por su número cuando vuelve de la caché de Turbo, donde viene congelado.
       get "campanita" => "notifications#count", as: :count
       post "suscripcion" => "push_subscriptions#create", as: :push_subscription

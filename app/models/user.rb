@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :push_subscriptions, dependent: :destroy
+  has_many :alert_dismissals, dependent: :delete_all
   belongs_to :participant, optional: true
 
   # Cuánto vale el enlace con el que alguien elige su contraseña: al crearle la cuenta o al restablecerla.
@@ -144,7 +145,7 @@ class User < ApplicationRecord
   end
 
   def unread_alerts_count
-    Alert.visible_to(participant).unread_for(self).count
+    Alert.inbox_for(self).unread_for(self).count
   end
 
   def full_name
