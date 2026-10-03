@@ -32,7 +32,7 @@ class MobileTest < ApplicationSystemTestCase
     # El correo vive en Contacto, no bajo el nombre.
     within("[data-profile-actions]") { assert_no_text "andrea.chavarria.martinez@gmail.com" }
     assert_no_selector "[data-account-status]"
-    within("[data-contact-email]") { assert_text "Todavía no entra" }
+    within("[data-contact-account]") { assert_text "Todavía no entra" }
 
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
   end
@@ -46,7 +46,12 @@ class MobileTest < ApplicationSystemTestCase
       tops = [ find("[data-profile-qr]"), find_link("Editar") ].map { |b| b.rect.y }
       assert_equal 1, tops.map(&:round).uniq.size, "QR and edit side by side"
     end
-    within("[data-contact-email]") { assert_button "Restablecer contraseña" }
+    within("[data-contact-account]") do
+      reset = find_button("Restablecer contraseña").rect
+      strip = find(:xpath, ".").rect
+      assert_operator reset.x + reset.width, :<=, strip.x + strip.width, "the button stays inside the card"
+    end
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-escritorio.png")) if ENV["SCREENSHOTS"]
     assert_photo_over_the_banner
   end
 

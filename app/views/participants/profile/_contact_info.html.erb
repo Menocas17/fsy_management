@@ -2,33 +2,53 @@
   <%= section_heading "Contacto", "phone" %>
   <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6">
     <div><%= info_row "Número", "phone", participant.phone_number, href: tel_href(participant.phone_number) %></div>
-    <%# Quien administra cuentas ve aquí si la persona ya entró a la app (y con qué correo, si no es este), y
-        desde aquí la crea o le restablece la contraseña: todo lo de la cuenta junto al correo. %>
     <% account = participant.user if can_manage_accounts? %>
-    <div class="border-t border-line-soft pt-3 sm:border-t-0 sm:pt-0" data-contact-email data-controller="dialog">
-      <%= info_row "Correo", "mail", participant.email_address.presence || account&.email_address,
-            badge: ("Todavía no entra" if account && !account.signed_in_before?),
-            note: ("Entra a la app con #{account.email_address}" if account && participant.email_address.present? && account.email_address != participant.email_address.strip.downcase) %>
+    <div class="border-t border-line-soft pt-3 sm:border-t-0 sm:pt-0" data-contact-email><%= info_row "Correo", "mail", participant.email_address.presence || account&.email_address %></div>
+  </div>
+
+  <%# Quien administra cuentas ve aquí si la persona ya entró a la app (y con qué correo, si no es el de la
+      ficha), y desde aquí la crea o le restablece la contraseña. Franja a todo lo ancho: el botón nunca se sale
+      de la tarjeta ni estira la columna del correo; si no cabe al lado del estado, baja a su propia fila. %>
+  <% if can_manage_accounts? %>
+    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 p-3.5 rounded-control bg-canvas dark:bg-slate-800/60" data-contact-account data-controller="dialog">
+      <div class="flex items-start gap-3 min-w-0 flex-1 basis-56">
+        <span class="w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100">
+          <%= icon "key-round", class: "w-4 h-4" %>
+        </span>
+        <div class="min-w-0">
+          <p class="text-[11.5px] font-semibold text-ink-500">Cuenta de la app</p>
+          <% if account.nil? %>
+            <p class="mt-px text-[13.5px] font-semibold text-ink-700">Sin cuenta</p>
+          <% elsif account.signed_in_before? %>
+            <p class="mt-px text-[13.5px] font-semibold text-ink-900">Ya entró a la app</p>
+          <% else %>
+            <span class="inline-block mt-1 px-2 py-px rounded-full bg-cat-amber/15 text-[11.5px] font-bold text-cat-amber-ink whitespace-nowrap" data-account-badge>Todavía no entra</span>
+          <% end %>
+          <% if account && participant.email_address.present? && account.email_address != participant.email_address.strip.downcase %>
+            <p class="mt-1 text-[12px] font-medium text-ink-500 [overflow-wrap:anywhere]">Entra con <%= account.email_address %></p>
+          <% end %>
+        </div>
+      </div>
       <% if can_create_account_for?(participant) %>
         <button type="button" data-action="click->dialog#open" data-dialog-name="account" data-account-action="create"
-                class="<%= button_classes(:secondary, size: :sm, extra: "mt-2.5 ml-[46px] whitespace-nowrap") %>">
+                class="<%= button_classes(:secondary, size: :sm, extra: "w-full sm:w-auto whitespace-nowrap") %>">
           <%= icon "user-plus", class: "w-4 h-4" %>
           Crear cuenta
         </button>
         <%= render "participants/profile/account_dialog", participant: participant %>
       <% elsif can_reset_account_of?(participant) %>
-        <%= button_to participant_account_path(participant), method: :patch, form_class: "mt-2.5 ml-[46px]",
+        <%= button_to participant_account_path(participant), method: :patch, form_class: "w-full sm:w-auto",
               form: { data: { turbo_confirm: "¿Restablecer la contraseña de #{participant.full_name}?",
                               turbo_confirm_detail: "La actual deja de servir, se cierran sus sesiones y le llega a #{participant.user.email_address} un enlace para elegir otra.",
                               turbo_confirm_button: "Sí, restablecer" } },
               data: { account_action: "reset" },
-              class: button_classes(:secondary, size: :sm, extra: "whitespace-nowrap") do %>
+              class: button_classes(:secondary, size: :sm, extra: "w-full sm:w-auto whitespace-nowrap") do %>
           <%= icon "rotate-ccw-key", class: "w-4 h-4" %>
           Restablecer contraseña
         <% end %>
       <% end %>
     </div>
-  </div>
+  <% end %>
 
   <div class="mt-5 pt-4 border-t border-line-soft">
     <h3 class="mb-3 text-[11px] font-bold tracking-[.07em] uppercase text-cat-amber-ink">Contacto de emergencia</h3>
