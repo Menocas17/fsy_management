@@ -1,9 +1,13 @@
 class PasswordsController < ApplicationController
   layout "auth"
   allow_unauthenticated_access
+  before_action :require_password_reset_emails, only: %i[ new create ]
   before_action :set_user_by_token, only: %i[ edit update ]
-   before_action :redirect_if_authenticated, only: %i[ new create edit]
-  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_password_path, alert: "Intenta de nuevo mas tarde" }
+  # El enlace del correo se puede abrir con la sesión abierta: es quien pidió cambiarla, no hay a dónde mandarlo.
+  before_action :redirect_if_authenticated, only: %i[ new create ]
+  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_password_path, alert: "Intenta de nuevo más tarde" }
+  rate_limit to: 10, within: 3.minutes, only: :update, name: "update",
+             with: -> { redirect_to new_session_path, alert: "Intenta de nuevo más tarde" }
 
   def new
   end
@@ -19,23 +23,33 @@ class PasswordsController < ApplicationController
   def edit
   end
 
+  # Si falla, se queda en el formulario con los motivos (antes redirigía y todo error decía «no coinciden»).
   def update
-    if @user.update(params.permit(:password, :password_confirmation))
+    if params[:password].blank?
+      @user.errors.add(:password, :blank)
+    elsif @user.update(params.permit(:password, :password_confirmation).merge(must_change_password: false))
       @user.sessions.destroy_all
-      redirect_to new_session_path, notice: "La contraseña ha sido restablecida."
-    else
-      redirect_to edit_password_path(params[:token]), alert: "Las contraseñas no coinciden."
+      return redirect_to new_session_path, notice: "La contraseña ha sido restablecida."
     end
+
+    render :edit, status: :unprocessable_entity
   end
 
   private
     def set_user_by_token
       @user = User.find_by_password_reset_token!(params[:token])
     rescue ActiveSupport::MessageVerifier::InvalidSignature
-      redirect_to new_password_path, alert: "El enlace para restablecer la contraseña no es válido o ha caducado."
+      redirect_to password_reset_emails? ? new_password_path : new_session_path,
+                  alert: "El enlace para restablecer la contraseña no es válido o ha caducado."
     end
 
-  def redirect_if_authenticated
-    redirect_to dashboard_path if authenticated?
-  end
+    def require_password_reset_emails
+      return if password_reset_emails?
+
+      redirect_to new_session_path, alert: "Por ahora la contraseña no se recupera por correo: pídele a tu coordinación que la restablezca."
+    end
+
+    def redirect_if_authenticated
+      redirect_to dashboard_path if authenticated?
+    end
 end

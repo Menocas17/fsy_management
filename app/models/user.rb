@@ -4,19 +4,45 @@ class User < ApplicationRecord
   has_many :push_subscriptions, dependent: :destroy
   belongs_to :participant, optional: true
 
+  # La contraseña con la que nace una cuenta creada desde una ficha (o restablecida). Es conocida a propósito:
+  # quien entra con ella no puede hacer nada más que cambiarla (must_change_password).
+  DEFAULT_PASSWORD = ENV.fetch("DEFAULT_ACCOUNT_PASSWORD", "FsyManagua2026!").freeze
+
   validates :password, length: { minimum: 8 }, allow_nil: true
   validate :password_complexity
+  validates :email_address, presence: true, uniqueness: true,
+                            format: { with: URI::MailTo::EMAIL_REGEXP, allow_blank: true }
+  validates :participant_id, uniqueness: true, allow_nil: true
+  validates :email_address, confirmation: { case_sensitive: false }
+  validate :password_not_default, unless: :must_change_password?
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
-  # La cuenta del sistema, sin ficha de participante: la única que abre o cierra los registros a mano.
-  def superadmin?
-    participant_id.nil?
+  # superadmin? (la columna) marca la cuenta del sistema: la única que abre o cierra los registros a mano.
+  # Antes era «la cuenta sin participante», y borrar una ficha volvía superadmin a su cuenta.
+
+  # Una cuenta sirve si es la del sistema o si sigue atada a una ficha; una que perdió su ficha no entra.
+  def linked?
+    superadmin? || participant_id.present?
+  end
+
+  # Crea la cuenta de una ficha con la contraseña predeterminada; quien la crea escribe el correo dos veces.
+  def self.create_for_participant(participant, email:, email_confirmation:)
+    create(participant: participant, email_address: email, email_address_confirmation: email_confirmation.to_s.strip,
+           password: DEFAULT_PASSWORD, must_change_password: true)
+  end
+
+  # Sin correo para recuperarla, la coordinación la devuelve a la predeterminada y cierra sus sesiones.
+  def reset_to_default_password!
+    transaction do
+      update!(password: DEFAULT_PASSWORD, must_change_password: true)
+      sessions.destroy_all
+    end
   end
 
   # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
   def full_access?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.coordinador? || participant&.director? || false
   end
 
@@ -29,13 +55,20 @@ class User < ApplicationRecord
   # Who may send alerts and edit the agenda: the director couple, the coordinators, the logistics director
   # and the superadmin.
   def alert_manager?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.director? || participant&.coordinador? || participant&.director_logistica?
+  end
+
+  # Quién crea cuentas y las restablece: el matrimonio director, los coordinadores, el director de logística
+  # (que lleva el registro y da de alta a quien llega, sea del comité o no) y el superadmin.
+  def account_manager?
+    return true if superadmin?
+    participant&.director? || participant&.coordinador? || participant&.director_logistica? || false
   end
 
   # The agenda is edited by the director couple, the coordinators and the superadmin.
   def agenda_manager?
-    return true if participant_id.nil?
+    return true if superadmin?
     participant&.director? || participant&.coordinador?
   end
 
@@ -94,6 +127,11 @@ class User < ApplicationRecord
   end
 
   private
+  # Al cambiarla (fuera de crear o restablecer), la nueva no puede ser la predeterminada que todos conocen.
+  def password_not_default
+    errors.add(:password, "no puede ser la contraseña predeterminada.") if password.present? && password == DEFAULT_PASSWORD
+  end
+
   def password_complexity
     return if password.blank?
 

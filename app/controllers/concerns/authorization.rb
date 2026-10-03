@@ -9,7 +9,8 @@ module Authorization
                   :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
                   :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?,
-                  :can_view_finances?, :can_operate_finances?, :can_configure_finances?
+                  :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
+                  :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -110,6 +111,23 @@ module Authorization
     full_company_access?
   end
 
+  # Cuentas ---------------------------------------------------------------------
+  # El matrimonio director, los coordinadores, el director de logística y el superadmin crean la cuenta de
+  # cualquier ficha y la devuelven a la contraseña predeterminada. Quien lo hace conoce esa contraseña, así que
+  # nadie lo hace sobre una cuenta con más poder que la suya: la del director o un coordinador solo la toca
+  # el acceso total. La propia no se restablece: para eso está «Cambiar contraseña».
+  def can_manage_accounts?
+    Current.user&.account_manager? || false
+  end
+
+  def can_create_account_for?(participant)
+    participant.present? && participant.user.nil? && can_handle_account_of?(participant)
+  end
+
+  def can_reset_account_of?(participant)
+    participant&.user.present? && participant.user != Current.user && can_handle_account_of?(participant)
+  end
+
   # Registro de llegadas ---------------------------------------------------------
   # Consultar una ficha escaneando la puede hacer cualquiera del staff; registrar la llegada, solo
   # el acceso total, el director de logística y el comité de logística marcado para el registro.
@@ -129,6 +147,13 @@ module Authorization
   def can_configure_finances?
     Current.user&.finance_configurator? || false
   end
+
+  def can_handle_account_of?(participant)
+    return false unless can_manage_accounts?
+
+    full_company_access? || !(participant.director? || participant.coordinador?)
+  end
+  private :can_handle_account_of?
 
   # Inventario ------------------------------------------------------------------
   # Cualquier miembro de logística ve y ajusta existencias; crear o borrar un inventario entero

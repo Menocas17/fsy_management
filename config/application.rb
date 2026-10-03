@@ -28,5 +28,9 @@ module FsyManagement
     end
 
     config.i18n.default_locale = :es
+
+    # «¿Olvidaste tu contraseña?» por correo. Apagado mientras no haya SMTP en production.rb: sin él, el
+    # correo nunca salía y la pantalla igual decía que sí. Mientras, cada quien cambia la suya en Configuración.
+    config.x.password_reset_emails = false
   end
 end

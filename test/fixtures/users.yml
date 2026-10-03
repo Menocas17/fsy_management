@@ -1,4 +1,5 @@
 one:
   email_address: 'admin@fsy.com'
+  superadmin: true
   # Este es el hash bcrypt para la contraseña literal "password"
   password_digest: <%= BCrypt::Password.create("password") %>

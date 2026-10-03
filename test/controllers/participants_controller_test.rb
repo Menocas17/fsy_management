@@ -124,15 +124,17 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form#participant-form input[name^='assignment']", 0
   end
 
-  test "edit offers delete to admins, and password reset only when coming from Mi perfil" do
+  test "edit offers delete to admins, and the password change only on one's own ficha" do
     juan = participants(:juan)
 
-    get edit_participant_path(juan)
-    assert_select "button", text: /Borrar participante/
-    assert_select "form[action='#{send_password_reset_participant_path(juan)}']", count: 0
-
     get edit_participant_path(juan, from: "myprofile")
-    assert_select "form[action='#{send_password_reset_participant_path(juan)}']"
+    assert_select "button", text: /Borrar participante/
+    assert_select "a[href='#{edit_password_change_path}']", count: 0, message: "someone else's ficha, even with from=myprofile"
+
+    maria = participants(:maria)
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: maria))
+    get edit_participant_path(maria, from: "myprofile")
+    assert_select "a[href='#{edit_password_change_path}']"
   end
 
   test "cancel and back links ignore unsafe return_to values" do

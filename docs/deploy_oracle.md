@@ -88,15 +88,15 @@ usuarios.
 
 ### Crear el superadmin
 
-La cuenta del sistema es un `User` sin participante (acceso total, y la única que abre o cierra
-el escaneo en Configuración):
+La cuenta del sistema es un `User` con `superadmin: true` y sin participante (acceso total, y la
+única que abre o cierra el escaneo en Configuración):
 
 ```bash
 bin/kamal console
 ```
 
 ```ruby
-User.create!(email_address: "tu-correo@dominio.com", password: "Una-Clave-Larga-2026")
+User.create!(email_address: "tu-correo@dominio.com", password: "Una-Clave-Larga-2026", superadmin: true)
 ```
 
 La contraseña necesita 8 caracteres o más, un número, una mayúscula y un signo.
