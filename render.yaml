@@ -40,7 +40,12 @@ services:
       - key: R2_PUBLIC_URL
         sync: false
 
-      # Brevo (config/smtp_mail.rb).
+      # Correo por el Apps Script de Gmail (config/apps_script_mail.rb, docs/apps_script/mail_relay.gs).
+      - key: MAIL_RELAY_URL
+        sync: false
+      - key: MAIL_RELAY_SECRET
+        sync: false
+      # O por SMTP (config/smtp_mail.rb), si no está el Apps Script. MAILER_FROM es opcional con el Apps Script.
       - key: SMTP_USERNAME
         sync: false
       - key: SMTP_PASSWORD

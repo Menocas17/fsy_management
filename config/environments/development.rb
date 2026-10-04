@@ -45,16 +45,13 @@ Rails.application.configure do
   config.action_mailer.default_url_options =
     ENV["APP_HOST"].present? ? { host: ENV["APP_HOST"], protocol: "https" } : { host: "localhost", port: 3000 }
 
-  # En desarrollo los correos solo se ven en el log. Con SMTP_EN_DESARROLLO=1 salen de verdad por Brevo,
-  # para probar con el túnel (bin/rails correo:prueba[tu@correo.com] confirma que la cuenta funciona).
+  # En desarrollo los correos solo se ven en el log. Con CORREO_EN_DESARROLLO=1 salen de verdad, por el Apps
+  # Script o el SMTP (config/mail_delivery.rb), para probar con el túnel; bin/rails correo:prueba[tu@correo.com]
+  # confirma que la cuenta funciona.
   config.action_mailer.delivery_method = :test
-  if ENV["SMTP_EN_DESARROLLO"] == "1"
-    require Rails.root.join("config/smtp_mail")
-    config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = SmtpMail.settings
-    config.action_mailer.raise_delivery_errors = true
-    config.x.mailer_from = SmtpMail.from
-    config.x.password_reset_emails = SmtpMail.configured?
+  if ENV["CORREO_EN_DESARROLLO"] == "1"
+    require Rails.root.join("config/mail_delivery")
+    MailDelivery.apply(config)
   end
 
   # Print deprecation notices to the Rails logger.
