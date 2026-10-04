@@ -15,18 +15,30 @@ class AlertBroadcastTest < ActiveSupport::TestCase
     end
   end
 
-  test "an alert by role only refreshes the bells of those roles" do
+  test "an alert by role only refreshes the bells of those roles, plus the superadmin's, which shows them all" do
     alert = Alert.new(title: "Solo consejeros", body: "Texto", sender_name: "Coordinación",
                       audience: :por_roles, target_roles: [ "consejero" ])
 
-    assert_equal [ @counselor ], alert.push_recipients.to_a
+    assert_equal [ @admin, @counselor ].sort_by(&:id), alert.push_recipients.sort_by(&:id)
   end
 
-  test "an individual alert reaches only that person" do
+  test "an individual alert rings only that person, though the superadmin's open bell refreshes too" do
     alert = Alert.new(title: "Tu asignación", body: "Texto", sender_name: "Coordinación",
                       audience: :individual, recipient: participants(:maria))
 
     assert_equal [ @counselor ], alert.push_recipients.to_a
+    assert_equal [ @admin, @counselor ].sort_by(&:id), alert.bell_recipients.sort_by(&:id)
+  end
+
+  test "an agenda alert for some roles still refreshes the superadmin's bell, where it counts as unread" do
+    activity = Activity.create!(title: "Taller", category: :clase, date: Activity.event_days.first.to_s,
+                                start_time: "10:00", end_time: "11:00", audience: :por_roles, target_roles: [ "joven" ])
+
+    alert = Alert.announce(activity, action: :created, user: nil)
+
+    assert_includes alert.push_recipients, @admin
+    assert_includes alert.bell_recipients, @admin
+    assert_equal 1, @admin.unread_alerts_count
   end
 
   test "the bell carries its unread count, which is what makes it chime" do

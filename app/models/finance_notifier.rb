@@ -1,5 +1,5 @@
 # Los avisos de Finanzas (fase 3 de docs/finanzas.md): llegan a la campanita y como push, y abren el gasto.
-#   - A quien le toca el paso siguiente: un gasto presentado o una justificación esperan aprobación.
+#   - A quien aprueba: un gasto presentado o una justificación esperan su firma.
 #   - A quien lo presentó o justificó: su gasto o su justificación fueron aprobados o rechazados.
 #   - Al área de Finanzas y al director de logística: una categoría o el presupuesto general pasan del
 #     80 % o del 100 %. Cada umbral se avisa una vez (y otra vez si se baja y se vuelve a pasar).
@@ -14,8 +14,13 @@ module FinanceNotifier
                .or(Participant.where(rol: :logistica, logistics_area_id: LogisticsArea.where(finance: true).select(:id)))
   end
 
+  # Quienes los aprueban: el matrimonio director y el director de logística (el superadmin los ve en su campanita).
+  def approvers
+    Participant.where(rol: %i[director director_logistica])
+  end
+
   def presented(expense)
-    notify(operators.where.not(id: expense.presented_by_id), expense,
+    notify(approvers.where.not(id: expense.presented_by_id), expense,
            "Gasto por aprobar: #{expense.concept}",
            "#{expense.presented_by_name} lo presentó por #{Money.format(expense.estimated_cents, expense.currency)}. Lo aprueba otra persona.")
   end
@@ -32,7 +37,7 @@ module FinanceNotifier
   end
 
   def justified(expense)
-    notify(operators.where.not(id: expense.justified_by_id), expense, "Justificación por aprobar: #{expense.concept}",
+    notify(approvers.where.not(id: expense.justified_by_id), expense, "Justificación por aprobar: #{expense.concept}",
            "#{expense.justified_by_name} lo justificó sin factura: «#{expense.justification.to_s.truncate(90)}»")
   end
 

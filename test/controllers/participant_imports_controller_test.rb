@@ -85,7 +85,7 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#flash-messages", /No se pudo leer el archivo/
   end
 
-  test "only full access and registradores may import" do
+  test "only full access and the Registro area may import" do
     sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
 
     get new_participant_import_path

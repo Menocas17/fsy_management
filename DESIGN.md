@@ -128,7 +128,7 @@ components:
 
 **Creative North Star: "Casa abierta"**
 
-FSY Management es la casa donde trabaja el comité de un evento de jóvenes: coordinadores, consejeros, registradores y logística entran a la misma puerta, muchos desde el teléfono, de pie y a pleno sol durante la semana. La casa tiene que sentirse acogedora y ordenada a la vez: el azul marino es la institución que sostiene todo, el sol es lo que está pasando ahora, y los colores de categoría ayudan a reconocer cosas (una estaca, un área, un tipo de actividad) sin convertir cada pantalla en un tablero de luces.
+FSY Management es la casa donde trabaja el comité de un evento de jóvenes: coordinadores, consejeros y logística entran a la misma puerta, muchos desde el teléfono, de pie y a pleno sol durante la semana. La casa tiene que sentirse acogedora y ordenada a la vez: el azul marino es la institución que sostiene todo, el sol es lo que está pasando ahora, y los colores de categoría ayudan a reconocer cosas (una estaca, un área, un tipo de actividad) sin convertir cada pantalla en un tablero de luces.
 
 La calidez vive en los detalles, no en el ruido: frases completas y amables en español, estados vacíos que dicen qué hacer, banners con la cuenta regresiva y la escritura, avatares cuadrados como fotos de credencial. La densidad es la de una herramienta de trabajo diario: tarjetas con aire, letra pequeña pero nunca diminuta, y un solo botón principal por pantalla.
 

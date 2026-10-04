@@ -19,6 +19,8 @@ class Expense < ApplicationRecord
   PAYMENT_LABELS = { "efectivo" => "Efectivo", "transferencia" => "Transferencia", "tarjeta" => "Tarjeta" }.freeze
   RECEIPT_TYPES = %w[image/jpeg image/png image/heic image/heif image/webp application/pdf].freeze
   RECEIPT_MAX = 15.megabytes
+  # Quien firma un paso cuando lo da el superadmin, que no tiene ficha (el mismo nombre que usa el Historial).
+  SYSTEM_SIGNER = Data.define(:id, :full_name).new(id: nil, full_name: "Administrador del sistema")
 
   validates :concept, presence: true, length: { maximum: 120 }
   validates :presented_by_name, presence: true
@@ -77,7 +79,7 @@ class Expense < ApplicationRecord
   end
 
   # Pasos ------------------------------------------------------------------
-  # Cada uno devuelve true o deja el motivo en errors. «by» es el Participant que actúa.
+  # Cada uno devuelve true o deja el motivo en errors. «by» es el Participant que actúa (o SYSTEM_SIGNER).
 
   def approve(by)
     step(by, from: :presented, not_by: presented_by_id, rule: "Quien presenta un gasto no puede aprobarlo.") do

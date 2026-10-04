@@ -8,7 +8,7 @@ class LogisticsArea < ApplicationRecord
 
   FLAGS = {
     checkin: [ "Registro", "Escanea llegadas y capacitaciones, y anula registros." ],
-    finance: [ "Finanzas", "Presenta y aprueba gastos." ],
+    finance: [ "Finanzas", "Presenta gastos y los consolida con su factura; no los aprueba (eso es de la dirección)." ],
     food: [ "Alimentación", "Acceso al módulo de alimentación (próximamente)." ],
     nursing: [ "Enfermería", "Ingresa y da de alta jóvenes en enfermería y escribe su ficha clínica." ]
   }.freeze

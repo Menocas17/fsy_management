@@ -117,26 +117,42 @@ class Alert < ApplicationRecord
     target_roles.map { |role| Participant.role_label(role) }.to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
 
-  # A quién le suena el teléfono: el mismo alcance de la campanita, entre quienes tienen cuenta.
+  # A quién le suena el teléfono: el mismo alcance de la campanita, entre quienes tienen cuenta. Las alertas por
+  # roles (la agenda, la asistencia nocturna) también le suenan a la cuenta sin ficha (el superadmin), que las ve
+  # todas en su campanita; las de una o pocas personas, no: son de esas personas.
   def push_recipients
     return User.all if audience_todos?
-    return User.where(participant_id: recipient_id) if audience_individual?
-    return User.where(participant_id: recipient_ids) if audience_personas?
+    return everyone_addressed_and_the_superadmin if audience_por_roles?
 
-    User.joins(:participant).where(participants: { rol: target_roles })
+    addressed_users
+  end
+
+  # A quién se le refresca la campanita abierta: a todo el que la ve en la suya, y el superadmin las ve todas.
+  def bell_recipients
+    audience_todos? ? User.all : everyone_addressed_and_the_superadmin
   end
 
   # Only people with an account can be emailed.
   def email_recipients
     return User.none unless send_email? && priority_critica?
     return User.where.not(participant_id: nil) if audience_todos?
-    return User.where(participant_id: recipient_id) if audience_individual?
-    return User.where(participant_id: recipient_ids) if audience_personas?
 
-    User.joins(:participant).where(participants: { rol: target_roles })
+    addressed_users
   end
 
   private
+    # Las cuentas de las personas a quienes va dirigida (no aplica a las globales).
+    def addressed_users
+      return User.where(participant_id: recipient_id) if audience_individual?
+      return User.where(participant_id: recipient_ids) if audience_personas?
+
+      User.joins(:participant).where(participants: { rol: target_roles })
+    end
+
+    def everyone_addressed_and_the_superadmin
+      User.where(id: addressed_users.select(:id)).or(User.where(participant_id: nil))
+    end
+
     def roles_listed_for_role_alerts
       errors.add(:target_roles, "elige al menos un rol") if audience_por_roles? && target_roles.blank?
     end
@@ -160,7 +176,7 @@ class Alert < ApplicationRecord
 
     # Un envío por persona, porque cada campanita muestra lo que esa persona puede ver.
     def refresh_open_bells
-      push_recipients.find_each do |user|
+      bell_recipients.find_each do |user|
         broadcast_replace_later_to user, target: "notifications_bell",
                                          partial: "shared/notifications_bell", locals: { user: user }
       end

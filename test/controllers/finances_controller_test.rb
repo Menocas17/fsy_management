@@ -23,7 +23,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 150_000, expense.estimated_cents
 
     get expense_path(expense)
-    assert_select "[data-next-step='approve']", text: /lo tiene que aprobar otra persona/
+    assert_select "[data-next-step='approve']", text: /lo aprueban el matrimonio director o el director de logística/
     assert_select "form[action='#{approve_expense_path(expense)}']", 0, "the presenter gets no approve button"
 
     patch approve_expense_path(expense)
@@ -48,7 +48,57 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-timeline] li", 3
   end
 
-  test "the superadmin only looks: no budget, no categories, no expenses" do
+  test "the finance area presents and consolidates but never approves, not even someone else's expense" do
+    expense = Expense.create!(concept: "Hielo", estimated_cents: 5_000, presented_by: @director, presented_by_name: "Dire Logística")
+    sign_in_as(@finance_user)
+
+    get expense_path(expense)
+    assert_select "form[action='#{approve_expense_path(expense)}']", 0
+    assert_select "[data-awaiting-approval]"
+
+    patch approve_expense_path(expense)
+    assert_redirected_to finances_path
+    assert expense.reload.presented?
+    assert_not Alert.exists?(recipient: @finance, title: "Gasto por aprobar: Hielo")
+  end
+
+  test "the director couple approves, and hears about every expense waiting for it" do
+    director = Participant.create!(first_name: "Mat", last_name: "Director", age: 50, stake: "villa_flor", shirt_number: "l",
+                                   gender: "H", rol: :director)
+    sign_in_as(@finance_user)
+    post expenses_path, params: { expense: { concept: "Sillas", currency: "NIO", estimated_amount: "300" } }
+    expense = Expense.last
+    assert Alert.exists?(recipient: director, title: "Gasto por aprobar: Sillas")
+    assert_not Alert.exists?(recipient: @finance, title: "Gasto por aprobar: Sillas")
+
+    sign_in_as(User.create!(email_address: "mat@fsy.com", password: "Director1!", participant: director))
+    get expense_path(expense)
+    assert_select "form[action='#{approve_expense_path(expense)}']"
+    patch approve_expense_path(expense)
+    assert expense.reload.approved?
+    assert_equal "Mat Director", expense.approved_by_name
+  end
+
+  test "coordination still only looks: it cannot approve" do
+    expense = Expense.create!(concept: "Hielo", estimated_cents: 5_000, presented_by: @finance, presented_by_name: "Fina Cuentas")
+    sign_in_as(@coordinator_user)
+
+    patch approve_expense_path(expense)
+    assert expense.reload.presented?
+  end
+
+  test "the superadmin approves, signing as the system administrator" do
+    expense = Expense.create!(concept: "Hielo", estimated_cents: 5_000, presented_by: @finance, presented_by_name: "Fina Cuentas")
+    sign_in_as(users(:one))
+
+    patch approve_expense_path(expense)
+    expense.reload
+    assert expense.approved?
+    assert_equal "Administrador del sistema", expense.approved_by_name
+    assert_nil expense.approved_by_id
+  end
+
+  test "the superadmin does not move expenses: no budget, no categories, no new expenses" do
     sign_in_as(users(:one))
 
     get finances_path

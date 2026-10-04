@@ -21,9 +21,9 @@
       <% end %>
     <% end %>
   </div>
-  <% unless can_operate_finances? %>
+  <% unless can_operate_finances? || can_approve_expenses? %>
     <p class="rounded-tile border border-line-soft bg-canvas px-4 py-3 text-label font-semibold text-ink-500" role="note" data-finance-readonly>
-      Solo lectura. Los gastos los presentan y aprueban el área de Finanzas y el director de logística.
+      Solo lectura. Los gastos los presentan el área de Finanzas y el director de logística, y los aprueban el matrimonio director y el director de logística.
     </p>
   <% end %>
 

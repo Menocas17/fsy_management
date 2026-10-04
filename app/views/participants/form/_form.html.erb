@@ -1,4 +1,4 @@
-<%= form_with model: participant, id: "participant-form", class: "space-y-5" do |form| %>
+<%= form_with model: participant, id: "participant-form", class: "space-y-5", data: { controller: "role-fields" } do |form| %>
   <%= hidden_field_tag :from, params[:from] %>
   <% if form.object.errors.any? %>
     <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">

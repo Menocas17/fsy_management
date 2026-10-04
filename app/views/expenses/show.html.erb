@@ -80,7 +80,7 @@
     </section>
   <% end %>
 
-  <% if can_operate_finances? %>
+  <% if can_operate_finances? || can_approve_expenses? %>
     <%= render "expenses/next_step", expense: @expense, me: me %>
   <% end %>
 <% end %>

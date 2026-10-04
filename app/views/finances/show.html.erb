@@ -7,8 +7,8 @@
       <p class="text-body font-medium text-ink-700">
         Todo en córdobas<%= " · dólar a C$ #{FinanceSettings.usd_rate}" if FinanceSettings.usd_rate %>.
       </p>
-      <% unless can_operate_finances? %>
-        <span role="note" title="Los gastos los presentan y aprueban el área de Finanzas y el director de logística.">
+      <% unless can_operate_finances? || can_approve_expenses? %>
+        <span role="note" title="Los gastos los presentan el área de Finanzas y el director de logística, y los aprueban el matrimonio director y el director de logística.">
           <%= render ChipComponent.new(label: "Solo lectura", icon: "eye", data: { finance_readonly: true }) %>
         </span>
       <% end %>

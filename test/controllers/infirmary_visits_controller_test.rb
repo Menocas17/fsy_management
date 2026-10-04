@@ -13,7 +13,7 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     @auxiliar = person("Laura", "auxiliar", "M")
     @branch.memberships.create!(participant: @auxiliar)
     @nurse = person("Patricia", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Enfermería", nursing: true))
-    @registrar = person("Rita", "registrador", "M")
+    @registrar = person("Rita", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
     @director = person("Dir", "director", "H")
   end
 

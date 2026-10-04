@@ -8,12 +8,12 @@
         <%= form.select :company_id, Company.order(:name).map { |c| [ c.name, c.id ] },
               { include_blank: "Sin compañía" }, class: field_select_classes %>
       </div>
-      <% if form.object.new_record? || form.object.logistica? || form.object.director_logistica? %>
-        <div>
-          <%= form.label :logistics_area_id, "Área de logística", class: field_label_classes %>
-          <%= form.select :logistics_area_id, LogisticsArea.order(:name).map { |area| [ area.name, area.id ] },
-                { include_blank: "Sin área" }, class: field_select_classes %>
-        </div>
+      <%# Solo para el rol logística (sus banderas le dan permisos): aparece o se va al elegir el rol, con role-fields. %>
+      <% committee = form.object.logistica? %>
+      <%= tag.div hidden: !committee, data: { role_fields_target: "field", roles: "logistica", logistics_area_field: true } do %>
+        <%= form.label :logistics_area_id, "Área de logística", class: field_label_classes %>
+        <%= form.select :logistics_area_id, LogisticsArea.order(:name).map { |area| [ area.name, area.id ] },
+              { include_blank: "Sin área" }, class: field_select_classes, disabled: !committee %>
       <% end %>
     <% end %>
     <div>

@@ -14,7 +14,7 @@
 #   DEMO_PASSWORD   su contraseña (si falta, la pregunta sin mostrarla; nunca va en el repo)
 #   DEMO_DEVICE     ambos (por defecto), escritorio o telefono
 #   DEMO_ROLES      solo esos recorridos, p. ej. "consejero,auxiliar" (superadmin, director, coordinador,
-#                   director_logistica, registrador, logistica, auxiliar, consejero)
+#                   director_logistica, logistica, auxiliar, consejero)
 #   DEMO_PACE       multiplica las pausas: 1.5 más lento, 0.5 más rápido
 #   DEMO_PASOS=1    espera Enter antes de cada escena (para ir al ritmo de la explicación)
 #   DEMO_HEADLESS=1 sin ventanas (para probar el guion)
@@ -363,7 +363,7 @@ module Demo
   class Tour
     ROLE_LABELS = {
       "director" => "Director", "coordinador" => "Coordinador", "director_logistica" => "Director de logística",
-      "registrador" => "Registrador", "logistica" => "Logística", "auxiliar" => "Auxiliar", "consejero" => "Consejero"
+      "logistica" => "Logística", "auxiliar" => "Auxiliar", "consejero" => "Consejero"
     }.freeze
 
     def initialize(devices, step_by_step:)
@@ -531,23 +531,9 @@ module Demo
       end
     end
 
-    def registrador
-      as "registrador" do
-        scene "Registrador · Inscribir jóvenes", say: "El registrador inscribe y corrige jóvenes; no toca al staff." do |d|
-          d.nav_to("Jóvenes")
-          d.click_text("Nuevo participante")
-          d.tour_page(steps: 3)
-        end
-        scene "Registrador · Registro de llegadas", say: "El día de llegada escanea gafetes desde el teléfono." do |d|
-          d.nav_to("Registro")
-          Demo.pause 2
-        end
-      end
-    end
-
     def logistica
       as "logistica" do
-        scene "Logística · Su menú", say: "Un miembro de logística ve solo lo suyo: el inventario y lo de su área (registro, finanzas o enfermería)." do |d|
+        scene "Logística · Su menú", say: "Un miembro de logística ve solo lo suyo: el inventario y lo de su área (con Registro, además inscribe jóvenes y escanea llegadas; con Finanzas, presenta gastos; con Enfermería, lleva la enfermería)." do |d|
           d.nav_to("Inventario")
           d.tour_page(steps: 1)
           d.nav_to("Registro") || d.nav_to("Finanzas") || d.nav_to("Enfermería")
@@ -602,7 +588,7 @@ module Demo
       %r{\A/#{prefix}/\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z}
     end
 
-    ORDER = %w[superadmin director coordinador director_logistica registrador logistica auxiliar consejero].freeze
+    ORDER = %w[superadmin director coordinador director_logistica logistica auxiliar consejero].freeze
 
     def run(roles)
       (ORDER & roles).each { |rol| public_send(rol) }

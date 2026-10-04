@@ -41,7 +41,7 @@ class ParticipantsController < ApplicationController
 
   def create
     @participant = Participant.new(participant_params)
-    # El registrador inscribe jóvenes y el director de logística a su comité: nadie registra fuera de su alcance.
+    # Logística con la bandera Registro inscribe jóvenes y el director de logística a su comité: nadie registra fuera de su alcance.
     return redirect_to(participants_path, alert: "No estás autorizado para registrar este tipo de participante") unless can_edit_participant?(@participant)
 
     if @participant.save

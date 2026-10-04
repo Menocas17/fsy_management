@@ -24,7 +24,7 @@ class ExpensesTest < ApplicationSystemTestCase
     expense = Expense.find_by!(concept: "Agua")
     # Quien lo presenta no lo aprueba.
     within("[data-next-step='approve']") do
-      assert_text "lo tiene que aprobar otra persona"
+      assert_text "lo aprueban el matrimonio director o el director de logística"
       assert_no_button "Aprobar"
     end
     sign_out

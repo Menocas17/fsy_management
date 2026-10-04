@@ -100,6 +100,8 @@ Rails.application.routes.draw do
       delete "limpiar" => "notifications#clear", as: :clear
       # La campanita pregunta por su número cuando vuelve de la caché de Turbo, donde viene congelado.
       get "campanita" => "notifications#count", as: :count
+      # Abrir el menú de la campanita cuenta como leerlas, igual que abrir la página.
+      patch "leidas" => "notifications#read", as: :read
       post "suscripcion" => "push_subscriptions#create", as: :push_subscription
       delete "suscripcion" => "push_subscriptions#destroy"
     end

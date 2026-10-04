@@ -107,16 +107,22 @@ class User < ApplicationRecord
     superadmin? || participant&.director_logistica? || false
   end
 
-  # Quién registra llegadas: el acceso total, el director de logística, los registradores y el comité de
-  # logística cuya área está marcada para el registro (hoy, «Registro»).
+  # Quién registra llegadas: el acceso total, el director de logística y el comité de logística cuya área
+  # está marcada para el registro (hoy, «Registro»).
   def checkin_registrar?
-    return true if full_access? || participant&.director_logistica? || participant&.registrador?
+    return true if full_access? || participant&.director_logistica?
 
+    checkin_member?
+  end
+
+  # Logística con la bandera Registro: registra llegadas e inscribe y corrige jóvenes (antes, el rol registrador).
+  def checkin_member?
     participant&.logistica? && participant.logistics_area&.checkin? || false
   end
 
-  # Finanzas (docs/finanzas.md). Presentan y aprueban gastos quien está en el área de Finanzas y el director
-  # de logística, nunca la misma persona en dos pasos seguidos; dirección y coordinación solo ven.
+  # Finanzas (docs/finanzas.md). Presentan gastos y los consolidan quien está en el área de Finanzas y el
+  # director de logística; los aprueban solo el superadmin, el matrimonio director y el director de logística,
+  # nunca la misma persona en dos pasos seguidos. Coordinación solo ve.
   def finance_member?
     participant&.logistica? && participant.logistics_area&.finance? || false
   end
@@ -150,8 +156,13 @@ class User < ApplicationRecord
     finance_member? || participant&.director_logistica? || false
   end
 
+  # Aprobar o rechazar un gasto o una justificación sin factura.
+  def expense_approver?
+    superadmin? || participant&.director? || participant&.director_logistica? || false
+  end
+
   def finance_viewer?
-    finance_operator? || full_access?
+    finance_operator? || expense_approver? || full_access?
   end
 
   # Presupuesto, categorías y tipo de cambio: solo el director de logística. El superadmin, como dirección

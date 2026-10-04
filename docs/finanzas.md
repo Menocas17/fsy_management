@@ -9,17 +9,20 @@ Fuera por ahora: cuotas de los jóvenes, fondos entregados (caja chica) e ingres
 
 ## Quién hace qué
 
-| Quién | Presenta | Aprueba | Consolida | Presupuesto, categorías y tipo de cambio |
-|---|---|---|---|---|
-| Logística del área **Finanzas** (`logistics_areas.finance`) | Sí | Sí¹ | Sí¹ | Ve |
-| **Director de logística** | Sí | Sí¹ | Sí¹ | Define |
-| Dirección y coordinación | Solo ven | | | Ven |
-| Superadmin | Solo ve | | | Ve |
-| Resto del staff | No ve Finanzas | | | |
+| Quién | Presenta y consolida | Aprueba | Presupuesto, categorías y tipo de cambio |
+|---|---|---|---|
+| Logística del área **Finanzas** (`logistics_areas.finance`) | Sí | No | Ve |
+| **Director de logística** | Sí | Sí¹ | Define |
+| **Matrimonio director** | | Sí¹ | Ve |
+| **Superadmin** (firma «Administrador del sistema») | | Sí¹ | Ve |
+| Coordinación | Solo ve | | Ve |
+| Resto del staff | No ve Finanzas | | |
+
+Aprobar es aprobar o rechazar un gasto presentado y aceptar o no una justificación sin factura
+(`User#expense_approver?`).
 
 ¹ **Nunca la misma persona que dio el paso anterior**: quien presenta un gasto no lo aprueba, y quien
-escribe una justificación no la aprueba. Lo hacen las dos personas de siempre: la de Finanzas y el
-director de logística.
+escribe una justificación no la aprueba.
 
 ## Ciclo de un gasto
 
@@ -98,7 +101,7 @@ Finanzas.
 1. Presupuesto, tipo de cambio, gastos con sus tres etapas, facturas, justificaciones y panel.
 2. PDF de rendición y Excel.
 3. **Avisos** (hecho, `FinanceNotifier`): a la campanita y como push, abriendo el gasto. Gasto
-   presentado o justificación → a quien puede aprobar (nunca a quien la escribió); aprobado,
+   presentado o justificación → al matrimonio director y al director de logística (nunca a quien la escribió); aprobado,
    rechazado o justificación resuelta → a quien lo pidió; una categoría o el general pasan del 80 %
    o del 100 % → al área de Finanzas y al director de logística, una vez por umbral.
    **Reembolsos** a quien pagó de su bolsillo: pendiente.

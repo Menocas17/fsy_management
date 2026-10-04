@@ -14,7 +14,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     @director = person("Dir", "director", "H")
     @coordinator = person("Cora", "coordinador", "M")
     @logistics_director = person("Lalo", "director_logistica", "H")
-    @registrar = person("Rita", "registrador", "M")
+    @registrar = person("Rita", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
     @nurse = person("Patricia", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Enfermería", nursing: true))
     # Solo algunas tienen cuenta: las demás se ven con una cuenta de mentira que no se guarda.
     User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: @registrar)
@@ -77,6 +77,20 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "[data-view-as-banner]", 0
     assert_select "nav", text: /Historial/
+  end
+
+  test "reading the notifications while viewing as marks nothing as read for that person" do
+    sign_in_as @admin
+    Alert.create!(title: "Aviso", body: "Texto", sender_name: "Marta", audience: :todos)
+
+    post view_as_path, params: { participant_id: @nurse.id }
+    get notifications_path
+    assert_response :success, "a ficha without an account has nowhere to write it"
+
+    post view_as_path, params: { participant_id: @registrar.id }
+    get notifications_path
+    patch read_notifications_path
+    assert_nil @registrar.user.reload.alerts_read_at
   end
 
   test "actions while viewing as are logged under the superadmin" do

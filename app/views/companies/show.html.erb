@@ -31,17 +31,18 @@
           </p>
         </div>
       </div>
-      <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
+      <%# grow (no flex-1): cada botón mide al menos su texto; si en el teléfono no caben juntos, bajan a otra línea. %>
+      <div class="flex flex-wrap gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
         <% if can_open_night_attendance?(@company) %>
           <%= link_to company_night_attendance_path(@company, return_to: request.fullpath),
-                class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
+                class: button_classes(:secondary, extra: "grow sm:grow-0 whitespace-nowrap") do %>
             <%= icon "moon-star", class: "w-4 h-4" %>
             <%= night_attendance_gender_for(@company) ? "Pasar asistencia" : "Asistencia nocturna" %>
           <% end %>
         <% end %>
         <% if can_edit_company?(@company) %>
           <%= link_to edit_company_path(@company),
-                class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
+                class: button_classes(:primary, extra: "grow sm:grow-0 whitespace-nowrap") do %>
             <%= icon "square-pen", class: "w-4 h-4" %>
             Editar
           <% end %>

@@ -45,7 +45,8 @@
           <div class="sm:max-w-xs">
             <%= form.label :rol, "Rol", class: field_label_classes %>
             <%= form.select :rol, Participant.rols.keys.map { |key| [ Participant.role_label(key), key ] },
-                  { prompt: "Selecciona un rol" }, class: field_select_classes %>
+                  { prompt: "Selecciona un rol" }, class: field_select_classes,
+                  data: { role_fields_target: "role", action: "role-fields#toggle" } %>
           </div>
         </div>
       <% else %>

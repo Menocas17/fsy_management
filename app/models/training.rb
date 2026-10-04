@@ -16,7 +16,7 @@ class Training < ApplicationRecord
     "Consejeros" => %w[consejero],
     "Auxiliares" => %w[auxiliar],
     "Logística" => %w[logistica director_logistica],
-    "Dirección y coordinación" => %w[director coordinador registrador]
+    "Dirección y coordinación" => %w[director coordinador]
   }.freeze
 
   # A quién se espera: la capacitación es del staff, no de los jóvenes.
