@@ -1,6 +1,6 @@
 class ApplicationMailer < ActionMailer::Base
-  # El remitente es el verificado en Brevo (MAILER_FROM, ver config/smtp_mail.rb), con el nombre del evento
-  # para que se reconozca en la bandeja de entrada.
+  # El remitente lleva el nombre del evento para que se reconozca en la bandeja de entrada. La dirección es
+  # MAILER_FROM (config/smtp_mail.rb); por el Apps Script sale siempre del Gmail que lo publicó.
   default from: -> { %("#{Rails.configuration.x.event_name}" <#{Rails.configuration.x.mailer_from || "no-responder@example.com"}>) }
   layout "mailer"
 

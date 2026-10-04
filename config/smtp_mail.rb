@@ -1,13 +1,13 @@
-# El correo sale por el SMTP de Brevo (plan gratis: 300 correos al día). Va por el puerto 2525 porque el plan
-# gratis de Render bloquea el 25, el 465 y el 587. Todo sale de variables de entorno (en Render, del panel
-# Environment; ver docs/deploy_render.md):
+# La otra salida del correo, por SMTP, si no está el Apps Script de config/apps_script_mail.rb (que gana
+# cuando está). Pensado para Brevo o un proveedor con dominio propio. Va por el puerto 2525 porque el plan
+# gratis de Render bloquea el 25, el 465 y el 587. Todo sale de variables de entorno (ver docs/deploy_render.md):
 #
 #   SMTP_USERNAME  el "Login" de Brevo (algo como 8a1b2c001@smtp-brevo.com), no el correo de la cuenta
 #   SMTP_PASSWORD  una SMTP key de Brevo (Settings → SMTP & API → SMTP)
-#   MAILER_FROM    el remitente; tiene que estar verificado en Brevo (Senders, domains & IPs)
+#   MAILER_FROM    el remitente; tiene que estar verificado en el proveedor (con el Apps Script es opcional)
 #   SMTP_ADDRESS, SMTP_PORT  solo para cambiar de proveedor
 #
-# Lo usan production.rb y, si se pide, development.rb (SMTP_EN_DESARROLLO=1).
+# Lo elige config/mail_delivery.rb.
 module SmtpMail
   def self.settings
     {

@@ -1,4 +1,4 @@
-# Despliegue en Render (+ Neon, Cloudflare R2 y Brevo)
+# Despliegue en Render (+ Neon, Cloudflare R2 y Gmail)
 
 La app corre gratis repartida en cuatro servicios, ninguno pide tarjeta salvo R2 (acepta PayPal):
 
@@ -7,15 +7,16 @@ La app corre gratis repartida en cuatro servicios, ninguno pide tarjeta salvo R2
 | App (Puma + Solid Queue) | **Render**, `render.yaml` | 512 MB, 0.1 CPU, se duerme a los 15 min sin visitas |
 | Base de datos | **Neon** | 0.5 GB, 100 CU-horas al mes, se duerme a los 5 min y despierta sola |
 | Archivos (avatares, etc.) | **Cloudflare R2** | 10 GB |
-| Correo (invitaciones, contraseñas) | **Brevo** | 300 correos al día |
+| Correo (invitaciones, contraseñas) | **Gmail** por un Google Apps Script | unos 100 correos al día |
 
 Por qué así y no todo en Render:
 
 - La Postgres gratis de Render **se borra a los 30 días**. Neon no caduca.
 - El disco de Render **se borra en cada deploy y cada vez que se duerme**: los avatares tienen que vivir
   fuera (R2).
-- El plan gratis de Render **bloquea los puertos de correo 25, 465 y 587**, así que Gmail no sirve.
-  Brevo acepta SMTP por el **2525**.
+- El plan gratis de Render **bloquea los puertos de correo 25, 465 y 587**, así que el SMTP de Gmail no
+  sirve, y los SMTP gratis que usan el 2525 piden dominio propio (SMTP2GO, Resend) o verificar un teléfono
+  (Brevo). La app manda cada correo **por HTTPS** a un Apps Script de tu Gmail, que lo envía.
 
 ## Cómo encaja
 
@@ -69,23 +70,40 @@ Por qué así y no todo en Render:
    puede abrir esa foto. Sin `R2_PUBLIC_URL` la app funciona igual, con enlaces firmados.
    R2.dev tiene límite de velocidad: para el evento conviene el dominio propio.
 
-## 3. Brevo (correo)
+## 3. Gmail por Apps Script (correo)
 
-1. Crea una cuenta en <https://www.brevo.com> (plan Free).
-2. **Senders, domains & IPs → Senders → Add a sender**: el correo que va a aparecer como remitente
-   (puede ser un Gmail). Brevo manda un código para verificarlo. Ese correo es `MAILER_FROM`.
-3. **SMTP & API → SMTP**:
-   - El **Login** (algo como `8a1b2c001@smtp-brevo.com`) es `SMTP_USERNAME`. No es tu correo.
-   - **Generate a new SMTP key** → esa clave es `SMTP_PASSWORD`.
-4. Puede que Brevo pida completar el perfil de la cuenta antes de dejarte mandar correos
-   transaccionales; hazlo de una vez.
-5. Si Brevo pide una **IP autorizada** para usar la clave SMTP, no pongas la de Render: en el plan
-   gratis sale por IPs compartidas con otros clientes y pueden cambiar sin aviso, y Brevo rechazaría
-   el correo en silencio. En **Security → Authorized IPs** desactiva el bloqueo de IPs desconocidas.
-   La protección real es la clave SMTP, que solo vive en las variables de Render.
+El código del script está en `docs/apps_script/mail_relay.gs`. Hazlo con el Gmail del que quieres que
+salgan los correos: será el remitente.
 
-> Si el remitente es un `@gmail.com`, algunos correos pueden caer en spam porque salen de servidores
-> que no son de Google. Con un dominio propio verificado en Brevo (*Domains*) se arregla.
+1. Genera una clave larga, en tu máquina: `bin/rails secret`. Esa es `MAIL_RELAY_SECRET`.
+2. En <https://script.google.com> → **Nuevo proyecto**. Ponle nombre (`FSY correo`), borra lo que trae
+   y pega todo `docs/apps_script/mail_relay.gs`. Guarda.
+3. **Configuración del proyecto** (el engranaje) → **Propiedades de la secuencia de comandos → Agregar
+   propiedad**: nombre `SECRET`, valor la clave del paso 1. Guarda.
+4. Vuelve al editor, elige la función `autorizar` arriba y dale **Ejecutar**. Google pide permiso:
+   **Revisar permisos** → tu cuenta → sale *Google no verificó esta app* (es tuya, es normal) →
+   **Configuración avanzada → Ir a FSY correo (no seguro) → Permitir**.
+5. **Implementar → Nueva implementación** → tipo **Aplicación web**:
+   - Ejecutar como: **Yo**.
+   - Quién tiene acceso: **Cualquier persona** (sin esto Google pide iniciar sesión y la app no entra;
+     la clave es lo que impide que otro lo use).
+   - **Implementar** y copia la **URL de la aplicación web** (`https://script.google.com/macros/s/…/exec`).
+     Esa es `MAIL_RELAY_URL`.
+
+Si algún día cambias el código del script, publícalo en **Implementar → Administrar implementaciones →
+editar (lápiz) → Versión: Nueva versión**; así la URL no cambia. Una implementación nueva da otra URL.
+
+El límite es de Google: unos **100 destinatarios al día** con un Gmail normal (1500 con Google
+Workspace). Cada cuenta del staff recibe una invitación, y después solo hay correos si alguien olvida la
+contraseña. Si te pasas, el correo falla con *Service invoked too many times* en **Logs** de Render y
+hay que volver a mandarlo al día siguiente.
+
+### Alternativa: SMTP
+
+Con un dominio propio puedes usar un proveedor SMTP por el puerto 2525 (Brevo, SMTP2GO…) en vez del
+Apps Script: quita `MAIL_RELAY_URL` y pon `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAILER_FROM` y, si no es
+Brevo, `SMTP_ADDRESS` (ver `config/smtp_mail.rb`). Si el proveedor pide una **IP autorizada**, no pongas
+la de Render (en el plan gratis es compartida y cambia): desactiva esa restricción.
 
 ## 4. Render (la app)
 
@@ -98,7 +116,8 @@ Por qué así y no todo en Render:
    | `RAILS_MASTER_KEY` | el contenido de `config/master.key` |
    | `DATABASE_URL` | la cadena de Neon (paso 1) |
    | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_URL` | paso 2 |
-   | `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAILER_FROM` | paso 3 |
+   | `MAIL_RELAY_URL`, `MAIL_RELAY_SECRET` | paso 3 |
+   | `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAILER_FROM` | déjalas vacías (solo para la alternativa SMTP) |
 
    `R2_BUCKET`, `SOLID_QUEUE_IN_PUMA`, `RAILS_MAX_THREADS` y `HTTP_PORT` ya vienen puestas.
 3. **Apply.** El primer build tarda unos minutos. Cuando termina, la app queda en
@@ -130,10 +149,10 @@ producción: con cuidado, es la base real.
 
 ## 6. Probar el correo
 
-Desde tu máquina, con las variables de Brevo:
+Desde tu máquina, con las variables del paso 3:
 
 ```bash
-SMTP_EN_DESARROLLO=1 SMTP_USERNAME='...' SMTP_PASSWORD='...' MAILER_FROM='tu@correo.com' \
+CORREO_EN_DESARROLLO=1 MAIL_RELAY_URL='https://script.google.com/macros/s/…/exec' MAIL_RELAY_SECRET='...' \
 bin/rails 'correo:prueba[tu@correo.com]'
 ```
 

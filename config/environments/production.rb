@@ -56,21 +56,14 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Si Brevo rechaza un envío, el error queda en el log del job (Solid Queue) en vez de perderse en silencio.
-  config.action_mailer.raise_delivery_errors = true
-
   # Set host to be used by links generated in mailer templates.
   # Render da el dominio *.onrender.com en RENDER_EXTERNAL_HOSTNAME; APP_HOST solo si se usa uno propio.
   app_host = ENV["APP_HOST"].presence || ENV.fetch("RENDER_EXTERNAL_HOSTNAME", "example.com")
   config.action_mailer.default_url_options = { host: app_host, protocol: "https" }
 
-  # Correo por SMTP de Brevo (config/smtp_mail.rb); usuario, clave y remitente en variables de entorno.
-  require Rails.root.join("config/smtp_mail")
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = SmtpMail.settings
-  config.x.mailer_from = SmtpMail.from
-  # «¿Olvidaste tu contraseña?» solo aparece si de verdad hay con qué mandar el correo.
-  config.x.password_reset_emails = SmtpMail.configured?
+  # Correo por el Apps Script de Gmail o por SMTP (config/mail_delivery.rb); todo en variables de entorno.
+  require Rails.root.join("config/mail_delivery")
+  MailDelivery.apply(config)
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
