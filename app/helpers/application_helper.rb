@@ -1,4 +1,20 @@
 module ApplicationHelper
+  # Incluido aquí para que el super de #icon siempre lo encuentre, también fuera de las vistas (pruebas, jobs).
+  include RailsIcons::Helpers::IconHelper
+
+  ICON_CACHE = Concurrent::Map.new
+  ICON_CACHE_LIMIT = 2_000
+
+  # rails_icons lee el .svg del disco y lo pasa por Nokogiri en cada llamada (~0.15 ms), y una página dibuja
+  # unas 70. Con los mismos argumentos el SVG sale idéntico, así que se arma una vez por proceso.
+  # Un ícono que no existe no se guarda: sigue fallando igual.
+  def icon(name, **options)
+    return super if Rails.application.config.enable_reloading
+
+    ICON_CACHE.clear if ICON_CACHE.size > ICON_CACHE_LIMIT
+    ICON_CACHE.compute_if_absent([ name.to_s, options ]) { super.to_str.freeze }.html_safe
+  end
+
   # this helper creates a fallback using the ui-avatar api in case there is no image in the database, but the default is using an generic avatar image in case the api is not responding
   def avatar_for(participant, options = {})
     if participant.avatar.attached?
