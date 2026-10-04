@@ -14,7 +14,7 @@
       <div class="grid border-b border-line-soft" style="<%= columns %>">
         <div></div>
         <% days.each do |day| %>
-          <%= link_to agenda_path(date: day, view: @view),
+          <%= link_to agenda_path(date: day, view: @view), data: { scroll_keep: true },
                 class: "px-2 py-2.5 text-center border-l border-line-soft #{"bg-primary-50 dark:bg-primary-700/20" if day == @selected_day}" do %>
             <span class="block text-meta font-bold tracking-[.06em] uppercase <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-300" %>"><%= spanish_day_abbr(day) %></span>
             <span class="block text-display font-extrabold tabular-nums <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-900 dark:text-ink-900" %>"><%= day.day %></span>
@@ -43,7 +43,7 @@
               <%= link_to agenda_path(date: day, view: @view, activity_id: activity.id),
                     style: "top: #{(offset_for.(activity.starts_at) + 2).round}px; height: #{block_height}px;",
                     class: "absolute left-1 right-1 flex flex-col justify-center gap-0.5 overflow-hidden rounded-control border-l-[3px] px-2.5 py-1.5 #{activity.styles[:block]} #{"ring-2 ring-primary-500" if @activity&.id == activity.id}",
-                    data: { activity_id: activity.id, turbo_action: "advance" } do %>
+                    data: { activity_id: activity.id, turbo_action: "advance", scroll_keep: true } do %>
                 <span class="block text-label font-bold leading-tight truncate"><%= activity.title %></span>
                 <%# Una actividad corta no tiene alto para la segunda línea: mejor el título limpio que texto cortado. %>
                 <% if block_height >= 46 %>

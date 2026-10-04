@@ -74,6 +74,7 @@
       <div class="xl:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
     </div>
 
-    <div class="hidden xl:block"><%= render "agenda/detail", activity: @activity %></div>
+    <%# Fijo al desplazarse: la actividad que se toca al final del día se ve sin volver arriba. %>
+    <div class="hidden xl:block xl:sticky xl:top-5 xl:max-h-[calc(100dvh-7rem)] xl:overflow-y-auto"><%= render "agenda/detail", activity: @activity %></div>
   </div>
 <% end %>
