@@ -75,6 +75,15 @@
   --color-cat-rose-ink: oklch(48% 0.17 15);
   --color-cat-teal-ink: oklch(46% 0.09 195);
 
+  /* Rellenos sólidos de categoría (mosaicos de cifra, barras de gráfico). Un tono más oscuro que el base para
+     que el ícono blanco encima llegue a 3:1; el ámbar base no llegaba (2.5:1). Ver DESIGN.md, «regla de color». */
+  --color-cat-blue-solid: oklch(56% 0.13 230);
+  --color-cat-indigo-solid: oklch(52% 0.16 275);
+  --color-cat-green-solid: oklch(56% 0.14 148);
+  --color-cat-amber-solid: oklch(62% 0.14 70);
+  --color-cat-rose-solid: oklch(55% 0.17 15);
+  --color-cat-teal-solid: oklch(56% 0.1 195);
+
   /* Radios: controles (botones, campos, pestañas), baldosas (iconos, bloques internos), tarjetas y paneles. */
   --radius-control: 11px;
   --radius-tile: 13px;
@@ -87,6 +96,29 @@
   --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-lg: 0 20px 40px -12px oklch(20% 0.05 260 / 0.22);
+
+  /* Escala de letra: cinco tamaños y la cifra grande (DESIGN.md, «Typography»). Siguen a --type-scale como los
+     tamaños sueltos de abajo, así el teléfono y «Texto grande» los agrandan igual. Se usan como text-body, etc. */
+  --text-meta: calc(11px * var(--type-scale));
+  --text-meta--line-height: 1.4;
+  --text-label: calc(12px * var(--type-scale));
+  --text-label--line-height: 1.4;
+  --text-body: calc(13px * var(--type-scale));
+  --text-body--line-height: 1.5;
+  --text-title: calc(15px * var(--type-scale));
+  --text-title--line-height: 1.35;
+  --text-display: 22px;
+  --text-display--line-height: 1.2;
+  --text-stat: 34px;
+  --text-stat--line-height: 1;
+
+  /* Los dos anchos de página: max-w-page para listas y tableros, max-w-form para crear, editar y ajustes. */
+  --container-page: 1400px;
+  --container-form: 48rem;
+
+  /* Curvas de movimiento: salida fuerte para lo que entra o responde, la de cajón para lo que se desliza. */
+  --ease-fluid: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
 }
 
