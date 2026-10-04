@@ -14,3 +14,7 @@ test:
 production:
   database: cache
   <<: *default
+  store_options:
+    # El plan gratis de Neon da 0.5 GB para toda la base; la cache no se puede comer la mitad.
+    max_size: <%= 64.megabytes %>
+    namespace: <%= Rails.env %>

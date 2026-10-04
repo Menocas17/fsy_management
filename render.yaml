@@ -1,0 +1,54 @@
+# Blueprint de Render: el servicio web de la app. La guía paso a paso está en docs/deploy_render.md.
+#
+# Render construye el Dockerfile del repo. Al arrancar, bin/docker-entrypoint corre db:prepare
+# (crea las tablas o aplica migraciones pendientes) y luego Thruster + Puma, con Solid Queue dentro.
+#
+# Las variables con sync: false se piden la primera vez que se crea el Blueprint y después se cambian en
+# el panel (Environment). Nunca se escriben aquí: el repo es público.
+services:
+  - type: web
+    name: fsy-management
+    runtime: docker
+    # free: 512 MB y 0.1 CPU, se duerme a los 15 min sin visitas. Para el campamento se puede subir a
+    # starter (no se duerme) desde el panel, o cambiando esto.
+    plan: free
+    # Ohio, para estar junto a la base de Neon (AWS us-east-2).
+    region: ohio
+    branch: main
+    healthCheckPath: /up
+    # Solo despliega un commit de main cuando GitHub Actions (CI) pasa completo.
+    autoDeployTrigger: checksPass
+    envVars:
+      # El contenido de config/master.key.
+      - key: RAILS_MASTER_KEY
+        sync: false
+      # Neon → Connect → la cadena *sin* "-pooler" (las migraciones y Solid Queue necesitan conexión directa).
+      - key: DATABASE_URL
+        sync: false
+
+      # Cloudflare R2 (config/storage.yml).
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        value: fsy-management
+
+      # Brevo (config/smtp_mail.rb).
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAILER_FROM
+        sync: false
+
+      # Solid Queue corre dentro de Puma (en hilos, ver config/puma.rb): el plan gratis no tiene workers.
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
+      - key: RAILS_MAX_THREADS
+        value: "3"
+      # Thruster escucha en el puerto que Render espera (10000) y le pasa las peticiones a Puma en el 3000.
+      - key: HTTP_PORT
+        value: "10000"

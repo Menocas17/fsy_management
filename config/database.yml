@@ -94,22 +94,25 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+# Producción (Render + Neon): una sola base de datos, la de DATABASE_URL. Cache, cola y cable viven cada
+# una en su propio esquema de Postgres dentro de ella, con su propio schema_migrations: si compartieran el
+# esquema public, db:prepare vería la base ya inicializada por la primaria y nunca cargaría
+# queue_schema.rb y compañía. bin/docker-entrypoint crea los esquemas antes de db:prepare.
 production:
   primary: &primary_production
     <<: *default
-    database: fsy_management_production
-    host: <%= ENV.fetch("DB_HOST", "localhost") %>
-    username: <%= ENV.fetch("POSTGRES_USER", "fsy_management") %>
-    password: <%= ENV["POSTGRES_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
+    # Los hilos de Puma y los de Solid Queue (en modo async, ver config/puma.rb) comparten proceso y pool.
+    max_connections: 10
   cache:
     <<: *primary_production
-    database: fsy_management_production_cache
+    schema_search_path: solid_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: fsy_management_production_queue
+    schema_search_path: solid_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: fsy_management_production_cable
+    schema_search_path: solid_cable
     migrations_paths: db/cable_migrate

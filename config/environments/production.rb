@@ -21,8 +21,8 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Archivos en Cloudflare R2 (config/storage.yml): el disco de Render no se conserva.
+  config.active_storage.service = :cloudflare
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
@@ -53,18 +53,21 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Si Gmail rechaza un envío, el error queda en el log del job (Solid Queue) en vez de perderse en silencio.
+  # Si Brevo rechaza un envío, el error queda en el log del job (Solid Queue) en vez de perderse en silencio.
   config.action_mailer.raise_delivery_errors = true
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
+  # Render da el dominio *.onrender.com en RENDER_EXTERNAL_HOSTNAME; APP_HOST solo si se usa uno propio.
+  app_host = ENV["APP_HOST"].presence || ENV.fetch("RENDER_EXTERNAL_HOSTNAME", "example.com")
+  config.action_mailer.default_url_options = { host: app_host, protocol: "https" }
 
-  # Correo por Gmail (config/gmail_smtp.rb); usuario y contraseña de aplicación en las credenciales.
-  require Rails.root.join("config/gmail_smtp")
+  # Correo por SMTP de Brevo (config/smtp_mail.rb); usuario, clave y remitente en variables de entorno.
+  require Rails.root.join("config/smtp_mail")
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = GmailSmtp.settings
+  config.action_mailer.smtp_settings = SmtpMail.settings
+  config.x.mailer_from = SmtpMail.from
   # «¿Olvidaste tu contraseña?» solo aparece si de verdad hay con qué mandar el correo.
-  config.x.password_reset_emails = GmailSmtp.configured?
+  config.x.password_reset_emails = SmtpMail.configured?
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
