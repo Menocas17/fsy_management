@@ -14,7 +14,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     @director = person("Dir", "director", "H")
     @coordinator = person("Cora", "coordinador", "M")
     @logistics_director = person("Lalo", "director_logistica", "H")
-    @registrar = person("Rita", "registrador", "M")
+    @registrar = person("Rita", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
     @nurse = person("Patricia", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Enfermería", nursing: true))
     # Solo algunas tienen cuenta: las demás se ven con una cuenta de mentira que no se guarda.
     User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: @registrar)

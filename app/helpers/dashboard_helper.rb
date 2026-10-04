@@ -21,7 +21,7 @@ module DashboardHelper
 
   # Shortcut for whoever can't register participants: the company they belong to. A joven goes to their own
   # company, a consejero to the company of jóvenes they staff, an auxiliar to the auxiliar company that groups
-  # their counselors. Logística and registradores have no company, so they get no shortcut.
+  # their counselors. Logística has no company, so they get no shortcut.
   def my_company_link
     participant = Current.user&.participant
     return nil if participant.nil?

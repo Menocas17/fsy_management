@@ -10,7 +10,9 @@ class ImportRowEvaluator
   # Los roles en femenino, como vienen en muchas planillas.
   ROLE_ALIASES = {
     "directora" => "director", "coordinadora" => "coordinador", "consejera" => "consejero",
-    "registradora" => "registrador", "directora de logistica" => "director_logistica", "jovenes" => "joven"
+    "directora de logistica" => "director_logistica", "jovenes" => "joven",
+    # El rol registrador ya no existe: quien registra es de logística, con la bandera Registro en su área.
+    "registrador" => "logistica", "registradora" => "logistica"
   }.freeze
 
   # «M» es mujer, como en la app (H/M); «F» (femenino) también, porque así vienen muchos formularios.

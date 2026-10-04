@@ -139,7 +139,7 @@ class ParticipantAccountsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "nobody else creates or resets accounts, and they don't see the buttons" do
-    %i[consejero registrador logistica auxiliar].each do |rol|
+    %i[consejero logistica auxiliar].each do |rol|
       sign_in_as(user_for(rol))
 
       get participant_path(@juan)

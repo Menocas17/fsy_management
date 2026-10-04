@@ -76,7 +76,7 @@ bin/rubocop --no-server        # lint (Rails Omakase)
 - **`/companies`** (CompaniesController) — listado de compañías estándar agrupadas por AC (+ "sin compañía auxiliar"), detalle con plantilla 1M/1F de consejeros/auxiliares y jóvenes, CRUD y panel de asignación de personal (`assign_staff`/`remove_staff`).
 - **`/auxiliar_companies`** (AuxiliarCompaniesController) — CRUD de auxiliar companies y asignación de su coordinador.
 - **`/companies/overview`** (KPIs) — cards + Chartkick (jóvenes y personal por compañía) y tabla de estado Completa/Incompleta.
-- **Autorización por rol:** cualquier usuario autenticado ve; **editan** superadmin, `coordinador` y `director` (todo); `auxiliar` su AC y las compañías de sus consejeros; `consejero` su propia compañía; `logistica`/`registrador` solo lectura.
+- **Autorización por rol:** cualquier usuario autenticado ve; **editan** superadmin, `coordinador` y `director` (todo); `auxiliar` su AC y las compañías de sus consejeros; `consejero` su propia compañía; `logistica` solo lectura, más lo que den las banderas de su área (con Registro inscribe jóvenes y registra llegadas).
 
 ## Deploy (Render)
 

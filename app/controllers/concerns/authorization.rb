@@ -28,7 +28,8 @@ module Authorization
   end
 
   # Participantes ---------------------------------------------------------------
-  # La cadena de mando: el director de logística manda sobre su comité, el registrador sobre los jóvenes,
+  # La cadena de mando: el director de logística manda sobre su comité, logística con la bandera Registro sobre
+  # los jóvenes,
   # el auxiliar sobre los jóvenes de su rama y el consejero sobre los de su compañía. Todos sobre su propia ficha.
   def can_edit_participant?(participant)
     return false if Current.user.nil? || participant.nil?
@@ -40,19 +41,19 @@ module Authorization
 
     case actor.rol.to_s
     when "director_logistica" then participant.logistica? || participant.director_logistica?
-    when "registrador"        then participant.joven?
+    when "logistica"          then Current.user.checkin_member? && participant.joven?
     when "auxiliar"           then participant.joven? && actor.auxiliar_scope[:companies].map(&:id).include?(participant.company_id)
     when "consejero"          then participant.joven? && actor.counselor_scope.map(&:id).include?(participant.company_id)
     else false
     end
   end
 
-  # El registrador inscribe jóvenes y el director de logística a su comité; qué rol puede darles lo vuelve
-  # a verificar can_edit_participant? sobre la ficha ya armada.
+  # Logística con la bandera Registro inscribe jóvenes y el director de logística a su comité; qué rol puede
+  # darles lo vuelve a verificar can_edit_participant? sobre la ficha ya armada.
   def can_create_participants?
     return true if full_company_access?
 
-    %w[registrador director_logistica].include?(Current.user&.participant&.rol.to_s)
+    Current.user&.checkin_member? || Current.user&.participant&.director_logistica? || false
   end
 
   def can_delete_participant?(participant)
@@ -142,7 +143,7 @@ module Authorization
 
   # Registro de llegadas ---------------------------------------------------------
   # Consultar una ficha escaneando la puede hacer cualquiera del staff; registrar la llegada, solo
-  # el acceso total, el director de logística, los registradores y el comité de logística marcado para el
+  # el acceso total, el director de logística y el comité de logística marcado para el
   # registro. Quien registra también anula (CheckinsController#void).
   def can_check_in?
     Current.user&.checkin_registrar? || false
@@ -282,7 +283,7 @@ module Authorization
   end
 
   def can_import_participants?
-    full_company_access? || Current.user&.participant&.registrador? || false
+    full_company_access? || Current.user&.checkin_member? || false
   end
 
   def can_manage_alerts?
@@ -466,14 +467,12 @@ module Authorization
       return [] if Current.user.nil?
 
       actor = Current.user.participant
-      attributes = if full_company_access?
+      attributes = if full_company_access? || Current.user.checkin_member? || actor&.director_logistica?
         CARE_ATTRIBUTES + IDENTITY_ATTRIBUTES
+      elsif actor&.auxiliar? || actor&.consejero? || editing_self?(actor, target)
+        CARE_ATTRIBUTES
       else
-        case actor&.rol.to_s
-        when "registrador", "director_logistica" then CARE_ATTRIBUTES + IDENTITY_ATTRIBUTES
-        when "auxiliar", "consejero"             then CARE_ATTRIBUTES
-        else editing_self?(actor, target) ? CARE_ATTRIBUTES : []
-        end
+        []
       end
 
       # Nadie se asciende a sí mismo: el rol, la compañía y el área las cambia quien tiene acceso total.

@@ -12,11 +12,11 @@ class Participant < ApplicationRecord
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
 
-  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, registrador: 4, logistica: 5, joven: 6, director_logistica: 7 }
+  enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, logistica: 5, joven: 6, director_logistica: 7 }
 
   ROLE_LABELS = {
     "director" => "Director", "coordinador" => "Coordinador", "auxiliar" => "Auxiliar", "consejero" => "Consejero",
-    "registrador" => "Registrador", "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
+    "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
   }.freeze
   enum :stake, { bello_horizonte: 0, las_americas: 1, villa_flor: 2, puerto_cabezas: 3 }
   enum :ward, { bello_horizonte_b: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6 }
@@ -87,7 +87,7 @@ class Participant < ApplicationRecord
   end
 
   scope :jovenes, -> { where(rol: "joven") }
-  scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
+  scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar" ]) }
   scope :search_by_name, ->(query) { where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{query}%") if query.present? }
   # Nombre y apellido juntos, sin importar tildes ni mayúsculas: «ana perez» encuentra a Ana Pérez.
   scope :search_full_name, ->(query) {
@@ -145,7 +145,7 @@ class Participant < ApplicationRecord
   end
 
   # Los roles que el superadmin puede probar con «Ver como» (el joven todavía no tiene su propia vista).
-  VIEW_AS_ROLES = %w[director coordinador director_logistica registrador logistica auxiliar consejero].freeze
+  VIEW_AS_ROLES = %w[director coordinador director_logistica logistica auxiliar consejero].freeze
 
   # Una ficha que muestre bien el rol: primero las que ya tienen cuenta, y entre ellas las que tienen a quién
   # mandar (el consejero su compañía, el auxiliar su rama, logística su área).

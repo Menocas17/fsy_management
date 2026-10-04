@@ -120,7 +120,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     logistics = Participant.create!(first_name: "Lu", last_name: "Gística", age: 30, stake: "villa_flor", shirt_number: "m",
                                     gender: "M", rol: :logistica, logistics_area: area)
 
-    logistics.update!(rol: :registrador)
+    logistics.update!(rol: :auxiliar)
 
     assert_nil logistics.reload.logistics_area_id
   end

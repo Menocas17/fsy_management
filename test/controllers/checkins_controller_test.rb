@@ -252,13 +252,4 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Checkin.count, "the arrival is a different registry"
     assert_match(/Anuló la asistencia a Primeros auxilios/, AuditLog.registro.sole.summary)
   end
-
-  test "registradores register and void too" do
-    registrador = Participant.create!(first_name: "Rita", last_name: "Registro", age: 30, stake: "villa_flor",
-                                      shirt_number: "m", gender: "M", rol: "registrador")
-    sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Registro1!", participant: registrador))
-
-    get checkins_path
-    assert_response :success
-  end
 end

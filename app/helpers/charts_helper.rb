@@ -21,7 +21,7 @@ module ChartsHelper
 
   ROLE_CATEGORY = {
     "joven" => "green", "consejero" => "amber", "auxiliar" => "blue", "coordinador" => "indigo",
-    "director" => "navy", "logistica" => "rose", "director_logistica" => "teal", "registrador" => "neutral"
+    "director" => "navy", "logistica" => "rose", "director_logistica" => "teal"
   }.freeze
   STAKE_CATEGORY = { "bello_horizonte" => "blue", "las_americas" => "indigo", "villa_flor" => "green", "puerto_cabezas" => "amber" }.freeze
   GENDER_CATEGORY = { "H" => "blue", "M" => "rose" }.freeze
@@ -29,7 +29,7 @@ module ChartsHelper
   # Etiquetas de la gráfica de roles; el orden sigue a los roles más numerosos.
   ROLE_CHART_LABELS = {
     "consejero" => "Consejero", "logistica" => "Logística", "auxiliar" => "Auxiliar", "coordinador" => "Coordinador",
-    "director" => "Director", "director_logistica" => "Director de logística", "registrador" => "Registrador", "joven" => "Joven"
+    "director" => "Director", "director_logistica" => "Director de logística", "joven" => "Joven"
   }.freeze
 
   def self.chip(category)

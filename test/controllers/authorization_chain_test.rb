@@ -146,10 +146,23 @@ class AuthorizationChainTest < ActionDispatch::IntegrationTest
     assert_equal "logistica", @logistics_member.rol, "pero no se cambia el rol"
   end
 
-  # Registrador y acceso total --------------------------------------------------
+  # La bandera Registro y el acceso total -----------------------------------------
 
-  test "a registrador registers and edits jóvenes only" do
-    registrar = create_participant(rol: :registrador, gender: "M")
+  test "logística without the Registro flag registers nobody" do
+    sign_in_as_participant(create_participant(rol: :logistica, gender: "M"))
+
+    assert_no_difference -> { Participant.count } do
+      post participants_path, params: { participant: {
+        first_name: "Nueva", last_name: "Joven", age: 15, stake: "las_americas",
+        shirt_number: "s", gender: "M", rol: "joven" } }
+    end
+    patch participant_path(@other_joven), params: { participant: { room: "105" } }
+    assert_not_equal "105", @other_joven.reload.room
+  end
+
+  test "logística with the Registro flag registers and edits jóvenes only, as the registrador used to" do
+    registrar = create_participant(rol: :logistica, gender: "M")
+    registrar.update!(logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
     sign_in_as_participant(registrar)
 
     assert_difference -> { Participant.joven.count }, 1 do
