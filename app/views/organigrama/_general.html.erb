@@ -6,7 +6,9 @@
   by_number = ->(companies) { companies.sort_by { |company| [ company.number || Float::INFINITY, company.name ] } }
   logistics_title = @logistics_directors.map(&:full_name).join(" · ").presence || "Logística"
   logistics_groups = @logistics.group_by(&:logistics_area).sort_by { |area, _| area&.name || "~" }
-  company_node = ->(company) { render("organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0)) }
+  # El árbol de escritorio y la lista del teléfono muestran el mismo nodo: se dibuja una vez y se reusa.
+  company_nodes = Hash.new { |nodes, company| nodes[company] = render("organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0)) }
+  company_node = ->(company) { company_nodes[company] }
   control = "w-8 h-8 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer transition"
 %>
 
