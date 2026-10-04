@@ -101,6 +101,30 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     assert_equal company, juan.reload.company
   end
 
+  test "the logistics area picker only shows for the logística role, and follows the role select" do
+    LogisticsArea.create!(name: "Registro", checkin: true)
+
+    get new_participant_path
+    assert_select "#participant-form[data-controller~='role-fields']"
+    assert_select "select[name='participant[rol]'][data-action~='role-fields#toggle']"
+    assert_select "[data-logistics-area-field][hidden][data-roles='logistica'] select[disabled]"
+
+    logistics = Participant.create!(first_name: "Lu", last_name: "Gística", age: 30, stake: "villa_flor", shirt_number: "m",
+                                    gender: "M", rol: :logistica)
+    get edit_participant_path(logistics)
+    assert_select "[data-logistics-area-field]:not([hidden]) select:not([disabled])"
+  end
+
+  test "leaving logística drops the area" do
+    area = LogisticsArea.create!(name: "Finanzas", finance: true)
+    logistics = Participant.create!(first_name: "Lu", last_name: "Gística", age: 30, stake: "villa_flor", shirt_number: "m",
+                                    gender: "M", rol: :logistica, logistics_area: area)
+
+    logistics.update!(rol: :registrador)
+
+    assert_nil logistics.reload.logistics_area_id
+  end
+
   test "edit renders every section of the redesigned form" do
     get edit_participant_path(participants(:juan))
 

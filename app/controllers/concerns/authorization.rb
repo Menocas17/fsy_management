@@ -9,7 +9,7 @@ module Authorization
                   :can_edit_participant?, :can_create_participants?, :can_delete_participant?, :can_edit_full_profile?,
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
                   :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?, :can_manage_logistics_areas?,
-                  :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
+                  :can_view_finances?, :can_operate_finances?, :can_approve_expenses?, :can_configure_finances?,
                   :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?,
                   :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
                   :can_take_night_attendance?,
@@ -237,6 +237,10 @@ module Authorization
     Current.user&.finance_operator? || false
   end
 
+  def can_approve_expenses?
+    Current.user&.expense_approver? || false
+  end
+
   def can_configure_finances?
     Current.user&.finance_configurator? || false
   end
@@ -328,6 +332,10 @@ module Authorization
 
     def require_finance_operator!
       redirect_to finances_path, alert: "Solo el área de Finanzas y el director de logística mueven gastos" unless can_operate_finances?
+    end
+
+    def require_expense_approver!
+      redirect_to finances_path, alert: "Los gastos los aprueban el matrimonio director y el director de logística" unless can_approve_expenses?
     end
 
     def require_finance_configurator!

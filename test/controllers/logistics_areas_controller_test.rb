@@ -20,6 +20,15 @@ class LogisticsAreasControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-unassigned]", text: /#{sin_area.full_name}/
   end
 
+  test "what each flag does is just its pills: a note on hover and a dialog for touch screens" do
+    get logistics_areas_path
+
+    assert_select "[data-flags-help] button[data-action='flag-help#open']", LogisticsArea::FLAGS.size
+    assert_select "[data-flags-help] [data-flag-tip='finance']", text: /no los aprueba/
+    assert_select "dialog[data-flag-help-target='dialog'][data-flag='nursing']"
+    assert_select "details[data-flags-help]", 0, "it no longer folds open"
+  end
+
   test "an area is created with its flags" do
     post logistics_areas_path, params: { logistics_area: { name: " Alimentación ", description: "Comidas", food: "1" } }
 

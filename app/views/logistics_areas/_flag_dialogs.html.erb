@@ -1,0 +1,20 @@
+<%# Lo que da cada bandera, para el teléfono: lo abre flag-help al tocar una pastilla. Va una vez por página. %>
+<% LogisticsArea::FLAGS.each do |flag, (label, description)| %>
+  <% icon_name, tone = flag_style(flag) %>
+  <dialog data-flag-help-target="dialog" data-flag="<%= flag %>" data-action="click->flag-help#clickOutside" aria-modal="true"
+          aria-labelledby="flag-dialog-<%= flag %>"
+          class="p-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-card shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+    <div class="relative p-5 bg-surface rounded-card">
+      <button type="button" data-action="flag-help#close" aria-label="Cerrar"
+              class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-muted text-ink-700 hover:bg-line-soft cursor-pointer transition">
+        <%= icon "x", class: "w-4 h-4" %>
+      </button>
+      <div class="flex items-center gap-3 pr-9">
+        <%= render IconTileComponent.new(icon: icon_name, tone: tone) %>
+        <h2 id="flag-dialog-<%= flag %>" class="text-title font-bold text-ink-900">Bandera <%= label %></h2>
+      </div>
+      <p class="mt-3 text-body text-ink-700"><%= description %></p>
+      <p class="mt-2 text-label text-ink-500">Lo tiene cada miembro de logística de un área con esta bandera encendida.</p>
+    </div>
+  </dialog>
+<% end %>

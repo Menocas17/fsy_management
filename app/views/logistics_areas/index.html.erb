@@ -1,6 +1,6 @@
 <% content_for :title, "Áreas de logística" %>
 <% content_for :eyebrow, "Logística" %>
-<%= render PageComponent.new(width: :page) do |page| %>
+<%= render PageComponent.new(width: :page, data: { controller: "flag-help" }) do |page| %>
   <% page.with_intro { "Cada miembro del comité pertenece a un área; las banderas del área le dan permisos." } %>
   <% page.with_actions do %>
     <%= link_to new_logistics_area_path, class: button_classes do %>
@@ -21,30 +21,19 @@
     <% end %>
   </section>
 
-  <%# Qué da cada bandera: una fila en escritorio; en el teléfono se pliega para que las áreas no queden abajo. %>
-  <details class="group <%= card_classes %> md:hidden" data-flags-help>
-    <summary class="list-none min-h-13 px-4 py-3 flex items-center gap-3 cursor-pointer">
-      <%= render IconTileComponent.new(icon: "flag") %>
-      <span class="flex-1 text-title font-bold text-ink-900">Qué da cada bandera</span>
-      <%= icon "chevron-down", class: "size-[18px] text-ink-500 transition-transform group-open:rotate-180" %>
-    </summary>
-    <ul class="px-4 pb-4 flex flex-col gap-2.5">
+  <%# Qué da cada bandera: solo las pastillas. Al pasar el ratón se explican; en el teléfono, al tocarlas. %>
+  <section class="flex flex-wrap items-center gap-x-3 gap-y-2" aria-label="Qué da cada bandera" data-flags-help>
+    <span class="inline-flex items-center gap-1.5 text-label font-semibold text-ink-500">
+      <%= icon "flag", class: "size-3.5" %>
+      Banderas
+    </span>
+    <span class="flex flex-wrap gap-1.5">
       <% LogisticsArea::FLAGS.each_key do |flag| %>
-        <li class="flex items-start gap-2.5"><%= render "logistics_areas/flag_chip", flag: flag %><span class="text-label text-ink-700"><%= LogisticsArea::FLAGS.fetch(flag).last %></span></li>
+        <%= render "logistics_areas/flag_help_chip", flag: flag %>
       <% end %>
-    </ul>
-  </details>
-  <section class="hidden md:flex <%= card_classes("items-center gap-6 px-6 py-5") %>" aria-label="Qué da cada bandera">
-    <div class="flex items-center gap-3 shrink-0">
-      <%= render IconTileComponent.new(icon: "flag") %>
-      <h2 class="text-title font-bold text-ink-900">Qué da cada bandera</h2>
-    </div>
-    <ul class="flex-1 grid grid-cols-3 gap-5">
-      <% LogisticsArea::FLAGS.each_key do |flag| %>
-        <li class="flex items-center gap-2.5"><%= render "logistics_areas/flag_chip", flag: flag %><span class="text-label text-ink-700"><%= LogisticsArea::FLAGS.fetch(flag).last %></span></li>
-      <% end %>
-    </ul>
+    </span>
   </section>
+  <%= render "logistics_areas/flag_dialogs" %>
 
   <% if @areas.any? %>
     <section aria-label="Áreas" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-areas>
@@ -75,7 +64,7 @@
             </div>
             <div class="flex flex-wrap justify-end gap-1.5">
               <% area.flags.each do |flag| %>
-                <%= render "logistics_areas/flag_chip", flag: flag %>
+                <%= render "logistics_areas/flag_help_chip", flag: flag, align: :right %>
               <% end %>
               <% if area.flags.empty? %>
                 <span title="Sin permisos extra: solo ve"><%= render ChipComponent.new(label: "Solo ve") %><span class="sr-only">. Sin permisos extra</span></span>

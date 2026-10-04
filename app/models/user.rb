@@ -115,8 +115,9 @@ class User < ApplicationRecord
     participant&.logistica? && participant.logistics_area&.checkin? || false
   end
 
-  # Finanzas (docs/finanzas.md). Presentan y aprueban gastos quien está en el área de Finanzas y el director
-  # de logística, nunca la misma persona en dos pasos seguidos; dirección y coordinación solo ven.
+  # Finanzas (docs/finanzas.md). Presentan gastos y los consolidan quien está en el área de Finanzas y el
+  # director de logística; los aprueban solo el superadmin, el matrimonio director y el director de logística,
+  # nunca la misma persona en dos pasos seguidos. Coordinación solo ve.
   def finance_member?
     participant&.logistica? && participant.logistics_area&.finance? || false
   end
@@ -150,8 +151,13 @@ class User < ApplicationRecord
     finance_member? || participant&.director_logistica? || false
   end
 
+  # Aprobar o rechazar un gasto o una justificación sin factura.
+  def expense_approver?
+    superadmin? || participant&.director? || participant&.director_logistica? || false
+  end
+
   def finance_viewer?
-    finance_operator? || full_access?
+    finance_operator? || expense_approver? || full_access?
   end
 
   # Presupuesto, categorías y tipo de cambio: solo el director de logística. El superadmin, como dirección

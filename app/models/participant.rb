@@ -35,6 +35,9 @@ class Participant < ApplicationRecord
 
   after_save :sync_membership_gender
 
+  # Un área de logística es del comité: quien deja de ser de logística sale de su área (y de sus banderas).
+  before_save -> { self.logistics_area_id = nil }, if: -> { will_save_change_to_rol? && !logistica? && !director_logistica? }
+
   # Al consejero lo ubican dos cosas: la «Compañía» de su ficha y su lugar en el personal de la compañía
   # (Membership), que es lo que leen la compañía, el organigrama y la asistencia nocturna. Se mantienen
   # iguales desde los dos lados: aquí al editar la ficha, y en Membership al asignarlo desde la compañía.

@@ -1,19 +1,23 @@
-<%# El paso que toca, según la etapa y quién mira. El modelo vuelve a comprobar las reglas al enviarlo. %>
+<%# El paso que toca, según la etapa y quién mira. El modelo vuelve a comprobar las reglas al enviarlo.
+    Aprobar es del superadmin, el matrimonio director y el director de logística; consolidar, de quien mueve gastos. %>
 <% presenter = me && expense.presented_by_id == me.id %>
 <% justifier = me && expense.justified_by_id == me.id %>
+<% approver = can_approve_expenses? %>
 
 <% case expense.status %>
 <% when "presented" %>
   <section class="<%= card_classes("p-5 md:p-6") %>" data-next-step="approve">
     <%= section_heading "Aprobación", "stamp" %>
     <% if presenter %>
-      <p class="text-body text-ink-500">Lo presentaste tú: lo tiene que aprobar otra persona (Finanzas o el director de logística).</p>
+      <p class="text-body text-ink-500">Lo presentaste tú: lo aprueban el matrimonio director o el director de logística.</p>
       <div class="mt-4 flex flex-wrap gap-2">
         <%= link_to "Editar", edit_expense_path(expense), class: button_classes(:secondary) %>
         <%= button_to "Retirar", withdraw_expense_path(expense), method: :patch,
               form: { data: { turbo_confirm: "¿Retirar este gasto?", turbo_confirm_detail: "Queda cerrado y ya no se puede aprobar.", turbo_confirm_button: "Sí, retirar" } },
               class: button_classes(:ghost) %>
       </div>
+    <% elsif !approver %>
+      <p class="text-body text-ink-500" data-awaiting-approval>Lo aprueban el matrimonio director o el director de logística.</p>
     <% else %>
       <div class="flex flex-wrap items-start gap-3">
         <%= button_to approve_expense_path(expense), method: :patch, class: button_classes, data: { turbo_submits_with: "Aprobando…" } do %>
@@ -30,6 +34,7 @@
   </section>
 
 <% when "approved" %>
+  <% if can_operate_finances? %>
   <section class="<%= card_classes("p-5 md:p-6") %>" data-next-step="consolidate">
     <%= section_heading "Consolidar con la factura", "receipt" %>
     <p class="-mt-2 mb-4 text-label text-ink-500">Hecha la compra, sube la foto de la factura con el monto real. Todo gasto debe llevar su comprobante.</p>
@@ -64,12 +69,15 @@
       <% end %>
     </details>
   </section>
+  <% end %>
 
 <% when "justification_pending" %>
   <section class="<%= card_classes("p-5 md:p-6") %>" data-next-step="approve-justification">
     <%= section_heading "Aprobar la justificación", "stamp" %>
     <% if justifier %>
       <p class="text-body text-ink-500">La escribiste tú: la tiene que aprobar otra persona.</p>
+    <% elsif !approver %>
+      <p class="text-body text-ink-500" data-awaiting-approval>La aprueban el matrimonio director o el director de logística.</p>
     <% else %>
       <div class="flex flex-wrap items-start gap-3">
         <%= button_to approve_justification_expense_path(expense), method: :patch, class: button_classes do %>

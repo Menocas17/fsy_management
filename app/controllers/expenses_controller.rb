@@ -1,8 +1,11 @@
 # Los gastos y sus tres etapas (docs/finanzas.md). El modelo decide si el paso vale (etapa y que no sea la
 # misma persona del paso anterior); aquí solo se ve quién puede entrar y se deja constancia.
 class ExpensesController < ApplicationController
+  APPROVAL_STEPS = %i[approve reject approve_justification reject_justification].freeze
+
   before_action :require_finance_viewer!
-  before_action :require_finance_operator!, except: %i[index show]
+  before_action :require_finance_operator!, except: [ :index, :show, *APPROVAL_STEPS ]
+  before_action :require_expense_approver!, only: APPROVAL_STEPS
   before_action :set_expense, except: %i[index new create]
 
   FILTERS = {
@@ -95,8 +98,9 @@ class ExpensesController < ApplicationController
       @expense = Expense.find(params[:id])
     end
 
+    # El superadmin no tiene ficha: aprueba firmando como «Administrador del sistema».
     def actor
-      Current.user.participant
+      Current.user.participant || (Expense::SYSTEM_SIGNER if Current.user.superadmin?)
     end
 
     def editable?
