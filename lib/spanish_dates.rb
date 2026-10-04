@@ -14,6 +14,11 @@ module SpanishDates
     "#{capitalize ? day.capitalize : day} #{date.day} de #{MONTH_NAMES[date.month - 1]}"
   end
 
+  # «14 de marzo de 2010»: una fecha de nacimiento.
+  def full(date)
+    "#{date.day} de #{MONTH_NAMES[date.month - 1]} de #{date.year}"
+  end
+
   def abbr(date)
     DAY_ABBR[date.wday]
   end

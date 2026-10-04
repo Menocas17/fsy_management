@@ -14,7 +14,7 @@
       <div class="min-w-0">
         <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @participant.full_name %></h1>
         <p class="text-label font-semibold text-ink-500">
-          <%= [ "#{@participant.age} años", @company&.name, @participant.stake&.titleize ].compact.join(" · ") %>
+          <%= [ "#{@participant.age} años", @company&.name, @participant.stake_name ].compact.join(" · ") %>
         </p>
       </div>
     </div>
@@ -52,16 +52,18 @@
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-5 items-start">
     <%# Lo que ya dice su ficha, para no tener que buscarlo. Se corrige en la ficha del participante. %>
     <aside class="flex flex-col gap-4">
-      <% if flags[:allergies] %>
-        <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-cat-rose-ink" role="note" data-infirmary-allergies>
-          <p class="flex items-center gap-2 text-label font-bold"><%= icon "triangle-alert", class: "size-4" %>Alergias</p>
-          <p class="mt-1 text-body font-semibold"><%= flags[:allergies] %></p>
+      <% if flags[:medical_information] %>
+        <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-cat-rose-ink" role="note" data-infirmary-medical-information>
+          <p class="flex items-center gap-2 text-label font-bold"><%= icon "triangle-alert", class: "size-4" %>Información médica</p>
+          <p class="mt-1 text-body font-semibold whitespace-pre-line"><%= flags[:medical_information] %></p>
         </div>
       <% end %>
       <section class="<%= card_classes("p-5") %>">
         <%= section_heading "De su ficha", "shield-plus", tone: :rose %>
-        <%= info_row "Medicinas", "pill", @participant.medicines %>
         <%= info_row "Dieta", "leaf", @participant.diet %>
+        <% if can_read_emotional_information?(@participant) %>
+          <%= info_row "Información emocional", "heart-handshake", @participant.emotional_information %>
+        <% end %>
         <%= info_row "Notas", "notebook-pen", @participant.additional_instructions %>
         <%= info_row "Contacto de emergencia", "phone",
               [ @participant.emergency_contact_name, @participant.emergency_contact_relation.presence&.then { "(#{_1})" }, @participant.emergency_contact_number ].compact_blank.join(" "),

@@ -2,17 +2,34 @@
   <%= section_heading "Información médica", "shield-plus", tone: :rose %>
   <%# Si algo pide atención salta a la vista en rojo; el detalle ya está justo abajo, así que el aviso no lo repite.
       Si todo dice «Ninguna», no aparece nada. %>
-  <% if [ participant.allergies, participant.medicines, participant.diet ].any? { |value| medical_note?(value) } %>
+  <% if [ participant.medical_information, participant.diet ].any? { |value| medical_note?(value) } %>
     <p class="mb-4 flex items-center gap-2.5 rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-body font-bold text-cat-rose-ink" role="note" data-medical-alert>
       <%= icon "triangle-alert", class: "size-[18px] shrink-0" %>
       Requiere atención
     </p>
   <% end %>
   <div>
-    <%= info_row "Alergias", "shield-plus", participant.allergies %>
-    <%= info_row "Medicinas", "pill", participant.medicines %>
+    <%= info_row "Información médica", "stethoscope", participant.medical_information %>
     <%= info_row "Dieta", "leaf", participant.diet %>
   </div>
+
+  <%# Privada: la ven enfermería, el director, sus consejeros y su auxiliar (y la persona misma). %>
+  <% if can_read_emotional_information?(participant) %>
+    <div class="mt-4 rounded-tile border border-cat-indigo/25 bg-cat-indigo/10 px-4 py-3.5" data-emotional-information>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="flex items-center gap-2 text-body font-bold text-ink-900">
+          <%= icon "heart-handshake", class: "size-4 text-cat-indigo-ink" %>
+          Información emocional
+        </p>
+        <%= render ChipComponent.new(label: "Privada", tone: :indigo, icon: "lock") %>
+      </div>
+      <% if participant.emotional_information.present? %>
+        <p class="mt-1.5 text-body leading-relaxed text-ink-700 whitespace-pre-line"><%= participant.emotional_information %></p>
+      <% else %>
+        <p class="mt-1.5 text-body text-ink-500">No hay información emocional.</p>
+      <% end %>
+    </div>
+  <% end %>
 
   <%# Sus visitas a enfermería: si está adentro ahora salta a la vista; si no, cuántas lleva. %>
   <% if participant.joven? && can_view_infirmary? %>

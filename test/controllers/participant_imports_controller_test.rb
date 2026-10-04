@@ -96,8 +96,53 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "with full access the page has three tabs: companies, counselors and jóvenes" do
+    get new_participant_import_path(tipo: "companias")
+
+    assert_select "[data-import-tab]", 3
+    assert_select "[data-import-form='companias'] form[action='#{company_imports_path}']"
+  end
+
+  test "companies are uploaded from their tab and come back with a summary" do
+    post company_imports_path, params: { file: csv_upload("Número,Compañía auxiliar\n7,Alfa\n8,Alfa\n") }
+
+    assert_redirected_to new_participant_import_path(tipo: "companias")
+    assert_equal "2 compañías nuevas.", flash[:notice]
+    assert_equal [ 7, 8 ], AuxiliarCompany.find_by!(name: "Auxiliar Alfa").companies.order(:number).pluck(:number)
+  end
+
+  test "counselors uploaded from their tab sit in their company at once" do
+    file = csv_upload("Nombre,Apellido,Edad,Sexo,Estaca,Talla de camiseta,Compañía\nLuis,Uno,25,Masculino,Villa Flor,M,3\n")
+
+    post participant_imports_path, params: { file: file, tipo: "consejeros" }
+
+    luis = Participant.find_by!(first_name: "Luis")
+    assert luis.consejero?
+    assert_equal [ 3 ], luis.companies.pluck(:number)
+  end
+
+  test "registration (logística) only sees the jóvenes tab and can't upload companies" do
+    registrar = Participant.create!(first_name: "Rita", last_name: "Registro", age: 30, stake: "villa_flor", shirt_number: "m",
+                                    gender: "M", rol: "logistica", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
+    sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: registrar))
+
+    get new_participant_import_path(tipo: "companias")
+    assert_select "[data-import-tab]", 0
+    assert_select "[data-import-form='jovenes']"
+
+    post company_imports_path, params: { file: csv_upload("Número\n9\n") }
+    assert_nil Company.find_by(number: 9)
+  end
+
   private
     def spreadsheet
       fixture_file_upload("participantes.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    end
+
+    def csv_upload(content)
+      file = Tempfile.new([ "carga", ".csv" ])
+      file.write(content)
+      file.rewind
+      Rack::Test::UploadedFile.new(file.path, "text/csv", original_filename: "carga.csv")
     end
 end

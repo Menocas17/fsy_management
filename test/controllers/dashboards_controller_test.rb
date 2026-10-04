@@ -132,14 +132,13 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "kitchen and infirmary see what each ficha needs, ignoring the ninguna answers" do
-    participants(:juan).update!(allergies: "Maní", diet: "Sin restricciones", medicines: "Ninguna")
-    participants(:maria).update!(rol: :joven, allergies: "Ninguna", diet: "Vegetariana")
+    participants(:juan).update!(medical_information: "Alérgico al maní", diet: "Sin restricciones")
+    participants(:maria).update!(rol: :joven, medical_information: "Ninguna", diet: "Vegetariana")
 
     get dashboard_path
 
-    assert_select "[data-care-count='allergies']", text: "1"
+    assert_select "[data-care-count='medical_information']", { text: "1" }, "«Ninguna» no cuenta"
     assert_select "[data-care-count='diet']", { text: "1" }, "«Sin restricciones» no cuenta como dieta especial"
-    assert_select "[data-care-count='medicines']", text: "0"
   end
 
   test "the totals and the kitchen figures are doors into their lists" do

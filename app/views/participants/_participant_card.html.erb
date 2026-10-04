@@ -8,7 +8,7 @@
       <% if is_staff %>
         <%= render(RoleSpanComponent.new(role: participant.rol)) %>
       <% else %>
-        <%= render(StakeSpanComponent.new(stake: participant.stake)) %>
+        <%= render(StakeSpanComponent.new(stake: participant.stake, name: participant.stake_name)) %>
         <span class="text-label font-semibold text-ink-500"><%= participant.age %> años</span>
       <% end %>
     </div>

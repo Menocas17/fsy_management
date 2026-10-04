@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class StakeSpanComponent < ViewComponent::Base
-  def initialize(stake:)
+  # name: lo que se lee; sin él, la estaca. Una estaca escrita a mano (staff de otra estaca) va en gris.
+  def initialize(stake:, name: nil)
     @stake = stake
+    @name = name || stake&.titleize
   end
 
   def stake_color

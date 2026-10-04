@@ -24,7 +24,9 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
         <% ParticipantImportRow::EDITABLE.each do |field, label| %>
           <% current = @row.values[field.to_s] %>
-          <div class="<%= "sm:col-span-2" if field.in?(%i[additional_instructions]) %>">
+          <%# Alergias y medicinas aparte solo vienen en planillas viejas: al entrar se juntan en la información médica. %>
+          <% next if field.in?(%i[allergies medicines]) && current.blank? %>
+          <div class="<%= "sm:col-span-2" if field.in?(%i[additional_instructions medical_information]) %>">
             <%= form.label field, label, class: field_label_classes %>
             <% if (options = import_field_options(field)) %>
               <%= form.select field, import_select_options(options, current.to_s), {}, class: field_select_classes %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_203000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -429,6 +429,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_203000) do
     t.uuid "company_id"
     t.uuid "logistics_area_id"
     t.string "code"
+    t.string "preferred_name"
+    t.date "birth_date"
+    t.string "other_stake"
+    t.string "other_ward"
     t.index ["code"], name: "index_participants_on_code", unique: true
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"

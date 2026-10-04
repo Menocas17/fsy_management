@@ -25,7 +25,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
                  [ ana.age, ana.gender, ana.stake, ana.ward, ana.shirt_number, ana.rol, ana.room ]
     assert_equal @company, ana.company
     assert_equal "8888-1111", ana.phone_number
-    assert_equal "Maní", ana.allergies
+    assert_equal "Alergias: Maní", ana.medical_information
   end
 
   test "a row in wait says why, and which issues block approving it" do
@@ -35,7 +35,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal [ "La compañía 99 no existe: quedaría sin compañía" ], sofia.issues.map { |i| i["text"] }
     refute sofia.blocking?, "a missing company can be approved knowingly"
     assert pedro.blocking?
-    assert_match(/Edad/, pedro.issues.first["text"])
+    assert_match(/Fecha de nacimiento/, pedro.issues.first["text"])
   end
 
   test "running it twice holds every row as a duplicate, pointing at the existing ficha" do
@@ -151,6 +151,46 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal [ "Edad debe ser un número" ], import.rows.pending.sole.issues.map { |i| i["text"] }
   end
 
+
+  test "the official church file goes in as it is downloaded, empty first row included" do
+    import = ParticipantImporter.new(Rails.root.join("test/fixtures/files/formato_iglesia.xlsx").to_s).call.import
+    sofia = Participant.find_by!(last_name: "Martínez")
+
+    assert_equal [ "Sofía Isabel", "Sofi", Date.new(2010, 3, 14), 16, "M", "m" ],
+                 [ sofia.first_name, sofia.preferred_name, sofia.birth_date, sofia.age, sofia.gender, sofia.shirt_number ]
+    assert_equal [ "bello_horizonte", "la_rotonda" ], [ sofia.stake, sofia.ward ], "«Estaca Managua Nicaragua Bello Horizonte» is Bello Horizonte"
+    assert_equal [ "Asma leve, usa inhalador", "No come mariscos", "Ansiedad en lugares con mucha gente" ],
+                 [ sofia.medical_information, sofia.diet, sofia.emotional_information ]
+    assert_equal [ "María Martínez", "8765 4321", "maria@example.com", "Roberto Martínez", "8890 1122", "roberto@example.com" ],
+                 [ sofia.emergency_contact_name, sofia.emergency_contact_number, sofia.emergency_contact_email,
+                   sofia.emergency_contact_2_name, sofia.emergency_contact_2_number, sofia.emergency_contact_2_email ]
+    assert_equal [ "Carlos Mendoza", "obispo@example.com" ], [ sofia.bishop_name, sofia.bishop_email ]
+    assert_equal 3, import.rows.first.row_number, "the row numbers are the spreadsheet's"
+
+    luis = import.rows.pending.sole
+    assert_equal "Luis", luis.values["first_name"]
+    assert luis.blocking?, "a joven from a stake that doesn't take part waits"
+    assert_match "Estaca León Nicaragua", luis.issues.first["text"]
+  end
+
+  test "the counselors' upload makes every row a counselor, who may come from another stake" do
+    import = ParticipantImporter.new(Rails.root.join("test/fixtures/files/formato_iglesia.xlsx").to_s, role: "consejero").call.import
+    assert_equal [ "Consejero sin compañía: se puede aprobar y asignarlo después" ], import.rows.pending.flat_map { |row| row.issues.map { |i| i["text"] } }.uniq
+
+    import.rows.pending.each { |row| assert row.approve!("Admin") }
+    luis = Participant.find_by!(first_name: "Luis")
+
+    assert luis.consejero?
+    assert_equal [ nil, "Estaca León Nicaragua", "Barrio Sutiava", Date.new(2009, 8, 5) ],
+                 [ luis.stake, luis.other_stake, luis.other_ward, luis.birth_date ]
+  end
+
+  test "a joven from a ward that doesn't take part waits" do
+    import = import_csv [ "Nombres,Apellidos,Cumpleaños,Sexo,Estaca,Barrio,Talla",
+                          "Rosa,Uno,14/03/2010,Femenino,Villa Flor,Altamira,S" ]
+
+    assert_equal [ "El barrio «Altamira» no es de los que participan" ], import.rows.pending.sole.issues.map { |i| i["text"] }
+  end
   private
     def import_csv(lines)
       Tempfile.create([ "carga", ".csv" ]) do |file|

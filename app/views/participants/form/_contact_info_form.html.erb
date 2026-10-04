@@ -11,21 +11,27 @@
     </div>
   </div>
 
-  <div class="mt-5 pt-4 border-t border-line-soft">
-    <h3 class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-cat-amber-ink">Contacto de emergencia</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <%= form.label :emergency_contact_number, "Número", class: field_label_classes %>
-        <%= form.phone_field :emergency_contact_number, class: field_input_classes, placeholder: "+505 0000 0000" %>
-      </div>
-      <div>
-        <%= form.label :emergency_contact_name, "Nombre", class: field_label_classes %>
-        <%= form.text_field :emergency_contact_name, class: field_input_classes, placeholder: "Nombre completo" %>
-      </div>
-      <div class="sm:max-w-xs">
-        <%= form.label :emergency_contact_relation, "Parentesco", class: field_label_classes %>
-        <%= form.text_field :emergency_contact_relation, class: field_input_classes, placeholder: "Ej. Madre, Padre, Tutor" %>
+  <% [ [ "Contacto de emergencia", "" ], [ "Segundo contacto de emergencia", "2_" ] ].each do |title, n| %>
+    <div class="mt-5 pt-4 border-t border-line-soft">
+      <h3 class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-cat-amber-ink"><%= title %></h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :"emergency_contact_#{n}number", "Número", class: field_label_classes %>
+          <%= form.phone_field :"emergency_contact_#{n}number", class: field_input_classes, placeholder: "+505 0000 0000" %>
+        </div>
+        <div>
+          <%= form.label :"emergency_contact_#{n}name", "Nombre", class: field_label_classes %>
+          <%= form.text_field :"emergency_contact_#{n}name", class: field_input_classes, placeholder: "Nombre completo" %>
+        </div>
+        <div>
+          <%= form.label :"emergency_contact_#{n}relation", "Parentesco", class: field_label_classes %>
+          <%= form.text_field :"emergency_contact_#{n}relation", class: field_input_classes, placeholder: "Ej. Madre, Padre, Tutor" %>
+        </div>
+        <div>
+          <%= form.label :"emergency_contact_#{n}email", "Correo", class: field_label_classes %>
+          <%= form.email_field :"emergency_contact_#{n}email", class: field_input_classes, placeholder: "correo@ejemplo.com" %>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 </section>

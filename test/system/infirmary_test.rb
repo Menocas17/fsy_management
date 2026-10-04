@@ -3,8 +3,8 @@ require "application_system_test_case"
 class InfirmaryTest < ApplicationSystemTestCase
   setup do
     company = Company.create!(number: 7)
-    @joven = Participant.create!(first_name: "Valeria", last_name: "Mendoza", age: 16, stake: "bello_horizonte", ward: "ducuali",
-                                 shirt_number: "m", gender: "M", rol: "joven", company: company, allergies: "Penicilina")
+    @joven = Participant.create!(first_name: "Valeria", last_name: "Mendoza", age: 16, stake: "bello_horizonte", ward: "la_rotonda",
+                                 shirt_number: "m", gender: "M", rol: "joven", company: company, medical_information: "Alérgica a la penicilina")
     @visit = InfirmaryVisit.admit_directly(@joven, by: nil, reason: "fiebre", detail: "38.4 y dolor de garganta").tap(&:start)
     sign_in_as(users(:one))
   end

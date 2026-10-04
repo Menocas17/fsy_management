@@ -5,7 +5,7 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(users(:one))
     @company = Company.create!(number: 3)
     @joven = participants(:juan)
-    @joven.update!(company: @company, room: "204", allergies: "Maní")
+    @joven.update!(company: @company, room: "204", medical_information: "Alérgico al maní")
     # Sin nada activo el escáner está cerrado; estas pruebas activan la llegada, como haría el admin.
     ScanWindow.activate!(ScanWindow.arrival)
   end

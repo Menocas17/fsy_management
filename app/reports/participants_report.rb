@@ -51,8 +51,8 @@ class ParticipantsReport < ApplicationReport
         participant.age.to_s,
         Participant::GENDER_LABELS.fetch(participant.gender, "—"),
         participant.role_label,
-        blank(participant.stake&.titleize),
-        blank(participant.ward&.titleize),
+        blank(participant.stake_name),
+        blank(participant.ward_name),
         blank(participant.shirt_number&.upcase),
         blank(participant.room),
         blank(participant.phone_number)

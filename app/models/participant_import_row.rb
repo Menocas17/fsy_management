@@ -9,13 +9,18 @@ class ParticipantImportRow < ApplicationRecord
 
   STATUS_LABELS = { "imported" => "Entró", "pending" => "Por resolver", "approved" => "Aprobada", "discarded" => "Descartada" }.freeze
 
-  # Los campos que se pueden corregir a mano, con su etiqueta: los mismos que reconoce la carga.
+  # Los campos que se pueden corregir a mano, con su etiqueta: los mismos que reconoce la carga. La
+  # información emocional no: es privada, y quien carga el archivo no siempre puede leerla.
   EDITABLE = {
-    first_name: "Nombres", last_name: "Apellidos", age: "Edad", gender: "Sexo", stake: "Estaca", ward: "Barrio",
+    first_name: "Nombres", last_name: "Apellidos", preferred_name: "Nombre que se prefiere",
+    birth_date: "Fecha de nacimiento", age: "Edad", gender: "Sexo", stake: "Estaca", ward: "Barrio",
     shirt_number: "Talla", rol: "Rol", identity_document: "Cédula", company_number: "Compañía",
     auxiliar_company: "Compañía auxiliar", room: "Cuarto", phone_number: "Teléfono", email_address: "Correo",
     emergency_contact_name: "Contacto de emergencia", emergency_contact_number: "Teléfono de emergencia",
-    emergency_contact_relation: "Parentesco", allergies: "Alergias", medicines: "Medicinas", diet: "Dieta",
+    emergency_contact_relation: "Parentesco", emergency_contact_email: "Correo de emergencia",
+    emergency_contact_2_name: "Segundo contacto", emergency_contact_2_number: "Teléfono del segundo contacto",
+    emergency_contact_2_email: "Correo del segundo contacto", bishop_name: "Obispo", bishop_email: "Correo del obispo",
+    medical_information: "Información médica", allergies: "Alergias", medicines: "Medicinas", diet: "Dieta",
     additional_instructions: "Notas"
   }.freeze
 

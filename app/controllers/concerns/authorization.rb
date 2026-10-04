@@ -14,7 +14,7 @@ module Authorization
                   :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
                   :can_take_night_attendance?,
                   :can_view_infirmary?, :can_operate_infirmary?, :can_announce_infirmary?, :can_read_infirmary_notes?,
-                  :can_cancel_infirmary_visit?
+                  :can_cancel_infirmary_visit?, :can_read_emotional_information?, :can_import_staffing?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -205,6 +205,15 @@ module Authorization
     infirmary_care_team?(joven)
   end
 
+  # La información emocional de la inscripción: la leen (y la escriben) quienes leen las notas de enfermería
+  # de esa persona, y ella misma. Al registrar una ficha nueva todavía no hay a quién cuidar: enfermería y la dirección.
+  def can_read_emotional_information?(participant)
+    return false if Current.user.nil?
+    return can_operate_infirmary? || Current.user.participant&.director? || false if participant.nil? || participant.new_record?
+
+    Current.user.participant_id == participant.id || can_read_infirmary_notes?(participant)
+  end
+
   # Un aviso que todavía no llega se puede retirar: quien lo dio o enfermería.
   def can_cancel_infirmary_visit?(visit)
     return false unless visit&.en_camino?
@@ -286,6 +295,11 @@ module Authorization
     full_company_access? || Current.user&.checkin_member? || false
   end
 
+  # Compañías y consejeros por archivo: arman el personal de las compañías, que es de acceso total.
+  def can_import_staffing?
+    full_company_access?
+  end
+
   def can_manage_alerts?
     Current.user&.alert_manager? || false
   end
@@ -320,12 +334,15 @@ module Authorization
   private
     # Contacto, salud y acomodación: lo que un líder necesita para cuidar a su gente.
     CARE_ATTRIBUTES = %i[avatar room shirt_number phone_number email_address emergency_contact_number
-                         emergency_contact_name emergency_contact_relation allergies medicines diet
+                         emergency_contact_name emergency_contact_relation emergency_contact_email
+                         emergency_contact_2_number emergency_contact_2_name emergency_contact_2_relation
+                         emergency_contact_2_email medical_information emotional_information diet
                          additional_medical_notes additional_instructions].freeze
 
     # Quién es la persona y dónde encaja en el evento.
-    IDENTITY_ATTRIBUTES = %i[first_name last_name age m_person_in_charge h_person_in_charge identity_document
-                             gender stake ward rol company_id logistics_area_id].freeze
+    IDENTITY_ATTRIBUTES = %i[first_name last_name preferred_name birth_date age m_person_in_charge h_person_in_charge
+                             identity_document gender stake ward other_stake other_ward bishop_name bishop_email
+                             rol company_id logistics_area_id].freeze
 
     def require_finance_viewer!
       redirect_to dashboard_path, alert: "Finanzas es del área de Finanzas y la dirección" unless can_view_finances?
@@ -477,6 +494,7 @@ module Authorization
 
       # Nadie se asciende a sí mismo: el rol, la compañía y el área las cambia quien tiene acceso total.
       attributes -= %i[rol company_id logistics_area_id] if editing_self?(actor, target) && !full_company_access?
+      attributes -= %i[emotional_information] unless can_read_emotional_information?(target)
       attributes
     end
 

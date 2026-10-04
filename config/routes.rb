@@ -87,6 +87,8 @@ Rails.application.routes.draw do
     end
   end
   # Carga masiva: subir el archivo y, de cada carga, su informe con las filas que esperan resolverse a mano.
+  # Las compañías se suben aparte (no dejan informe: cada fila entra o dice por qué no).
+  post "carga-de-participantes/companias", to: "company_imports#create", as: :company_imports
   resources :participant_imports, only: %i[new create show], path: "carga-de-participantes", path_names: { new: "subir" } do
     resources :rows, only: %i[edit update], controller: "participant_import_rows", path: "filas", path_names: { edit: "corregir" } do
       member do

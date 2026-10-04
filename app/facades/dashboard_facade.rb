@@ -39,9 +39,8 @@ class DashboardFacade
   # Cocina y enfermería: lo que cada ficha trae y que, si no se suma aquí, hay que ir a buscar de a una.
   def special_care
     @special_care ||= {
-      allergies: Participant.jovenes.with_medical_note(:allergies).count,
-      diet: Participant.jovenes.with_medical_note(:diet).count,
-      medicines: Participant.jovenes.with_medical_note(:medicines).count
+      medical_information: Participant.jovenes.with_medical_note(:medical_information).count,
+      diet: Participant.jovenes.with_medical_note(:diet).count
     }
   end
 

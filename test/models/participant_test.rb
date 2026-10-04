@@ -92,10 +92,52 @@ class ParticipantTest < ActiveSupport::TestCase
   test "a company keeps one counselor per gender when the ficha is edited" do
     company = Company.create!(number: 1)
     participants(:maria).update!(company: company)
-    other = Participant.create!(first_name: "Rosa", last_name: "Díaz", age: 30, stake: "bello_horizonte", ward: "ducuali",
+    other = Participant.create!(first_name: "Rosa", last_name: "Díaz", age: 30, stake: "bello_horizonte", ward: "la_rotonda",
                                 shirt_number: "m", gender: "M", rol: "consejero")
 
     assert_not other.update(company: company)
     assert_match "Compañía 1 ya tiene consejera: María García", other.errors.full_messages.to_sentence
+  end
+
+  test "each stake offers only its own wards" do
+    juan = participants(:juan)
+
+    assert_not juan.update(ward: "ciudad_jardin")
+    assert_match "Ciudad Jardin no es de la estaca Bello Horizonte", juan.errors.full_messages.to_sentence
+  end
+
+  test "staff may come from a stake that doesn't take part, written by hand; jóvenes may not" do
+    maria = participants(:maria)
+    assert maria.update(stake: Participant::OTHER_STAKE, other_stake: "Estaca Managua Sur", other_ward: "Barrio Altamira")
+    assert_equal [ nil, nil, "Estaca Managua Sur", "Barrio Altamira" ], [ maria.stake, maria.ward, maria.stake_name, maria.ward_name ]
+    assert_equal Participant::OTHER_STAKE, maria.stake_choice
+
+    maria.update!(stake: "las_americas", ward: "ciudad_jardin")
+    assert_nil maria.reload.other_stake, "choosing a stake that takes part drops the written one"
+
+    juan = participants(:juan)
+    assert_not juan.update(stake: Participant::OTHER_STAKE, other_stake: "Estaca León")
+    assert_match "solo se acepta para el staff", juan.errors.full_messages.to_sentence
+  end
+
+  test "the age comes from the birth date, counted on the first day of the event" do
+    juan = participants(:juan)
+    event = Rails.configuration.x.event_start_on
+
+    juan.update!(birth_date: event.prev_year(16))
+    assert_equal 16, juan.age
+    juan.update!(birth_date: event.prev_year(16) + 1)
+    assert_equal 15, juan.age, "one day short of the birthday"
+
+    assert_not Participant.new(first_name: "Sin", last_name: "Fecha", stake: "villa_flor", shirt_number: "m", gender: "H").valid?
+  end
+
+  test "the nickname is the preferred name only when it differs from the first name" do
+    juan = participants(:juan)
+
+    juan.preferred_name = "juan"
+    assert_nil juan.nickname
+    juan.preferred_name = "Juancho"
+    assert_equal "Juancho", juan.nickname
   end
 end

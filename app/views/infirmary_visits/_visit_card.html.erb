@@ -35,14 +35,10 @@
 
   <div class="flex flex-wrap items-center justify-between gap-2 mt-auto">
     <div class="flex flex-wrap gap-1.5 min-w-0">
-      <% if flags[:allergies] %>
-        <%= render ChipComponent.new(label: "Alergia: #{flags[:allergies].truncate(28)}", tone: :rose, icon: "triangle-alert", data: { infirmary_flag: "allergies" }) %>
-      <% end %>
-      <% if flags[:medicines] %>
-        <%= render ChipComponent.new(label: "Toma: #{flags[:medicines].truncate(24)}", tone: :amber, icon: "pill", data: { infirmary_flag: "medicines" }) %>
-      <% end %>
-      <% if flags.empty? %>
-        <%= render ChipComponent.new(label: "Sin alergias ni medicinas") %>
+      <% if flags[:medical_information] %>
+        <%= render ChipComponent.new(label: flags[:medical_information].squish.truncate(40), tone: :rose, icon: "triangle-alert", data: { infirmary_flag: "medical_information" }) %>
+      <% else %>
+        <%= render ChipComponent.new(label: "Sin información médica") %>
       <% end %>
     </div>
     <div class="relative z-10 flex flex-wrap gap-2">

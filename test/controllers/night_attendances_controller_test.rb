@@ -128,7 +128,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
 
   private
     def person(name, rol, gender, company: nil)
-      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "ducuali",
+      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "la_rotonda",
                           shirt_number: "m", gender: gender, rol: rol, company: company)
     end
 

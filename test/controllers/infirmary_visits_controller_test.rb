@@ -5,7 +5,7 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     @branch = AuxiliarCompany.create!(name: "Auxiliar Alfa")
     @company = Company.create!(number: 3, auxiliar_company: @branch)
     @other = Company.create!(number: 4)
-    @juan = participants(:juan).tap { |joven| joven.update!(company: @company, allergies: "Penicilina") }
+    @juan = participants(:juan).tap { |joven| joven.update!(company: @company, medical_information: "Alérgico a la penicilina") }
     @pedro = person("Pedro", "joven", "H", company: @other)
 
     @counselor = person("Carlos", "consejero", "H")
@@ -24,7 +24,7 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     get infirmary_visits_path
     assert_response :success
     assert_select "[data-infirmary-visit='#{@juan.id}'][data-infirmary-status=adentro]", text: /Fiebre/
-    assert_select "[data-infirmary-visit='#{@juan.id}'] [data-infirmary-flag=allergies]", text: /Penicilina/
+    assert_select "[data-infirmary-visit='#{@juan.id}'] [data-infirmary-flag=medical_information]", text: /penicilina/
     assert_select "[data-infirmary-detail]", 0, "the detail is only for those who read the chart"
     assert_select "[data-infirmary-action]", 0, "a registrar neither admits nor discharges"
     assert_select "nav a[href='#{infirmary_visits_path}']", text: /Enfermería/
@@ -166,9 +166,22 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-night-joven='#{@juan.id}'] input[name='marks[#{@juan.id}][absence_reason]'][value=enfermeria]"
   end
 
+  test "the emotional information is read like the clinical notes: carers, nursing and the director" do
+    @juan.update!(emotional_information: "Ansiedad en lugares con mucha gente")
+
+    sign_in_as account(@counselor)
+    get participant_path(@juan)
+    assert_select "[data-emotional-information]", text: /Ansiedad/
+
+    sign_in_as account(@registrar)
+    get participant_path(@juan)
+    assert_select "[data-emotional-information]", 0
+    assert_not_includes response.body, "Ansiedad"
+  end
+
   private
     def person(name, rol, gender, **attrs)
-      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "ducuali",
+      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "la_rotonda",
                           shirt_number: "m", gender: gender, rol: rol, **attrs)
     end
 

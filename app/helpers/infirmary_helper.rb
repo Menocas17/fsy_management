@@ -20,9 +20,9 @@ module InfirmaryHelper
     render ChipComponent.new(label: visit.disposition_label || "Alta", tone: tone, icon: icon_name, data: { disposition: visit.disposition })
   end
 
-  # Lo médico de su ficha que enfermería tiene que ver antes de darle algo: alergias y medicinas, si dicen algo.
+  # Lo médico de su ficha que enfermería tiene que ver antes de darle algo (alergias, medicinas…), si dice algo.
   def infirmary_medical_flags(participant)
-    { allergies: participant.allergies, medicines: participant.medicines }.select { |_, value| medical_note?(value) }
+    { medical_information: participant.medical_information }.select { |_, value| medical_note?(value) }
   end
 
   # La hora, y el día si no fue hoy: «11:43» o «lun 12 · 21:10».

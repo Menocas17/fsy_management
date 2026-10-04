@@ -68,7 +68,7 @@ class NightAttendanceTest < ApplicationSystemTestCase
 
   private
     def person(name, rol, company: nil)
-      Participant.create!(first_name: name, last_name: "Prueba", age: 17, stake: "bello_horizonte", ward: "ducuali",
+      Participant.create!(first_name: name, last_name: "Prueba", age: 17, stake: "bello_horizonte", ward: "la_rotonda",
                           shirt_number: "m", gender: "H", rol: rol, company: company)
     end
 end

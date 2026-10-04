@@ -33,13 +33,7 @@ class DemoSeed
     "Música y audiovisuales" => [ 2, "Sonido, proyección y ensayos musicales." ]
   }.freeze
 
-  # The app doesn't record which ward belongs to which stake yet; adjust this mapping if it's off.
-  WARDS_BY_STAKE = {
-    "bello_horizonte" => %w[bello_horizonte_b la_rotonda],
-    "las_americas" => %w[ciudad_jardin la_maximo_jerez],
-    "villa_flor" => %w[ducuali primavera],
-    "puerto_cabezas" => %w[waspan]
-  }.freeze
+  WARDS_BY_STAKE = Participant::WARDS_BY_STAKE
 
   MALE_NAMES = %w[
     Carlos Pedro José Alejandro Mateo Daniel Gabriel Samuel David Lucas Juan Francisco Mauricio Eduardo Santiago
@@ -333,7 +327,8 @@ class DemoSeed
       contact_first_name, = unique_name(relations[relation], register: false)
 
       {
-        rol: rol, gender: gender, age: age, stake: stake, ward: pick(WARDS_BY_STAKE.fetch(stake)),
+        rol: rol, gender: gender, stake: stake, ward: pick(WARDS_BY_STAKE.fetch(stake)),
+        birth_date: Rails.configuration.x.event_start_on.prev_year(age) - @rng.rand(1..360),
         shirt_number: pick(gender == "H" ? %w[s m m l l xl] : %w[xs s s m m l]),
         identity_document: @rng.rand(100_000_000..999_999_999),
         date_of_inscription: Date.new(2026, 1, 15) + @rng.rand(0..120),
@@ -341,11 +336,17 @@ class DemoSeed
         emergency_contact_name: "#{contact_first_name} #{pick(LAST_NAMES)}",
         emergency_contact_number: phone,
         emergency_contact_relation: relation,
-        allergies: chance(0.2) ? pick(ALLERGIES) : "Ninguna",
-        medicines: chance(0.15) ? pick(MEDICINES) : "Ninguna",
+        medical_information: medical_information,
         diet: chance(0.12) ? pick(DIETS) : "Sin restricciones",
         additional_medical_notes: chance(0.1) ? pick(MEDICAL_NOTES) : nil
       }
+    end
+
+    def medical_information
+      parts = []
+      parts << "Alérgico a #{pick(ALLERGIES).downcase}" if chance(0.2)
+      parts << pick(MEDICINES) if chance(0.15)
+      parts.any? ? parts.join(". ") : "Ninguna"
     end
 
     def link_logins

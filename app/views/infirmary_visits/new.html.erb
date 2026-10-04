@@ -21,8 +21,7 @@
 
       <% if flags.any? %>
         <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-cat-rose-ink" role="note" data-infirmary-medical>
-          <% if flags[:allergies] %><p class="text-label font-bold">Alergias: <%= flags[:allergies] %></p><% end %>
-          <% if flags[:medicines] %><p class="text-label font-bold">Toma: <%= flags[:medicines] %></p><% end %>
+          <p class="text-label font-bold whitespace-pre-line">Información médica: <%= flags[:medical_information] %></p>
         </div>
       <% end %>
 
