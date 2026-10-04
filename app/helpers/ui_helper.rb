@@ -63,16 +63,8 @@ module UiHelper
 
   # Título de tarjeta en tipo de oración: las etiquetas en mayúsculas quedan solo para la barra superior.
   # El encabezado de sección de toda la aplicación (DESIGN.md): mosaico teñido de 34 px y título de 15. Lo que
-  # vaya en el bloque (un conteo, un enlace) queda a la derecha. bare: el ícono suelto de antes, solo para el
-  # escáner de Registro, que se queda como está.
-  def section_heading(title, icon_name, tone: :primary, bare: false, &block)
-    if bare
-      return tag.div(class: "flex items-center gap-2.5 mb-4") do
-        icon(icon_name, class: "w-[17px] h-[17px] text-primary-500 dark:text-primary-300") +
-          tag.h2(title, class: "text-[15px] font-bold text-ink-900")
-      end
-    end
-
+  # vaya en el bloque (un conteo, un enlace) queda a la derecha.
+  def section_heading(title, icon_name, tone: :primary, &block)
     tag.div(class: "flex items-center justify-between gap-3 mb-4", data: { section_heading: true }) do
       tag.div(class: "flex items-center gap-3 min-w-0") do
         render(IconTileComponent.new(icon: icon_name, tone: tone)) + tag.h2(title, class: "text-title font-bold text-ink-900")

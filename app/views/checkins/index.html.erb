@@ -3,88 +3,92 @@
 <% content_for :eyebrow, "Registro" %>
 <% back_to "Inicio", dashboard_path %>
 <%
-  mode_base = "inline-flex items-center gap-2.5 h-auto px-3.5 py-2 rounded-control text-[13px] font-bold transition"
+  # Qué se registra: la opción elegida va en sólido (lo seleccionado, según la regla de color de DESIGN.md).
+  mode_base = "inline-flex items-center gap-2.5 min-h-11 px-3.5 py-2 rounded-control text-body font-bold transition-colors"
   mode_on = "#{mode_base} bg-primary-700 text-white shadow-sm"
-  mode_off = "#{mode_base} border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"
+  mode_off = "#{mode_base} border border-line bg-surface text-ink-700 hover:bg-canvas"
 %>
 <% open = @window.open? %>
-<%= tag.div class: "px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto",
+<%= render PageComponent.new(width: :page,
             data: (open ? { controller: "checkin-scanner",
                             checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id),
                             checkin_scanner_sync_url_value: register_checkins_path(training_id: @training&.id),
                             checkin_scanner_mode_value: @training ? "training-#{@training.id}" : "arrival",
                             checkin_scanner_total_value: @expected,
-                            checkin_scanner_arrived_value: @registered } : { scan_closed: true }) do %>
+                            checkin_scanner_arrived_value: @registered } : { scan_closed: true })) do %>
 
   <%# Primero se elige qué se está registrando: cambia a quién se espera y dónde se guarda. %>
-  <div class="flex flex-wrap gap-2 mb-4" data-scan-modes>
+  <div class="flex flex-wrap gap-2" data-scan-modes>
     <%# Solo los registros abiertos hoy (y el que se está viendo): la de diciembre no se escanea en octubre. %>
     <% if @arrival_open || @training.nil? %>
     <%= link_to checkins_path, class: @training ? mode_off : mode_on, data: { scan_mode: "arrival" } do %>
-      <%= icon "user-check", class: "w-[17px] h-[17px]" %>
+      <%= icon "user-check", class: "size-[17px]" %>
       <span>
         Llegada al FSY
-        <span class="block text-[11px] font-semibold opacity-75"><%= pluralize(Participant.joven.count, "joven", plural: "jóvenes") %></span>
+        <span class="block text-meta font-semibold opacity-75"><%= pluralize(Participant.joven.count, "joven", plural: "jóvenes") %></span>
       </span>
     <% end %>
     <% end %>
     <% (@trainings | [ @training ].compact).sort_by(&:held_on).each do |training| %>
       <%= link_to checkins_path(training_id: training.id), class: @training == training ? mode_on : mode_off,
                   data: { scan_mode: "training-#{training.id}" } do %>
-        <%= icon "graduation-cap", class: "w-[17px] h-[17px]" %>
+        <%= icon "graduation-cap", class: "size-[17px]" %>
         <span>
           <%= training.name %>
-          <span class="block text-[11px] font-semibold opacity-75"><%= SpanishDates.long(training.held_on) %></span>
+          <span class="block text-meta font-semibold opacity-75"><%= SpanishDates.long(training.held_on) %></span>
         </span>
       <% end %>
     <% end %>
   </div>
 
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900">
+      <h1 class="text-display font-extrabold tracking-tight text-ink-900">
         <%= @training ? "Asistencia a la capacitación" : "Registro de llegadas" %>
       </h1>
-      <p class="text-[12.5px] font-semibold text-ink-500">
+      <p class="text-label font-semibold text-ink-500">
         <span class="text-ink-900 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @registered %></span>
         de <%= @expected %> <%= @training ? "del staff" : "jóvenes" %> registrados
       </p>
     </div>
     <span hidden data-checkin-scanner-target="pending" data-pending
-          class="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-cat-amber/15 text-[12.5px] font-bold text-cat-amber-ink"></span>
+          class="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-label font-bold <%= Tones.tint(:amber) %>"></span>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] gap-5 items-start">
     <% if open %>
     <section class="<%= card_classes("overflow-hidden") %>">
-      <div class="px-5 py-3.5 border-b border-line-soft">
-        <p class="text-[14px] font-bold text-ink-900">Escáner</p>
-        <p class="mt-0.5 text-[11.5px] font-semibold text-primary-600 dark:text-primary-300">
-          <%= @training ? @training.label : "Llegada al FSY · #{SpanishDates.long(Rails.configuration.x.event_start_on)}" %>
-        </p>
-        <p role="status" class="mt-1 text-[11.5px] font-semibold text-ink-500" data-checkin-scanner-target="status">
-          Activa la cámara para empezar
-        </p>
+      <div class="flex items-start gap-3 px-5 py-4 border-b border-line-soft">
+        <%= render IconTileComponent.new(icon: "scan-qr-code") %>
+        <div class="min-w-0">
+          <h2 class="text-title font-bold text-ink-900">Escáner</h2>
+          <p class="text-label font-semibold text-primary-600 dark:text-primary-300">
+            <%= @training ? @training.label : "Llegada al FSY · #{SpanishDates.long(Rails.configuration.x.event_start_on)}" %>
+          </p>
+          <p role="status" class="mt-0.5 text-label font-semibold text-ink-500" data-checkin-scanner-target="status">
+            Activa la cámara para empezar
+          </p>
+        </div>
       </div>
 
       <%# El visor ocupa casi toda la pantalla del teléfono (vertical, como se sostiene). El resultado se pinta
           encima del video, porque quien registra mira la cámara, y se va solo a los 5 segundos (o al tocarlo)
           para no tapar al siguiente; el último queda anotado debajo. %>
-      <div class="relative bg-slate-900 aspect-[3/4] sm:aspect-[4/3] lg:aspect-square max-h-[72dvh] lg:max-h-none w-full flex items-center justify-center">
+      <div class="relative bg-primary-950 aspect-[3/4] sm:aspect-[4/3] max-h-[72dvh] w-full flex items-center justify-center">
         <video data-checkin-scanner-target="video" data-no-pull-refresh class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
         <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
         <%# El recuadro guía vive en la zona de arriba (todo menos la franja de 96px de abajo), así la tarjeta
             del resultado nunca lo tapa, sea cual sea el alto de la pantalla. %>
         <div class="absolute inset-x-0 top-0 bottom-24 flex items-center justify-center pointer-events-none">
           <div class="relative h-[min(15rem,85%)] aspect-square">
-            <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-xl", "top-0 right-0 border-l-0 border-b-0 rounded-tr-xl",
-                 "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-xl", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-xl" ].each do |corner| %>
+            <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-tile", "top-0 right-0 border-l-0 border-b-0 rounded-tr-tile",
+                 "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-tile", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-tile" ].each do |corner| %>
               <span data-checkin-scanner-target="corner" class="absolute w-9 h-9 border-[3px] border-white/90 transition-colors duration-500 ease-out <%= corner %>"></span>
             <% end %>
           </div>
         </div>
         <button type="button" data-action="checkin-scanner#start" data-checkin-scanner-target="start"
-                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-body font-bold text-primary-800 shadow-md hover:bg-primary-50 active:scale-[0.97] cursor-pointer transition">
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Activar la cámara
         </button>
@@ -103,7 +107,7 @@
             Registrar
           <% end %>
         <% end %>
-        <p class="text-[11.5px] font-medium text-ink-500">
+        <p class="text-label font-medium text-ink-500">
           Funciona sin señal: el padrón queda guardado en este dispositivo y lo escaneado se envía solo al volver el internet.
         </p>
       </div>
@@ -112,30 +116,28 @@
           es de una lista; el detalle, opcional. Va en la misma cola que los escaneos (sirve sin señal). %>
       <dialog data-checkin-scanner-target="voidDialog" data-void-dialog aria-labelledby="void-title"
               data-action="click->checkin-scanner#closeVoidOutside"
-              class="p-0 m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
-        <form data-action="submit->checkin-scanner#confirmVoid" class="p-5 md:p-6 bg-surface rounded-2xl">
+              class="app-dialog p-0 m-auto w-[calc(100%-2rem)] max-w-md rounded-panel shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+        <form data-action="submit->checkin-scanner#confirmVoid" class="p-5 md:p-6 bg-surface rounded-panel">
           <div class="flex items-start gap-3">
-            <span class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-cat-rose/12 text-cat-rose-ink">
-              <%= icon "user-x", class: "w-5 h-5" %>
-            </span>
+            <%= render IconTileComponent.new(icon: "user-x", tone: :rose, size: :md) %>
             <div class="min-w-0">
-              <h2 id="void-title" class="text-[16px] font-bold text-ink-900 text-balance">
+              <h2 id="void-title" class="text-title font-bold text-ink-900 text-balance">
                 ¿Anular <%= @training ? "la asistencia" : "la llegada" %> de <span data-checkin-scanner-target="voidName"></span>?
               </h2>
-              <p class="mt-1 text-[12.5px] text-ink-500">Vuelve a quedar como que no ha llegado. Queda anotado en el Historial.</p>
+              <p class="mt-1 text-label text-ink-500">Vuelve a quedar como que no ha llegado. Queda anotado en el Historial.</p>
             </div>
           </div>
 
           <fieldset class="mt-5 space-y-2">
-            <legend class="mb-2 text-[12px] font-bold text-ink-700">Motivo</legend>
+            <legend class="mb-2 text-label font-bold text-ink-700">Motivo</legend>
             <% [ [ "otra_persona", "No era la persona", "Llegó alguien con el gafete de otra persona." ],
                  [ "escaneo_incorrecto", "Escaneo incorrecto", "Se escaneó o se escribió el gafete equivocado." ],
                  [ "otro", "Otro", nil ] ].each_with_index do |(value, label, hint), index| %>
-              <label class="flex items-start gap-3 rounded-xl border border-line px-3.5 py-2.5 cursor-pointer transition hover:bg-canvas has-[:checked]:border-cat-rose has-[:checked]:bg-cat-rose/8" data-void-reason="<%= value %>">
+              <label class="flex items-start gap-3 rounded-control border border-line px-3.5 py-2.5 cursor-pointer transition-colors hover:bg-canvas has-[:checked]:border-cat-rose has-[:checked]:bg-cat-rose/10" data-void-reason="<%= value %>">
                 <input type="radio" name="void_reason" value="<%= value %>" <%= "checked" if index.zero? %> class="mt-[3px] w-4 h-4 accent-cat-rose">
                 <span>
-                  <span class="block text-[13.5px] font-bold text-ink-900"><%= label %></span>
-                  <% if hint %><span class="block text-[12px] font-medium text-ink-500"><%= hint %></span><% end %>
+                  <span class="block text-body font-bold text-ink-900"><%= label %></span>
+                  <% if hint %><span class="block text-label font-medium text-ink-500"><%= hint %></span><% end %>
                 </span>
               </label>
             <% end %>
@@ -159,29 +161,27 @@
     </section>
 
     <% else %>
-      <section class="<%= card_classes("p-6 text-center") %>" data-scan-closed-card>
-        <span class="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300">
-          <%= icon "lock", class: "w-6 h-6" %>
-        </span>
-        <p class="text-[15px] font-bold text-ink-900">Este registro no está abierto</p>
-        <p class="mt-1 text-[13px] text-ink-500"><%= @window.closed_reason %></p>
-        <% if Current.user.superadmin? %>
-          <%= link_to "Abrirlo desde Configuración", settings_path(anchor: "settings-scan"),
-                class: "mt-4 inline-flex items-center min-h-11 text-[13px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2" %>
+      <section class="<%= card_classes("p-5 md:p-6") %>" data-scan-closed-card>
+        <%= render EmptyStateComponent.new(title: "Este registro no está abierto", text: @window.closed_reason, icon: "lock", tone: :neutral, name: "scan-closed") do |empty| %>
+          <% if Current.user.superadmin? %>
+            <% empty.with_action do %>
+              <%= link_to "Abrirlo desde Configuración", settings_path(anchor: "settings-scan"), class: button_classes(:secondary) %>
+            <% end %>
+          <% end %>
         <% end %>
       </section>
     <% end %>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", bare: true %>
+      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", tone: :green %>
       <% if @recent.any? %>
         <ul class="divide-y divide-line-soft" data-recent-checkins>
           <% @recent.each do |record| %>
             <li class="flex items-center gap-3 py-2.5 first:pt-0" data-recent-record="<%= record.id %>">
-              <span class="text-[12px] font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
+              <span class="text-label font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
               <span class="min-w-0 flex-1">
-                <span class="block text-[13.5px] font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
-                <span class="block text-[11.5px] font-semibold text-ink-500">
+                <span class="block text-body font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
+                <span class="block text-label font-semibold text-ink-500">
                   <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
                 </span>
               </span>
@@ -189,7 +189,7 @@
                 <button type="button" data-action="checkin-scanner#askVoid"
                         data-record-id="<%= record.id %>" data-participant-id="<%= record.participant_id %>"
                         data-name="<%= record.participant.full_name %>"
-                        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-[12px] font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
+                        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-label font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
                   Anular
                 </button>
               <% end %>
@@ -197,11 +197,11 @@
           <% end %>
         </ul>
       <% else %>
-        <p class="text-[13px] text-ink-500">Todavía no hay nadie registrado.</p>
+        <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "recent-checkins") %>
       <% end %>
 
       <% if @training %>
-        <%= link_to agenda_trainings_path, class: "mt-4 inline-flex items-center gap-2 text-[12.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
+        <%= link_to agenda_trainings_path, class: "mt-4 inline-flex items-center gap-2 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
           <%= icon "chart-column", class: "w-4 h-4" %>
           Ver el resumen de capacitaciones
         <% end %>

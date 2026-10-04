@@ -251,9 +251,9 @@ export default class extends Controller {
     this.lastTarget.innerHTML = `
       <span class="w-2.5 h-2.5 shrink-0 rounded-full bg-cat-rose" aria-hidden="true"></span>
       <span class="min-w-0 flex-1">
-        <span class="block text-[11px] font-bold text-ink-500">Último · ${time} · <span class="text-cat-rose-ink">Anulado</span></span>
-        <span class="block text-[13.5px] font-bold text-ink-900 truncate line-through decoration-ink-300">${this.escape(name)}</span>
-        <span class="block text-[11.5px] font-semibold text-ink-500 truncate">Vuelve a quedar como que no ha llegado</span>
+        <span class="block text-meta font-bold text-ink-500">Último · ${time} · <span class="text-cat-rose-ink">Anulado</span></span>
+        <span class="block text-body font-bold text-ink-900 truncate line-through decoration-ink-300">${this.escape(name)}</span>
+        <span class="block text-label font-semibold text-ink-500 truncate">Vuelve a quedar como que no ha llegado</span>
       </span>
     `
     this.lastTarget.hidden = false
@@ -345,19 +345,19 @@ export default class extends Controller {
   // Pantalla --------------------------------------------------------------
   show(result, vibration) {
     const tones = {
-      ok: { label: "Registrado", bar: "border-l-cat-green dark:border-l-cat-green", text: "text-cat-green-ink", corner: "border-cat-green", dot: "bg-cat-green" },
-      already: { label: "Ya estaba registrado", bar: "border-l-cat-amber dark:border-l-cat-amber", text: "text-cat-amber-ink", corner: "border-cat-amber", dot: "bg-cat-amber" },
-      unknown: { label: "No reconocido", bar: "border-l-cat-rose dark:border-l-cat-rose", text: "text-cat-rose-ink", corner: "border-cat-rose", dot: "bg-cat-rose" }
+      ok: { label: "Registrado", bar: "border-l-cat-green", text: "text-cat-green-ink", corner: "border-cat-green", dot: "bg-cat-green" },
+      already: { label: "Ya estaba registrado", bar: "border-l-cat-amber", text: "text-cat-amber-ink", corner: "border-cat-amber", dot: "bg-cat-amber" },
+      unknown: { label: "No reconocido", bar: "border-l-cat-rose", text: "text-cat-rose-ink", corner: "border-cat-rose", dot: "bg-cat-rose" }
     }
     const tone = tones[result.tone]
 
     // Franja compacta de alto fijo (tres líneas cortadas) en la zona de abajo del visor; el enlace a la ficha
     // va en la nota de «Último» debajo de la cámara, para no navegar por un toque sin querer.
-    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex flex-col justify-center rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg dark:border-slate-700 transition-opacity duration-200`
+    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex flex-col justify-center rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg transition-opacity duration-200`
     this.cardTarget.innerHTML = `
-      <p class="text-[11px] font-bold uppercase tracking-[.06em] leading-tight ${tone.text}">${tone.label}</p>
-      <p class="flex items-center gap-2 min-w-0"><span class="text-[15px] font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</p>
-      ${result.detail ? `<p class="text-[12px] font-semibold leading-tight text-ink-700 dark:text-slate-300 truncate">${this.escape(result.detail)}</p>` : ""}
+      <p class="text-meta font-bold uppercase tracking-[.07em] leading-tight ${tone.text}">${tone.label}</p>
+      <p class="flex items-center gap-2 min-w-0"><span class="text-title font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</p>
+      ${result.detail ? `<p class="text-label font-semibold leading-tight text-ink-700 truncate">${this.escape(result.detail)}</p>` : ""}
     `
     this.cardTarget.hidden = false
     this.cardTarget.classList.remove("opacity-0")
@@ -376,8 +376,8 @@ export default class extends Controller {
   genderChip(gender) {
     if (!gender) return ""
     const woman = gender === "Mujer"
-    const color = woman ? "bg-cat-rose/15 text-cat-rose-ink" : "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100"
-    return `<span class="shrink-0 inline-flex items-center px-2 py-px rounded-full text-[11px] font-extrabold uppercase tracking-[.04em] ${color}" data-gender-chip>${woman ? "♀ Mujer" : "♂ Hombre"}</span>`
+    const color = woman ? "bg-cat-rose/15 text-cat-rose-ink" : "bg-primary-100 text-primary-700 dark:bg-primary-700/30 dark:text-primary-100"
+    return `<span class="shrink-0 inline-flex items-center h-6 px-2.5 rounded-full text-label font-bold ${color}" data-gender-chip>${woman ? "♀ Mujer" : "♂ Hombre"}</span>`
   }
 
   // La tarjeta sobre la cámara se va sola a los 5 segundos para no tapar al siguiente; tocarla la quita ya.
@@ -407,14 +407,14 @@ export default class extends Controller {
     this.lastTarget.innerHTML = `
       <span class="w-2.5 h-2.5 shrink-0 rounded-full ${tone.dot}" aria-hidden="true"></span>
       <span class="min-w-0 flex-1">
-        <span class="block text-[11px] font-bold text-ink-500">Último · ${time} · <span class="${tone.text}">${tone.label}</span></span>
-        <span class="flex items-center gap-2 min-w-0"><span class="text-[13.5px] font-bold text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</span>
-        ${result.detail ? `<span class="block text-[11.5px] font-semibold text-ink-500 truncate">${this.escape(result.detail)}</span>` : ""}
+        <span class="block text-meta font-bold text-ink-500">Último · ${time} · <span class="${tone.text}">${tone.label}</span></span>
+        <span class="flex items-center gap-2 min-w-0"><span class="text-body font-bold text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</span>
+        ${result.detail ? `<span class="block text-label font-semibold text-ink-500 truncate">${this.escape(result.detail)}</span>` : ""}
       </span>
-      ${result.url ? `<a href="${this.escape(result.url)}" class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
+      ${result.url ? `<a href="${this.escape(result.url)}" class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-label font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
       ${result.void ? `<button type="button" data-action="checkin-scanner#askVoid" data-token="${this.escape(result.void.token)}"
           data-participant-id="${this.escape(result.void.participantId)}" data-name="${this.escape(result.void.name)}" data-void-last
-          class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-[12.5px] font-bold text-cat-rose-ink underline underline-offset-2 cursor-pointer">Anular</button>` : ""}
+          class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-label font-bold text-cat-rose-ink underline underline-offset-2 cursor-pointer">Anular</button>` : ""}
     `
     this.lastTarget.hidden = false
   }

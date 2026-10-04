@@ -14,7 +14,9 @@ class PageComponent < ViewComponent::Base
   renders_one :intro
   renders_one :actions
 
-  def initialize(width: :page)
+  # data: va en el contenedor de la página, por ejemplo el controlador de Stimulus que la gobierna.
+  def initialize(width: :page, data: {})
     @width = WIDTHS.fetch(width)
+    @data = data
   end
 end
