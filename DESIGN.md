@@ -269,6 +269,9 @@ Menú lateral con grupos plegables, la opción activa en neblina azul con una ba
 - **Do** usar el estado vacío común cuando no hay nada que mostrar, con la acción que corresponde.
 - **Do** escribir el texto sobre un tinte en su tinta (`text-cat-*-ink`).
 
+### La guarda
+`test/lib/design_guardrails_test.rb` revisa estas reglas en cada corrida de pruebas (colores, esquinas, sombras, tamaños de letra, marco de página e íconos que existen). Si una excepción hace falta, se agrega ahí con su motivo.
+
 ### Don't:
 - **Don't** usar colores sueltos de Tailwind (`bg-emerald-600`, `text-amber-700`, `slate-*`): todo color sale de los tokens. Para el modo oscuro, `muted` (hover y rellenos neutros) y `sunken` (bloques hundidos) ya traen su valor oscuro.
 - **Don't** poner más de un botón principal en una pantalla.

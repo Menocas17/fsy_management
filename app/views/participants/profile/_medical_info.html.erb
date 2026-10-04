@@ -3,7 +3,7 @@
   <%# Lo que hay que atender salta a la vista; si todo dice «Ninguna», no aparece nada. %>
   <% notes = { "Alergias" => participant.allergies, "Medicinas" => participant.medicines, "Dieta" => participant.diet }.select { |_, value| medical_note?(value) } %>
   <% if notes.any? %>
-    <div class="mb-4 flex items-start gap-3 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-rose-800 dark:text-rose-200" role="note">
+    <div class="mb-4 flex items-start gap-3 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-cat-rose-ink" role="note">
       <%= icon "triangle-alert", class: "w-[18px] h-[18px] mt-0.5 shrink-0" %>
       <div class="min-w-0 text-body font-semibold leading-snug">
         <p class="font-bold">Requiere atención</p>

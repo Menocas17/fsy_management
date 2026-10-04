@@ -8,7 +8,7 @@ module InventoryHelper
 
   def inventory_status_chip(item)
     tag.span(item.status_label,
-             class: "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold #{STATUS_CHIPS.fetch(item.status)}")
+             class: "inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold #{STATUS_CHIPS.fetch(item.status)}")
   end
 
   def inventory_tile_class(inventory)

@@ -23,7 +23,7 @@ module FinancesHelper
   end
 
   def expense_status_chip(expense)
-    tag.span(expense.status_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap #{STATUS_CHIPS.fetch(expense.status)}")
+    tag.span(expense.status_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold whitespace-nowrap #{STATUS_CHIPS.fetch(expense.status)}")
   end
 
   # Monto en su moneda y, si es en dólares, su equivalente en córdobas.
