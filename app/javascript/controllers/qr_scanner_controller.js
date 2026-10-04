@@ -1,5 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
-import jsQR from "jsqr"
+
+// jsQR (~50 KB) solo sirve con la cámara: se pide al abrir esta pantalla y no en cada carga de la app.
+// Mientras llega, tick() se salta los cuadros; si falló (sin señal), encender la cámara lo vuelve a pedir.
+let jsQR
+let loadingJsQR
+const loadJsQR = () =>
+  (loadingJsQR ||= import("jsqr")
+    .then((module) => (jsQR = module.default))
+    .catch(() => (loadingJsQR = null)))
 
 const SCAN_INTERVAL_MS = 120
 const SCAN_MAX_SIDE = 640
@@ -14,11 +22,16 @@ export default class extends Controller {
     found: { type: String, default: "Artículo" }
   }
 
+  connect() {
+    loadJsQR()
+  }
+
   disconnect() {
     this.stop()
   }
 
   async start() {
+    loadJsQR()
     this.startTarget.hidden = true
     this.status("Pidiendo permiso a la cámara…")
 
@@ -53,7 +66,7 @@ export default class extends Controller {
     const now = performance.now()
     // Unas ocho lecturas por segundo a 640px sobran para un QR, y no calientan el teléfono en horas de
     // registro como leer cada cuadro a resolución completa.
-    if (video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
+    if (jsQR && video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
       this.lastRead = now
       const canvas = this.canvasTarget
       const ratio = Math.min(1, SCAN_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
