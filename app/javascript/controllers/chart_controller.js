@@ -1,10 +1,19 @@
 import { Controller } from '@hotwired/stimulus';
-import ApexCharts from 'apexcharts';
 
 // Renders a column, stacked column or donut chart with ApexCharts from server-provided data.
 // Columns and donuts take a flat series of numbers; stacked charts take [{ name, data }, …].
 // Colors arrive as hex (ApexCharts can't parse OKLCH); axis and tooltip colors follow the dark-mode class on <html>.
 // Rellenos sólidos siempre: el color es el dato (ChartsHelper), un degradado solo lo ensucia.
+
+// ApexCharts pesa ~300 KB comprimido: se pide la primera vez que una página trae gráficas, no en cada carga.
+let apexCharts;
+const loadApexCharts = () =>
+  (apexCharts ||= import('apexcharts')
+    .then((module) => module.default)
+    .catch((error) => {
+      apexCharts = null;
+      throw error;
+    }));
 
 // Al volver atrás Turbo pinta la página desde su caché: las gráficas aparecen quietas en vez de crecer otra vez.
 let restoring = false;
@@ -31,9 +40,15 @@ export default class extends Controller {
     total: String,
   };
 
-  connect() {
+  async connect() {
     // A Turbo cache snapshot may still contain the previous render.
     this.canvasTarget.replaceChildren();
+    // Se lee antes de esperar la librería: turbo:load ya habrá apagado la bandera cuando llegue.
+    this.restored = restoring;
+    const ApexCharts = await loadApexCharts();
+    // Turbo pudo haber salido de la página mientras llegaba.
+    if (!this.element.isConnected || this.chart) return;
+
     this.chart = new ApexCharts(this.canvasTarget, this.options());
     this.chart.render();
 
@@ -49,6 +64,7 @@ export default class extends Controller {
   disconnect() {
     this.themeObserver?.disconnect();
     this.chart?.destroy();
+    this.chart = null;
   }
 
   get dark() {
@@ -89,7 +105,7 @@ export default class extends Controller {
         parentHeightOffset: 0,
         toolbar: { show: false },
         animations: {
-          enabled: !this.reduceMotion && !restoring,
+          enabled: !this.reduceMotion && !this.restored,
           speed: 380,
           animateGradually: { enabled: false },
           dynamicAnimation: { speed: 250 },

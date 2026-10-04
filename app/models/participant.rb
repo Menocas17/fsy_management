@@ -126,6 +126,10 @@ class Participant < ApplicationRecord
   end
 
 
+  # Lo mismo que with_attached_avatar, para precargar la foto desde otra asociación (counselors: AVATAR_PRELOAD).
+  # Trae las variantes ya procesadas: su llave es la URL pública de la miniatura (ApplicationHelper#storage_url).
+  AVATAR_PRELOAD = { avatar_attachment: { blob: { variant_records: { image_attachment: :blob } } } }.freeze
+
   def full_name
     "#{first_name} #{last_name}"
   end
@@ -191,10 +195,18 @@ class Participant < ApplicationRecord
 
   # 2) Auxiliar: the AuxiliarCompany it belongs to, its standard Companies, and
   #    the counselors staffed in those companies.
+  #    Los permisos lo consultan varias veces por página: se calcula una vez por objeto (reload lo vuelve a armar).
   def auxiliar_scope
-    company = auxiliar_companies.first
-    companies = company ? company.companies.to_a : []
-    { auxiliar_company: company, counselors: companies.flat_map(&:counselors).uniq, companies: companies }
+    @auxiliar_scope ||= begin
+      company = auxiliar_companies.first
+      companies = company ? company.companies.includes(:counselors).to_a : []
+      { auxiliar_company: company, counselors: companies.flat_map(&:counselors).uniq, companies: companies }
+    end
+  end
+
+  def reload(*)
+    @auxiliar_scope = nil
+    super
   end
 
   # 3) Counselor: only the standard Company directly assigned.

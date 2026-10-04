@@ -1,8 +1,33 @@
 module ApplicationHelper
+  # Incluido aquí para que el super de #icon siempre lo encuentre, también fuera de las vistas (pruebas, jobs).
+  include RailsIcons::Helpers::IconHelper
+
+  ICON_CACHE = Concurrent::Map.new
+  ICON_CACHE_LIMIT = 2_000
+
+  # rails_icons lee el .svg del disco y lo pasa por Nokogiri en cada llamada (~0.15 ms), y una página dibuja
+  # unas 70. Con los mismos argumentos el SVG sale idéntico, así que se arma una vez por proceso.
+  # Un ícono que no existe no se guarda: sigue fallando igual.
+  def icon(name, **options)
+    return super if Rails.application.config.enable_reloading
+
+    ICON_CACHE.clear if ICON_CACHE.size > ICON_CACHE_LIMIT
+    ICON_CACHE.compute_if_absent([ name.to_s, options ]) { super.to_str.freeze }.html_safe
+  end
+
+  # Con un bucket público (R2_PUBLIC_URL) la imagen sale directo de Cloudflare: sin la redirección por Rails,
+  # que en una página con 48 fotos eran 48 peticiones más al servidor. Si no hay bucket público, o la variante
+  # aún no se procesó (key nil), queda la ruta de Active Storage, que la procesa al pedirla.
+  def storage_url(attachable)
+    base = Rails.configuration.x.public_storage_url
+    key = attachable.key if base.present?
+    key.present? ? "#{base}/#{key}" : attachable
+  end
+
   # this helper creates a fallback using the ui-avatar api in case there is no image in the database, but the default is using an generic avatar image in case the api is not responding
   def avatar_for(participant, options = {})
     if participant.avatar.attached?
-      image_tag(participant.avatar.variant(:thumb), options)
+      image_tag(storage_url(participant.avatar.variant(:thumb)), options)
     elsif fallback_url = "https://ui-avatars.com/api/?name=#{participant.first_name}+#{participant.last_name}bold=true"
       image_tag(fallback_url, options)
     else
@@ -52,7 +77,7 @@ module ApplicationHelper
     participant = Current.user&.participant
 
     if participant&.avatar&.attached?
-      image_tag participant.avatar.variant(:thumb), alt: "Tu foto de perfil", class: "#{size_classes} rounded-avatar object-cover shrink-0"
+      image_tag storage_url(participant.avatar.variant(:thumb)), alt: "Tu foto de perfil", class: "#{size_classes} rounded-avatar object-cover shrink-0"
     else
       initials = participant&.full_name.to_s.split.map(&:first).first(2).join.upcase.presence || "FSY"
 

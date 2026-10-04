@@ -6,7 +6,7 @@ class ParticipantsController < ApplicationController
 
   def index
     @pagy, @participants = pagy(Participant.jovenes
-                                           .includes(:company, :avatar_attachment, :avatar_blob)
+                                           .includes(:company).with_attached_avatar
                                            .search_by_name(params[:query])
                                            .by_stake(params[:stake])
                                            .by_ward(params[:ward])
@@ -18,7 +18,7 @@ class ParticipantsController < ApplicationController
 
   def staff
     @pagy, @participants = pagy(Participant.staff
-                                           .includes(:company, :avatar_attachment, :avatar_blob)
+                                           .includes(:company).with_attached_avatar
                                            .search_by_name(params[:query])
                                            .by_stake(params[:stake])
                                            .by_ward(params[:ward])

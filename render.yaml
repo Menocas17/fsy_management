@@ -35,6 +35,10 @@ services:
         sync: false
       - key: R2_BUCKET
         value: fsy-management
+      # El acceso público del bucket (R2 → Settings → Public access): https://pub-….r2.dev o un dominio propio.
+      # Con él las fotos salen directo de Cloudflare; sin él, pasan por Rails como antes.
+      - key: R2_PUBLIC_URL
+        sync: false
 
       # Brevo (config/smtp_mail.rb).
       - key: SMTP_USERNAME

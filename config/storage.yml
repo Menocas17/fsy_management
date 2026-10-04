@@ -19,6 +19,9 @@ cloudflare:
   # R2 no acepta las sumas de verificación que aws-sdk-s3 manda por defecto desde la 1.178.
   request_checksum_calculation: when_required
   response_checksum_validation: when_required
+  # Cada archivo tiene una llave única que no se reusa: el navegador y Cloudflare lo pueden guardar para siempre.
+  upload:
+    cache_control: "public, max-age=31536000, immutable"
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:

@@ -7,7 +7,7 @@ class AuxiliarCompaniesController < ApplicationController
   FIELD_LABELS = { "name" => "nombre", "coordinator_id" => "coordinador", "second_coordinator_id" => "segundo coordinador" }.freeze
 
   def index
-    @auxiliar_companies = AuxiliarCompany.includes(auxiliars: :avatar_attachment, companies: :counselors)
+    @auxiliar_companies = AuxiliarCompany.includes(auxiliars: Participant::AVATAR_PRELOAD, companies: :counselors)
                                          .sort_by { |auxiliar_company| [ auxiliar_company.first_company_number || Float::INFINITY, auxiliar_company.name ] }
     @jovenes_counts = Participant.joven.joins(:company).where.not(companies: { auxiliar_company_id: nil })
                                  .group("companies.auxiliar_company_id").count
@@ -15,7 +15,7 @@ class AuxiliarCompaniesController < ApplicationController
 
   def show
     load_auxiliars
-    @companies = @auxiliar_company.companies.by_number.includes(:auxiliar_company, counselors: :avatar_attachment)
+    @companies = @auxiliar_company.companies.by_number.includes(:auxiliar_company, counselors: Participant::AVATAR_PRELOAD)
     @jovenes_counts = Company.jovenes_counts
     @room_counts = Company.room_counts
   end
@@ -85,7 +85,7 @@ class AuxiliarCompaniesController < ApplicationController
     end
 
     def load_auxiliars
-      @auxiliars = @auxiliar_company.auxiliars.includes(:avatar_attachment).order(gender: :desc)
+      @auxiliars = @auxiliar_company.auxiliars.with_attached_avatar.order(gender: :desc)
     end
 
     # Auxiliares are the auxiliary company's own staff (1 man, 1 woman); counselors are managed per company.

@@ -23,6 +23,9 @@ Rails.application.configure do
 
   # Archivos en Cloudflare R2 (config/storage.yml): el disco de Render no se conserva.
   config.active_storage.service = :cloudflare
+  # Dominio público del bucket (r2.dev o uno propio): las fotos se sirven desde ahí sin pasar por Rails.
+  # Sin él, Active Storage sigue redirigiendo cada imagen como antes (ApplicationHelper#storage_url).
+  config.x.public_storage_url = ENV["R2_PUBLIC_URL"].presence&.delete_suffix("/")
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true

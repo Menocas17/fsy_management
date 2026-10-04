@@ -8,7 +8,7 @@ class CompaniesController < ApplicationController
   ROLE_LABELS = { "consejero" => "consejero", "auxiliar" => "auxiliar", "participant" => "joven" }.freeze
 
   def index
-    @companies = Company.by_number.includes(:auxiliar_company, counselors: :avatar_attachment).search(params[:query])
+    @companies = Company.by_number.includes(:auxiliar_company, counselors: Participant::AVATAR_PRELOAD).search(params[:query])
     @jovenes_counts = Company.jovenes_counts
     @room_counts = Company.room_counts
     @total_companies = Company.count
@@ -19,7 +19,7 @@ class CompaniesController < ApplicationController
     @rooms = @company.room_occupancy
     @jovenes_total = @company.participants.count
     @pagy, @participants = pagy(@company.participants
-                                        .includes(:avatar_attachment)
+                                        .with_attached_avatar
                                         .search_by_name(params[:query])
                                         .order(:room, :first_name, :last_name, :id), limit: 12)
   end
@@ -98,8 +98,8 @@ class CompaniesController < ApplicationController
 
     # Counselors are the company's own staff; auxiliares come from its auxiliary company.
     def load_leaders
-      @counselors = @company.counselors.includes(:avatar_attachment).order(gender: :desc)
-      @auxiliars = @company.auxiliar_company ? @company.auxiliar_company.auxiliars.includes(:avatar_attachment).order(gender: :desc) : Participant.none
+      @counselors = @company.counselors.with_attached_avatar.order(gender: :desc)
+      @auxiliars = @company.auxiliar_company ? @company.auxiliar_company.auxiliars.with_attached_avatar.order(gender: :desc) : Participant.none
     end
 
     def load_staff_options

@@ -14,7 +14,7 @@ class AvatarComponent < ViewComponent::Base
   end
 
   def avatar_url
-    @participant.avatar.variant(:thumb)
+    helpers.storage_url(@participant.avatar.variant(:thumb))
   end
 
   def initials

@@ -9,7 +9,7 @@
       <label for="participant_avatar" class="relative block cursor-pointer" aria-label="Cambiar foto">
         <span class="block w-24 h-24 rounded-panel overflow-hidden border-4 border-surface shadow-md bg-cat-green-solid text-white">
           <% if saved_avatar %>
-            <%= image_tag participant.avatar.variant(:thumb), alt: "Foto de #{participant.full_name}",
+            <%= image_tag storage_url(participant.avatar.variant(:thumb)), alt: "Foto de #{participant.full_name}",
                   class: "w-full h-full object-cover", data: { avatar_preview_target: "image" } %>
           <% else %>
             <span class="w-full h-full flex items-center justify-center text-3xl font-extrabold" data-avatar-preview-target="placeholder">

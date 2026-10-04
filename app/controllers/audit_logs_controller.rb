@@ -6,7 +6,7 @@ class AuditLogsController < ApplicationController
   FILTERS = %i[query category kind period].freeze
 
   def index
-    @pagy, @audit_logs = pagy(AuditLog.includes(actor: :avatar_attachment)
+    @pagy, @audit_logs = pagy(AuditLog.includes(actor: Participant::AVATAR_PRELOAD)
                                       .by_category(params[:category])
                                       .by_kind(params[:kind])
                                       .in_period(params[:period])

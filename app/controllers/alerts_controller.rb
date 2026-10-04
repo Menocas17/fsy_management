@@ -3,7 +3,7 @@ class AlertsController < ApplicationController
   before_action :set_alert, only: %i[show destroy]
 
   def index
-    @pagy, @alerts = pagy(Alert.includes(sender: :avatar_attachment, images_attachments: :blob).recent)
+    @pagy, @alerts = pagy(Alert.includes(sender: Participant::AVATAR_PRELOAD, images_attachments: :blob).recent)
   end
 
   def show
