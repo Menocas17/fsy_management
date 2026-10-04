@@ -9,7 +9,7 @@
 <%= link_to company_path(company), data: { turbo_frame: "_top", company_card: company.number },
       class: card_classes("group block px-5 pt-[18px] pb-4 transition-[background-color,transform] duration-150 hover:bg-canvas active:scale-[0.99] focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas") do %>
   <div class="flex items-center gap-3">
-    <span class="w-11 h-11 shrink-0 rounded-tile bg-primary-100 text-primary-700 dark:bg-primary-700/30 dark:text-primary-100 text-title font-extrabold flex items-center justify-center"><%= company.number || "–" %></span>
+    <%= initials_tile(company.initials, seed: company.name) %>
     <div class="min-w-0 flex-1">
       <p class="text-title font-extrabold text-ink-900 truncate"><%= company.name %></p>
       <p class="mt-px text-label font-semibold text-ink-500 truncate">

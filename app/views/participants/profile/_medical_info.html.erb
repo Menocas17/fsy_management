@@ -1,17 +1,12 @@
 <section class="<%= card_classes("p-6") %>">
   <%= section_heading "Información médica", "shield-plus", tone: :rose %>
-  <%# Lo que hay que atender salta a la vista; si todo dice «Ninguna», no aparece nada. %>
-  <% notes = { "Alergias" => participant.allergies, "Medicinas" => participant.medicines, "Dieta" => participant.diet }.select { |_, value| medical_note?(value) } %>
-  <% if notes.any? %>
-    <div class="mb-4 flex items-start gap-3 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-cat-rose-ink" role="note">
-      <%= icon "triangle-alert", class: "w-[18px] h-[18px] mt-0.5 shrink-0" %>
-      <div class="min-w-0 text-body font-semibold leading-snug">
-        <p class="font-bold">Requiere atención</p>
-        <% notes.each do |label, value| %>
-          <p class="break-words"><span class="font-bold"><%= label %>:</span> <%= value %></p>
-        <% end %>
-      </div>
-    </div>
+  <%# Si algo pide atención salta a la vista en rojo; el detalle ya está justo abajo, así que el aviso no lo repite.
+      Si todo dice «Ninguna», no aparece nada. %>
+  <% if [ participant.allergies, participant.medicines, participant.diet ].any? { |value| medical_note?(value) } %>
+    <p class="mb-4 flex items-center gap-2.5 rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-body font-bold text-cat-rose-ink" role="note" data-medical-alert>
+      <%= icon "triangle-alert", class: "size-[18px] shrink-0" %>
+      Requiere atención
+    </p>
   <% end %>
   <div>
     <%= info_row "Alergias", "shield-plus", participant.allergies %>

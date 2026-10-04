@@ -27,7 +27,8 @@ class StatTileComponent < ViewComponent::Base
       if large?
         helpers.card_classes("flex flex-col items-start gap-2.5 p-3.5 md:flex-row md:items-center md:gap-4 md:px-5 md:py-[18px]#{" transition-colors hover:bg-canvas dark:hover:bg-muted/40" if @href}")
       else
-        "flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-3 p-3.5 rounded-tile bg-sunken#{" transition-colors hover:bg-line-soft/70 dark:hover:bg-muted/60" if @href}"
+        # Con href se ve como lo que es, un botón: borde, flecha y hover. Sin href es solo una cifra (sin borde).
+        "relative flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-3 p-3.5 rounded-tile #{@href ? "bg-surface border border-line shadow-sm transition-colors hover:bg-muted hover:border-primary-300 dark:hover:border-primary-500" : "bg-sunken"}"
       end
     end
 end

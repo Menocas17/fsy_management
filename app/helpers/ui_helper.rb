@@ -20,6 +20,14 @@ module UiHelper
     [ BUTTON_BASE, BUTTON_SIZES.fetch(size), BUTTON_VARIANTS.fetch(variant), extra ].compact.join(" ")
   end
 
+  # Unas iniciales en un mosaico, con el mismo algoritmo de color que los avatares: «C3» para la compañía 3,
+  # la inicial de una compañía auxiliar. seed decide el color (el nombre), así cada una conserva el suyo.
+  def initials_tile(text, seed:, size: :md)
+    box = size == :sm ? "size-8 rounded-avatar-sm text-label" : "size-11 rounded-avatar text-body"
+    tag.span(text, class: "#{box} shrink-0 flex items-center justify-center font-extrabold #{AvatarComponent.colors_for(seed)}",
+                   data: { initials_tile: text })
+  end
+
   def card_classes(extra = nil)
     [ CARD_CLASSES, extra ].compact.join(" ")
   end

@@ -31,8 +31,17 @@ class DesignPiecesTest < ViewComponent::TestCase
   test "a small stat tile is a tinted support figure, not a card" do
     tile = render_inline(StatTileComponent.new(value: 100, label: "con alergias", icon: "heart-pulse", tone: :rose, size: :sm))
 
-    assert_selector "div[data-stat-tile].bg-sunken"
+    assert_selector "div[data-stat-tile].bg-sunken:not([href])"
     assert tile.css("[data-icon-tile]").first["class"].include?("bg-cat-rose/15")
+  end
+
+  test "a small stat tile that links looks like a button; one that doesn't stays a flat figure" do
+    render_inline(StatTileComponent.new(value: 100, label: "con alergias", icon: "heart-pulse", tone: :rose, size: :sm, href: "/participants?care=allergies"))
+    assert_selector "a[data-stat-tile].bg-surface.border svg", count: 2 # su ícono y la flecha
+
+    render_inline(StatTileComponent.new(value: 220, label: "Salón Nicaragua", icon: "hand-platter", tone: :amber, size: :sm))
+    assert_selector "div[data-stat-tile].bg-sunken"
+    assert_no_selector "[data-stat-tile].border"
   end
 
   test "a chip is a pill in its tone" do

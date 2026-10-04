@@ -1,4 +1,9 @@
 class Company < ApplicationRecord
+  # Lo que va en su mosaico de iniciales: «C3»; sin número, la inicial del nombre.
+  def initials
+    number ? "C#{number}" : name.to_s.first.to_s.upcase.presence || "C"
+  end
+
   DINING_HALL_LABELS = { "salon_nicaragua" => "Salón Nicaragua", "salon_las_americas" => "Salón Las Américas" }.freeze
 
   belongs_to :auxiliar_company, optional: true

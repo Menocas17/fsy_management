@@ -12,9 +12,10 @@
     <% if @href %><%= helpers.icon "arrow-right", class: "hidden md:block size-[18px] shrink-0 text-ink-500" %><% end %>
   <% else %>
     <%= render IconTileComponent.new(icon: @icon, tone: @tone) %>
-    <div class="min-w-0 flex flex-col">
+    <div class="min-w-0 flex-1 flex flex-col">
       <%= tag.span @value, class: "text-display font-extrabold leading-tight tabular-nums text-ink-900", data: @value_data %>
       <span class="text-label font-semibold text-ink-700 line-clamp-2"><%= @label %></span>
     </div>
+    <% if @href %><%= helpers.icon "chevron-right", class: "absolute top-3 right-3 md:static size-[18px] shrink-0 text-ink-500" %><% end %>
   <% end %>
 <% end %>
