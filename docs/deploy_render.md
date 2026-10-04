@@ -79,6 +79,10 @@ Por qué así y no todo en Render:
    - **Generate a new SMTP key** → esa clave es `SMTP_PASSWORD`.
 4. Puede que Brevo pida completar el perfil de la cuenta antes de dejarte mandar correos
    transaccionales; hazlo de una vez.
+5. Si Brevo pide una **IP autorizada** para usar la clave SMTP, no pongas la de Render: en el plan
+   gratis sale por IPs compartidas con otros clientes y pueden cambiar sin aviso, y Brevo rechazaría
+   el correo en silencio. En **Security → Authorized IPs** desactiva el bloqueo de IPs desconocidas.
+   La protección real es la clave SMTP, que solo vive en las variables de Render.
 
 > Si el remitente es un `@gmail.com`, algunos correos pueden caer en spam porque salen de servidores
 > que no son de Google. Con un dominio propio verificado en Brevo (*Domains*) se arregla.
