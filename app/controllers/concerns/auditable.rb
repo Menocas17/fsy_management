@@ -3,11 +3,14 @@ module Auditable
 
   private
     def record_audit!(category:, action:, target:, summary:)
-      actor = Current.user&.participant
+      # En «Ver como» lo hizo el superadmin, no la persona cuya vista estaba usando.
+      actor = Current.real_user&.participant
+      actor_name = actor&.full_name || "Administrador del sistema"
+      actor_name += " (viendo como #{Current.user.full_name})" if Current.viewing_as?
 
       AuditLog.create!(
         actor: actor,
-        actor_name: actor&.full_name || "Administrador del sistema",
+        actor_name: actor_name,
         action: action,
         category: category,
         summary: summary,

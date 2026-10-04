@@ -141,6 +141,23 @@ class Participant < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  # Los roles que el superadmin puede probar con «Ver como» (el joven todavía no tiene su propia vista).
+  VIEW_AS_ROLES = %w[director coordinador director_logistica registrador logistica auxiliar consejero].freeze
+
+  # Una ficha que muestre bien el rol: primero las que ya tienen cuenta, y entre ellas las que tienen a quién
+  # mandar (el consejero su compañía, el auxiliar su rama, logística su área).
+  def self.view_as_sample(rol)
+    where(rol: rol).includes(:user, :logistics_area, :auxiliar_companies).order(:id).min_by do |participant|
+      in_place = case rol.to_s
+      when "consejero" then participant.counselor_scope.any?
+      when "auxiliar"  then participant.auxiliar_companies.any?
+      when "logistica" then participant.logistics_area.present?
+      else true
+      end
+      [ participant.user ? 0 : 1, in_place ? 0 : 1 ]
+    end
+  end
+
   def arrived?
     checkin.present?
   end

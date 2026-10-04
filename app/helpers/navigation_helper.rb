@@ -23,34 +23,22 @@ module NavigationHelper
       ] },
       { id: "logistica", label: "Logística", items: [
         ({ text: "Áreas", url: logistics_areas_path, lucide_icon: "layout-grid", active_paths: [ logistics_areas_path ] } if Current.user&.logistics_areas_manager?),
-        (if Current.user&.inventory_member?
-           { text: "Inventario", url: inventories_path, lucide_icon: "boxes",
-             # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
-             active_paths: [ inventories_path, "/articulos" ] }
-         else
-           { text: "Inventario", lucide_icon: "boxes", disabled: true, hint: "Solo para el comité de logística" }
-         end),
-        (if Current.user&.finance_viewer?
-           { text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] }
-         else
-           { text: "Finanzas", lucide_icon: "wallet", disabled: true, hint: "Solo para el área de Finanzas, logística y la dirección" }
-         end),
-        { text: "Librería", lucide_icon: "library", disabled: true }
+        # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
+        ({ text: "Inventario", url: inventories_path, lucide_icon: "boxes",
+           active_paths: [ inventories_path, "/articulos" ] } if Current.user&.inventory_member?),
+        ({ text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] } if Current.user&.finance_viewer?)
       ] },
       { id: "seguimiento", label: "Seguimiento", items: [
-        (if Current.user&.reports_viewer?
-           { text: "Reportes", url: reports_path, lucide_icon: "file-text",
-             active_paths: [ reports_path, participant_imports_path ] }
-         else
-           { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
-         end),
+        ({ text: "Reportes", url: reports_path, lucide_icon: "file-text",
+           active_paths: [ reports_path, participant_imports_path ] } if Current.user&.reports_viewer?),
         night_attendance_nav_item,
         ({ text: "Enfermería", url: infirmary_visits_path, lucide_icon: "heart-pulse",
            active_paths: [ infirmary_visits_path ] } if Current.user&.infirmary_viewer?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]
-    # "Mi perfil" lives in the account menu of the top bar; a section with no items is dropped.
+    # Cada quien ve solo lo que puede abrir: un módulo sin acceso no aparece en gris, se omite. "Mi perfil"
+    # vive en el menú de cuenta de la barra superior; un grupo que queda sin opciones se omite entero.
     sections.filter_map do |section|
       items = section[:items].compact.map { |item| item.merge(is_nav: true) }
       section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?

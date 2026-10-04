@@ -26,7 +26,23 @@ module Authentication
     end
 
     def resume_session
-      Current.session ||= find_session_by_cookie
+      return Current.session if Current.session
+
+      Current.session = find_session_by_cookie
+      Current.viewing_as = view_as_user if Current.session
+      Current.session
+    end
+
+    # «Ver como» (ViewAsController): solo vale para el superadmin; si la ficha ya no existe, se olvida.
+    def view_as_user
+      participant_id = session[:view_as_participant_id]
+      return if participant_id.blank?
+
+      participant = Participant.find_by(id: participant_id) if Current.session.user.superadmin?
+      return User.stand_in_for(participant) if participant
+
+      session.delete(:view_as_participant_id)
+      nil
     end
 
     # Una sesión vencida (Session#expired?) o de una cuenta que perdió su ficha se cierra en vez de revivir;
@@ -55,6 +71,7 @@ module Authentication
     end
 
     def start_new_session_for(user)
+      session.delete(:view_as_participant_id)
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         Current.session = session
         cookies.signed.permanent[:session_id] = { value: session.id, httponly: true, same_site: :lax }
@@ -63,6 +80,7 @@ module Authentication
 
     def terminate_session
       Current.session.destroy
+      session.delete(:view_as_participant_id)
       cookies.delete(:session_id)
     end
 end

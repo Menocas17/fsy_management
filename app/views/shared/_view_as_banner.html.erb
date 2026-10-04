@@ -1,0 +1,17 @@
+<%# «Ver como» (ViewAsController): mientras el superadmin usa la vista de otra persona, una franja lo recuerda
+    en todas las páginas y lo regresa a la suya con un toque. %>
+<% if Current.viewing_as? %>
+  <div data-view-as-banner class="shrink-0 flex items-center justify-between gap-3 px-3.5 md:px-8 py-2 bg-cat-amber/15 border-b border-line-soft">
+    <p class="min-w-0 flex items-center gap-2 text-label text-cat-amber-ink">
+      <%= icon "eye", class: "w-4 h-4 shrink-0" %>
+      <span class="truncate">Viendo como <b><%= Current.user.full_name %></b> · <%= Current.user.role_label %></span>
+    </p>
+    <%= button_to view_as_path, method: :delete, form_class: "shrink-0",
+          class: "inline-flex items-center gap-1.5 h-8 px-3 rounded-control bg-surface border border-line text-label font-semibold text-ink-700 hover:bg-muted cursor-pointer transition" do %>
+      <%= icon "undo-2", class: "w-4 h-4" %>
+      <%# En el teléfono el botón corto deja leer a quién se está viendo. %>
+      <span class="sm:hidden">Salir</span>
+      <span class="hidden sm:inline">Volver a superadmin</span>
+    <% end %>
+  </div>
+<% end %>

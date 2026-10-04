@@ -3,6 +3,8 @@
 class PasswordChangesController < ApplicationController
   rate_limit to: 10, within: 3.minutes, only: :update,
              with: -> { redirect_to edit_password_change_path, alert: "Intenta de nuevo más tarde." }
+  # En «Ver como» la cuenta es de otra persona: su contraseña no se toca desde aquí.
+  before_action -> { redirect_to settings_path, alert: "Sal de «Ver como» para cambiar tu contraseña." if Current.viewing_as? }
 
   def edit
     @user = Current.user
