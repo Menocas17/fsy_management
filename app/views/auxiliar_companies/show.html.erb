@@ -2,7 +2,7 @@
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Compañía auxiliar" %>
 <% content_for :page_h1, "true" %>
-<% back_to "Compañías auxiliares", auxiliar_companies_path %>
+<% back_to "Compañías auxiliares", safe_return_to(auxiliar_companies_path) %>
 <%
   counselor_total = @companies.sum { |company| company.counselors.size }
   counselor_capacity = @companies.size * 2
@@ -32,11 +32,6 @@
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
-        <%= link_to safe_return_to(auxiliar_companies_path),
-              class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
-          <%= icon "arrow-left", class: "w-4 h-4" %>
-          Volver
-        <% end %>
         <% if can_edit_auxiliar_company?(@auxiliar_company) %>
           <%= link_to edit_auxiliar_company_path(@auxiliar_company),
                 class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
