@@ -2,26 +2,21 @@
 <% content_for :eyebrow, "Evento" %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <p class="text-body font-medium text-ink-500"><%= pluralize(@pagy.count, "alerta enviada", plural: "alertas enviadas") %></p>
+    <p class="text-body font-medium text-ink-500" data-alerts-sent-total><%= pluralize(@pagy.count, "alerta enviada", plural: "alertas enviadas") %></p>
     <%= link_to new_alert_path, class: button_classes do %>
       <%= icon "plus", class: "w-4 h-4" %>
       Nueva alerta
     <% end %>
   </div>
 
-  <div class="<%= card_classes("overflow-hidden") %>">
+  <div class="<%= card_classes("overflow-hidden") %>" data-alerts-sent-list>
     <% if @alerts.any? %>
       <div class="divide-y divide-line-soft">
         <% @alerts.each do |alert| %>
-          <div class="relative group">
-            <%= render "alerts/alert", alert: alert %>
-            <%= button_to alert_path(alert), method: :delete,
-                  form: { class: "absolute top-3 right-3", data: { turbo_confirm: "¿Eliminar la alerta «#{alert.title}»?" } },
-                  aria: { label: "Eliminar alerta" },
-                  class: "w-8 h-8 rounded-inner flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition" do %>
-              <%= icon "trash-2", class: "w-4 h-4" %>
-            <% end %>
-          </div>
+          <%# Igual que en Notificaciones: X al pasar el ratón, deslizar a la izquierda en el celular. Aquí borra para todos. %>
+          <%= render "alerts/alert", alert: alert, dismissible: true, dismiss_path: alert_path(alert),
+                dismiss_label: "Eliminar la alerta «#{alert.title}»",
+                dismiss_confirm: "¿Eliminar la alerta «#{alert.title}»?" %>
         <% end %>
       </div>
       <% if @pagy.last > 1 %>
@@ -31,10 +26,7 @@
         </div>
       <% end %>
     <% else %>
-      <div class="px-6 py-10 text-center">
-        <p class="text-body font-bold text-ink-900">Aún no se han enviado alertas</p>
-        <p class="mt-1 text-label text-ink-500">Las alertas aparecen en la campana de todos los participantes a los que van dirigidas.</p>
-      </div>
+      <%= render "alerts/empty_state" %>
     <% end %>
   </div>
 <% end %>

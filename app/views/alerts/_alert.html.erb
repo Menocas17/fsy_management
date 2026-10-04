@@ -3,6 +3,11 @@
   unread = local_assigns.fetch(:unread, false)
   # En la campanita y en Notificaciones cada quien puede quitar la alerta de su lista (no la borra para los demás).
   dismissible = local_assigns.fetch(:dismissible, false)
+  # En Alertas (gestión) el mismo gesto borra la alerta para todos, así que pasa su propia ruta y confirmación.
+  dismiss_path = local_assigns.fetch(:dismiss_path) { notification_path(alert) }
+  dismiss_label = local_assigns.fetch(:dismiss_label, "Quitar «#{alert.title}» de mis notificaciones")
+  dismiss_confirm = local_assigns.fetch(:dismiss_confirm, nil)
+  dismiss_form_data = dismiss_confirm ? { turbo_confirm: dismiss_confirm } : {}
   # Toda la tarjeta lleva a lo que anuncia, salvo en la página de la alerta misma.
   linked = local_assigns.fetch(:linked, true)
 %>
@@ -11,7 +16,7 @@
 <div class="relative overflow-hidden" data-alert-item="<%= alert.id %>" data-controller="alert-item"
      data-action="turbo:submit-start->alert-item#leave turbo:submit-end->alert-item#settle">
   <div class="absolute inset-y-0 right-0 flex" data-alert-item-target="actions" hidden>
-    <%= button_to notification_path(alert), method: :delete, form_class: "flex",
+    <%= button_to dismiss_path, method: :delete, form: { class: "flex", data: dismiss_form_data },
           class: "w-24 flex flex-col items-center justify-center gap-1 bg-danger text-white text-label font-bold cursor-pointer",
           data: { alert_swipe_delete: true } do %>
       <%= icon "trash-2", class: "w-5 h-5" %>
@@ -43,8 +48,9 @@
           </time>
           <% if dismissible %>
             <%# Sobre el enlace estirado (relative z-10). En pantallas táctiles no hay hover: ahí se desliza. %>
-            <%= button_to notification_path(alert), method: :delete, form_class: "relative z-10 -my-1 -mr-1.5 [@media(hover:none)]:hidden",
-                  aria: { label: "Quitar «#{alert.title}» de mis notificaciones" }, title: "Quitar",
+            <%= button_to dismiss_path, method: :delete,
+                  form: { class: "relative z-10 -my-1 -mr-1.5 [@media(hover:none)]:hidden", data: dismiss_form_data },
+                  aria: { label: dismiss_label }, title: dismiss_confirm ? "Eliminar" : "Quitar",
                   class: "w-7 h-7 rounded-inner flex items-center justify-center text-ink-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-line-soft hover:text-ink-900 cursor-pointer transition",
                   data: { alert_dismiss: true } do %>
               <%= icon "x", class: "w-4 h-4" %>
