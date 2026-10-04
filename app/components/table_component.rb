@@ -24,11 +24,11 @@ class TableComponent < ViewComponent::Base
   end
 
   def header_cell_classes
-    "pt-5 pb-3 pr-5 text-[11px] font-bold tracking-[.06em] uppercase text-ink-500"
+    "pt-5 pb-3 pr-5 text-meta font-bold tracking-[.07em] uppercase text-ink-500"
   end
 
   def cell_classes
-    "py-3.5 pr-5 text-[13.5px] text-ink-700"
+    "py-3.5 pr-5 text-body text-ink-700"
   end
 
   def row_button_classes

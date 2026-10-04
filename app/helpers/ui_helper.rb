@@ -2,7 +2,7 @@ require "rqrcode"
 
 module UiHelper
   CARD_CLASSES = "bg-surface border border-line-soft rounded-card shadow-md".freeze
-  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-control bg-surface dark:bg-slate-900 border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
+  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-control bg-surface dark:bg-slate-900 border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
 
   BUTTON_BASE = "inline-flex items-center justify-center gap-2 rounded-control text-sm font-semibold transition cursor-pointer " \
                 "active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100".freeze
@@ -25,7 +25,7 @@ module UiHelper
   end
 
   def field_label_classes
-    "block mb-1.5 text-[11.5px] font-bold text-ink-700"
+    "block mb-1.5 text-label font-bold text-ink-700"
   end
 
   def field_input_classes
@@ -34,7 +34,7 @@ module UiHelper
 
   # Las pantallas de acceso van siempre en claro y el formulario es todo el contenido: campos algo más altos.
   def auth_input_classes
-    "w-full h-11 px-3.5 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"
+    "w-full h-11 px-3.5 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"
   end
 
   def auth_button_classes
@@ -75,12 +75,12 @@ module UiHelper
   # href convierte el valor en enlace (p. ej. tel: para llamar desde la ficha); sin valor no hay enlace.
   def info_row(label, icon_name, value, href: nil)
     display = Array(value).compact_blank.join(" · ").presence || "—"
-    value_classes = "mt-px text-[13.5px] font-semibold text-ink-900 [overflow-wrap:anywhere]"
+    value_classes = "mt-px text-body font-semibold text-ink-900 [overflow-wrap:anywhere]"
     tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft") do
       tag.span(icon(icon_name, class: "w-4 h-4"),
                class: "w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
         tag.div(class: "min-w-0") do
-          tag.p(label, class: "text-[11.5px] font-semibold text-ink-500") +
+          tag.p(label, class: "text-label font-semibold text-ink-500") +
             if href && display != "—"
               tag.p(link_to(display, href, class: "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"), class: value_classes)
             else

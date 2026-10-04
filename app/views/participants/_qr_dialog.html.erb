@@ -1,8 +1,8 @@
 <%# El QR lleva a la ficha de la persona: se escanea desde el gafete y se abre el perfil. Va dentro de un
     data-controller="dialog" y se abre con un botón data-dialog-name="qr" (la ficha y el panel de inicio). %>
 <dialog data-dialog-target="modal" data-dialog-name="qr" data-action="click->dialog#clickOutside" aria-modal="true"
-        class="p-0 m-auto w-full max-w-xs rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
-  <div class="relative p-5 bg-surface rounded-2xl text-center">
+        class="p-0 m-auto w-full max-w-xs rounded-card shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+  <div class="relative p-5 bg-surface rounded-card text-center">
     <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
             class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
       <%= icon "x", class: "w-4 h-4" %>
