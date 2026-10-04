@@ -38,68 +38,54 @@
             text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
     </div>
   <% else %>
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
-      <div class="xl:col-span-2 space-y-6">
-        <% lists.group_by { |company, *| company.auxiliar_company }.sort_by { |branch, _| branch&.name.to_s.presence || "~" }.each do |branch, branch_lists| %>
-          <section>
-            <h2 class="mb-2.5 text-meta font-bold uppercase tracking-[.08em] text-ink-500"><%= branch&.name || "Sin compañía auxiliar" %></h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <% branch_lists.group_by(&:first).each do |company, company_lists| %>
-                <article class="<%= card_classes("p-4") %>" data-night-company="<%= company.number %>">
-                  <div class="flex items-center gap-3 mb-3">
-                    <%= initials_tile "C#{company.number}", seed: company.name, size: :sm %>
-                    <p class="min-w-0 flex-1 text-body font-bold text-ink-900 truncate"><%= company.name %></p>
-                    <%= link_to company_path(company, return_to: panel_url), title: "Perfil de #{company.name}",
-                          class: "shrink-0 inline-flex items-center gap-1 text-label font-semibold text-ink-500 hover:text-ink-900 transition" do %>
-                      Perfil
-                      <%= icon "arrow-up-right", class: "w-3.5 h-3.5" %>
-                    <% end %>
-                  </div>
-                  <div class="space-y-2">
-                    <% company_lists.each do |_, gender, ids, status| %>
-                      <% attendance = @attendances[[ company.id, gender ]] %>
-                      <% missing = attendance ? attendance.missing_ids(ids).size : ids.size %>
-                      <% label, tone, icon_name = case status
-                           when :completa then [ "Completa", :green, "check" ]
-                           when :ausentes then [ "#{missing} #{missing == 1 ? "falta" : "faltan"}", :rose, "user-x" ]
-                           else [ "Sin pasar", :amber, "clock" ]
-                           end %>
-                      <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current), return_to: panel_url),
-                            class: "flex items-center gap-3 min-h-11 px-3 py-2 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted transition-colors",
-                            data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
-                        <span class="min-w-0 flex-1">
-                          <span class="block text-label font-bold text-ink-900"><%= NightAttendance.gender_label(gender) %></span>
-                          <span class="block text-meta font-semibold text-ink-500">
-                            <%= attendance ? "#{attendance.taken_by_name} · #{attendance.confirmed_at.strftime("%H:%M")}" : pluralize(ids.size, "joven", plural: "jóvenes") %>
-                          </span>
-                        </span>
-                        <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
-                        <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
-                      <% end %>
-                    <% end %>
-                  </div>
-                </article>
-              <% end %>
+    <%# La misma cuadrícula de Compañías. Cada lista (hombres, mujeres) es un botón que abre esa lista, y quien
+        falta se ve ahí mismo con su motivo: no hace falta otra columna. %>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
+      <% lists.group_by(&:first).each do |company, company_lists| %>
+        <article class="<%= card_classes("px-5 pt-[18px] pb-4 flex flex-col gap-3") %>" data-night-company="<%= company.number %>">
+          <div class="flex items-center gap-3">
+            <%= initials_tile(company.initials, seed: company.name) %>
+            <div class="min-w-0 flex-1">
+              <p class="text-title font-extrabold text-ink-900 truncate"><%= company.name %></p>
+              <p class="mt-px text-label font-semibold text-ink-500 truncate">
+                <%= [ company.nickname.presence, company.auxiliar_company&.name || "Sin compañía auxiliar" ].compact.join(" · ") %>
+              </p>
             </div>
-          </section>
-        <% end %>
-      </div>
+          </div>
 
-      <section class="<%= card_classes("p-5 md:p-6") %> xl:sticky xl:top-24">
-        <%= section_heading "Ausentes · #{@absences.size}", "user-x", tone: :rose %>
-        <% if @absences.any? %>
-          <ul class="divide-y divide-line-soft" data-night-absences>
-            <% @absences.each do |mark| %>
-              <li class="py-2.5 first:pt-0 last:pb-0">
-                <span class="block text-body font-bold text-ink-900 truncate"><%= mark.participant.full_name %></span>
-                <span class="block text-label font-semibold text-ink-500"><%= mark.participant.company&.name %> · <%= mark.reason_label %></span>
-              </li>
+          <% company_lists.each do |_, gender, ids, status| %>
+            <% attendance = @attendances[[ company.id, gender ]] %>
+            <% missing = attendance ? attendance.missing_ids(ids) : ids %>
+            <% label, tone, icon_name = case status
+                 when :completa then [ "Completa", :green, "check" ]
+                 when :ausentes then [ "#{missing.size} #{missing.size == 1 ? "falta" : "faltan"}", :rose, "user-x" ]
+                 else [ "Sin pasar", :amber, "clock" ]
+                 end %>
+            <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current), return_to: panel_url),
+                  class: "flex flex-col gap-1 px-3 py-2.5 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors",
+                  data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
+              <span class="flex items-center gap-2.5">
+                <span class="min-w-0 flex-1">
+                  <span class="block text-label font-bold text-ink-900"><%= NightAttendance.gender_label(gender) %></span>
+                  <span class="block text-meta font-semibold text-ink-500 truncate">
+                    <%= attendance ? "#{attendance.taken_by_name} · #{attendance.confirmed_at.strftime("%H:%M")}" : "#{pluralize(ids.size, "joven", plural: "jóvenes")} · nadie la ha pasado" %>
+                  </span>
+                </span>
+                <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
+                <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
+              </span>
+              <% if attendance && missing.any? %>
+                <ul class="text-label font-semibold text-cat-rose-ink" data-night-missing>
+                  <% missing.each do |id| %>
+                    <% mark = attendance.marks.find { |m| m.participant_id == id } %>
+                    <li>· <%= mark ? "#{mark.participant.full_name} · #{mark.reason_label}" : "#{@unmarked[id]&.full_name} · sin marcar" %></li>
+                  <% end %>
+                </ul>
+              <% end %>
             <% end %>
-          </ul>
-        <% else %>
-          <p class="text-body text-ink-500">Nadie marcado como ausente esta noche.</p>
-        <% end %>
-      </section>
+          <% end %>
+        </article>
+      <% end %>
     </div>
   <% end %>
 <% end %>

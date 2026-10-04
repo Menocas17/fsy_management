@@ -15,7 +15,9 @@ class NightAttendancesController < ApplicationController
     @attendances = NightAttendance.where(night_on: @night).includes(marks: { participant: :company })
                                   .index_by { |attendance| [ attendance.company_id, attendance.gender ] }
     @absences = @attendances.values.flat_map { |attendance| attendance.marks.select(&:ausente?) }
-                            .sort_by { |mark| [ mark.participant.company&.number.to_i, mark.participant.full_name ] }
+    # Los que llegaron a la compañía después de pasar la lista: cuentan como faltantes «sin marcar».
+    marked = @attendances.values.flat_map { |attendance| attendance.marks.map(&:participant_id) }
+    @unmarked = Participant.where(id: @expected.values.flatten - marked).index_by(&:id)
   end
 
   def show

@@ -1,14 +1,17 @@
-<%# Cada joven se marca a mano: presente, o ausente con su motivo (Enfermería, u Otro escrito). Sin marcar no
-    se confirma. night_attendance_controller muestra el motivo solo al elegir «Ausente». %>
+<%# Pasar lista (opción B de la maqueta): lo común es que estén todos, así que un toque en la fila marca presente
+    y otro lo quita. «Falta» abre una hoja con el motivo (Enfermería, u Otro escrito). Lo marcado viaja en campos
+    ocultos; confirmar se habilita cuando no queda nadie sin marcar (el servidor lo vuelve a revisar).
+    night_attendance_controller lleva la cuenta y la hoja. %>
+<% marked = @jovenes.count { |joven| @attendance&.mark_for(joven)&.status.present? } %>
 <%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), method: :patch,
       data: { controller: "night-attendance" } do %>
-  <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo do %>
-    <button type="button" data-action="night-attendance#markAllPresent"
-            class="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-control border border-line text-label font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
-      <%= icon "check-check", class: "w-4 h-4" %>
-      Todos presentes
-    </button>
-  <% end %>
+  <div class="flex items-center gap-3 mb-4">
+    <span class="text-label font-bold text-ink-900 tabular-nums whitespace-nowrap" data-night-attendance-target="count"><%= marked %> de <%= @jovenes.size %></span>
+    <span class="flex-1 h-1.5 rounded-full bg-sunken overflow-hidden" aria-hidden="true">
+      <span class="block h-full bg-cat-green-solid transition-[width] duration-300" data-night-attendance-target="fill"
+            style="width: <%= @jovenes.empty? ? 0 : marked * 100 / @jovenes.size %>%"></span>
+    </span>
+  </div>
 
   <% if @attendance&.errors&.any? %>
     <div class="mb-4 rounded-tile border border-cat-rose/40 bg-cat-rose/10 px-4 py-3" role="alert" data-night-errors>
@@ -18,48 +21,77 @@
     </div>
   <% end %>
 
-  <ul class="divide-y divide-line-soft">
+  <ul class="flex flex-col gap-2">
     <% @jovenes.each do |joven| %>
       <% mark = @attendance&.mark_for(joven) %>
       <% field = "marks[#{joven.id}]" %>
-      <li class="py-3 first:pt-0 last:pb-0" data-night-attendance-target="row" data-night-joven="<%= joven.id %>">
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span class="min-w-0 flex-1 basis-40">
-            <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
-            <span class="block text-label font-semibold text-ink-500"><%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %></span>
-          </span>
-          <div class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft" role="radiogroup" aria-label="Asistencia de <%= joven.full_name %>">
-            <% [ [ "presente", "Presente", "peer-checked:bg-cat-green-solid" ], [ "ausente", "Ausente", "peer-checked:bg-cat-rose-solid" ] ].each do |value, label, checked| %>
-              <label class="cursor-pointer">
-                <%= radio_button_tag "#{field}[status]", value, mark&.status == value, class: "peer sr-only",
-                      data: { action: "night-attendance#sync", night_status: value } %>
-                <span class="inline-flex items-center h-9 px-3.5 rounded-inner text-label font-bold text-ink-500 transition-colors hover:text-ink-900 <%= checked %> peer-checked:text-white peer-checked:hover:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500"><%= label %></span>
-              </label>
-            <% end %>
-          </div>
-        </div>
+      <li class="group flex items-stretch rounded-tile border border-line-soft bg-surface overflow-hidden transition-colors data-[state=ausente]:border-cat-rose/45 data-[state=presente]:border-cat-green/45"
+          data-night-attendance-target="row" data-night-joven="<%= joven.id %>" data-name="<%= joven.full_name %>"
+          <%= tag.attributes(data: { state: mark&.status }) %>>
+        <%= hidden_field_tag "#{field}[status]", mark&.status, id: nil, data: { field: "status" } %>
+        <%= hidden_field_tag "#{field}[absence_reason]", mark&.absence_reason, id: nil, data: { field: "reason" } %>
+        <%= hidden_field_tag "#{field}[absence_detail]", mark&.absence_detail, id: nil, data: { field: "detail" } %>
 
-        <div class="mt-3 flex flex-wrap items-center gap-2" data-night-reason-box <%= "hidden" unless mark&.ausente? %>>
-          <span class="text-label font-semibold text-ink-500">Motivo:</span>
-          <% NightAttendanceMark::REASON_LABELS.each do |value, label| %>
-            <label class="cursor-pointer">
-              <%= radio_button_tag "#{field}[absence_reason]", value, mark&.absence_reason == value, class: "peer sr-only",
-                    data: { action: "night-attendance#sync", night_reason: value } %>
-              <span class="inline-flex items-center h-8 px-3 rounded-full border border-line text-label font-bold text-ink-700 transition-colors peer-checked:border-transparent peer-checked:bg-cat-rose/15 peer-checked:text-cat-rose-ink peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500"><%= label %></span>
-            </label>
-          <% end %>
-          <%= text_field_tag "#{field}[absence_detail]", mark&.absence_detail, maxlength: 200, placeholder: "¿Dónde está?",
-                aria: { label: "Motivo de la ausencia de #{joven.full_name}" }, hidden: !mark&.otro?, data: { night_detail: true },
-                class: "#{field_input_classes} basis-full sm:basis-0 sm:flex-1 sm:min-w-40" %>
-        </div>
+        <button type="button" data-action="night-attendance#toggle" data-night-toggle
+                class="flex-1 min-w-0 flex items-center gap-3 p-3 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500">
+          <span class="size-8 shrink-0 rounded-full border-2 border-line flex items-center justify-center text-transparent transition-colors
+                       group-data-[state=presente]:bg-cat-green-solid group-data-[state=presente]:border-cat-green-solid group-data-[state=presente]:text-white
+                       group-data-[state=ausente]:bg-cat-rose-solid group-data-[state=ausente]:border-cat-rose-solid group-data-[state=ausente]:text-white">
+            <%= icon "check", class: "w-4 h-4 group-data-[state=ausente]:hidden" %>
+            <%= icon "x", class: "w-4 h-4 hidden group-data-[state=ausente]:block" %>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+            <span class="block text-label font-semibold text-ink-500 truncate">
+              <%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %> ·
+              <span class="group-data-[state=presente]:text-cat-green-ink group-data-[state=ausente]:text-cat-rose-ink" data-night-attendance-target="label"
+                    data-night-label><%= mark&.presente? ? "Presente" : mark&.ausente? ? "Ausente · #{mark.reason_label}" : "Toca para marcar presente" %></span>
+            </span>
+          </span>
+        </button>
+        <button type="button" data-action="night-attendance#openSheet" data-night-falta
+                class="shrink-0 px-4 border-l border-line-soft text-label font-bold text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500">
+          <span class="group-data-[state=ausente]:hidden">Falta</span>
+          <span class="hidden group-data-[state=ausente]:inline">Cambiar</span>
+        </button>
       </li>
     <% end %>
   </ul>
 
-  <div class="mt-6 flex justify-end">
-    <%= button_tag type: "submit", class: button_classes(extra: "w-full sm:w-auto") do %>
+  <div class="sticky bottom-0 -mx-5 md:-mx-6 -mb-5 md:-mb-6 mt-5 px-5 md:px-6 py-4 bg-surface border-t border-line-soft rounded-b-card flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+    <p class="flex-1 text-label font-semibold text-ink-500 text-center sm:text-left" data-night-attendance-target="hint">
+      <%= marked == @jovenes.size ? "Lista completa" : "Faltan #{@jovenes.size - marked} por marcar" %>
+    </p>
+    <%= button_tag type: "submit", disabled: marked < @jovenes.size, data: { night_attendance_target: "confirm" },
+          class: button_classes(extra: "w-full sm:w-auto disabled:opacity-45 disabled:cursor-not-allowed") do %>
       <%= icon "moon-star", class: "w-4 h-4" %>
       Confirmar asistencia
     <% end %>
   </div>
+
+  <%# La hoja del motivo: abajo en el teléfono, centrada en escritorio. %>
+  <dialog data-night-attendance-target="sheet" data-action="click->night-attendance#clickOutside" aria-labelledby="night-sheet-title"
+          class="app-dialog p-0 bg-surface text-ink-900 shadow-lg backdrop:bg-ink-900/55 w-full max-w-none mt-auto mb-0 rounded-t-panel
+                 sm:m-auto sm:max-w-sm sm:w-[calc(100%-2rem)] sm:rounded-card">
+    <div class="p-5 flex flex-col gap-3">
+      <div>
+        <h2 id="night-sheet-title" class="text-title font-extrabold text-ink-900">¿Por qué falta?</h2>
+        <p class="text-label font-semibold text-ink-500" data-night-attendance-target="sheetName"></p>
+      </div>
+      <% NightAttendanceMark::REASON_LABELS.each do |value, label| %>
+        <button type="button" data-action="night-attendance#chooseReason" data-reason="<%= value %>" aria-pressed="false"
+                class="h-12 px-4 flex items-center rounded-control border-[1.5px] border-line text-body font-bold text-ink-900 cursor-pointer transition-colors
+                       aria-pressed:border-cat-rose-solid aria-pressed:text-cat-rose-ink">
+          <%= value == "otro" ? "Otro motivo" : label %>
+        </button>
+      <% end %>
+      <input type="text" maxlength="200" placeholder="¿Dónde está?" aria-label="Motivo de la ausencia" hidden
+             data-night-attendance-target="detail" data-action="input->night-attendance#syncSheet" class="<%= field_input_classes %>">
+      <div class="grid grid-cols-2 gap-2 mt-1">
+        <button type="button" data-action="night-attendance#closeSheet" class="<%= button_classes(:secondary) %>">Cancelar</button>
+        <button type="button" data-action="night-attendance#markAbsent" data-night-attendance-target="save" disabled
+                class="<%= button_classes(extra: "disabled:opacity-45 disabled:cursor-not-allowed") %>">Marcar ausente</button>
+      </div>
+    </div>
+  </dialog>
 <% end %>

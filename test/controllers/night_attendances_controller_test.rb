@@ -19,7 +19,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
 
     get company_night_attendance_path(@company)
     assert_response :success
-    assert_select "[data-night-joven='#{@juan.id}'] input[type=radio][value=presente]"
+    assert_select "[data-night-joven='#{@juan.id}'] [data-night-toggle]"
     assert_select "[data-night-joven='#{@ana.id}']", 0
 
     patch company_night_attendance_path(@company, genero: "H"), params: { marks: { @juan.id => { status: "presente" } } }
@@ -32,7 +32,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
       patch company_night_attendance_path(@company, genero: "M"), params: { marks: { @ana.id => { status: "presente" } } }
     end
     get company_night_attendance_path(@company, genero: "M")
-    assert_select "input[type=radio]", 0 # la de las mujeres de su compañía la ve, pero no la pasa
+    assert_select "[data-night-toggle]", 0 # la de las mujeres de su compañía la ve, pero no la pasa
   end
 
   test "a counselor can't open another company nor the panel" do
@@ -50,7 +50,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as account(auxiliar)
 
     get company_night_attendance_path(@company)
-    assert_select "[data-night-joven='#{@ana.id}'] input[type=radio]"
+    assert_select "[data-night-joven='#{@ana.id}'] [data-night-toggle]"
 
     patch company_night_attendance_path(@company, genero: "M"),
           params: { marks: { @ana.id => { status: "ausente", absence_reason: "enfermeria" } } }
@@ -78,11 +78,11 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-night-list='3-H'][data-night-list-status=ausentes]", text: /1 falta/
     assert_select "[data-night-list='3-M'][data-night-list-status=pendiente]", text: /Sin pasar/
-    assert_select "[data-night-absences]", text: /Juan Pérez.*Con sus papás/m
+    assert_select "[data-night-list='3-H'] [data-night-missing]", text: /Juan Pérez · Con sus papás/
 
     get company_night_attendance_path(@company, genero: "H")
     assert_select "[data-night-joven='#{@juan.id}']", text: /Ausente · Con sus papás/
-    assert_select "input[type=radio]", 0, "directors follow the lists, they don't take them"
+    assert_select "[data-night-toggle]", 0, "directors follow the lists, they don't take them"
   end
 
   test "the superadmin can take any list, but only on the test night before the event" do
@@ -100,7 +100,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one) # la sesión de octubre ya venció
     get company_night_attendance_path(@company, genero: "H")
     assert_response :success
-    assert_select "input[type=radio]", 0, "during the event only the counselors take it"
+    assert_select "[data-night-toggle]", 0, "during the event only the counselors take it"
     get night_attendances_path
     assert_select "[data-night-option='2027-01-12']"
     assert_select "[data-night-option]", 5
@@ -123,7 +123,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as account(@counselor)
 
     get company_night_attendance_path(@company, noche: "2027-01-10")
-    assert_select "input[type=radio]", 0
+    assert_select "[data-night-toggle]", 0
   end
 
   private

@@ -13,21 +13,27 @@ class NightAttendanceTest < ApplicationSystemTestCase
     @user = User.create!(email_address: "carlos@fsy.com", password: "Prueba123!", participant: counselor)
   end
 
-  test "the counselor marks his jóvenes, with a reason for whoever is missing" do
+  test "the counselor taps each joven present, and Falta asks for the reason" do
     sign_in_as(@user, password: "Prueba123!")
     visit company_path(@company)
     click_on "Pasar asistencia"
 
-    within("[data-night-joven='#{@pedro.id}']") do
-      assert_no_selector "[data-night-reason-box]", visible: true
-      find("label", text: "Ausente").click
-      assert_selector "[data-night-reason-box]", visible: true
-      assert_no_selector "[data-night-detail]", visible: true
-      find("label", text: "Otro").click
-      find("[data-night-detail]").fill_in(with: "Con sus papás")
+    assert_button "Confirmar asistencia", disabled: true
+    find("[data-night-joven='#{@juan.id}'] [data-night-toggle]").click
+    find("[data-night-joven='#{@luis.id}'] [data-night-toggle]").click
+    within("[data-night-joven='#{@juan.id}']") { assert_text "Presente" }
+    assert_text "2 de 3"
+
+    find("[data-night-joven='#{@pedro.id}'] [data-night-falta]").click
+    within("dialog[open]") do
+      assert_button "Marcar ausente", disabled: true
+      click_on "Otro motivo"
+      find("input[placeholder='¿Dónde está?']").fill_in(with: "Con sus papás")
+      save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-hoja.png")) if ENV["SCREENSHOTS"]
+      click_on "Marcar ausente"
     end
-    click_on "Todos presentes"
-    within("[data-night-joven='#{@pedro.id}']") { assert find("[data-night-status=ausente]", visible: :all).checked? }
+    within("[data-night-joven='#{@pedro.id}']") { assert_text "Ausente · Con sus papás" }
+    assert_text "3 de 3"
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-escritorio.png")) if ENV["SCREENSHOTS"]
 
     click_on "Confirmar asistencia"
@@ -41,19 +47,19 @@ class NightAttendanceTest < ApplicationSystemTestCase
     sign_in_as(User.create!(email_address: "dir@fsy.com", password: "Prueba123!", participant: director), password: "Prueba123!")
     visit night_attendances_path
     assert_selector "[data-night-list='3-H']", text: "1 falta"
-    assert_selector "[data-night-absences]", text: "Pedro Prueba"
+    assert_selector "[data-night-list='3-H'] [data-night-missing]", text: "Pedro Prueba · Con sus papás"
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-panel.png")) if ENV["SCREENSHOTS"]
   end
 
-  test "on a phone the list fits without scrolling sideways" do
+  test "on a phone the list fits without scrolling sideways and the reason opens as a sheet" do
     resize_to_mobile
     sign_in_as(@user, password: "Prueba123!")
     visit company_night_attendance_path(@company)
-    within("[data-night-joven='#{@pedro.id}']") do
-      find("label", text: "Ausente").click
-      find("label", text: "Otro").click
-    end
+    find("[data-night-joven='#{@juan.id}'] [data-night-toggle]").click
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-celular.png")) if ENV["SCREENSHOTS"]
+    find("[data-night-joven='#{@pedro.id}'] [data-night-falta]").click
+    within("dialog[open]") { click_on "Enfermería" }
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-celular-hoja.png")) if ENV["SCREENSHOTS"]
 
     assert_equal page.evaluate_script("document.documentElement.clientWidth"), page.evaluate_script("document.documentElement.scrollWidth")
   end
