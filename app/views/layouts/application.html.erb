@@ -65,10 +65,6 @@
           </div>
         </div>
         <main data-controller="scroll-memory" data-pull-refresh-target="scroller" class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-canvas">
-          <%# En pantallas chicas el volver encabeza el contenido, lejos del botón de menú y con su etiqueta visible. %>
-          <% if content_for?(:back) %>
-            <div data-page-back-mobile class="sm:hidden px-4 pt-4 -mb-1"><%= yield :back %></div>
-          <% end %>
           <%= yield %>
         </main>
       </div>

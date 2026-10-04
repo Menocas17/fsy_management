@@ -1,26 +1,5 @@
 <%
-  # Durante la semana del FSY manda la agenda: las dos próximas actividades. Antes, las capacitaciones
-  # que faltan y el arranque del evento.
-  items = if event_in_progress?
-    next_activities.map do |activity|
-      { key: "activity-#{activity.id}", eyebrow: "Agenda", title: activity.title,
-        meta: [ SpanishDates.long(activity.starts_at.to_date), activity.time_range, activity.location.presence ].compact.join(" · "),
-        days: days_until(activity.starts_at.to_date), icon: "calendar-days", tone: :primary,
-        url: agenda_path(date: activity.starts_at.to_date, activity_id: activity.id) }
-    end
-  else
-    trainings = next_trainings.map do |training|
-      { key: "training-#{training.held_on}", eyebrow: "Capacitación", title: SpanishDates.long(training.held_on),
-        meta: "#{training.name} · #{training.held_on.year}", days: days_until(training.held_on),
-        icon: "graduation-cap", tone: :amber,
-        url: agenda_training_path(training, return_to: return_here) }
-    end
-    start_on = Rails.configuration.x.event_start_on
-    trainings + [ { key: "event", eyebrow: Rails.configuration.x.event_name, title: "Comienza el evento",
-                    meta: "#{SpanishDates.long(start_on)} de #{start_on.year} · Managua-Caribe",
-                    days: days_until(start_on), icon: "party-popper", tone: :indigo, url: agenda_path } ]
-  end
-  items = items.first(3)
+  items = next_up_items(next_activities)
   columns = { 1 => "", 2 => "lg:grid-cols-2", 3 => "lg:grid-cols-3" }.fetch(items.size, "lg:grid-cols-3")
 %>
 <section class="<%= card_classes("p-5 md:p-6") %>" data-next-up>

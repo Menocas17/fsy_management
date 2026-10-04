@@ -9,7 +9,7 @@
   jovenes_total = @companies.sum { |company| @jovenes_counts.fetch(company.id, 0) }
   numbers = @auxiliar_company.company_numbers_label
 %>
-<%= render PageComponent.new(width: :page) do %>
+<%= render PageComponent.new(width: :page, banner: true) do %>
   <%= render "shared/event_banner" %>
 
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">

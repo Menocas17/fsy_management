@@ -1,4 +1,4 @@
-<%= render PageComponent.new(width: :page) do %>
+<%= render PageComponent.new(width: :page, banner: true) do %>
   <%= render "participants/profile/profile_banner", participant: participant, edit_from: edit_from %>
 
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] 2xl:grid-cols-3 gap-5 items-start 2xl:items-stretch">

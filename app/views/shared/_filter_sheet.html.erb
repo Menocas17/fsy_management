@@ -1,0 +1,40 @@
+<%#
+  Envoltorio de los filtros de una lista (render layout: "shared/filter_sheet"), junto a la búsqueda.
+  Teléfono y tablet: un botón «Filtros» con cuántos hay puestos abre una hoja desde abajo con los filtros a lo
+  ancho, uno debajo del otro. Desde lg, la hoja es la fila de siempre (row_class) y el botón no existe.
+  Locales: sheet_id, clear_path, active_count, row_class (la fila de escritorio), sheet_class (su ancho en lg),
+  row_data (atributos data de la fila). El form lleva data-controller="filter-sheet" y las acciones de
+  filter_sheet_form_data. Cada filtro va en filter_field, con su nombre encima solo en la hoja.
+%>
+<button type="button" data-filter-sheet-target="trigger" data-action="filter-sheet#open" data-filter-sheet-trigger
+        aria-expanded="false" aria-controls="<%= sheet_id %>"
+        class="lg:hidden shrink-0 inline-flex items-center gap-1.5 h-10 px-3 rounded-control bg-surface border border-line text-body font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
+  <%= icon "sliders-horizontal", class: "w-4 h-4" %>
+  Filtros
+  <span data-filter-sheet-target="count" <%= "hidden" unless active_count.positive? %>
+        class="min-w-5 h-5 px-1.5 rounded-full bg-primary-600 text-white text-meta font-extrabold flex items-center justify-center"><%= active_count %></span>
+</button>
+
+<div data-filter-sheet-target="scrim" data-action="click->filter-sheet#close" aria-hidden="true"
+     class="lg:hidden fixed inset-0 z-100 bg-black/50 opacity-0 pointer-events-none data-open:opacity-100 data-open:pointer-events-auto transition-opacity duration-200"></div>
+
+<%# Cerrada queda invisible (fuera del Tab); la visibilidad cambia al final del cierre para que se vea bajar.
+    El encabezado y «Ver resultados» quedan fijos; si los filtros no caben, se desplazan ellos en medio. %>
+<div id="<%= sheet_id %>" data-filter-sheet-target="sheet" role="group" aria-label="Filtros"
+     class="max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-200 max-lg:max-h-[85dvh] max-lg:flex max-lg:flex-col max-lg:bg-surface max-lg:rounded-t-panel max-lg:shadow-lg max-lg:px-4 max-lg:pt-2 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]
+            max-lg:translate-y-full max-lg:invisible max-lg:data-open:translate-y-0 max-lg:data-open:visible max-lg:transition-[translate,visibility] max-lg:duration-[360ms] max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] <%= local_assigns[:sheet_class] %>">
+  <div class="lg:hidden shrink-0">
+    <div class="w-10 h-1.5 mx-auto mb-3 rounded-full bg-line" aria-hidden="true"></div>
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <p class="text-title font-extrabold text-ink-900">Filtros</p>
+      <%= link_to "Limpiar", clear_path, data: { turbo_frame: "_top" }, class: "h-8 inline-flex items-center px-2 rounded-inner text-label font-semibold text-ink-500 hover:text-ink-900 transition" %>
+    </div>
+  </div>
+  <%= tag.div class: "scroll-reveal-x max-lg:flex max-lg:flex-col max-lg:gap-3 max-lg:min-h-0 max-lg:overflow-y-auto max-lg:p-1 max-lg:-m-1 #{row_class}",
+        data: { controller: "scroll-reveal" }.merge(local_assigns.fetch(:row_data, {})) do %>
+    <%= yield %>
+  <% end %>
+  <button type="button" data-action="filter-sheet#close" class="<%= button_classes(extra: "lg:hidden shrink-0 mt-4 w-full") %>">
+    Ver resultados
+  </button>
+</div>

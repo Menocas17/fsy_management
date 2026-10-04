@@ -16,8 +16,9 @@ export default class extends Controller {
 
   toggle(event) {
     event.stopPropagation();
-    this.menuTarget.classList.toggle('hidden');
-    this.chevronTargets.forEach((chevron) => chevron.classList.toggle('rotate-180'));
+    const open = this.menuTarget.classList.toggle('hidden') === false;
+    this.chevronTargets.forEach((chevron) => chevron.classList.toggle('rotate-180', open));
+    this.trigger?.setAttribute('aria-expanded', String(open));
   }
 
   hide(event) {
@@ -30,5 +31,10 @@ export default class extends Controller {
   close() {
     this.menuTarget.classList.add('hidden');
     this.chevronTargets.forEach((chevron) => chevron.classList.remove('rotate-180'));
+    this.trigger?.setAttribute('aria-expanded', 'false');
+  }
+
+  get trigger() {
+    return this.element.querySelector('[aria-haspopup]');
   }
 }

@@ -3,7 +3,7 @@
 <% params[:from] == "myprofile" ? back_to("Mi perfil", myprofile_participants_path) : back_to_origin(@participant.first_name, participant_path(@participant, from: params[:from])) %>
 <%= render PageComponent.new(width: :page) do %>
   <%# El volver vive en la barra superior; aquí solo queda de quién es la ficha que se está editando. %>
-  <p class="min-w-0 text-body text-ink-500 truncate">Editando el registro de <span class="font-semibold text-ink-700 dark:text-ink-700"><%= @participant.full_name %></span></p>
+  <p class="min-w-0 text-body text-ink-500 sm:truncate">Editando el registro de <span class="font-semibold text-ink-700 dark:text-ink-700"><%= @participant.full_name %></span></p>
   <%= render "participants/form/form", participant: @participant %>
   <%= render "participants/form/form_actions", participant: @participant %>
 <% end %>

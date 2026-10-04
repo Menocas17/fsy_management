@@ -63,9 +63,13 @@ class Company < ApplicationRecord
     DINING_HALL_LABELS[dining_hall]
   end
 
-  def counselor_names
+  # Él primero y luego ella, como en el resto de la app.
+  def counselors_in_order
     counselors.sort_by { |counselor| counselor.gender == "H" ? 0 : 1 }
-              .map(&:full_name)
+  end
+
+  def counselor_names
+    counselors_in_order.map(&:full_name)
               .to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
 

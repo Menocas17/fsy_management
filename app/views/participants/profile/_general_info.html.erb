@@ -4,10 +4,12 @@
     <%= info_row "Compañía asignada", "building-2", participant.company&.name, href: (company_path(participant.company, return_to: return_here) if participant.company) %>
     <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
     <%= info_row "Cuarto", "door-open", participant.room %>
-    <%# Los de su compañía hoy (el personal asignado), no lo que se copió en la ficha al importarla. %>
+    <%# Los de su compañía hoy (el personal asignado), no lo que se copió en la ficha al importarla; cada uno lleva a su perfil. %>
     <% if participant.joven? %>
+      <% counselors = participant.company&.counselors_in_order.to_a %>
       <%= info_row "Consejeros a cargo", "users",
-            participant.company ? participant.company.counselor_names : [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
+            participant.company ? nil : [ participant.m_person_in_charge, participant.h_person_in_charge ],
+            links: counselors.map { |counselor| [ counselor.full_name, participant_path(counselor, return_to: return_here) ] } %>
     <% end %>
     <%= info_row "Identificación", "id-card", participant.formatted_identity_document %>
     <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>

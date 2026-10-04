@@ -4,7 +4,7 @@
 <% content_for :page_h1, "true" %>
 <% back_to_origin "Compañías", companies_path %>
 <% counselor_names = @company.counselor_names %>
-<%= render PageComponent.new(width: :page) do %>
+<%= render PageComponent.new(width: :page, banner: true) do %>
   <%= render "shared/event_banner" %>
 
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">

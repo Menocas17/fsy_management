@@ -34,7 +34,50 @@ class MobileTest < ApplicationSystemTestCase
     assert_no_selector "[data-account-status]"
     within("[data-contact-account]") { assert_text "Todavía no entra" }
 
+    # Como en iPhone: la barra cambia el menú por «‹ Jóvenes», y no hay otro volver sobre el contenido.
+    assert_no_selector "[data-mobile-menu-target='trigger']", visible: true
+    assert_selector "a[data-page-back-mobile]", text: "Jóvenes", count: 1
+    assert_no_selector "[data-page-back] a", visible: true
+
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
+    # Toda la zona del título vuelve, no solo la flecha: lo que hay bajo el centro del título es el enlace.
+    under_title = evaluate_script(<<~JS)
+      (() => {
+        const title = [...document.querySelectorAll("[data-page-header] p")].find((p) => p.textContent.includes("Perfil del participante"));
+        const box = title.getBoundingClientRect();
+        return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2).closest("a")?.dataset.pageBackMobile;
+      })()
+    JS
+    assert_equal "true", under_title
+    find("a[data-page-back-mobile]").click
+    assert_current_path participants_path
+    assert_selector "[data-mobile-menu-target='trigger']", visible: true
+  end
+
+  test "on a phone the list filters open in a sheet that counts what is applied" do
+    sign_in_as(@admin)
+    emulate_phone
+    visit staff_participants_path
+
+    assert_no_selector "select[aria-label='Filtrar por rol']", visible: true
+    assert_equal evaluate_script("window.innerWidth"), evaluate_script("document.documentElement.scrollWidth"), "la página no se desliza de lado"
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "staff-movil.png")) if ENV["SCREENSHOTS"]
+
+    find("[data-filter-sheet-trigger]").click
+    find("select[aria-label='Filtrar por rol']").select("Consejero")
+    assert_selector "[data-active-filter='rol']", visible: :all
+    within("[data-filter-sheet-trigger]") { assert_text "1" }
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "staff-movil-filtros.png")) if ENV["SCREENSHOTS"]
+
+    click_button "Ver resultados"
+    assert_no_selector "select[aria-label='Filtrar por rol']", visible: true
+    assert_text "Andrea Chavarría Martínez"
+
+    # Limpiar vuelve a la lista sin que la copia guardada (con la hoja abierta) se asome.
+    click_link "Limpiar todo"
+    assert_no_selector "[data-active-filters]"
+    assert_no_selector "[data-filter-sheet-target][data-open]", visible: :all
+    within("[data-filter-sheet-trigger]") { assert_no_selector "[data-filter-sheet-target='count']" }
   end
 
   test "on a wide screen the profile buttons stay in one row" do

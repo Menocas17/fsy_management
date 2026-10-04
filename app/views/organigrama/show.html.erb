@@ -1,5 +1,8 @@
 <% content_for :title, "Organigrama" %>
 <% content_for :eyebrow, "Participantes" %>
+<%# Cambiar de vista se mezcla en la página (ver SegmentedToggleComponent); el lienzo lleva la vista en su id
+    para que se cambie entero y vuelva a ajustarse. %>
+<%= turbo_refreshes_with method: :morph, scroll: :preserve %>
 <%# The chart fills the screen on desktop, so the page itself carries no padding there. %>
 <div class="md:h-full">
   <%= render(@view == "mi_compania" ? "organigrama/mine" : "organigrama/general") %>

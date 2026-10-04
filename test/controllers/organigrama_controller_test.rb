@@ -46,6 +46,12 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
     assert_select "ul.org-stack##{branch}[hidden] [data-company-id='#{@company.id}']"
     assert_select "button[data-action='org-chart#toggleBranch'][aria-controls='#{branch}'][aria-expanded='false']"
     assert_select "button[data-action='org-chart#toggleAll']", text: /Mostrar compañías/
+
+    # El teléfono no tiene lienzo, pero sus ramas se abren y cierran igual.
+    mobile_branch = "branch-mobile-#{@auxiliar_company.id}"
+    assert_select "[data-controller='org-branches'] ##{mobile_branch}[hidden] [data-company-id='#{@company.id}']"
+    assert_select "button[data-action='org-branches#toggleBranch'][aria-controls='#{mobile_branch}'][aria-expanded='false']"
+    assert_select "button[data-action='org-branches#toggleAll']", text: /Mostrar compañías/
   end
 
   test "the logistics view keeps the directors at the head and drops the companies branch" do

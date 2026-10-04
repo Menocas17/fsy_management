@@ -1,11 +1,14 @@
-<%# Short hero banner for edit/new pages: a back link and, when editing, the record's name. %>
-<div class="h-[110px] rounded-panel bg-hero shadow-lg px-4 md:px-7 pt-4 md:pt-5 flex items-start justify-between gap-3">
+<%# Short hero banner for edit/new pages: a back link and, when editing, the record's name.
+    En el teléfono el volver de la página ya está en la barra superior («‹ …»): el del banner se oculta y
+    el «Editando …» se lee entero, en dos líneas si hace falta, en vez de cortarse junto al botón. %>
+<% page_back = content_for?(:back) %>
+<div class="min-h-[110px] sm:h-[110px] rounded-panel bg-hero shadow-lg px-4 md:px-7 pt-4 md:pt-5 pb-12 sm:pb-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
   <%= link_to back_path,
-        class: "inline-flex items-center gap-2 h-9 px-3.5 shrink-0 rounded-control bg-white/15 border border-white/25 text-white text-body font-bold hover:bg-white/25 transition" do %>
+        class: "#{page_back ? "hidden sm:inline-flex" : "inline-flex"} self-start items-center gap-2 h-9 px-3.5 shrink-0 rounded-control bg-white/15 border border-white/25 text-white text-body font-bold hover:bg-white/25 transition" do %>
     <%= icon "arrow-left", class: "w-4 h-4" %>
     <%= back_label %>
   <% end %>
-  <p class="mt-2 min-w-0 truncate text-label font-semibold text-white/75">
+  <p class="sm:mt-2 min-w-0 line-clamp-2 sm:line-clamp-none sm:truncate text-label font-semibold text-white/75">
     <% if local_assigns[:editing].present? %>
       Editando <b class="text-white"><%= editing %></b>
     <% else %>

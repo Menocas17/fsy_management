@@ -20,6 +20,21 @@ module UiHelper
     [ BUTTON_BASE, BUTTON_SIZES.fetch(size), BUTTON_VARIANTS.fetch(variant), extra ].compact.join(" ")
   end
 
+  # Los filtros de una lista (shared/filter_sheet): el form los aplica solos y la hoja del teléfono lleva la
+  # cuenta de cuántos hay puestos y se cierra con Esc.
+  def filter_sheet_form_data(frame)
+    { turbo_frame: frame, turbo_action: "advance", controller: "auto-submit filter-sheet",
+      action: "change->filter-sheet#recount input->filter-sheet#recount keydown.esc@window->filter-sheet#close" }
+  end
+
+  # Un filtro dentro de la hoja: en el teléfono, su nombre encima; desde lg el envoltorio desaparece
+  # (contents) y el campo queda suelto en la fila, donde el select ya dice qué filtra.
+  def filter_field(label, id, &block)
+    tag.div(class: "lg:contents") do
+      label_tag(id, label, class: "lg:hidden mb-1 block text-label font-semibold text-ink-500") + capture(&block)
+    end
+  end
+
   # Unas iniciales en un mosaico, con el mismo algoritmo de color que los avatares: «C3» para la compañía 3,
   # la inicial de una compañía auxiliar. seed decide el color (el nombre), así cada una conserva el suyo.
   def initials_tile(text, seed:, size: :md)
@@ -81,16 +96,21 @@ module UiHelper
   end
 
   # href convierte el valor en enlace (p. ej. tel: para llamar desde la ficha); sin valor no hay enlace.
-  def info_row(label, icon_name, value, href: nil)
+  # links: varios valores que llevan cada uno a su página, como [[nombre, ruta], …]; se unen con «y».
+  def info_row(label, icon_name, value, href: nil, links: nil)
     display = Array(value).compact_blank.join(" · ").presence || "—"
     value_classes = "mt-px text-body font-semibold text-ink-900 [overflow-wrap:anywhere]"
+    link_classes = "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"
     tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft") do
       tag.span(icon(icon_name, class: "w-4 h-4"),
                class: "w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
         tag.div(class: "min-w-0") do
           tag.p(label, class: "text-label font-semibold text-ink-500") +
-            if href && display != "—"
-              tag.p(link_to(display, href, class: "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"), class: value_classes)
+            if links.present?
+              anchors = links.map { |text, path| link_to(text, path, class: link_classes) }
+              tag.p(anchors.to_sentence(two_words_connector: " y ", last_word_connector: " y ").html_safe, class: value_classes)
+            elsif href && display != "—"
+              tag.p(link_to(display, href, class: link_classes), class: value_classes)
             else
               tag.p(display, class: value_classes)
             end
