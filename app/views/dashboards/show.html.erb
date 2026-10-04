@@ -14,10 +14,12 @@
           class: "hidden lg:block absolute top-10 right-12 xl:top-10 xl:right-12 w-[220px] xl:w-[270px] opacity-50 pointer-events-none select-none" %>
     <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 max-sm:flex-1">
       <div class="max-w-xl">
-        <%# En los teléfonos altos sobra aire en el banner: lo encabeza el lockup oficial (en escritorio va arriba a
-            la derecha). Solo desde 800px de alto visible; por debajo no cabe sin empujar los KPI a la vista. %>
-        <%= image_tag "fsy-lettering.png", alt: "", aria: { hidden: true },
-              class: "hidden max-sm:[@media(min-height:800px)]:block w-[52%] max-w-[210px] mb-5 opacity-50 pointer-events-none select-none" %>
+        <%# En los teléfonos altos sobra aire en el banner: lo encabeza el triángulo de la marca, en su mosaico como
+            en el menú lateral (el lockup con letras repetía lo que ya dice la píldora). Solo desde 800px de alto
+            visible; por debajo no cabe sin empujar los KPI a la vista. %>
+        <span class="hidden max-sm:[@media(min-height:800px)]:flex w-16 h-16 mb-5 rounded-card bg-brand-tile p-2.5 shadow-md" aria-hidden="true">
+          <%= image_tag "fsy-mark.png", alt: "", class: "w-full h-full object-contain" %>
+        </span>
         <span class="lg:hidden inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %></span>
         <% countdown = event_countdown %>
         <%# El título de la página es estable; la cuenta regresiva cambia cada segundo y no debe ser el h1. %>
