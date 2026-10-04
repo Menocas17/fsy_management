@@ -1,15 +1,16 @@
 <%# Un joven en el tablero: en camino (avisado por su consejero) o adentro. El detalle del motivo solo lo ve
-    quien puede leer su ficha clínica; el resto, el motivo a secas. %>
+    quien puede leer su ficha clínica; el resto, el motivo a secas. Toda la tarjeta abre su ficha: el enlace del
+    nombre se estira sobre ella (after:inset-0) y los botones quedan encima (relative z-10). %>
 <% joven = visit.participant %>
 <% arriving = visit.en_camino? %>
 <% flags = infirmary_medical_flags(joven) %>
-<article class="<%= card_classes("p-4 md:p-5 flex flex-col gap-3 #{"border-cat-amber/55" if arriving}") %>"
+<article class="<%= card_classes("relative p-4 md:p-5 flex flex-col gap-3 transition-colors hover:border-primary-300 dark:hover:border-primary-500 has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-primary-500 #{"border-cat-amber/55" if arriving}") %>"
          data-infirmary-visit="<%= joven.id %>" data-infirmary-status="<%= visit.status %>" data-controller="dialog">
   <div class="flex items-center gap-3">
     <%= render AvatarComponent.new(participant: joven) %>
     <div class="min-w-0 flex-1">
-      <%= link_to joven.full_name, infirmary_chart_path(joven),
-            class: "block text-title font-bold text-ink-900 truncate hover:underline decoration-line underline-offset-2" %>
+      <%= link_to joven.full_name, infirmary_chart_path(joven), data: { card_link: true },
+            class: "block text-title font-bold text-ink-900 truncate focus:outline-none after:absolute after:inset-0 after:rounded-card" %>
       <p class="text-label font-semibold text-ink-500 truncate"><%= joven.company&.name || "Sin compañía" %></p>
     </div>
     <div class="shrink-0 text-right">
@@ -44,7 +45,7 @@
         <%= render ChipComponent.new(label: "Sin alergias ni medicinas") %>
       <% end %>
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div class="relative z-10 flex flex-wrap gap-2">
       <% if arriving && can_cancel_infirmary_visit?(visit) %>
         <%= button_to infirmary_visit_path(visit), method: :delete,
               form: { data: { turbo_confirm: "¿Retirar el aviso de #{joven.full_name}?", turbo_confirm_detail: "Deja de aparecer en camino a enfermería.",

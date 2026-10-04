@@ -29,7 +29,6 @@ class CreateInfirmaryVisits < ActiveRecord::Migration[8.1]
       t.references :infirmary_visit, type: :uuid, null: false, foreign_key: true
       t.references :author, type: :uuid, foreign_key: { to_table: :participants, on_delete: :nullify }
       t.string :author_name, null: false
-      t.integer :kind, null: false, default: 0
       t.text :body
       t.jsonb :vitals, null: false, default: {}
       t.timestamps

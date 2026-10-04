@@ -238,7 +238,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120200) do
     t.uuid "infirmary_visit_id", null: false
     t.uuid "author_id"
     t.string "author_name", null: false
-    t.integer "kind", default: 0, null: false
     t.text "body"
     t.jsonb "vitals", default: {}, null: false
     t.datetime "created_at", null: false

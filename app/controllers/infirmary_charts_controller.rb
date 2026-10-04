@@ -7,6 +7,6 @@ class InfirmaryChartsController < ApplicationController
 
   def show
     load_infirmary_chart(Participant.jovenes.find(params[:participant_id]))
-    @note = InfirmaryNote.new(kind: :nota)
+    @note = InfirmaryNote.new
   end
 end

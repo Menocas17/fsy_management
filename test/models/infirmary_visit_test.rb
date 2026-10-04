@@ -76,11 +76,11 @@ class InfirmaryVisitTest < ActiveSupport::TestCase
 
   test "notes can't change once written and flag a fever" do
     visit = InfirmaryVisit.admit_directly(@juan, by: @nurse, reason: "fiebre").tap(&:start)
-    note = visit.notes.create!(kind: :signos, author: @nurse, author_name: @nurse.full_name, temperature: "38.4", heart_rate: "96", oxygen: "")
+    note = visit.notes.create!(author: @nurse, author_name: @nurse.full_name, temperature: "38.4", heart_rate: "96", oxygen: "")
 
     assert_equal [ [ "38.4 °C", true ], [ "FC 96", false ] ], note.vital_readings
     assert_raises(ActiveRecord::ReadOnlyRecord) { note.update!(body: "otra cosa") }
-    assert_not visit.notes.build(kind: :nota, author_name: "X").valid?, "an empty note says nothing"
+    assert_not visit.notes.build(author_name: "X").valid?, "an empty note says nothing"
   end
 
   private

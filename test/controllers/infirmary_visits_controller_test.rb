@@ -86,13 +86,13 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     assert visit.adentro?
     assert_equal "Patricia Prueba", visit.admitted_by_name
 
-    post infirmary_visit_notes_path(visit), params: { infirmary_note: { kind: "signos", temperature: "37.2", heart_rate: "88" } }
+    post infirmary_visit_notes_path(visit), params: { infirmary_note: { temperature: "37.2", heart_rate: "88" } }
     assert_redirected_to infirmary_chart_path(@pedro, anchor: "visita-#{visit.id}")
     assert_equal({ "temperature" => "37.2", "heart_rate" => "88" }, visit.notes.last.vitals)
 
-    post infirmary_visit_notes_path(visit), params: { infirmary_note: { kind: "nota", body: " " } }
+    post infirmary_visit_notes_path(visit), params: { infirmary_note: { body: " " } }
     assert_response :unprocessable_entity
-    assert_select "[data-infirmary-note-errors]", text: /escribe la nota/
+    assert_select "[data-infirmary-note-errors]", text: /escribe la nota o anota algún signo vital/
 
     patch discharge_infirmary_visit_path(visit), params: { disposition: "regreso", discharge_notes: "Hielo cada 2 horas" }
     assert visit.reload.alta?
@@ -101,12 +101,12 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
 
   test "the clinical notes are read by nursing, the joven's carers and the director, not by the rest of the staff" do
     visit = InfirmaryVisit.admit_directly(@juan, by: @nurse, reason: "fiebre", detail: "Garganta roja").tap(&:start)
-    visit.notes.create!(kind: :medicamento, body: "Acetaminofén 500 mg", author: @nurse, author_name: "Patricia Prueba")
+    visit.notes.create!(body: "Acetaminofén 500 mg", author: @nurse, author_name: "Patricia Prueba")
 
     [ @counselor, @auxiliar, @director, @nurse ].each do |reader|
       sign_in_as account(reader)
       get infirmary_chart_path(@juan)
-      assert_select "[data-infirmary-note=medicamento]", { text: /Acetaminofén/ }, "#{reader.role_label} reads the notes"
+      assert_select "[data-infirmary-note]", { text: /Acetaminofén/ }, "#{reader.role_label} reads the notes"
       sign_out
     end
 
@@ -122,7 +122,7 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as account(@counselor)
 
     assert_no_difference -> { InfirmaryNote.count } do
-      post infirmary_visit_notes_path(visit), params: { infirmary_note: { kind: "nota", body: "Hola" } }
+      post infirmary_visit_notes_path(visit), params: { infirmary_note: { body: "Hola" } }
     end
     patch discharge_infirmary_visit_path(visit), params: { disposition: "casa" }
     assert visit.reload.adentro?

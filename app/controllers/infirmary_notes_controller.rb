@@ -13,7 +13,7 @@ class InfirmaryNotesController < ApplicationController
     @note = visit.notes.build(note_params.merge(author: actor, author_name: InfirmaryVisit.name_of(actor)))
     if @note.save
       record_audit!(category: :enfermeria, action: "created", target: joven,
-                    summary: "Agregó #{@note.nota? ? "una nota" : @note.kind_label.downcase} a la ficha de enfermería de #{joven.full_name}")
+                    summary: "Agregó una nota a la ficha de enfermería de #{joven.full_name}")
       redirect_to infirmary_chart_path(joven, anchor: "visita-#{visit.id}"), notice: "Nota agregada a la ficha."
     else
       load_infirmary_chart(joven)
@@ -24,6 +24,6 @@ class InfirmaryNotesController < ApplicationController
 
   private
     def note_params
-      params.expect(infirmary_note: [ :kind, :body, *InfirmaryNote::VITALS.keys ])
+      params.expect(infirmary_note: [ :body, *InfirmaryNote::VITALS.keys ])
     end
 end
