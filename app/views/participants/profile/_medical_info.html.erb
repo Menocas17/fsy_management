@@ -1,31 +1,25 @@
-<%# En el teléfono va primero (order-first): es lo que busca enfermería o un consejero. Con dos columnas ocupa la
-    fila entera y pone las notas al lado; con tres vuelve a ser una columna más. %>
-<section class="<%= card_classes("p-6 order-first lg:order-none lg:col-span-2 2xl:col-span-1") %>">
+<section class="<%= card_classes("p-6 2xl:order-3") %>">
   <%= section_heading "Información médica", "shield-plus", tone: :rose %>
-  <div class="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start 2xl:block">
-    <div>
-      <%# Si algo pide atención salta a la vista en rojo; el detalle ya está justo abajo, así que el aviso no lo repite.
-          Si todo dice «Ninguna», no aparece nada. %>
-      <% if [ participant.allergies, participant.medicines, participant.diet ].any? { |value| medical_note?(value) } %>
-        <p class="mb-4 flex items-center gap-2.5 rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-body font-bold text-cat-rose-ink" role="note" data-medical-alert>
-          <%= icon "triangle-alert", class: "size-[18px] shrink-0" %>
-          Requiere atención
-        </p>
-      <% end %>
-      <div>
-        <%= info_row "Alergias", "shield-plus", participant.allergies %>
-        <%= info_row "Medicinas", "pill", participant.medicines %>
-        <%= info_row "Dieta", "leaf", participant.diet %>
-      </div>
-    </div>
+  <%# Si algo pide atención salta a la vista en rojo; el detalle ya está justo abajo, así que el aviso no lo repite.
+      Si todo dice «Ninguna», no aparece nada. %>
+  <% if [ participant.allergies, participant.medicines, participant.diet ].any? { |value| medical_note?(value) } %>
+    <p class="mb-4 flex items-center gap-2.5 rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-body font-bold text-cat-rose-ink" role="note" data-medical-alert>
+      <%= icon "triangle-alert", class: "size-[18px] shrink-0" %>
+      Requiere atención
+    </p>
+  <% end %>
+  <div>
+    <%= info_row "Alergias", "shield-plus", participant.allergies %>
+    <%= info_row "Medicinas", "pill", participant.medicines %>
+    <%= info_row "Dieta", "leaf", participant.diet %>
+  </div>
 
-    <div class="mt-5 lg:mt-0 2xl:mt-5 rounded-tile bg-sunken border border-line-soft px-5 py-4">
-      <p class="text-body font-bold text-ink-700">Notas adicionales</p>
-      <% if participant.additional_instructions.present? %>
-        <p class="mt-1.5 text-body leading-relaxed italic text-ink-700"><%= participant.additional_instructions %></p>
-      <% else %>
-        <p class="mt-1.5 text-body text-ink-500">No hay notas adicionales.</p>
-      <% end %>
-    </div>
+  <div class="mt-5 rounded-tile bg-sunken border border-line-soft px-5 py-4">
+    <p class="text-body font-bold text-ink-700">Notas adicionales</p>
+    <% if participant.additional_instructions.present? %>
+      <p class="mt-1.5 text-body leading-relaxed italic text-ink-700"><%= participant.additional_instructions %></p>
+    <% else %>
+      <p class="mt-1.5 text-body text-ink-500">No hay notas adicionales.</p>
+    <% end %>
   </div>
 </section>
