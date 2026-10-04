@@ -1,88 +1,95 @@
 <% content_for :title, "Áreas de logística" %>
 <% content_for :eyebrow, "Logística" %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto space-y-5">
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-    <div class="max-w-2xl">
-      <p class="text-[14px] leading-relaxed text-ink-700">
-        Cada miembro del comité pertenece a un área. Las <strong class="text-ink-900">banderas</strong> de un área dan permisos a
-        todos sus miembros; el resto de las áreas solo puede ver.
-      </p>
-      <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] font-semibold text-ink-500">
-        <span><%= pluralize(@committee_count, "miembro", plural: "miembros") %> de logística</span>·
-        <span><%= pluralize(@areas.size, "área", plural: "áreas") %></span>
-      </p>
-    </div>
-    <%= link_to new_logistics_area_path, class: button_classes(:primary, extra: "shrink-0") do %>
-      <%= icon "plus", class: "w-4 h-4" %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "Cada miembro del comité pertenece a un área; las banderas del área le dan permisos." } %>
+  <% page.with_actions do %>
+    <%= link_to new_logistics_area_path, class: button_classes do %>
+      <%= icon "plus", class: "size-4" %>
       Nueva área
     <% end %>
-  </div>
+  <% end %>
 
-  <section aria-label="Qué permite cada bandera" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <% { checkin: [ "scan-line", "bg-cat-green/15 text-cat-green-ink" ],
-         finance: [ "wallet", "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100" ],
-         food: [ "utensils", "bg-cat-amber/15 text-cat-amber-ink" ] }.each do |flag, (icon_name, classes)| %>
-      <% label, hint = LogisticsArea::FLAGS.fetch(flag) %>
-      <div class="<%= card_classes("flex gap-3 px-4 py-3.5") %>">
-        <span class="size-[34px] shrink-0 rounded-[10px] flex items-center justify-center <%= classes %>"><%= icon icon_name, class: "w-[17px] h-[17px]" %></span>
-        <span>
-          <span class="block text-[13.5px] font-extrabold text-ink-900"><%= label %></span>
-          <span class="block mt-0.5 text-[12px] leading-snug text-ink-500"><%= hint %></span>
-        </span>
-      </div>
+  <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen">
+    <%= render StatTileComponent.new(value: @committee_count, label: "Miembros de logística", icon: "users", tone: :indigo) %>
+    <%= render StatTileComponent.new(value: @areas.size, label: "Áreas", icon: "layout-grid", tone: :blue) %>
+    <% if @unassigned.any? %>
+      <%= render StatTileComponent.new(value: @unassigned.size, icon: "triangle-alert", tone: :amber, data: { unassigned: true },
+            label: "Sin área: #{@unassigned.first(3).map(&:full_name).to_sentence(two_words_connector: " y ", last_word_connector: " y ")}#{" y #{@unassigned.size - 3} más" if @unassigned.size > 3}",
+            hint: "Sin área no tienen ningún permiso extra.") %>
+    <% else %>
+      <%= render StatTileComponent.new(value: 0, label: "Sin área", icon: "circle-check", tone: :green, hint: "Todo el comité tiene su área.") %>
     <% end %>
   </section>
 
-  <% if @unassigned.any? %>
-    <section class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-tile border border-cat-amber/30 bg-cat-amber/10 px-4 py-3.5" data-unassigned>
-      <%= icon "triangle-alert", class: "w-[18px] h-[18px] shrink-0 text-cat-amber-ink" %>
-      <p class="flex-1 min-w-60 text-[13px] text-ink-700">
-        <strong class="text-cat-amber-ink"><%= pluralize(@unassigned.size, "miembro sin área", plural: "miembros sin área") %>:</strong>
-        <%= @unassigned.first(4).map(&:full_name).to_sentence(two_words_connector: " y ", last_word_connector: " y ") %><%= " y #{@unassigned.size - 4} más" if @unassigned.size > 4 %>.
-        Sin área no tienen ningún permiso extra.
-      </p>
-    </section>
-  <% end %>
+  <%# Qué da cada bandera: una fila en escritorio; en el teléfono se pliega para que las áreas no queden abajo. %>
+  <details class="group <%= card_classes %> md:hidden" data-flags-help>
+    <summary class="list-none min-h-13 px-4 py-3 flex items-center gap-3 cursor-pointer">
+      <%= render IconTileComponent.new(icon: "flag") %>
+      <span class="flex-1 text-title font-bold text-ink-900">Qué da cada bandera</span>
+      <%= icon "chevron-down", class: "size-[18px] text-ink-500 transition-transform group-open:rotate-180" %>
+    </summary>
+    <ul class="px-4 pb-4 flex flex-col gap-2.5">
+      <% LogisticsArea::FLAGS.each_key do |flag| %>
+        <li class="flex items-start gap-2.5"><%= render "logistics_areas/flag_chip", flag: flag %><span class="text-label text-ink-700"><%= LogisticsArea::FLAGS.fetch(flag).last %></span></li>
+      <% end %>
+    </ul>
+  </details>
+  <section class="hidden md:flex <%= card_classes("items-center gap-6 px-6 py-5") %>" aria-label="Qué da cada bandera">
+    <div class="flex items-center gap-3 shrink-0">
+      <%= render IconTileComponent.new(icon: "flag") %>
+      <h2 class="text-title font-bold text-ink-900">Qué da cada bandera</h2>
+    </div>
+    <ul class="flex-1 grid grid-cols-3 gap-5">
+      <% LogisticsArea::FLAGS.each_key do |flag| %>
+        <li class="flex items-center gap-2.5"><%= render "logistics_areas/flag_chip", flag: flag %><span class="text-label text-ink-700"><%= LogisticsArea::FLAGS.fetch(flag).last %></span></li>
+      <% end %>
+    </ul>
+  </section>
 
   <% if @areas.any? %>
-    <section aria-label="Áreas" class="grid grid-cols-1 md:grid-cols-2 gap-3.5" data-areas>
+    <section aria-label="Áreas" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-areas>
       <% @areas.each do |area| %>
-        <article class="<%= card_classes("flex flex-col gap-3 px-5 py-[18px]") %>" data-area="<%= area.name %>">
+        <% tile_icon, tile_tone = area_tile(area) %>
+        <article class="<%= card_classes("flex flex-col gap-3.5 p-4 md:px-5 md:py-5") %>" data-area="<%= area.name %>">
           <div class="flex items-start gap-3">
+            <%= render IconTileComponent.new(icon: tile_icon, tone: tile_tone) %>
             <div class="min-w-0 flex-1">
-              <h2 class="text-[15.5px] font-extrabold text-ink-900 break-words"><%= area.name %></h2>
+              <h2 class="text-title font-bold text-ink-900 break-words"><%= area.name %></h2>
               <% if area.description.present? %>
-                <p class="mt-0.5 text-[12.5px] text-ink-500"><%= area.description %></p>
+                <p class="mt-0.5 text-body text-ink-700"><%= area.description %></p>
               <% end %>
             </div>
-            <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, size: :sm, extra: "shrink-0") %>
+            <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, size: :sm, extra: "hidden md:inline-flex shrink-0") %>
           </div>
-          <div class="flex flex-wrap gap-1.5 min-h-6">
-            <% area.flags.each do |flag| %>
-              <%= render "logistics_areas/flag_chip", flag: flag %>
-            <% end %>
-            <% if area.flags.empty? %>
-              <span class="py-0.5 text-[11.5px] font-semibold text-ink-500">Sin permisos extra · solo ve</span>
-            <% end %>
-          </div>
-          <div class="flex items-center gap-2.5 pt-3 border-t border-line-soft">
-            <% members = area.members.sort_by(&:full_name) %>
-            <span class="flex">
-              <% members.first(5).each do |member| %>
-                <span class="-mr-1.5 rounded-avatar-sm ring-2 ring-surface"><%= render(AvatarComponent.new(participant: member, size: :sm)) %></span>
+          <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-line-soft">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <% members = area.members.sort_by(&:full_name) %>
+              <span class="flex">
+                <% members.first(5).each do |member| %>
+                  <span class="-mr-1.5 rounded-avatar-sm ring-2 ring-surface"><%= render(AvatarComponent.new(participant: member, size: :sm)) %></span>
+                <% end %>
+              </span>
+              <span class="ml-1.5 text-label font-semibold text-ink-500 whitespace-nowrap">
+                <%= members.empty? ? "Sin miembros todavía" : pluralize(members.size, "miembro", plural: "miembros") %>
+              </span>
+            </div>
+            <div class="flex flex-wrap justify-end gap-1.5">
+              <% area.flags.each do |flag| %>
+                <%= render "logistics_areas/flag_chip", flag: flag %>
               <% end %>
-            </span>
-            <span class="ml-1.5 text-[12.5px] font-semibold text-ink-500">
-              <%= members.empty? ? "Sin miembros todavía" : pluralize(members.size, "miembro", plural: "miembros") %>
-            </span>
+              <% if area.flags.empty? %>
+                <%= render ChipComponent.new(label: "Sin permisos extra · solo ve") %>
+              <% end %>
+            </div>
           </div>
+          <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, extra: "md:hidden w-full") %>
         </article>
       <% end %>
     </section>
   <% else %>
-    <section class="<%= card_classes("p-6 text-center") %>">
-      <p class="text-[14px] font-bold text-ink-900">Todavía no hay áreas</p>
-      <p class="mt-1 text-[13px] text-ink-500">Crea la primera, por ejemplo «Registro», y enciéndele su bandera.</p>
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Todavía no hay áreas", icon: "layout-grid", name: "areas",
+            text: "Crea la primera, por ejemplo «Registro», y enciéndele su bandera.") %>
     </section>
   <% end %>
-</div>
+<% end %>

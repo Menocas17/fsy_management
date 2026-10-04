@@ -2,10 +2,10 @@
 <% content_for :eyebrow, "Finanzas" %>
 <% back_to "Finanzas", finances_path %>
 <%
-  tab_base = "inline-flex items-center h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
+  tab_base = "inline-flex items-center h-9 px-3.5 rounded-inner text-label whitespace-nowrap transition"
   tabs = [ [ "Todos", nil ], [ "Esperan aprobación", "espera" ], [ "Sin factura", "sin-factura" ], [ "Consolidados", "consolidados" ], [ "Cerrados", "cerrados" ] ]
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl space-y-4">
+<%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-wrap items-center justify-between gap-3">
     <nav class="flex gap-0.5 p-1 rounded-control bg-canvas border border-line overflow-x-auto max-w-full" aria-label="Etapa">
       <% tabs.each do |label, value| %>
@@ -22,7 +22,7 @@
     <% end %>
   </div>
   <% unless can_operate_finances? %>
-    <p class="rounded-tile border border-line-soft bg-canvas px-4 py-3 text-[12.5px] font-semibold text-ink-500" role="note" data-finance-readonly>
+    <p class="rounded-tile border border-line-soft bg-canvas px-4 py-3 text-label font-semibold text-ink-500" role="note" data-finance-readonly>
       Solo lectura. Los gastos los presentan y aprueban el área de Finanzas y el director de logística.
     </p>
   <% end %>
@@ -32,18 +32,18 @@
       <ul class="divide-y divide-line-soft" data-expenses>
         <% @expenses.each do |expense| %>
           <li>
-            <%= link_to expense, class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-lg hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+            <%= link_to expense, class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-slate-700/40" do %>
               <%= category_tile(expense.expense_category, size: :sm) %>
               <span class="min-w-0 flex-1">
-                <span class="block text-[14px] font-bold text-ink-900 truncate">
+                <span class="block text-body font-bold text-ink-900 truncate">
                   <%= expense.concept %>
-                  <% if expense.without_receipt? %><span class="ml-1 text-[11px] font-bold text-cat-amber-ink">· sin factura</span><% end %>
+                  <% if expense.without_receipt? %><span class="ml-1 text-meta font-bold text-cat-amber-ink">· sin factura</span><% end %>
                 </span>
-                <span class="block text-[12px] font-semibold text-ink-500 truncate">
+                <span class="block text-label font-semibold text-ink-500 truncate">
                   <%= [ expense.category_name, expense.logistics_area&.name, expense.vendor.presence, expense.presented_by_name ].compact.join(" · ") %>
                 </span>
               </span>
-              <span class="text-[14px] font-bold tabular-nums text-ink-900 shrink-0">
+              <span class="text-body font-bold tabular-nums text-ink-900 shrink-0">
                 <%= money(expense.actual_cents || expense.estimated_cents, expense.currency) %>
               </span>
               <%= expense_status_chip(expense) %>
@@ -52,7 +52,7 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="text-[13px] text-ink-500">No hay gastos en esta vista.</p>
+      <p class="text-body text-ink-500">No hay gastos en esta vista.</p>
     <% end %>
   </section>
-</div>
+<% end %>

@@ -165,6 +165,8 @@ Un azul marino que sostiene, un sol que marca el momento y una paleta de categor
 ### Named Rules
 **La regla de color.** Sólido solo para las cifras clave que abren un módulo, la acción principal y lo seleccionado. Tinte al 15 % para encabezados de sección, categorías, estados y chips. Neutro para todo lo demás. Si una pantalla tiene más de cuatro rellenos sólidos, sobra alguno.
 
+**La regla del color propio.** Lo que la persona colorea a su gusto (un inventario, una categoría de gasto) conserva su relleno sólido: ese color es su identidad, no una categoría de la paleta. Es la única excepción a la regla de color, y solo en el mosaico de ese elemento.
+
 **La regla del sol.** El sol nunca decora: marca lo que está ocurriendo ahora. Una pantalla tiene como mucho un elemento de sol.
 
 **La regla de la tinta.** Texto sobre un tinte siempre en su tinta (`text-cat-*-ink`), nunca en el tono base: en letra chica no llega a 4.5:1.

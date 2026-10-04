@@ -17,7 +17,7 @@
       <div>
         <%= form.label :budget, "Presupuesto propio (C$, opcional)", class: field_label_classes %>
         <%= form.text_field :budget, value: Money.to_input(category.budget_cents), inputmode: "decimal", placeholder: "Sin presupuesto propio", class: field_input_classes %>
-        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Sin él, sus gastos cuentan solo contra el presupuesto general.</p>
+        <p class="mt-1.5 text-label font-medium text-ink-500">Sin él, sus gastos cuentan solo contra el presupuesto general.</p>
       </div>
     </div>
   </section>

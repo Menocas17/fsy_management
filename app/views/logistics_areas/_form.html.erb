@@ -26,11 +26,11 @@
       <%= section_heading "Permisos", "shield-check" %>
       <div class="space-y-2.5">
         <% LogisticsArea::FLAGS.each do |flag, (label, hint)| %>
-          <label class="flex items-start gap-3 rounded-xl border border-line px-3.5 py-3 cursor-pointer transition hover:bg-canvas has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-700/30">
+          <label class="flex items-start gap-3 rounded-tile border border-line px-3.5 py-3 cursor-pointer transition hover:bg-canvas has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-700/30">
             <%= form.check_box flag, class: "mt-[3px] w-4 h-4 accent-primary-600" %>
             <span>
-              <span class="block text-[13.5px] font-bold text-ink-900"><%= label %></span>
-              <span class="block mt-0.5 text-[12.5px] text-ink-500"><%= hint %></span>
+              <span class="block text-body font-bold text-ink-900"><%= label %></span>
+              <span class="block mt-0.5 text-label text-ink-500"><%= hint %></span>
             </span>
           </label>
         <% end %>

@@ -14,11 +14,11 @@
         <%= form.label :name, "Nombre", class: field_label_classes %>
         <%= form.text_field :name, required: true, maxlength: 60, placeholder: "Ej. Materiales", class: field_input_classes %>
         <% if inventory.persisted? %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">
+          <p class="mt-1.5 text-label font-medium text-ink-500">
             Los códigos ya impresos siguen siendo <span class="font-mono"><%= inventory.code_prefix %>-0000</span>: el prefijo no cambia.
           </p>
         <% else %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">De aquí sale el prefijo de los códigos QR (Materiales → MAT-0001).</p>
+          <p class="mt-1.5 text-label font-medium text-ink-500">De aquí sale el prefijo de los códigos QR (Materiales → MAT-0001).</p>
         <% end %>
       </div>
       <div>
