@@ -1,0 +1,90 @@
+<% content_for :title, "Asistencia nocturna" %>
+<% content_for :eyebrow, "Seguimiento" %>
+<% content_for :head do %>
+  <%# Cada lista que se confirma refresca el panel abierto (NightAttendance#after_commit), sin perder el scroll. %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+<%= turbo_stream_from "night_attendance" %>
+<%
+  lists = @companies.flat_map { |company| NightAttendance::GENDER_LABELS.keys.filter_map { |gender|
+            ids = @expected[[ company.id, gender ]]
+            [ company, gender, ids, NightAttendance.status_for(@attendances[[ company.id, gender ]], ids) ] if ids } }
+  confirmed = lists.count { |*, status| status != :pendiente }
+  pending = lists.size - confirmed
+  current = @night == NightAttendance.current_night
+%>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "Noche del #{SpanishDates.long(@night, capitalize: false)}#{" · esta noche" if current}" } %>
+  <% page.with_actions do %>
+    <%= render SegmentedToggleComponent.new(label: "Noche", items: @nights.map { |night|
+          { text: "#{SpanishDates.abbr(night)} #{night.day}", href: night_attendances_path(noche: night.iso8601), active: night == @night } }) %>
+  <% end %>
+
+  <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
+    <%= render StatTileComponent.new(value: "#{confirmed}/#{lists.size}", label: "Listas confirmadas", short_label: "Confirmadas",
+          icon: "circle-check", tone: :green, value_data: { figure: "confirmadas" }) %>
+    <%= render StatTileComponent.new(value: pending, label: "Listas sin pasar", short_label: "Sin pasar",
+          icon: "clock", tone: :amber, value_data: { figure: "pendientes" }) %>
+    <%= render StatTileComponent.new(value: @absences.size, label: "Jóvenes ausentes", short_label: "Ausentes",
+          icon: "user-x", tone: :rose, value_data: { figure: "ausentes" }) %>
+  </div>
+
+  <% if lists.empty? %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Todavía no hay jóvenes en compañías", icon: "moon-star", tone: :indigo, name: "night-attendance",
+            text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+      <section class="lg:col-span-2 <%= card_classes("p-5 md:p-6") %>">
+        <%= section_heading "Compañías", "building-2", tone: :indigo %>
+        <div class="space-y-4">
+        <% lists.group_by { |company, *| company.auxiliar_company }.sort_by { |branch, _| branch&.name.to_s.presence || "~" }.each do |branch, branch_lists| %>
+          <div>
+            <p class="mb-1 text-meta font-bold uppercase tracking-[.08em] text-ink-500"><%= branch&.name || "Sin compañía auxiliar" %></p>
+            <ul class="divide-y divide-line-soft">
+              <% branch_lists.group_by(&:first).each do |company, company_lists| %>
+                <li class="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5" data-night-company="<%= company.number %>">
+                  <%= link_to company.name, company_path(company), class: "min-w-0 flex-1 basis-32 text-body font-bold text-ink-900 hover:underline truncate" %>
+                  <div class="flex flex-wrap gap-2">
+                    <% company_lists.each do |_, gender, ids, status| %>
+                      <% attendance = @attendances[[ company.id, gender ]] %>
+                      <% missing = attendance ? attendance.missing_ids(ids).size : ids.size %>
+                      <% label, tone, icon_name = case status
+                           when :completa then [ "Completa", :green, "check" ]
+                           when :ausentes then [ "#{missing} #{missing == 1 ? "falta" : "faltan"}", :rose, "user-x" ]
+                           else [ "Sin pasar", :amber, "clock" ]
+                           end %>
+                      <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current)),
+                            class: "inline-flex items-center gap-2 rounded-full hover:opacity-80 transition", data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
+                        <span class="text-label font-semibold text-ink-500 w-16 text-right"><%= NightAttendance.gender_label(gender) %></span>
+                        <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        </div>
+      </section>
+
+      <section class="<%= card_classes("p-5 md:p-6") %>">
+        <%= section_heading "Ausentes · #{@absences.size}", "user-x", tone: :rose %>
+        <% if @absences.any? %>
+          <ul class="divide-y divide-line-soft" data-night-absences>
+            <% @absences.each do |mark| %>
+              <li class="py-2.5 first:pt-0 last:pb-0">
+                <span class="block text-body font-bold text-ink-900 truncate"><%= mark.participant.full_name %></span>
+                <span class="block text-label font-semibold text-ink-500"><%= mark.participant.company&.name %> · <%= mark.reason_label %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-body text-ink-500">Nadie marcado como ausente esta noche.</p>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
+<% end %>

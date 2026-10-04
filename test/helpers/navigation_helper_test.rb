@@ -37,7 +37,7 @@ class NavigationHelperTest < ActionView::TestCase
                    "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
                    "Evento" => [ "Agenda", "Registro", "Alertas" ],
                    "Logística" => [ "Áreas", "Inventario", "Finanzas", "Librería" ],
-                   "Seguimiento" => [ "Reportes", "Historial" ] }, groups)
+                   "Seguimiento" => [ "Reportes", "Asistencia nocturna", "Historial" ] }, groups)
   ensure
     Current.reset
   end

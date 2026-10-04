@@ -145,6 +145,12 @@ class User < ApplicationRecord
   end
 
   # Quién entra al módulo de reportes: el acceso total y el director de logística (solo su sección).
+  # El panel de la asistencia nocturna: dirección, coordinadores, auxiliares y el director de logística.
+  # Pasarla es de los consejeros (y del auxiliar, si falta el consejero): Authorization#night_attendance_gender_for.
+  def night_attendance_viewer?
+    full_access? || participant&.auxiliar? || participant&.director_logistica? || false
+  end
+
   def reports_viewer?
     full_access? || participant&.director_logistica? || false
   end

@@ -1,0 +1,64 @@
+<% content_for :page_h1, true %>
+<% content_for :title, "Asistencia nocturna" %>
+<% content_for :eyebrow, @company.name %>
+<% back_to(can_view_night_attendance? ? "Asistencia nocturna" : @company.name,
+           can_view_night_attendance? ? night_attendances_path(noche: @night.iso8601) : company_path(@company)) %>
+<% night_param = (@night.iso8601 unless @night == NightAttendance.current_night) %>
+<%= render PageComponent.new(width: :form) do %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <div class="flex items-center gap-3 min-w-0">
+      <%= render IconTileComponent.new(icon: "moon-star", tone: :indigo) %>
+      <div class="min-w-0">
+        <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @company.name %></h1>
+        <p class="text-label font-semibold text-ink-500">Noche del <%= SpanishDates.long(@night, capitalize: false) %></p>
+      </div>
+    </div>
+    <%= render SegmentedToggleComponent.new(label: "Lista de", items: NightAttendance::GENDER_LABELS.map { |gender, label|
+          { text: label, href: company_night_attendance_path(@company, genero: gender, noche: night_param), active: gender == @gender,
+            data: { night_gender: gender } } }) %>
+  </div>
+
+  <div class="mb-5 flex items-center gap-2.5 rounded-tile border border-line-soft bg-canvas px-4 py-3" data-night-status>
+    <% if @attendance&.persisted? %>
+      <%= icon "circle-check", class: "w-5 h-5 shrink-0 text-cat-green-ink" %>
+      <p class="text-body text-ink-700">
+        Confirmada por <strong class="text-ink-900"><%= @attendance.taken_by_name %></strong> a las <%= @attendance.confirmed_at.strftime("%H:%M") %>.
+      </p>
+    <% else %>
+      <%= icon "clock", class: "w-5 h-5 shrink-0 text-cat-amber-ink" %>
+      <p class="text-body text-ink-700">Todavía no se ha pasado la asistencia de los <%= NightAttendance.gender_label(@gender).downcase %> esta noche.</p>
+    <% end %>
+  </div>
+
+  <div class="<%= card_classes("p-5 md:p-6") %>">
+    <% if @jovenes.empty? %>
+      <%= render EmptyStateComponent.new(title: "No hay jóvenes en esta lista", icon: "users", tone: :indigo, name: "night-attendance",
+            text: "#{@company.name} no tiene #{NightAttendance.gender_label(@gender).downcase} asignados.") %>
+    <% elsif @editable %>
+      <%= render "night_attendances/form" %>
+    <% else %>
+      <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo %>
+      <% if @own_gender.nil? && @night == NightAttendance.current_night %>
+        <p class="-mt-2 mb-3 text-label text-ink-500">La pasa el consejero de esta compañía; aquí solo se consulta.</p>
+      <% end %>
+      <ul class="divide-y divide-line-soft" data-night-roster>
+        <% @jovenes.each do |joven| %>
+          <% mark = @attendance&.mark_for(joven) %>
+          <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0" data-night-joven="<%= joven.id %>">
+            <span class="min-w-0 flex-1">
+              <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+              <span class="block text-label font-semibold text-ink-500"><%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %></span>
+            </span>
+            <% if mark&.presente? %>
+              <%= render ChipComponent.new(label: "Presente", tone: :green, icon: "check") %>
+            <% elsif mark&.ausente? %>
+              <%= render ChipComponent.new(label: "Ausente · #{mark.reason_label}", tone: :rose, icon: "user-x") %>
+            <% else %>
+              <%= render ChipComponent.new(label: "Sin marcar", tone: :amber, icon: "clock") %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+<% end %>

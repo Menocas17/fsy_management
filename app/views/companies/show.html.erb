@@ -39,6 +39,13 @@
             Gafetes
           <% end %>
         <% end %>
+        <% if can_open_night_attendance?(@company) %>
+          <%= link_to company_night_attendance_path(@company),
+                class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
+            <%= icon "moon-star", class: "w-4 h-4" %>
+            <%= night_attendance_gender_for(@company) ? "Pasar asistencia" : "Asistencia nocturna" %>
+          <% end %>
+        <% end %>
         <% if can_edit_company?(@company) %>
           <%= link_to edit_company_path(@company),
                 class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>

@@ -14,6 +14,7 @@ class Company < ApplicationRecord
   # Jóvenes join a company through participants.company_id; memberships only hold staff.
   has_many :participants, -> { where(rol: :joven) }, class_name: "Participant"
   has_many :members, class_name: "Participant", dependent: :nullify
+  has_many :night_attendances, dependent: :delete_all
 
   enum :dining_hall, { salon_nicaragua: 0, salon_las_americas: 1 }, validate: { allow_nil: true, message: "no es un comedor válido" }
 

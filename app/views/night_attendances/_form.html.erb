@@ -1,0 +1,65 @@
+<%# Cada joven se marca a mano: presente, o ausente con su motivo (Enfermería, u Otro escrito). Sin marcar no
+    se confirma. night_attendance_controller muestra el motivo solo al elegir «Ausente». %>
+<%= form_with url: company_night_attendance_path(@company, genero: @gender), method: :patch,
+      data: { controller: "night-attendance" } do %>
+  <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo do %>
+    <button type="button" data-action="night-attendance#markAllPresent"
+            class="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-control border border-line text-label font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
+      <%= icon "check-check", class: "w-4 h-4" %>
+      Todos presentes
+    </button>
+  <% end %>
+
+  <% if @attendance&.errors&.any? %>
+    <div class="mb-4 rounded-tile border border-cat-rose/40 bg-cat-rose/10 px-4 py-3" role="alert" data-night-errors>
+      <% @attendance.errors.full_messages.each do |message| %>
+        <p class="text-label font-semibold text-cat-rose-ink"><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <ul class="divide-y divide-line-soft">
+    <% @jovenes.each do |joven| %>
+      <% mark = @attendance&.mark_for(joven) %>
+      <% field = "marks[#{joven.id}]" %>
+      <li class="py-3 first:pt-0 last:pb-0" data-night-attendance-target="row" data-night-joven="<%= joven.id %>">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span class="min-w-0 flex-1 basis-40">
+            <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+            <span class="block text-label font-semibold text-ink-500"><%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %></span>
+          </span>
+          <div class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft" role="radiogroup" aria-label="Asistencia de <%= joven.full_name %>">
+            <% [ [ "presente", "Presente", "peer-checked:bg-cat-green-solid" ], [ "ausente", "Ausente", "peer-checked:bg-cat-rose-solid" ] ].each do |value, label, checked| %>
+              <label class="cursor-pointer">
+                <%= radio_button_tag "#{field}[status]", value, mark&.status == value, class: "peer sr-only",
+                      data: { action: "night-attendance#sync", night_status: value } %>
+                <span class="inline-flex items-center h-9 px-3.5 rounded-inner text-label font-bold text-ink-500 transition-colors hover:text-ink-900 <%= checked %> peer-checked:text-white peer-checked:hover:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500"><%= label %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-3 flex flex-wrap items-center gap-2" data-night-reason-box <%= "hidden" unless mark&.ausente? %>>
+          <span class="text-label font-semibold text-ink-500">Motivo:</span>
+          <% NightAttendanceMark::REASON_LABELS.each do |value, label| %>
+            <label class="cursor-pointer">
+              <%= radio_button_tag "#{field}[absence_reason]", value, mark&.absence_reason == value, class: "peer sr-only",
+                    data: { action: "night-attendance#sync", night_reason: value } %>
+              <span class="inline-flex items-center h-8 px-3 rounded-full border border-line text-label font-bold text-ink-700 transition-colors peer-checked:border-transparent peer-checked:bg-cat-rose/15 peer-checked:text-cat-rose-ink peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500"><%= label %></span>
+            </label>
+          <% end %>
+          <%= text_field_tag "#{field}[absence_detail]", mark&.absence_detail, maxlength: 200, placeholder: "¿Dónde está?",
+                aria: { label: "Motivo de la ausencia de #{joven.full_name}" }, hidden: !mark&.otro?, data: { night_detail: true },
+                class: "#{field_input_classes} basis-full sm:basis-0 sm:flex-1 sm:min-w-40" %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+
+  <div class="mt-6 flex justify-end">
+    <%= button_tag type: "submit", class: button_classes(extra: "w-full sm:w-auto") do %>
+      <%= icon "moon-star", class: "w-4 h-4" %>
+      Confirmar asistencia
+    <% end %>
+  </div>
+<% end %>

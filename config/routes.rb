@@ -122,7 +122,11 @@ Rails.application.routes.draw do
       post :assign_staff
       delete :remove_staff
     end
+    # La lista de la noche de esta compañía (?genero=H|M): la pasa su consejero, la ven los del panel.
+    resource :night_attendance, only: %i[show update], path: "asistencia-nocturna"
   end
+  # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
+  resources :night_attendances, only: :index, path: "asistencia-nocturna"
   resources :assignments, only: [ :update, :destroy ], path: "asignaciones"
   resources :participants do
       resources :assignments, only: [ :new, :create ], path: "asignaciones"

@@ -44,6 +44,7 @@ module NavigationHelper
          else
            { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),
+        night_attendance_nav_item,
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]
@@ -51,6 +52,15 @@ module NavigationHelper
     sections.filter_map do |section|
       items = section[:items].compact.map { |item| item.merge(is_nav: true) }
       section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
+    end
+  end
+
+  # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.
+  def night_attendance_nav_item
+    if Current.user&.night_attendance_viewer?
+      { text: "Asistencia nocturna", url: night_attendances_path, lucide_icon: "moon-star", active_paths: [ night_attendances_path ] }
+    elsif Current.user&.participant&.consejero? && (company = Current.user.participant.counselor_scope.first)
+      { text: "Asistencia nocturna", url: company_night_attendance_path(company), lucide_icon: "moon-star" }
     end
   end
 
