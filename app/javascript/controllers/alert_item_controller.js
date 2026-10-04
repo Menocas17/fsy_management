@@ -104,7 +104,10 @@ export default class extends Controller {
     }, { once: true })
   }
 
+  // Vuelve a mostrar «Eliminar» antes de mandar: si el borrado pide confirmación y se cancela, la tarjeta
+  // queda abierta en vez de colgada a medio deslizar.
   submit() {
+    this.open()
     this.actionsTarget.querySelector("form")?.requestSubmit()
   }
 

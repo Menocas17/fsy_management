@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_130001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -310,6 +310,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_130001) do
     t.index ["participant_id"], name: "index_memberships_on_participant_id"
   end
 
+  create_table "night_attendance_marks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "night_attendance_id", null: false
+    t.uuid "participant_id", null: false
+    t.integer "status", null: false
+    t.integer "absence_reason"
+    t.string "absence_detail"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["night_attendance_id", "participant_id"], name: "idx_on_night_attendance_id_participant_id_5159a1e4de", unique: true
+    t.index ["night_attendance_id"], name: "index_night_attendance_marks_on_night_attendance_id"
+    t.index ["participant_id"], name: "index_night_attendance_marks_on_participant_id"
+  end
+
+  create_table "night_attendances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.date "night_on", null: false
+    t.integer "gender", null: false
+    t.uuid "taken_by_id"
+    t.string "taken_by_name", null: false
+    t.datetime "confirmed_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "night_on", "gender"], name: "index_night_attendances_on_company_id_and_night_on_and_gender", unique: true
+    t.index ["company_id"], name: "index_night_attendances_on_company_id"
+    t.index ["night_on"], name: "index_night_attendances_on_night_on"
+    t.index ["taken_by_id"], name: "index_night_attendances_on_taken_by_id"
+  end
+
   create_table "participant_import_rows", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "participant_import_id", null: false
     t.integer "row_number", null: false
@@ -454,6 +482,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_130001) do
   add_foreign_key "inventory_movements", "participants"
   add_foreign_key "login_attempts", "users", on_delete: :nullify
   add_foreign_key "memberships", "participants"
+  add_foreign_key "night_attendance_marks", "night_attendances", on_delete: :cascade
+  add_foreign_key "night_attendance_marks", "participants", on_delete: :cascade
+  add_foreign_key "night_attendances", "companies", on_delete: :cascade
+  add_foreign_key "night_attendances", "participants", column: "taken_by_id", on_delete: :nullify
   add_foreign_key "participant_import_rows", "participant_imports", on_delete: :cascade
   add_foreign_key "participant_import_rows", "participants", on_delete: :nullify
   add_foreign_key "participant_imports", "participants", column: "uploaded_by_id", on_delete: :nullify

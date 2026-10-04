@@ -1,10 +1,14 @@
 <section class="<%= card_classes("p-6 2xl:order-1") %>">
   <%= section_heading "Información general", "layers" %>
   <div>
-    <%= info_row "Compañía asignada", "building-2", participant.company&.name %>
+    <%= info_row "Compañía asignada", "building-2", participant.company&.name, href: (company_path(participant.company, return_to: return_here) if participant.company) %>
     <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
     <%= info_row "Cuarto", "door-open", participant.room %>
-    <%= info_row "Consejeros a cargo", "users", [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
+    <%# Los de su compañía hoy (el personal asignado), no lo que se copió en la ficha al importarla. %>
+    <% if participant.joven? %>
+      <%= info_row "Consejeros a cargo", "users",
+            participant.company ? participant.company.counselor_names : [ participant.m_person_in_charge, participant.h_person_in_charge ] %>
+    <% end %>
     <%= info_row "Identificación", "id-card", participant.formatted_identity_document %>
     <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>
     <%= info_row "Talla de camisa", "shirt", participant.shirt_number&.upcase %>

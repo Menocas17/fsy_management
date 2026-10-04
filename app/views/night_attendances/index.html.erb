@@ -1,0 +1,83 @@
+<% content_for :title, "Asistencia nocturna" %>
+<% content_for :eyebrow, "Seguimiento" %>
+<% content_for :head do %>
+  <%# Cada lista que se confirma refresca el panel abierto (NightAttendance#after_commit), sin perder el scroll. %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+<%= turbo_stream_from "night_attendance" %>
+<%
+  lists = @companies.flat_map { |company| NightAttendance::GENDER_LABELS.keys.filter_map { |gender|
+            ids = @expected[[ company.id, gender ]]
+            [ company, gender, ids, NightAttendance.status_for(@attendances[[ company.id, gender ]], ids) ] if ids } }
+  confirmed = lists.count { |*, status| status != :pendiente }
+  pending = lists.size - confirmed
+  current = @night == NightAttendance.current_night
+  test_night = current && NightAttendance.testing?
+  panel_url = night_attendances_path(noche: @night.iso8601)
+%>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "Noche del #{SpanishDates.long(@night, capitalize: false)}#{" · prueba" if test_night}#{" · esta noche" if current && !test_night}" } %>
+  <% page.with_actions do %>
+    <%= render SegmentedToggleComponent.new(label: "Noche", items: @nights.map { |night|
+          { text: night < Rails.configuration.x.event_start_on ? "Hoy · prueba" : "#{SpanishDates.abbr(night)} #{night.day}",
+            href: night_attendances_path(noche: night.iso8601), active: night == @night, data: { night_option: night.iso8601 } } }) %>
+  <% end %>
+
+  <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
+    <%= render StatTileComponent.new(value: "#{confirmed}/#{lists.size}", label: "Listas confirmadas", short_label: "Confirmadas",
+          icon: "circle-check", tone: :green, value_data: { figure: "confirmadas" }) %>
+    <%= render StatTileComponent.new(value: pending, label: "Listas sin pasar", short_label: "Sin pasar",
+          icon: "clock", tone: :amber, value_data: { figure: "pendientes" }) %>
+    <%= render StatTileComponent.new(value: @absences.size, label: "Jóvenes ausentes", short_label: "Ausentes",
+          icon: "user-x", tone: :rose, value_data: { figure: "ausentes" }) %>
+  </div>
+
+  <% if lists.empty? %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Todavía no hay jóvenes en compañías", icon: "moon-star", tone: :indigo, name: "night-attendance",
+            text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
+    </div>
+  <% else %>
+    <%# La misma cuadrícula de Compañías. Cada lista (hombres, mujeres) es un botón que abre esa lista; quién falta
+        y por qué se ve adentro. %>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
+      <% lists.group_by(&:first).each do |company, company_lists| %>
+        <article class="<%= card_classes("px-5 pt-[18px] pb-4 flex flex-col gap-3") %>" data-night-company="<%= company.number %>">
+          <div class="flex items-center gap-3">
+            <%= initials_tile(company.initials, seed: company.name) %>
+            <div class="min-w-0 flex-1">
+              <p class="text-title font-extrabold text-ink-900 truncate"><%= company.name %></p>
+              <p class="mt-px text-label font-semibold text-ink-500 truncate">
+                <%= [ company.nickname.presence, company.auxiliar_company&.name || "Sin compañía auxiliar" ].compact.join(" · ") %>
+              </p>
+            </div>
+          </div>
+
+          <% company_lists.each do |_, gender, ids, status| %>
+            <% attendance = @attendances[[ company.id, gender ]] %>
+            <% missing = attendance ? attendance.missing_ids(ids) : ids %>
+            <% label, tone, icon_name = case status
+                 when :completa then [ "Completa", :green, "check" ]
+                 when :ausentes then [ "#{missing.size} #{missing.size == 1 ? "falta" : "faltan"}", :rose, "user-x" ]
+                 else [ "Sin pasar", :amber, "clock" ]
+                 end %>
+            <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current), return_to: panel_url),
+                  class: "block px-3 py-2.5 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors",
+                  data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
+              <span class="flex items-center gap-2.5">
+                <span class="min-w-0 flex-1">
+                  <span class="block text-label font-bold text-ink-900"><%= NightAttendance.gender_label(gender) %></span>
+                  <span class="block text-meta font-semibold text-ink-500 truncate">
+                    <%= attendance ? "#{attendance.taken_by_name} · #{attendance.confirmed_at.strftime("%H:%M")}" : "#{pluralize(ids.size, "joven", plural: "jóvenes")} · nadie la ha pasado" %>
+                  </span>
+                </span>
+                <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
+                <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
+              </span>
+            <% end %>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

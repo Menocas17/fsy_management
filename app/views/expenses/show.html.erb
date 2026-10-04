@@ -1,6 +1,6 @@
 <% content_for :title, @expense.concept %>
 <% content_for :eyebrow, "Finanzas" %>
-<% back_to "Gastos", expenses_path %>
+<% back_to_origin "Gastos", expenses_path %>
 <% me = Current.user.participant %>
 <%= render PageComponent.new(width: :page) do %>
   <section class="<%= card_classes("p-5 md:p-6") %>">

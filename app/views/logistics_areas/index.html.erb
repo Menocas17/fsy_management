@@ -59,7 +59,7 @@
                 <p class="mt-0.5 text-body text-ink-700"><%= area.description %></p>
               <% end %>
             </div>
-            <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, size: :sm, extra: "max-md:hidden shrink-0") %>
+            <%= link_to "Administrar", logistics_area_path(area, return_to: return_here), class: button_classes(:secondary, size: :sm, extra: "max-md:hidden shrink-0") %>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3.5 border-t border-line-soft">
             <div class="flex items-center gap-2.5 min-w-0">
@@ -82,7 +82,7 @@
               <% end %>
             </div>
           </div>
-          <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, extra: "md:hidden w-full") %>
+          <%= link_to "Administrar", logistics_area_path(area, return_to: return_here), class: button_classes(:secondary, extra: "md:hidden w-full") %>
         </article>
       <% end %>
     </section>

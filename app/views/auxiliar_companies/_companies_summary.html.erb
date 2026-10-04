@@ -4,7 +4,7 @@
     <ul class="space-y-1.5">
       <% companies.each do |company| %>
         <li>
-          <%= link_to company_path(company), class: "flex items-center gap-2.5 rounded-tile -mx-2 px-2 py-1.5 hover:bg-canvas dark:hover:bg-muted/50 transition" do %>
+          <%= link_to company_path(company, return_to: return_here), class: "flex items-center gap-2.5 rounded-tile -mx-2 px-2 py-1.5 hover:bg-canvas dark:hover:bg-muted/50 transition" do %>
             <%= initials_tile(company.initials, seed: company.name, size: :sm) %>
             <span class="min-w-0 flex-1">
               <span class="block truncate text-body font-bold text-ink-900"><%= company.name %></span>

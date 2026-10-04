@@ -99,6 +99,13 @@ module UiHelper
   end
 
   # Only same-site paths: a raw param in an href would allow javascript: URLs and open redirects.
+  # La página actual, para mandarla como return_to en los enlaces a una página de detalle: así su botón de
+  # volver regresa aquí. Las cadenas largas (perfil → compañía → perfil → …) se cortan a la dirección sola.
+  def return_here
+    path = request.fullpath
+    path.length > 1500 ? request.path : path
+  end
+
   def safe_return_to(fallback)
     path = params[:return_to].to_s
     path.match?(%r{\A/(?![/\\])}) ? path : fallback

@@ -1,0 +1,77 @@
+<% content_for :page_h1, true %>
+<% content_for :title, "Asistencia nocturna" %>
+<% content_for :eyebrow, @company.name %>
+<%# Vuelve a donde se abrió (return_to: el panel o el perfil de la compañía); sin eso, al panel si lo puede ver. %>
+<% if can_view_night_attendance? %>
+  <% back_to_origin "Asistencia nocturna", night_attendances_path(noche: @night.iso8601) %>
+<% else %>
+  <% back_to_origin @company.name, company_path(@company) %>
+<% end %>
+<% night_param = (@night.iso8601 unless @night == NightAttendance.current_night) %>
+<%= render PageComponent.new(width: :form) do %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <div class="flex items-center gap-3 min-w-0">
+      <%= render IconTileComponent.new(icon: "moon-star", tone: :indigo) %>
+      <div class="min-w-0">
+        <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @company.name %></h1>
+        <p class="text-label font-semibold text-ink-500">Noche del <%= SpanishDates.long(@night, capitalize: false) %></p>
+      </div>
+    </div>
+    <%= render SegmentedToggleComponent.new(label: "Lista de", items: NightAttendance::GENDER_LABELS.map { |gender, label|
+          { text: label, href: company_night_attendance_path(@company, genero: gender, noche: night_param, return_to: params[:return_to].presence),
+            active: gender == @gender,
+            data: { night_gender: gender } } }) %>
+  </div>
+
+  <%# Sobre el lienzo gris va en superficie, con el borde y el mosaico en el color del estado: si fuera del
+      mismo gris que el fondo no se notaría. %>
+  <% confirmed = @attendance&.persisted? %>
+  <div class="mb-5 flex items-center gap-3 rounded-tile border bg-surface px-4 py-3 shadow-sm <%= confirmed ? "border-cat-green/45" : "border-cat-amber/55" %>"
+       data-night-status="<%= confirmed ? "confirmada" : "pendiente" %>">
+    <%= render IconTileComponent.new(icon: confirmed ? "circle-check" : "clock", tone: confirmed ? :green : :amber) %>
+    <div class="min-w-0">
+      <% if confirmed %>
+        <p class="text-body font-bold text-ink-900">Asistencia confirmada</p>
+        <p class="text-label font-semibold text-ink-700">
+          La pasó <%= @attendance.taken_by_name %> a las <%= @attendance.confirmed_at.strftime("%H:%M") %>.
+        </p>
+      <% else %>
+        <p class="text-body font-bold text-ink-900">Todavía no se ha pasado</p>
+        <p class="text-label font-semibold text-ink-700">La lista de los <%= NightAttendance.gender_label(@gender).downcase %> de esta noche está pendiente.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="<%= card_classes("p-5 md:p-6") %>">
+    <% if @jovenes.empty? %>
+      <%= render EmptyStateComponent.new(title: "No hay jóvenes en esta lista", icon: "users", tone: :indigo, name: "night-attendance",
+            text: "#{@company.name} no tiene #{NightAttendance.gender_label(@gender).downcase} asignados.") %>
+    <% elsif @editable %>
+      <%= render "night_attendances/form" %>
+    <% else %>
+      <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo %>
+      <% if @night == NightAttendance.current_night %>
+        <p class="-mt-2 mb-3 text-label text-ink-500">La pasa <%= @gender == "H" ? "el consejero" : "la consejera" %> de esta compañía; aquí solo se consulta.</p>
+      <% end %>
+      <ul class="divide-y divide-line-soft" data-night-roster>
+        <%# Los ausentes primero, como al pasarla. %>
+        <% @jovenes.each_with_index.sort_by { |joven, index| [ @attendance&.mark_for(joven)&.ausente? ? 0 : 1, index ] }.each do |joven, _| %>
+          <% mark = @attendance&.mark_for(joven) %>
+          <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0" data-night-joven="<%= joven.id %>">
+            <span class="min-w-0 flex-1">
+              <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+              <span class="block text-label font-semibold text-ink-500"><%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %></span>
+            </span>
+            <% if mark&.presente? %>
+              <%= render ChipComponent.new(label: "Presente", tone: :green, icon: "check") %>
+            <% elsif mark&.ausente? %>
+              <%= render ChipComponent.new(label: "Ausente · #{mark.reason_label}", tone: :rose, icon: "user-x") %>
+            <% else %>
+              <%= render ChipComponent.new(label: "Sin marcar", tone: :amber, icon: "clock") %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+<% end %>

@@ -70,4 +70,21 @@ class AlertsControllerTest < ActionDispatch::IntegrationTest
       post alerts_path, params: { alert: { title: "No", body: "No", audience: "todos", priority: "informativa" } }
     end
   end
+
+  test "deleting from the list removes the card in place and shows the empty state after the last one" do
+    alert = Alert.create!(title: "Aviso", body: "Texto", audience: :todos, priority: :informativa, sender_name: "Administrador del sistema")
+
+    get alerts_path
+    assert_select "[data-alert-item='#{alert.id}'] [data-alert-dismiss]" # la X, no el bote de basura
+    assert_select "[data-alert-item='#{alert.id}'] [data-alert-swipe-delete]"
+
+    Alert.where.not(id: alert.id).delete_all
+    assert_difference -> { Alert.count }, -1 do
+      delete alert_path(alert), as: :turbo_stream
+    end
+    assert_response :success
+    assert_turbo_stream action: "remove", targets: "[data-alert-item='#{alert.id}']"
+    assert_turbo_stream(action: "update", targets: "[data-alerts-sent-total]") { assert_select "template", text: "0 alertas enviadas" }
+    assert_turbo_stream(action: "update", targets: "[data-alerts-sent-list]") { assert_select "template", text: /Aún no se han enviado alertas/ }
+  end
 end

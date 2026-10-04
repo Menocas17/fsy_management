@@ -1,0 +1,104 @@
+import { Controller } from "@hotwired/stimulus"
+
+const REASONS = { enfermeria: "Enfermería" }
+
+// Pasar lista: un toque en la fila marca presente (otro lo quita); «Falta» abre la hoja del motivo. Lo marcado
+// va en los campos ocultos de cada fila; aquí se lleva la cuenta y se habilita «Confirmar» al completar.
+export default class extends Controller {
+  static targets = ["list", "row", "count", "fill", "hint", "confirm", "sheet", "sheetName", "detail", "save"]
+
+  toggle(event) {
+    const row = event.currentTarget.closest("[data-night-attendance-target~=row]")
+    this.set(row, row.dataset.state === "presente" ? {} : { status: "presente" })
+  }
+
+  openSheet(event) {
+    this.current = event.currentTarget.closest("[data-night-attendance-target~=row]")
+    this.reason = this.field(this.current, "reason").value || null
+    this.detailTarget.value = this.field(this.current, "detail").value
+    this.sheetNameTarget.textContent = this.current.dataset.name
+    this.syncSheet()
+    this.sheetTarget.showModal()
+  }
+
+  chooseReason(event) {
+    this.reason = event.currentTarget.dataset.reason
+    this.syncSheet()
+    if (this.reason === "otro") this.detailTarget.focus()
+  }
+
+  syncSheet() {
+    this.sheetTarget.querySelectorAll("[data-reason]").forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.reason === this.reason)
+    })
+    this.detailTarget.hidden = this.reason !== "otro"
+    this.saveTarget.disabled = !(this.reason === "enfermeria" || (this.reason === "otro" && this.detailTarget.value.trim()))
+  }
+
+  markAbsent() {
+    const detail = this.reason === "otro" ? this.detailTarget.value.trim() : ""
+    this.set(this.current, { status: "ausente", reason: this.reason, detail })
+    this.closeSheet()
+  }
+
+  closeSheet() {
+    this.sheetTarget.close()
+  }
+
+  clickOutside(event) {
+    if (event.target === this.sheetTarget) this.closeSheet()
+  }
+
+  set(row, { status = "", reason = "", detail = "" }) {
+    this.field(row, "status").value = status
+    this.field(row, "reason").value = reason || ""
+    this.field(row, "detail").value = detail
+    if (status) row.dataset.state = status
+    else delete row.dataset.state
+
+    const label = row.querySelector("[data-night-label]")
+    label.textContent = status === "presente" ? "Presente"
+      : status === "ausente" ? `Ausente · ${REASONS[reason] || detail}` : "Toca para marcar presente"
+    this.refresh()
+    this.reorder()
+  }
+
+  // Los ausentes arriba y el resto en su orden de siempre (data-order). Las filas que cambian de lugar se
+  // deslizan desde donde estaban (FLIP): se mide, se reordena y cada una parte de su posición vieja.
+  reorder() {
+    const rows = this.rowTargets
+    const sorted = [...rows].sort((a, b) =>
+      (a.dataset.state === "ausente" ? 0 : 1) - (b.dataset.state === "ausente" ? 0 : 1) || a.dataset.order - b.dataset.order)
+    if (sorted.every((row, index) => row === rows[index])) return
+
+    const before = new Map(rows.map((row) => [row, row.getBoundingClientRect().top]))
+    sorted.forEach((row) => this.listTarget.appendChild(row))
+    if (this.reducedMotion) return
+
+    sorted.forEach((row) => {
+      const delta = before.get(row) - row.getBoundingClientRect().top
+      if (!delta) return
+
+      row.animate([ { transform: `translateY(${delta}px)` }, { transform: "translateY(0)" } ],
+                  { duration: 320, easing: "cubic-bezier(0.32, 0.72, 0, 1)" })
+    })
+  }
+
+  get reducedMotion() {
+    return document.documentElement.classList.contains("reduce-motion") ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  }
+
+  refresh() {
+    const total = this.rowTargets.length
+    const marked = this.rowTargets.filter((row) => row.dataset.state).length
+    this.countTarget.textContent = `${marked} de ${total}`
+    this.fillTarget.style.width = `${total ? (marked * 100) / total : 0}%`
+    this.confirmTarget.disabled = marked < total
+    this.hintTarget.textContent = marked < total ? `Faltan ${total - marked} por marcar` : "Lista completa"
+  }
+
+  field(row, name) {
+    return row.querySelector(`[data-field=${name}]`)
+  }
+}

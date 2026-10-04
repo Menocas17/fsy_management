@@ -2,11 +2,12 @@ class AuditLog < ApplicationRecord
   belongs_to :actor, class_name: "Participant", optional: true
 
   enum :category, { logistica: 0, companias: 1, asignaciones: 2, alertas: 3, agenda: 4, finanzas: 5, cuentas: 6, registro: 7,
-                    participantes: 8 }
+                    participantes: 8, asistencia: 9 }
 
   CATEGORY_LABELS = { "participantes" => "Participantes", "asignaciones" => "Asignaciones", "companias" => "Compañías",
                       "agenda" => "Agenda", "registro" => "Registro", "alertas" => "Alertas", "logistica" => "Logística",
-                      "finanzas" => "Finanzas", "cuentas" => "Cuentas" }.freeze
+                      "finanzas" => "Finanzas", "cuentas" => "Cuentas",
+                      "asistencia" => "Asistencia nocturna" }.freeze
 
   # Qué clase de cosa se hizo, para el ícono de cada fila y el filtro «Acción». La frase completa (quién,
   # qué y a quién) ya viene en summary; esto solo la agrupa. Las acciones que no estén aquí caen en «Otro».

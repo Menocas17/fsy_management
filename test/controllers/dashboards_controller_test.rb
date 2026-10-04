@@ -37,7 +37,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
 
     get dashboard_path
 
-    assert_select "a[data-shortcut='my-company'][href='#{company_path(company)}']", text: /Ver mi compañía/
+    assert_select "a[data-shortcut='my-company'][href='#{company_path(company, return_to: dashboard_path)}']", text: /Ver mi compañía/
     assert_select "a[href='#{new_participant_path}']", false
     assert_select "a[data-shortcut='qr'][href='#{scan_path}']", text: /Escanear gafete/
     assert_select "a[href='#{checkins_path}']", false
@@ -54,7 +54,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
 
     get dashboard_path
 
-    assert_select "a[data-shortcut='my-company'][href='#{auxiliar_company_path(auxiliar_company)}']"
+    assert_select "a[data-shortcut='my-company'][href='#{auxiliar_company_path(auxiliar_company, return_to: dashboard_path)}']"
   end
 
   test "someone without a company gets no shortcut at all" do

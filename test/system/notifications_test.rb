@@ -68,6 +68,37 @@ class NotificationsTest < ApplicationSystemTestCase
     assert_equal 2, @admin.alert_dismissals.count
   end
 
+  # En Alertas (gestión) el mismo gesto borra la alerta para todos, por eso pide confirmación.
+  test "the Alertas page deletes with the same X on desktop, after confirming" do
+    page.driver.browser.manage.window.resize_to(1400, 1000)
+    sign_in_as(@admin)
+    visit alerts_path
+
+    find("main [data-alert-id='#{@first.id}']").hover
+    find("main [data-alert-id='#{@first.id}'] [data-alert-dismiss]").click
+    within("dialog[open]") { click_on "Sí, eliminar" }
+    assert_no_selector "main [data-alert-id='#{@first.id}']"
+    assert_selector "main [data-alerts-sent-total]", text: "1 alerta enviada"
+    assert_not Alert.exists?(@first.id)
+  end
+
+  test "on a phone the Alertas page swipes left, and cancelling the confirmation leaves Eliminar showing" do
+    sign_in_as(@admin)
+    emulate_phone
+    visit alerts_path
+
+    assert_no_selector "main [data-alert-dismiss]"
+    swipe(@second, by: 330)
+    within("dialog[open]") { click_on "Cancelar" }
+    assert_selector "main [data-alert-id='#{@second.id}']"
+    assert_selector "main [data-alert-swipe-delete]", visible: true
+
+    find("main [data-alert-swipe-delete]").click
+    within("dialog[open]") { click_on "Sí, eliminar" }
+    assert_no_selector "main [data-alert-id='#{@second.id}']"
+    assert_equal [ @first.id ], Alert.pluck(:id)
+  end
+
   private
     def emulate_phone
       cdp("Emulation.setDeviceMetricsOverride", width: 412, height: 892, deviceScaleFactor: 2, mobile: true)

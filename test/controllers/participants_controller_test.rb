@@ -163,15 +163,17 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
   test "profile shows assignment data under Información general and an honest empty Asignaciones state" do
     juan = participants(:juan)
-    juan.update!(company: Company.create!(name: "Alfa 3"), room: "204",
-                 m_person_in_charge: "Ana Ruiz", h_person_in_charge: "Pedro González")
+    company = Company.create!(name: "Alfa 3")
+    participants(:maria).update!(company: company) # su consejera, por el personal de la compañía
+    juan.update!(company: company, room: "204", m_person_in_charge: "Ana Ruiz", h_person_in_charge: "Pedro González")
 
     get participant_path(juan)
 
     assert_response :success
     assert_select "h2", text: "Información general"
-    assert_includes response.body, "Alfa 3"
-    assert_includes response.body, "Ana Ruiz · Pedro González"
+    assert_select "a[href^='#{company_path(company)}?return_to=']", text: "Alfa 3"
+    assert_includes response.body, "María García"
+    refute_includes response.body, "Ana Ruiz", "the counselors come from the company's staff, not what was copied on the ficha"
     assert_select "[data-empty-state='asignaciones']", text: /Sin asignaciones todavía/
     refute_includes response.body, "Primera oración"
   end

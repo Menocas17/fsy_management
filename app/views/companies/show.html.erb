@@ -32,11 +32,11 @@
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
-        <% if can_view_participant_reports? %>
-          <%= link_to badges_reports_path(company: @company.id), target: "_blank", rel: "noopener",
+        <% if can_open_night_attendance?(@company) %>
+          <%= link_to company_night_attendance_path(@company, return_to: request.fullpath),
                 class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
-            <%= icon "id-card", class: "w-4 h-4" %>
-            Gafetes
+            <%= icon "moon-star", class: "w-4 h-4" %>
+            <%= night_attendance_gender_for(@company) ? "Pasar asistencia" : "Asistencia nocturna" %>
           <% end %>
         <% end %>
         <% if can_edit_company?(@company) %>

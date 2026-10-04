@@ -32,7 +32,11 @@ class AlertsController < ApplicationController
   def destroy
     @alert.destroy
     record_audit!(category: :alertas, action: "destroyed", target: @alert, summary: "Eliminó la alerta «#{@alert.title}»")
-    redirect_to alerts_path, status: :see_other, notice: "Alerta eliminada."
+
+    respond_to do |format|
+      format.turbo_stream { render turbo_stream: removal_streams(@alert) }
+      format.html { redirect_to alerts_path, status: :see_other, notice: "Alerta eliminada." }
+    end
   end
 
   private
@@ -42,6 +46,17 @@ class AlertsController < ApplicationController
 
     def visible?(alert)
       Alert.visible_to(Current.user&.participant).exists?(id: alert.id)
+    end
+
+    # La tarjeta ya se fue con la animación del deslizamiento; aquí se quita del DOM y se ajusta el total.
+    def removal_streams(alert)
+      remaining = Alert.count
+      streams = [
+        turbo_stream.remove_all("[data-alert-item='#{alert.id}']"),
+        turbo_stream.update_all("[data-alerts-sent-total]", helpers.pluralize(remaining, "alerta enviada", plural: "alertas enviadas"))
+      ]
+      streams << turbo_stream.update_all("[data-alerts-sent-list]", partial: "alerts/empty_state") if remaining.zero?
+      streams
     end
 
     def deliver_emails(alert)

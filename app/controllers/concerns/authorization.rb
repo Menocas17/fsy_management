@@ -10,7 +10,9 @@ module Authorization
                   :can_view_reports?, :can_view_participant_reports?, :can_view_logistics_reports?, :can_import_participants?,
                   :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?, :can_manage_logistics_areas?,
                   :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
-                  :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?
+                  :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?,
+                  :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
+                  :can_take_night_attendance?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -142,6 +144,38 @@ module Authorization
   # registro. Quien registra también anula (CheckinsController#void).
   def can_check_in?
     Current.user&.checkin_registrar? || false
+  end
+
+  # Asistencia nocturna -------------------------------------------------------
+  def can_view_night_attendance?
+    Current.user&.night_attendance_viewer? || false
+  end
+
+  # Qué lista de esta compañía le toca pasar a quien entra, o nil: el consejero, la de su género en su
+  # compañía; el auxiliar, la de su género en las compañías de su rama (cuando falta el consejero).
+  def night_attendance_gender_for(company)
+    actor = Current.user&.participant
+    return if actor.nil? || company.nil? || actor.gender.blank?
+
+    in_reach = case actor.rol.to_s
+    when "consejero" then actor.counselor_scope.include?(company)
+    when "auxiliar"  then actor.auxiliar_scope[:companies].include?(company)
+    else false
+    end
+    actor.gender if in_reach
+  end
+
+  def can_open_night_attendance?(company)
+    can_view_night_attendance? || night_attendance_gender_for(company).present?
+  end
+
+  # Pasar una lista: la de su género, y solo la de esta noche. El superadmin, cualquiera, pero solo en la
+  # noche de prueba (antes del evento).
+  def can_take_night_attendance?(company, gender, night)
+    return false unless night == NightAttendance.current_night
+    return true if Current.user&.superadmin? && NightAttendance.testing?
+
+    night_attendance_gender_for(company) == gender.to_s
   end
 
   # Finanzas ------------------------------------------------------------------
