@@ -8,7 +8,7 @@ class AgendaController < ApplicationController
     @next_day = @selected_day + 1 if @selected_day < @days.last
     @visible_days = @view == "semana" ? @days : [ @selected_day ]
 
-    activities = Activity.includes(responsibles: :avatar_attachment)
+    activities = Activity.includes(responsibles: { avatar_attachment: :blob })
     @activities_by_day = activities.between(@days.first, @days.last).group_by(&:day)
     @day_activities = @activities_by_day.fetch(@selected_day, [])
     @hours = grid_hours
