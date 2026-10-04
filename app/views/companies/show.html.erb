@@ -74,7 +74,7 @@
         <% if @rooms.any? %>
           <div class="grid grid-cols-2 gap-2">
             <% @rooms.each do |room, count| %>
-              <div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-tile bg-canvas dark:bg-slate-900/60 border border-line-soft" data-room="<%= room %>">
+              <div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-tile bg-sunken border border-line-soft" data-room="<%= room %>">
                 <span class="text-sm font-extrabold text-ink-900"><%= room %></span>
                 <span class="text-label font-semibold text-ink-500"><%= count %> jóv.</span>
               </div>

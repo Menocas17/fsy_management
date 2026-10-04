@@ -6,7 +6,7 @@
     <caption class="sr-only">Camisas registradas por talla</caption>
     <tbody>
       <% %w[xs s m l xl].each_with_index do |size, index| %>
-        <tr class="<%= "bg-canvas dark:bg-slate-800/60" if index.odd? %>">
+        <tr class="<%= "bg-sunken" if index.odd? %>">
           <th scope="row" class="px-5 md:px-6 py-2.5 text-left uppercase font-semibold <%= index.odd? ? "text-ink-900" : "text-ink-500" %>"><%= size %></th>
           <td class="px-5 md:px-6 py-2.5 text-right tabular-nums <%= index.odd? ? "text-ink-900" : "text-ink-500" %>" data-shirt-size="<%= size %>"><%= shirt_counts[size] || 0 %></td>
         </tr>

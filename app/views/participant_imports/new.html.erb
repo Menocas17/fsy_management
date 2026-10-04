@@ -31,7 +31,7 @@
       <div class="flex flex-wrap gap-1.5">
         <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Compañía\ auxiliar Teléfono Correo
               Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
-          <span class="px-2.5 py-1 rounded-inner bg-canvas dark:bg-slate-900/60 border border-line-soft text-label font-semibold text-ink-700"><%= column %></span>
+          <span class="px-2.5 py-1 rounded-inner bg-sunken border border-line-soft text-label font-semibold text-ink-700"><%= column %></span>
         <% end %>
       </div>
       <ul class="mt-4 space-y-1.5 text-label leading-relaxed text-ink-500 list-disc list-inside">
@@ -50,7 +50,7 @@
       <ul class="divide-y divide-line-soft">
         <% @imports.each do |import| %>
           <li>
-            <%= link_to participant_import_path(import), class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+            <%= link_to participant_import_path(import), class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-muted/40" do %>
               <span class="min-w-0 flex-1">
                 <span class="block text-body font-bold text-ink-900 truncate"><%= import.filename %></span>
                 <span class="block text-label font-semibold text-ink-500"><%= SpanishDates.short_with_time(import.created_at) %> · <%= import.uploaded_by_name %></span>

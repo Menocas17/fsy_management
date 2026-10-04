@@ -29,7 +29,7 @@
       </button>
       <input type="number" name="quantity" min="1" step="1" value="1" inputmode="numeric" required
              data-inventory-adjust-target="quantity" data-action="input->inventory-adjust#preview" aria-label="Cantidad"
-             class="w-24 h-14 text-center text-[30px] font-extrabold tabular-nums rounded-control border border-line bg-surface dark:bg-slate-900 text-ink-900 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500">
+             class="w-24 h-14 text-center text-[30px] font-extrabold tabular-nums rounded-control border border-line bg-surface dark:bg-canvas text-ink-900 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500">
       <button type="button" data-action="inventory-adjust#step" data-step="1" aria-label="Más uno"
               class="w-10 h-10 rounded-control border border-line flex items-center justify-center text-ink-700 hover:border-primary-500 cursor-pointer transition">
         <%= icon "plus", class: "w-[18px] h-[18px]" %>
@@ -57,7 +57,7 @@
 
     <div class="flex gap-2 mt-4">
       <button type="button" data-action="inventory-adjust#close"
-              class="flex-1 h-10 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+              class="flex-1 h-10 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-muted cursor-pointer transition">
         Cancelar
       </button>
       <button type="submit"

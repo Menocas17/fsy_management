@@ -7,7 +7,7 @@
   <div class="flex flex-col md:flex-row gap-6 md:gap-8">
     <div class="flex md:flex-col items-center gap-4 md:gap-2.5 shrink-0">
       <label for="participant_avatar" class="relative block cursor-pointer" aria-label="Cambiar foto">
-        <span class="block w-24 h-24 rounded-panel overflow-hidden border-4 border-surface shadow-md bg-linear-to-br from-cat-green to-green-800 text-white">
+        <span class="block w-24 h-24 rounded-panel overflow-hidden border-4 border-surface shadow-md bg-cat-green-solid text-white">
           <% if saved_avatar %>
             <%= image_tag participant.avatar.variant(:thumb), alt: "Foto de #{participant.full_name}",
                   class: "w-full h-full object-cover", data: { avatar_preview_target: "image" } %>

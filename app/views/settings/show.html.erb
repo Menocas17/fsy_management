@@ -99,7 +99,7 @@
                   <%= label_tag name.parameterize(separator: "_"), label, class: "block text-body font-semibold text-ink-900" %>
                   <p class="text-label font-semibold text-ink-500">
                     <%= SpanishDates.long(window.day) %> ·
-                    <span class="<%= window.open? ? "text-emerald-700 dark:text-cat-green" : "text-ink-500 dark:text-slate-400" %>">
+                    <span class="<%= window.open? ? "text-cat-green-ink" : "text-ink-500 dark:text-ink-500" %>">
                       <%= window.open? ? "abierto ahora" : "cerrado ahora" %>
                     </span>
                   </p>

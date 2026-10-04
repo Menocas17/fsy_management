@@ -60,7 +60,7 @@
               </span>
               <% if can_check_in? %>
                 <%= button_to agenda_training_attendances_path(training, participant_id: person.id),
-                      class: "shrink-0 inline-flex items-center gap-1.5 h-11 md:h-8 px-3 rounded-control border border-line text-label font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 active:scale-[0.97] cursor-pointer transition" do %>
+                      class: "shrink-0 inline-flex items-center gap-1.5 h-11 md:h-8 px-3 rounded-control border border-line text-label font-bold text-ink-700 hover:bg-muted active:scale-[0.97] cursor-pointer transition" do %>
                   Marcar
                 <% end %>
               <% end %>

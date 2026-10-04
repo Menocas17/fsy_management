@@ -73,9 +73,9 @@
           <% @staff.each do |person| %>
             <% held = @trainings.reject { |training| training.held_on > Date.current } %>
             <% attended = held.count { |training| @attended[training.id]&.include?(person.id) } %>
-            <tr class="group border-b border-line dark:border-slate-700 last:border-b-0 hover:bg-canvas dark:hover:bg-slate-700/40" data-staff-row="<%= person.id %>">
+            <tr class="group border-b border-line dark:border-line-soft last:border-b-0 hover:bg-canvas dark:hover:bg-muted/40" data-staff-row="<%= person.id %>">
               <%# El nombre queda fijo al desplazar la tabla de lado en el teléfono: si no, se pierde de quién es cada fila. %>
-              <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:group-hover:bg-slate-700">
+              <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:group-hover:bg-muted">
                 <%= link_to person.full_name, participant_path(person, from: "staff"),
                       class: "text-body font-bold text-ink-900 hover:underline" %>
               </td>

@@ -22,9 +22,9 @@ class StatTileComponent < ViewComponent::Base
 
     def wrapper_classes
       if large?
-        helpers.card_classes("flex flex-col items-start gap-2.5 p-3.5 md:flex-row md:items-center md:gap-4 md:px-5 md:py-[18px]#{" transition-colors hover:bg-canvas dark:hover:bg-slate-700/40" if @href}")
+        helpers.card_classes("flex flex-col items-start gap-2.5 p-3.5 md:flex-row md:items-center md:gap-4 md:px-5 md:py-[18px]#{" transition-colors hover:bg-canvas dark:hover:bg-muted/40" if @href}")
       else
-        "flex items-center gap-3 p-3.5 rounded-tile bg-canvas dark:bg-slate-800/60#{" transition-colors hover:bg-line-soft/70 dark:hover:bg-slate-700/60" if @href}"
+        "flex items-center gap-3 p-3.5 rounded-tile bg-sunken#{" transition-colors hover:bg-line-soft/70 dark:hover:bg-muted/60" if @href}"
       end
     end
 end

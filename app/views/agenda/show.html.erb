@@ -1,8 +1,8 @@
 <% content_for :title, "Agenda" %>
 <% content_for :eyebrow, "Gestión" %>
 <%
-  nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-slate-600 cursor-not-allowed"
+  nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted transition"
+  nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-ink-300 cursor-not-allowed"
 %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">

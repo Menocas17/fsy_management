@@ -4,7 +4,7 @@
   remove_url = local_assigns[:remove_url]
 %>
 <% if person %>
-  <div class="flex items-center gap-3 px-3 py-2.5 rounded-tile bg-canvas dark:bg-slate-900/60 border border-line-soft"
+  <div class="flex items-center gap-3 px-3 py-2.5 rounded-tile bg-sunken border border-line-soft"
        data-leader-slot="<%= role %>-<%= gender %>">
     <%= render(AvatarComponent.new(participant: person)) %>
     <div class="min-w-0 flex-1">

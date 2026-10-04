@@ -3,7 +3,7 @@
 <% content_for :eyebrow, @inventory.name %>
 <% back_to @inventory.name, inventory_path(@inventory) %>
 <%
-  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-muted transition"
 %>
 <%= render PageComponent.new(width: :page, data: { controller: "inventory-adjust", inventory_adjust_auto_open_value: params[:ajuste].present? }) do %>
   <%# El enlace de volver vive en la barra superior, igual que en el resto de las vistas. %>

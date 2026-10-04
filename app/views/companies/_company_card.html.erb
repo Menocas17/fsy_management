@@ -42,7 +42,7 @@
 
   <div class="grid grid-cols-3 gap-2 mt-3.5">
     <% stats.each do |value, label| %>
-      <div class="px-1 py-2 rounded-control bg-canvas dark:bg-slate-900/60 text-center">
+      <div class="px-1 py-2 rounded-control bg-sunken text-center">
         <p class="<%= value.is_a?(String) ? "text-label leading-[22px]" : "text-title leading-[22px]" %> font-extrabold text-ink-900 truncate"><%= value %></p>
         <p class="text-meta font-semibold text-ink-500"><%= label %></p>
       </div>

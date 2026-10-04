@@ -167,6 +167,8 @@ Un azul marino que sostiene, un sol que marca el momento y una paleta de categor
 
 **La regla del color propio.** Lo que la persona colorea a su gusto (un inventario, una categoría de gasto) conserva su relleno sólido: ese color es su identidad, no una categoría de la paleta. Es la única excepción a la regla de color, y solo en el mosaico de ese elemento.
 
+**Las otras dos excepciones.** Los avatares de iniciales usan su propia paleta de quince tonos (AvatarComponent): su trabajo es distinguir a una persona de otra, no categorizar. Los visores de cámara (registro, escanear, inventario) van sobre azul FSY profundo (primary-950), que se queda oscuro en los dos modos.
+
 **La regla del sol.** El sol nunca decora: marca lo que está ocurriendo ahora. Una pantalla tiene como mucho un elemento de sol.
 
 **La regla de la tinta.** Texto sobre un tinte siempre en su tinta (`text-cat-*-ink`), nunca en el tono base: en letra chica no llega a 4.5:1.
@@ -268,7 +270,7 @@ Menú lateral con grupos plegables, la opción activa en neblina azul con una ba
 - **Do** escribir el texto sobre un tinte en su tinta (`text-cat-*-ink`).
 
 ### Don't:
-- **Don't** usar colores sueltos de Tailwind (`bg-emerald-600`, `text-amber-700`, `slate-*`): todo color sale de los tokens.
+- **Don't** usar colores sueltos de Tailwind (`bg-emerald-600`, `text-amber-700`, `slate-*`): todo color sale de los tokens. Para el modo oscuro, `muted` (hover y rellenos neutros) y `sunken` (bloques hundidos) ya traen su valor oscuro.
 - **Don't** poner más de un botón principal en una pantalla.
 - **Don't** usar rellenos sólidos para encabezados de sección, chips o decoración.
 - **Don't** usar letra de menos de 11 px.

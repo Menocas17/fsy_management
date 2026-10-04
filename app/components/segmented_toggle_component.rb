@@ -5,11 +5,11 @@
 # accesos. Cada item: { text:, href:, active:, icon: nil, data: {} }.
 class SegmentedToggleComponent < ViewComponent::Base
   BASE = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-inner text-label whitespace-nowrap transition-colors"
-  ACTIVE = "#{BASE} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900".freeze
+  ACTIVE = "#{BASE} bg-surface dark:bg-muted shadow-sm font-bold text-ink-900".freeze
   IDLE = "#{BASE} font-semibold text-ink-500 hover:text-ink-900".freeze
 
   # floating: sobre un lienzo (el organigrama), el riel va en superficie con sombra en vez de hundido.
-  RAIL = "inline-flex w-fit p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-slate-700"
+  RAIL = "inline-flex w-fit p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft"
   FLOATING_RAIL = "inline-flex w-fit p-1 gap-0.5 rounded-control bg-surface/95 border border-line-soft shadow-md"
 
   def initialize(label:, items:, floating: false)

@@ -13,7 +13,7 @@ module FinancesHelper
   def category_tile(category, size: :md)
     box = size == :sm ? "w-8 h-8 rounded-control" : "w-10 h-10 rounded-tile"
     glyph = size == :sm ? "w-4 h-4" : "w-5 h-5"
-    color = category ? Appearance.color_class(category.color) : "bg-slate-500"
+    color = category ? Appearance.color_class(category.color) : "bg-ink-500"
     tag.span(icon(category&.icon || "wallet", class: glyph), aria: { hidden: true },
              class: "#{box} shrink-0 text-white flex items-center justify-center #{color}")
   end

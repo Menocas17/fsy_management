@@ -37,7 +37,7 @@
       <ul class="divide-y divide-line-soft">
         <% @categories.each do |category| %>
           <li>
-            <%= link_to edit_expense_category_path(category), class: "flex items-center gap-3 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+            <%= link_to edit_expense_category_path(category), class: "flex items-center gap-3 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-muted/40" do %>
               <%= category_tile(category) %>
               <span class="min-w-0 flex-1">
                 <span class="block text-body font-bold text-ink-900 truncate"><%= category.name %></span>

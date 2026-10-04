@@ -16,7 +16,7 @@ module ChartsHelper
     "rose" => "bg-cat-rose/15 text-cat-rose-ink",
     "teal" => "bg-cat-teal/15 text-cat-teal-ink",
     "navy" => "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100",
-    "neutral" => "bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300"
+    "neutral" => "bg-canvas text-ink-500 dark:bg-muted dark:text-ink-700"
   }.freeze
 
   ROLE_CATEGORY = {

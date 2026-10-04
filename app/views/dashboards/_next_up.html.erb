@@ -41,7 +41,7 @@
               <% end %>
             </span>
           <% end
-          cell = "flex items-start gap-3 rounded-tile bg-canvas dark:bg-slate-800/60 p-4"
+          cell = "flex items-start gap-3 rounded-tile bg-sunken p-4"
         %>
         <% if item[:url] %>
           <%= link_to item[:url], data: { next_item: item[:key] }, class: "#{cell} hover:bg-line-soft/70 transition-colors" do %><%= body %><% end %>

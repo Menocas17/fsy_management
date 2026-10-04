@@ -3,7 +3,7 @@
 <%
   total_items = @inventories.sum { |inventory| inventory.items.size }
   low_total = @inventories.sum { |inventory| inventory.items.count { |item| item.low? || item.out? } }
-  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-muted transition"
 %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">

@@ -31,7 +31,7 @@ class DesignPiecesTest < ViewComponent::TestCase
   test "a small stat tile is a tinted support figure, not a card" do
     tile = render_inline(StatTileComponent.new(value: 100, label: "con alergias", icon: "heart-pulse", tone: :rose, size: :sm))
 
-    assert_selector "div[data-stat-tile].bg-canvas"
+    assert_selector "div[data-stat-tile].bg-sunken"
     assert tile.css("[data-icon-tile]").first["class"].include?("bg-cat-rose/15")
   end
 

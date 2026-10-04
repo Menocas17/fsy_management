@@ -16,8 +16,8 @@
         <% days.each do |day| %>
           <%= link_to agenda_path(date: day, view: @view),
                 class: "px-2 py-2.5 text-center border-l border-line-soft #{"bg-primary-50 dark:bg-primary-700/20" if day == @selected_day}" do %>
-            <span class="block text-meta font-bold tracking-[.06em] uppercase <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-300 dark:text-slate-500" %>"><%= spanish_day_abbr(day) %></span>
-            <span class="block text-display font-extrabold tabular-nums <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-900 dark:text-slate-100" %>"><%= day.day %></span>
+            <span class="block text-meta font-bold tracking-[.06em] uppercase <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-300" %>"><%= spanish_day_abbr(day) %></span>
+            <span class="block text-display font-extrabold tabular-nums <%= day == @selected_day ? "text-primary-600 dark:text-primary-300" : "text-ink-900 dark:text-ink-900" %>"><%= day.day %></span>
           <% end %>
         <% end %>
       </div>

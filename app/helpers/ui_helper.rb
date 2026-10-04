@@ -2,16 +2,16 @@ require "rqrcode"
 
 module UiHelper
   CARD_CLASSES = "bg-surface border border-line-soft rounded-card shadow-md".freeze
-  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-control bg-surface dark:bg-slate-900 border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
+  INPUT_CLASSES = "w-full h-10 px-3.5 rounded-control bg-surface dark:bg-canvas border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500 disabled:cursor-not-allowed".freeze
 
   BUTTON_BASE = "inline-flex items-center justify-center gap-2 rounded-control text-sm font-semibold transition cursor-pointer " \
                 "active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100".freeze
   BUTTON_SIZES = { sm: "h-9 px-3.5", md: "h-10 px-4", lg: "h-11 px-5" }.freeze
   BUTTON_VARIANTS = {
     primary: "bg-primary-700 text-white shadow-sm hover:bg-primary-800",
-    secondary: "border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700",
+    secondary: "border border-line bg-surface text-ink-700 hover:bg-muted",
     danger: "bg-danger text-white shadow-sm hover:bg-danger/90",
-    ghost: "text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"
+    ghost: "text-ink-700 hover:bg-muted"
   }.freeze
 
   # Un solo lugar para los botones: antes cada vista copiaba su propia cadena y ninguna coincidía del todo.

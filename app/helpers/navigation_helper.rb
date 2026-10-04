@@ -81,7 +81,7 @@ module NavigationHelper
   # así nadie depende de las flechas del navegador.
   def back_to(label, url)
     content_for :back do
-      link_to url, title: "Volver a #{label}", data: { scroll_restore: true }, class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition" do
+      link_to url, title: "Volver a #{label}", data: { scroll_restore: true }, class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted transition" do
         safe_join([
           icon("arrow-left", class: "w-4 h-4 shrink-0"),
           tag.span(label, class: "max-w-[180px] truncate text-[12.5px] font-semibold")

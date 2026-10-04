@@ -3,8 +3,8 @@
 <% content_for :eyebrow, "Inventario" %>
 <% back_to "Inventario", inventories_path %>
 <%
-  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  filter_chip = ->(active) { "inline-flex items-center h-10 px-3.5 rounded-control text-body font-semibold transition #{active ? 'bg-primary-700 text-white shadow-sm' : 'border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700'}" }
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-muted transition"
+  filter_chip = ->(active) { "inline-flex items-center h-10 px-3.5 rounded-control text-body font-semibold transition #{active ? 'bg-primary-700 text-white shadow-sm' : 'border border-line bg-surface text-ink-700 hover:bg-muted'}" }
   low_count = @inventory.items.count { |item| item.low? || item.out? }
 %>
 <%= render PageComponent.new(width: :page, data: { controller: "inventory-adjust" }) do %>
@@ -99,7 +99,7 @@
       </div>
     </div>
     <% if @pagy.pages > 1 %>
-      <nav class="mt-4 flex justify-center" aria-label="Paginación"><%== @pagy.series_nav(anchor_string: 'class="px-3 py-1.5 mx-0.5 rounded-inner text-body font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"') %></nav>
+      <nav class="mt-4 flex justify-center" aria-label="Paginación"><%== @pagy.series_nav(anchor_string: 'class="px-3 py-1.5 mx-0.5 rounded-inner text-body font-semibold text-ink-700 hover:bg-muted"') %></nav>
     <% end %>
   <% else %>
     <% searching = params[:query].present? || params[:filter] == "low" %>

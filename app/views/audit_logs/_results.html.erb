@@ -25,7 +25,7 @@
           </thead>
           <tbody class="divide-y divide-line-soft text-body text-ink-700">
             <% audit_logs.each do |log| %>
-              <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors" data-audit-log-id="<%= log.id %>">
+              <tr class="hover:bg-primary-50/60 dark:hover:bg-muted/40 transition-colors" data-audit-log-id="<%= log.id %>">
                 <td class="py-3.5 pr-5">
                   <div class="flex items-start gap-3 min-w-64">
                     <%= render "audit_logs/kind_icon", log: log %>

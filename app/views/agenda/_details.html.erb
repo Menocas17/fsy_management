@@ -20,7 +20,7 @@
   <div class="mt-4 pt-4 border-t border-line-soft flex flex-col gap-2.5">
     <p class="text-meta font-bold tracking-[.07em] uppercase text-ink-500">Notas por rol</p>
     <% notes.each do |note| %>
-      <div class="rounded-tile px-3.5 py-3 bg-canvas dark:bg-slate-900/60" data-role-note="<%= note[:label].parameterize %>">
+      <div class="rounded-tile px-3.5 py-3 bg-sunken" data-role-note="<%= note[:label].parameterize %>">
         <p class="flex items-center gap-1.5 text-meta font-bold tracking-[.07em] uppercase text-ink-500">
           <%= icon note[:icon], class: "w-3.5 h-3.5" %>
           <%= note[:label] %>

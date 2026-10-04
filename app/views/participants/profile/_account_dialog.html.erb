@@ -5,7 +5,7 @@
         class="p-0 m-auto w-full max-w-md rounded-card shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
   <div class="relative p-5 md:p-6 bg-surface rounded-card">
     <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
-            class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+            class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-muted text-ink-700 dark:text-ink-700 hover:bg-line-soft cursor-pointer transition">
       <%= icon "x", class: "w-4 h-4" %>
     </button>
     <h2 id="account-dialog-title" class="pr-10 text-title font-bold text-balance break-words text-ink-900">Crear la cuenta de <%= participant.full_name %></h2>
@@ -48,7 +48,7 @@
         <% end %>
       </div>
 
-      <div class="flex items-start gap-2.5 rounded-tile bg-primary-50 dark:bg-primary-700/30 px-3.5 py-3 text-label text-ink-700 dark:text-slate-200">
+      <div class="flex items-start gap-2.5 rounded-tile bg-primary-50 dark:bg-primary-700/30 px-3.5 py-3 text-label text-ink-700 dark:text-ink-700">
         <%= icon "mail", class: "w-4 h-4 shrink-0 mt-px" %>
         <p>
           Le llega a ese correo un enlace para elegir su contraseña (vale <%= User::INVITATION_VALID_FOR.in_days.to_i %> días).

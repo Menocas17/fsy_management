@@ -13,7 +13,7 @@ module Tones
     amber: "bg-cat-amber/20 text-cat-amber-ink",
     rose: "bg-cat-rose/15 text-cat-rose-ink",
     teal: "bg-cat-teal/15 text-cat-teal-ink",
-    neutral: "bg-canvas text-ink-700 dark:bg-slate-700 dark:text-slate-200"
+    neutral: "bg-muted text-ink-700"
   }.freeze
 
   SOLID = {

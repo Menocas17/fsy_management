@@ -4,7 +4,7 @@
   card = card_classes("p-5 flex flex-col gap-3 h-full")
   # Una pantalla de puros documentos: ninguno es la acción principal, así que todos van como secundarios.
   action = button_classes(:secondary)
-  secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-muted transition"
   inert = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-500 cursor-not-allowed"
 %>
 <%= render PageComponent.new(width: :page) do %>
@@ -127,7 +127,7 @@
             <div class="flex items-center gap-2.5">
               <%= icon report[:icon], class: "w-[18px] h-[18px] text-ink-500" %>
               <h3 class="text-title font-bold text-ink-500"><%= report[:title] %></h3>
-              <span class="ml-auto text-meta font-bold tracking-[.06em] uppercase px-2 py-0.5 rounded-full bg-canvas dark:bg-slate-700 text-ink-500">Pronto</span>
+              <span class="ml-auto text-meta font-bold tracking-[.06em] uppercase px-2 py-0.5 rounded-full bg-muted text-ink-500">Pronto</span>
             </div>
             <p class="text-body leading-relaxed text-ink-500 flex-1"><%= report[:text] %></p>
             <span aria-disabled="true" class="<%= inert %>"><%= report[:label] %></span>

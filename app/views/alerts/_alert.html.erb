@@ -19,7 +19,7 @@
     <% end %>
   </div>
 <% end %>
-<article class="group relative <%= compact ? "px-5 py-3.5" : "px-5 py-4 md:px-6" %> <%= unread ? "bg-primary-50 dark:bg-slate-800" : "bg-surface" %> <%= "hover:bg-canvas dark:hover:bg-slate-700/60 has-[[data-alert-open]:focus-visible]:ring-2 has-[[data-alert-open]:focus-visible]:ring-inset has-[[data-alert-open]:focus-visible]:ring-primary-500 transition-colors" if linked %> <%= "touch-pan-y" if dismissible %>"
+<article class="group relative <%= compact ? "px-5 py-3.5" : "px-5 py-4 md:px-6" %> <%= unread ? "bg-primary-50 dark:bg-sunken" : "bg-surface" %> <%= "hover:bg-canvas dark:hover:bg-muted/60 has-[[data-alert-open]:focus-visible]:ring-2 has-[[data-alert-open]:focus-visible]:ring-inset has-[[data-alert-open]:focus-visible]:ring-primary-500 transition-colors" if linked %> <%= "touch-pan-y" if dismissible %>"
          data-alert-id="<%= alert.id %>" data-alert-priority="<%= alert.priority %>" <%= tag.attributes(data: { alert_item_target: "panel" }) if dismissible %>>
   <div class="flex items-start gap-3">
     <span class="mt-0.5 w-9 h-9 shrink-0 rounded-control flex items-center justify-center <%= alert.priority_styles %>">
@@ -64,7 +64,7 @@
 
       <div class="mt-2 flex flex-wrap items-center gap-2">
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-meta font-bold <%= alert.priority_styles %>"><%= alert.priority_label %></span>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-meta font-semibold bg-canvas dark:bg-slate-700 text-ink-500 dark:text-slate-300"><%= alert.audience_label %></span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-meta font-semibold bg-muted text-ink-500 dark:text-ink-700"><%= alert.audience_label %></span>
         <% if alert.send_email? %>
           <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
             <%= icon "mail", class: "w-3.5 h-3.5" %>
