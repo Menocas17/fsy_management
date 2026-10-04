@@ -13,7 +13,7 @@
 <% if branches || @directors.any? %>
   <%# Desktop: the canvas is the page — no card, no margins, controls floating on top. %>
   <div class="hidden md:block h-full">
-    <div class="org-chart relative h-full" data-controller="org-chart">
+    <div id="org-chart-<%= @view %>" class="org-chart relative h-full" data-controller="org-chart">
       <div data-org-chart-target="viewport" tabindex="0" role="region"
            aria-label="Organigrama. Arrastra para moverte; usa Ctrl y la rueda del ratón, o las teclas más y menos, para acercar o alejar."
            class="relative h-full w-full overflow-hidden bg-canvas cursor-grab data-[dragging]:cursor-grabbing touch-none select-none focus:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"

@@ -4,10 +4,7 @@ import { Controller } from '@hotwired/stimulus';
 // volver de una ficha a la lista la deja arriba de todo y hay que buscar otra vez el lugar.
 // Se recupera al volver con el navegador (visita «restore») y con el botón «Volver» de la barra
 // superior (enlaces con data-scroll-restore), que es por donde vuelve casi todo el mundo.
-// Los enlaces con data-scroll-keep cambian algo dentro de la misma pantalla (la actividad elegida en la
-// agenda): la página nueva llega en el mismo lugar en que se tocó, no arriba de todo.
 let restoreNext = false;
-let keepAt = null;
 document.addEventListener('turbo:visit', (event) => {
   if (event.detail?.action === 'restore') restoreNext = true;
 });
@@ -16,16 +13,8 @@ document.addEventListener('click', (event) => {
 });
 // Hasta turbo:load, no antes: en una visita normal Turbo pinta primero la copia en caché y luego la
 // página fresca, y las dos tienen que llegar al mismo lugar.
-// turbo:click y no click: solo cuenta si Turbo hace la visita (no un Cmd+clic a otra pestaña).
-document.addEventListener('turbo:click', (event) => {
-  if (!event.target.closest?.('a[data-scroll-keep]')) return;
-  keepAt = event.target.closest('[data-controller~="scroll-memory"]')?.scrollTop ?? null;
-});
 document.addEventListener('turbo:load', () => {
-  queueMicrotask(() => {
-    restoreNext = false;
-    keepAt = null;
-  });
+  queueMicrotask(() => (restoreNext = false));
 });
 
 export default class extends Controller {
@@ -35,9 +24,7 @@ export default class extends Controller {
     this.boundSave = this.save.bind(this);
     this.element.addEventListener('scroll', this.boundSave, { passive: true });
 
-    if (keepAt) {
-      this.restore(keepAt);
-    } else if (restoreNext) {
+    if (restoreNext) {
       const saved = Number(this.read());
       if (saved) this.restore(saved);
     }

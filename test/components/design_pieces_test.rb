@@ -69,6 +69,17 @@ class DesignPiecesTest < ViewComponent::TestCase
     assert_selector "nav a:not([aria-current])", text: "Día"
   end
 
+  test "the segmented toggle mixes options of the same page in place instead of visiting a new one" do
+    with_request_url "/agenda?view=semana" do
+      render_inline(SegmentedToggleComponent.new(label: "Vista", items: [
+        { text: "Día", href: "/agenda?view=dia" }, { text: "Capacitaciones", href: "/agenda/capacitaciones" }
+      ]))
+    end
+
+    assert_selector "a[data-turbo-action='replace']", text: "Día"
+    assert_selector "a:not([data-turbo-action])", text: "Capacitaciones"
+  end
+
   test "the page frame picks one of the two widths and lays out its header" do
     render_inline(PageComponent.new(width: :form)) do |page|
       page.with_intro { "8 áreas" }

@@ -24,6 +24,11 @@ export default class extends Controller {
 
   scrolled() {
     if (this.hasKeyValue) positions[this.keyValue] = this.element.scrollTop;
+    // El salto de restore() no lo hizo la persona: la barra no aparece por él.
+    if (this.silent) {
+      this.silent = false;
+      return;
+    }
     this.element.dataset.scrolling = '';
     clearTimeout(this.timer);
     this.timer = setTimeout(() => delete this.element.dataset.scrolling, HIDE_AFTER_MS);
@@ -32,16 +37,21 @@ export default class extends Controller {
   // Vuelve al lugar de antes; si no hay (recién se abrió la app), al menos deja a la vista la opción activa.
   restore() {
     const saved = positions[this.keyValue];
-    if (saved != null) {
-      this.element.scrollTop = saved;
-      return;
-    }
+    if (saved != null) return this.jumpTo(saved);
+
     const active = this.element.querySelector('[aria-current="page"]');
     if (!active) return;
     const box = this.element.getBoundingClientRect();
     const item = active.getBoundingClientRect();
     if (item.top < box.top || item.bottom > box.bottom) {
-      this.element.scrollTop += item.top - box.top - (box.height - item.height) / 2;
+      this.jumpTo(this.element.scrollTop + item.top - box.top - (box.height - item.height) / 2);
     }
+  }
+
+  jumpTo(top) {
+    const before = this.element.scrollTop;
+    this.element.scrollTop = top;
+    // Solo si de verdad se movió habrá un evento scroll que callar.
+    this.silent = this.element.scrollTop !== before;
   }
 }

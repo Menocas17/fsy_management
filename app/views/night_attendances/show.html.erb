@@ -1,6 +1,8 @@
 <% content_for :page_h1, true %>
 <% content_for :title, "Asistencia nocturna" %>
 <% content_for :eyebrow, @company.name %>
+<%# Cambiar de lista (hombres / mujeres) se mezcla en la página, sin parpadeo ni salto (ver SegmentedToggleComponent). %>
+<%= turbo_refreshes_with method: :morph, scroll: :preserve %>
 <%# Vuelve a donde se abrió (return_to: el panel o el perfil de la compañía); sin eso, al panel si lo puede ver. %>
 <% if can_view_night_attendance? %>
   <% back_to_origin "Asistencia nocturna", night_attendances_path(noche: @night.iso8601) %>
