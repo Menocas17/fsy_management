@@ -50,14 +50,20 @@ Por qué así y no todo en Render:
 
 1. Crea una cuenta en <https://dash.cloudflare.com>, entra a **R2 Object Storage** y actívalo. Pide un
    método de pago para verificar (tarjeta o **PayPal**); no cobra mientras no pases de 10 GB.
-2. **Create bucket** → nombre `fsy-management`, ubicación *Automatic*. No lo hagas público: la app
-   entrega los archivos con enlaces firmados que caducan solos.
+2. **Create bucket** → nombre `fsy-management`, ubicación *Automatic*.
 3. **Manage R2 API Tokens → Create API token**:
    - Permisos: **Object Read & Write**.
    - Alcance: solo el bucket `fsy-management`.
 4. Al crearlo te muestra (una sola vez) el **Access Key ID** y el **Secret Access Key**. El
    **Account ID** está en la página principal de R2. Esos tres son `R2_ACCESS_KEY_ID`,
    `R2_SECRET_ACCESS_KEY` y `R2_ACCOUNT_ID`.
+5. **Acceso público** (bucket → **Settings → Public access**): conecta un dominio propio (**Custom
+   Domains**, si el dominio está en Cloudflare) o activa el **R2.dev subdomain**. La dirección que da
+   (`https://pub-….r2.dev` o `https://fotos.tu-dominio`) es `R2_PUBLIC_URL`. Con ella las fotos salen
+   directo de Cloudflare en vez de pasar por Rails, que en el plan gratis hacía una petición más por cada
+   foto. Las llaves de los archivos son aleatorias y no se pueden adivinar, pero quien tenga un enlace
+   puede abrir esa foto. Sin `R2_PUBLIC_URL` la app funciona igual, con enlaces firmados.
+   R2.dev tiene límite de velocidad: para el evento conviene el dominio propio.
 
 ## 3. Brevo (correo)
 
@@ -83,7 +89,7 @@ Por qué así y no todo en Render:
    |---|---|
    | `RAILS_MASTER_KEY` | el contenido de `config/master.key` |
    | `DATABASE_URL` | la cadena de Neon (paso 1) |
-   | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | paso 2 |
+   | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_URL` | paso 2 |
    | `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAILER_FROM` | paso 3 |
 
    `R2_BUCKET`, `SOLID_QUEUE_IN_PUMA`, `RAILS_MAX_THREADS` y `HTTP_PORT` ya vienen puestas.

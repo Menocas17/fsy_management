@@ -126,6 +126,10 @@ class Participant < ApplicationRecord
   end
 
 
+  # Lo mismo que with_attached_avatar, para precargar la foto desde otra asociación (counselors: AVATAR_PRELOAD).
+  # Trae las variantes ya procesadas: su llave es la URL pública de la miniatura (ApplicationHelper#storage_url).
+  AVATAR_PRELOAD = { avatar_attachment: { blob: { variant_records: { image_attachment: :blob } } } }.freeze
+
   def full_name
     "#{first_name} #{last_name}"
   end

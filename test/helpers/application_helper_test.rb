@@ -19,4 +19,26 @@ class ApplicationHelperTest < ActionView::TestCase
     2.times { assert_raises(Icons::IconNotFound) { icon("no-existe-este-icono") } }
     assert_empty ApplicationHelper::ICON_CACHE
   end
+
+  test "storage_url points at the public bucket when there is one" do
+    blob = ActiveStorage::Blob.new(key: "abc123")
+
+    with_public_storage("https://fotos.example.com") { assert_equal "https://fotos.example.com/abc123", storage_url(blob) }
+    with_public_storage(nil) { assert_same blob, storage_url(blob) }
+  end
+
+  test "an unprocessed variant keeps the active storage route, which processes it" do
+    variant = Struct.new(:key).new(nil)
+
+    with_public_storage("https://fotos.example.com") { assert_same variant, storage_url(variant) }
+  end
+
+  private
+    def with_public_storage(url)
+      previous = Rails.configuration.x.public_storage_url
+      Rails.configuration.x.public_storage_url = url
+      yield
+    ensure
+      Rails.configuration.x.public_storage_url = previous
+    end
 end
