@@ -57,7 +57,7 @@ class TrainingsController < ApplicationController
       @training = Training.find(params[:id])
     end
 
-    # El escaneo (scan_mode) no va aquí: lo abre o cierra el superadmin desde Configuración.
+    # El escaneo no va aquí: el registro activo se elige desde Configuración (ScanWindow).
     def training_params
       params.expect(training: [ :name, :held_on, :location, :notes ])
     end

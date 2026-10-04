@@ -96,6 +96,11 @@ class User < ApplicationRecord
     participant&.director? || participant&.coordinador?
   end
 
+  # Quién elige qué registro está activo en el escáner (Configuración): el superadmin y el director de logística.
+  def scan_manager?
+    superadmin? || participant&.director_logistica? || false
+  end
+
   # Quién registra llegadas: el acceso total, el director de logística, los registradores y el comité de
   # logística cuya área está marcada para el registro (hoy, «Registro»).
   def checkin_registrar?

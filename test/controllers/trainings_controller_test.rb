@@ -134,7 +134,7 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-trainings-card]", 0
   end
 
-  test "whoever edits the agenda creates a training, and the date opens its scan by itself" do
+  test "whoever edits the agenda creates a training, whose scan stays closed until someone activates it" do
     get new_agenda_training_path
     assert_select "input[name='training[name]'][value='Tercera capacitación']", 1, "suggests the next ordinal"
 
@@ -143,7 +143,7 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
     end
     training = Training.find_by!(name: "Tercera")
     assert_redirected_to agenda_training_path(training)
-    assert training.scan_window.open?
+    assert_not training.scan_window.open?
     assert_equal "created", AuditLog.last.action
 
     follow_redirect!

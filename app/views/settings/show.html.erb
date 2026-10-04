@@ -78,42 +78,38 @@
       </div>
     </section>
 
-    <% if Current.user.superadmin? %>
-      <%# Solo la cuenta del sistema: por defecto cada registro se escanea únicamente el día que toca. %>
+    <% if Current.user.scan_manager? %>
+      <%# El superadmin y el director de logística: un solo registro abierto a la vez, así nadie escanea en el equivocado. %>
       <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-scan" aria-labelledby="settings-scan-title">
         <h2 id="settings-scan-title" class="<%= card_heading %>">
           <%= icon "scan-line", class: "w-[17px] h-[17px]" %>
           Registro por escaneo
         </h2>
         <p class="-mt-2 mb-4 text-label leading-relaxed text-ink-500">
-          «Solo el día» abre el escáner únicamente en la fecha del registro. «Abierto» lo deja disponible
-          cualquier día, por ejemplo para una prueba, y «Cerrado» lo bloquea aunque sea el día.
+          Activa el registro que se está escaneando. Solo hay uno abierto a la vez: al activar otro, el anterior se cierra.
         </p>
-        <%= form_with url: scan_windows_settings_path, method: :patch do %>
-          <% rows = [ [ "arrival", "Llegada de los jóvenes", ScanWindow.arrival ] ] +
-                    @trainings.map { |training| [ "trainings[#{training.id}]", training.name, training.scan_window ] } %>
-          <ul class="divide-y divide-line-soft">
-            <% rows.each do |name, label, window| %>
-              <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 first:pt-0" data-scan-window="<%= name %>">
-                <div class="min-w-0 flex-1">
-                  <%= label_tag name.parameterize(separator: "_"), label, class: "block text-body font-semibold text-ink-900" %>
-                  <p class="text-label font-semibold text-ink-500">
-                    <%= SpanishDates.long(window.day) %> ·
-                    <span class="<%= window.open? ? "text-cat-green-ink" : "text-ink-500 dark:text-ink-500" %>">
-                      <%= window.open? ? "abierto ahora" : "cerrado ahora" %>
-                    </span>
-                  </p>
-                </div>
-                <%= select_tag name, options_for_select(ScanWindow::MODES.invert, window.mode),
-                      id: name.parameterize(separator: "_"), class: "#{field_select_classes} sm:w-44" %>
-              </li>
-            <% end %>
-          </ul>
-          <button type="submit" class="<%= button_classes(:primary, extra: "mt-4") %>">
-            <%= icon "check", class: "w-4 h-4" %>
-            Guardar
-          </button>
-        <% end %>
+        <% rows = [ [ "arrival", "Llegada de los jóvenes", Rails.configuration.x.event_start_on, ScanWindow.arrival ] ] +
+                  @trainings.map { |training| [ "training:#{training.id}", training.name, training.held_on, training.scan_window ] } %>
+        <ul class="divide-y divide-line-soft">
+          <% rows.each do |key, label, day, window| %>
+            <% active = window.active? %>
+            <li class="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0" data-scan-window="<%= key %>">
+              <div class="min-w-0">
+                <p class="text-body font-semibold text-ink-900"><%= label %></p>
+                <p class="text-label font-semibold text-ink-500">
+                  <%= SpanishDates.long(day) %>
+                  <% if active %> · <span class="text-cat-green-ink">abierto ahora</span><% end %>
+                </p>
+              </div>
+              <%# Apagar el activo cierra el escaneo; encender otro lo cambia. Cada interruptor guarda al tocarlo. %>
+              <%= button_to scan_windows_settings_path, method: :patch, params: { scan: active ? "" : key },
+                    role: "switch", aria: { checked: active, label: "#{label}: #{active ? "cerrar" : "activar"} el registro" },
+                    class: "relative shrink-0 w-[42px] h-6 rounded-full cursor-pointer transition-colors #{active ? "bg-primary-600" : "bg-line"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
+                <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if active %>"></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
       </section>
     <% end %>
   </div>

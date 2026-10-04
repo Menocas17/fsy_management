@@ -7,12 +7,9 @@ class CheckinsController < ApplicationController
   before_action :set_mode
 
   def index
-    @trainings = Training.chronological.select { |training| training.scan_window.open? }
-    @arrival_open = ScanWindow.arrival.open?
-
-    # Sin nada elegido y con la llegada cerrada, se entra directo al registro que sí está abierto hoy.
-    if @training.nil? && !@arrival_open && @trainings.any?
-      return redirect_to checkins_path(training_id: @trainings.first.id)
+    # Sin nada elegido se entra directo al registro activo, si es una capacitación.
+    if @training.nil? && (active = ScanWindow.active_training)
+      return redirect_to checkins_path(training_id: active.id)
     end
 
     @expected = expected_scope.count
@@ -70,7 +67,7 @@ class CheckinsController < ApplicationController
     end
 
     def register(scan)
-      # Se juzga por la hora del escaneo: lo que se tomó sin señal el día que tocaba entra aunque llegue después.
+      # Se juzga por la hora del escaneo: lo que se tomó sin señal mientras estaba activo entra aunque llegue después.
       return { client_token: scan[:client_token], status: "closed" } unless @window.open?(parse_time(scan[:recorded_at]))
 
       # Normalmente llega el id (lo resuelve el teléfono con su padrón); por si acaso, también el código corto.
