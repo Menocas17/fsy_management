@@ -1,5 +1,5 @@
-# Una entrada de la ficha clínica de una visita: lo que se observó o se le dio (en el texto) y, si se tomaron,
-# sus signos vitales. No se edita ni se borra (como los movimientos del inventario): un error se corrige con otra nota.
+# Una entrada de la ficha clínica de una visita: una nota de lo que se observó o un medicamento que se le dio
+# (medication, con el medicamento y la dosis en el texto) y, si se tomaron, sus signos vitales. No se edita ni se borra (como los movimientos del inventario): un error se corrige con otra nota.
 class InfirmaryNote < ApplicationRecord
   belongs_to :visit, class_name: "InfirmaryVisit", foreign_key: :infirmary_visit_id, touch: true
   belongs_to :author, class_name: "Participant", optional: true
@@ -18,6 +18,7 @@ class InfirmaryNote < ApplicationRecord
   validates :author_name, presence: true
   validates :body, length: { maximum: 2000 }
   validates :temperature, :heart_rate, :blood_pressure, :oxygen, length: { maximum: 12 }
+  validates :body, presence: { message: "escribe qué medicamento y la dosis" }, if: :medication?
   validate :says_something
 
   before_validation :tidy_vitals
@@ -41,7 +42,7 @@ class InfirmaryNote < ApplicationRecord
     end
 
     def says_something
-      return if body.present? || vitals.present?
+      return if body.present? || vitals.present? || medication?
 
       errors.add(:base, "escribe la nota o anota algún signo vital")
     end

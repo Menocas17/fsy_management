@@ -90,6 +90,10 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to infirmary_chart_path(@pedro, anchor: "visita-#{visit.id}")
     assert_equal({ "temperature" => "37.2", "heart_rate" => "88" }, visit.notes.last.vitals)
 
+    post infirmary_visit_notes_path(visit), params: { infirmary_note: { medication: "true", body: "Ibuprofeno 400 mg" } }
+    assert visit.notes.last.medication?
+    assert_equal "Agregó un medicamento a la ficha de enfermería de Pedro Prueba", AuditLog.enfermeria.last.summary
+
     post infirmary_visit_notes_path(visit), params: { infirmary_note: { body: " " } }
     assert_response :unprocessable_entity
     assert_select "[data-infirmary-note-errors]", text: /escribe la nota o anota algún signo vital/
@@ -101,12 +105,12 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
 
   test "the clinical notes are read by nursing, the joven's carers and the director, not by the rest of the staff" do
     visit = InfirmaryVisit.admit_directly(@juan, by: @nurse, reason: "fiebre", detail: "Garganta roja").tap(&:start)
-    visit.notes.create!(body: "Acetaminofén 500 mg", author: @nurse, author_name: "Patricia Prueba")
+    visit.notes.create!(medication: true, body: "Acetaminofén 500 mg", author: @nurse, author_name: "Patricia Prueba")
 
     [ @counselor, @auxiliar, @director, @nurse ].each do |reader|
       sign_in_as account(reader)
       get infirmary_chart_path(@juan)
-      assert_select "[data-infirmary-note]", { text: /Acetaminofén/ }, "#{reader.role_label} reads the notes"
+      assert_select "[data-infirmary-note=medicamento]", { text: /Acetaminofén/ }, "#{reader.role_label} reads the notes"
       sign_out
     end
 

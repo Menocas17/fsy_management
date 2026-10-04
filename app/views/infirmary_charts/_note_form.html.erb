@@ -1,10 +1,22 @@
-<%# Agregar a la ficha clínica de una visita (solo enfermería): lo que se observó o se le dio y, si se tomaron,
-    sus signos vitales (desplegables: no siempre se toman). %>
+<%# Agregar a la ficha clínica de una visita (solo enfermería): una nota o un medicamento que se le dio y, si se
+    tomaron, sus signos vitales (desplegables: no siempre se toman). %>
 <%= form_with model: note, url: infirmary_visit_notes_path(visit), class: "m-5 mt-1 p-4 rounded-tile border border-line bg-canvas flex flex-col gap-3",
       data: { infirmary_note_form: visit.id } do |form| %>
   <% if note.errors.any? %>
     <p class="text-label font-semibold text-cat-rose-ink" role="alert" data-infirmary-note-errors><%= note.errors.full_messages.to_sentence %></p>
   <% end %>
+  <fieldset class="flex flex-wrap gap-1.5">
+    <legend class="sr-only">¿Qué anotas?</legend>
+    <% [ [ false, "Nota", "notebook-pen" ], [ true, "Medicamento", "pill" ] ].each do |value, label, icon_name| %>
+      <label class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-line bg-surface text-label font-bold text-ink-700 cursor-pointer transition
+                    hover:bg-muted has-[:checked]:bg-primary-700 has-[:checked]:border-primary-700 has-[:checked]:text-white
+                    has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-500">
+        <%= form.radio_button :medication, value, id: "note_#{visit.id}_#{label.downcase}", class: "sr-only" %>
+        <%= icon icon_name, class: "w-3.5 h-3.5" %>
+        <%= label %>
+      </label>
+    <% end %>
+  </fieldset>
   <%= form.label :body, "Nota", for: "note_body_#{visit.id}", class: "sr-only" %>
   <%= form.text_area :body, id: "note_body_#{visit.id}", rows: 2, maxlength: 2000, class: field_textarea_classes,
         placeholder: "Qué observaste o qué se le dio (medicamento y dosis)…" %>

@@ -81,6 +81,10 @@ class InfirmaryVisitTest < ActiveSupport::TestCase
     assert_equal [ [ "38.4 °C", true ], [ "FC 96", false ] ], note.vital_readings
     assert_raises(ActiveRecord::ReadOnlyRecord) { note.update!(body: "otra cosa") }
     assert_not visit.notes.build(author_name: "X").valid?, "an empty note says nothing"
+
+    medicine = visit.notes.build(author_name: "X", medication: true, temperature: "38")
+    assert_not medicine.valid?
+    assert_includes medicine.errors[:body], "escribe qué medicamento y la dosis"
   end
 
   private

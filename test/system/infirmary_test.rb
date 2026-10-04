@@ -25,14 +25,15 @@ class InfirmaryTest < ApplicationSystemTestCase
     assert_current_path infirmary_chart_path(@joven)
   end
 
-  test "a note is text plus the vital signs, if they were taken" do
+  test "a note says whether a medicine was given, with the vital signs below if they were taken" do
     visit infirmary_chart_path(@joven)
+    find("label", text: "Medicamento").click
     fill_in "Nota", with: "Acetaminofén 500 mg"
     find("summary", text: "Signos vitales").click
     fill_in "Temperatura (°C)", with: "38.6"
     click_on "Agregar a la ficha"
 
-    assert_selector "[data-infirmary-note]", text: "Acetaminofén 500 mg"
+    assert_selector "[data-infirmary-note=medicamento]", text: "Acetaminofén 500 mg"
     assert_selector "[data-vital='38.6 °C']"
   end
 end

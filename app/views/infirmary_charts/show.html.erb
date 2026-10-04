@@ -113,11 +113,14 @@
                 </li>
               <% end %>
               <% visit.notes.each do |note| %>
-                <li class="py-3.5" data-infirmary-note>
+                <li class="py-3.5" data-infirmary-note="<%= note.medication? ? "medicamento" : "nota" %>">
                   <div class="flex items-center justify-between gap-3">
                     <p class="text-label font-bold text-ink-900 truncate"><%= note.author_name %></p>
                     <p class="text-label font-semibold text-ink-500 tabular-nums shrink-0"><%= infirmary_time(note.created_at) %></p>
                   </div>
+                  <% if note.medication? %>
+                    <div class="mt-1.5"><%= render ChipComponent.new(label: "Medicamento", tone: :teal, icon: "pill") %></div>
+                  <% end %>
                   <% if note.body %>
                     <p class="mt-1 text-body text-ink-900 whitespace-pre-line"><%= note.body %></p>
                   <% end %>
