@@ -1,4 +1,6 @@
-name: CI/CD - Rails & Kamal
+# Render despliega main solo cuando todos estos jobs pasan (autoDeployTrigger: checksPass en render.yaml),
+# así que este workflow es también la puerta del deploy: aquí no hay job que despliegue.
+name: CI
 
 on:
   pull_request:
@@ -150,57 +152,3 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
-
-  # Solo despliega si hay servidor: activar con la variable de repositorio DEPLOY_ENABLED = true
-  # (Settings → Secrets and variables → Actions → Variables). Mientras no exista, el job se salta y main
-  # queda en verde en vez de fallar siempre por falta de servidor.
-  deploy:
-    needs: [scan_ruby, scan_js, lint, test, system-test]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
-
-    steps:
-      - name: Clonar el código
-        uses: actions/checkout@v7
-
-      - name: Configurar Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Configurar Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Configurar Agente SSH
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # El builder remoto (docker sobre ssh://) usa el cliente ssh del sistema, que
-      # rechaza hosts desconocidos: sin esto falla con "Host key verification failed".
-      - name: Registrar la huella SSH del servidor
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H "$ORACLE_SERVER_IP" >> ~/.ssh/known_hosts
-        env:
-          ORACLE_SERVER_IP: ${{ secrets.ORACLE_SERVER_IP }}
-
-      # El .kamal/secrets versionado lee config/master.key, que no existe en CI;
-      # se reemplaza (no se agrega al final) para que todo salga del entorno.
-      - name: Preparar Secretos de Kamal
-        run: |
-          cat > .kamal/secrets <<'EOF'
-          KAMAL_REGISTRY_PASSWORD=$KAMAL_REGISTRY_PASSWORD
-          RAILS_MASTER_KEY=$RAILS_MASTER_KEY
-          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-          EOF
-
-      - name: Desplegar con Kamal
-        run: bin/kamal deploy
-        env:
-          ORACLE_SERVER_IP: ${{ secrets.ORACLE_SERVER_IP }}
-          APP_HOST: ${{ secrets.APP_HOST }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}

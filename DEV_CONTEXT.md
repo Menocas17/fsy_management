@@ -194,7 +194,7 @@ y se veía un espacio vacío con borde. Se implementó un skeleton con las inici
 - **ViewComponent**, **Chartkick**, **Rails Icons (Lucide)**
 - **Solid Cache/Queue/Cable**, Active Storage (UUID) — Solid Queue activo en dev y prod (adaptador de jobs en background)
 - Auth a medida: `has_secure_password` + sessions por cookie firmada (`Current`, concern `Authentication`), autorización por rol (concern `Authorization`)
-- Deploy: Kamal + Docker, CI/CD GitHub Actions, Brakeman/Bundler-audit/Importmap-audit, Rubocop
+- Deploy: Render (Docker) + Neon + Cloudflare R2 + Brevo, CI/CD GitHub Actions, Brakeman/Bundler-audit/Importmap-audit, Rubocop
 - Tests: Minitest + Capybara/Selenium
 
 ### Modelos

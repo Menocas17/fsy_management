@@ -45,15 +45,16 @@ Rails.application.configure do
   config.action_mailer.default_url_options =
     ENV["APP_HOST"].present? ? { host: ENV["APP_HOST"], protocol: "https" } : { host: "localhost", port: 3000 }
 
-  # En desarrollo los correos solo se ven en el log. Con SMTP_EN_DESARROLLO=1 salen de verdad por Gmail,
+  # En desarrollo los correos solo se ven en el log. Con SMTP_EN_DESARROLLO=1 salen de verdad por Brevo,
   # para probar con el túnel (bin/rails correo:prueba[tu@correo.com] confirma que la cuenta funciona).
   config.action_mailer.delivery_method = :test
   if ENV["SMTP_EN_DESARROLLO"] == "1"
-    require Rails.root.join("config/gmail_smtp")
+    require Rails.root.join("config/smtp_mail")
     config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = GmailSmtp.settings
+    config.action_mailer.smtp_settings = SmtpMail.settings
     config.action_mailer.raise_delivery_errors = true
-    config.x.password_reset_emails = GmailSmtp.configured?
+    config.x.mailer_from = SmtpMail.from
+    config.x.password_reset_emails = SmtpMail.configured?
   end
 
   # Print deprecation notices to the Rails logger.

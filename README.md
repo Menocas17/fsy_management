@@ -17,7 +17,7 @@ Construida con **Ruby on Rails 8** + **Hotwire** (Turbo + Stimulus) + **Tailwind
 | Cache / Cable | Solid Cache / Solid Cable (prod), memoria (dev) |
 | Autenticación | `has_secure_password` + sesiones por cookie firmada (concern `Authentication`) |
 | Autorización | concern `Authorization` (por rol) |
-| Deploy | Kamal + Docker, CI/CD GitHub Actions |
+| Deploy | Render (Docker) + Neon + Cloudflare R2 + Brevo, CI/CD GitHub Actions |
 | Tests | Minitest + Capybara/Selenium |
 
 ## Requisitos
@@ -78,15 +78,14 @@ bin/rubocop --no-server        # lint (Rails Omakase)
 - **`/companies/overview`** (KPIs) — cards + Chartkick (jóvenes y personal por compañía) y tabla de estado Completa/Incompleta.
 - **Autorización por rol:** cualquier usuario autenticado ve; **editan** superadmin, `coordinador` y `director` (todo); `auxiliar` su AC y las compañías de sus consejeros; `consejero` su propia compañía; `logistica`/`registrador` solo lectura.
 
-## Deploy (Kamal)
+## Deploy (Render)
 
-Se usa **Kamal** para desplegar a una instancia Always Free de **Oracle Cloud** (Ampere A1, ARM64). La configuración está en `config/deploy.yml` y la guía paso a paso (crear la instancia, abrir puertos, `script/oracle/setup_server.sh`, variables y respaldos) en [`docs/deploy_oracle.md`](docs/deploy_oracle.md).
+La app corre en el plan gratis de **Render** (Docker, `render.yaml`), con la base en **Neon**, los archivos de Active Storage en **Cloudflare R2** y el correo por el SMTP de **Brevo**. La guía paso a paso (cuentas, variables, superadmin, respaldos y límites del plan gratis) está en [`docs/deploy_render.md`](docs/deploy_render.md).
 
-- **SSL:** `kamal-proxy` con Let's Encrypt para `APP_HOST`.
-
-- **BD en producción:** PostgreSQL como accessory de Kamal (`postgres:18`), con BDs separadas: primaria, cache, queue y cable.
-- **Jobs:** Solid Queue corre dentro del proceso de Puma (`SOLID_QUEUE_IN_PUMA: true`), por lo que no requiere un contenedor de workers dedicado.
-- El pipeline de CI (`scan_ruby`, `scan_js`, `lint`, `test`, `system-test`) debe pasar antes de desplegar.
+- **CI/CD:** Render despliega `main` solo cuando el CI (`scan_ruby`, `scan_js`, `lint`, `test`, `system-test`) pasa completo (`autoDeployTrigger: checksPass`).
+- **BD en producción:** una sola base (`DATABASE_URL`); cache, queue y cable viven en esquemas propios dentro de ella.
+- **Jobs:** Solid Queue corre dentro del proceso de Puma en modo async (`SOLID_QUEUE_IN_PUMA`), sin worker aparte.
+- **Migraciones:** `bin/docker-entrypoint` corre `db:prepare` en cada arranque.
 
 ## Estructura relevante
 
@@ -95,6 +94,6 @@ app/components/            # ViewComponents (tabla, avatar, botones, spans, info
 app/controllers/concerns/  # Authentication + Authorization (+ allowed_participant_attributes)
 app/facades/dashboard_facade.rb  # lógica del dashboard
 app/javascript/controllers/      # Stimulus (avatar, confirm, dialog, mobile_menu, toast...)
-config/deploy.yml          # despliegue Kamal
+render.yaml                # despliegue en Render (Blueprint)
 Procfile.dev               # web + css + worker para desarrollo
 ```

@@ -4,7 +4,7 @@
 # participantes, compañías e inventario y crea cuentas con una contraseña que está en este repo, y además
 # se niega a correr sin ALLOW_DEMO_SEED=1, así que el primer arranque fallaba en db:prepare.
 if Rails.env.production?
-  puts "Producción: no se cargan datos de demo. Crea el superadmin con bin/kamal console (docs/deploy_oracle.md)."
+  puts "Producción: no se cargan datos de demo. Crea el superadmin como dice docs/deploy_render.md."
 else
   DemoSeed.new.run
 end
