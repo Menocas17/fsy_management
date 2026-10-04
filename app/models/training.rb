@@ -3,8 +3,6 @@ class Training < ApplicationRecord
   has_many :attendances, class_name: "TrainingAttendance", dependent: :destroy
   has_many :participants, through: :attendances
 
-  # Ver ScanWindow: automático es solo el día de la capacitación.
-  enum :scan_mode, { auto: 0, open: 1, closed: 2 }, prefix: :scan
 
   validates :name, presence: true
   validates :held_on, presence: true, uniqueness: { message: "ya hay una capacitación ese día" }

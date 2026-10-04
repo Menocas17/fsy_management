@@ -2,12 +2,6 @@
 <% content_for :title, @training ? "Asistencia · #{@training.name}" : "Registro de llegadas" %>
 <% content_for :eyebrow, "Evento" %>
 <% back_to "Inicio", dashboard_path %>
-<%
-  # Qué se registra: la opción elegida va en sólido (lo seleccionado, según la regla de color de DESIGN.md).
-  mode_base = "inline-flex items-center gap-2.5 min-h-11 px-3.5 py-2 rounded-control text-body font-bold transition-colors"
-  mode_on = "#{mode_base} bg-primary-700 text-white shadow-sm"
-  mode_off = "#{mode_base} border border-line bg-surface text-ink-700 hover:bg-canvas"
-%>
 <% open = @window.open? %>
 <%= render PageComponent.new(width: :page,
             data: (open ? { controller: "checkin-scanner",
@@ -17,35 +11,15 @@
                             checkin_scanner_total_value: @expected,
                             checkin_scanner_arrived_value: @registered } : { scan_closed: true })) do %>
 
-  <%# Primero se elige qué se está registrando: cambia a quién se espera y dónde se guarda. %>
-  <div class="flex flex-wrap gap-2" data-scan-modes>
-    <%# Solo los registros abiertos hoy (y el que se está viendo): la de diciembre no se escanea en octubre. %>
-    <% if @arrival_open || @training.nil? %>
-    <%= link_to checkins_path, class: @training ? mode_off : mode_on, data: { scan_mode: "arrival" } do %>
-      <%= icon "user-check", class: "size-[17px]" %>
-      <span>
-        Llegada al FSY
-        <span class="block text-meta font-semibold opacity-75"><%= pluralize(Participant.joven.count, "joven", plural: "jóvenes") %></span>
-      </span>
-    <% end %>
-    <% end %>
-    <% (@trainings | [ @training ].compact).sort_by(&:held_on).each do |training| %>
-      <%= link_to checkins_path(training_id: training.id), class: @training == training ? mode_on : mode_off,
-                  data: { scan_mode: "training-#{training.id}" } do %>
-        <%= icon "graduation-cap", class: "size-[17px]" %>
-        <span>
-          <%= training.name %>
-          <span class="block text-meta font-semibold opacity-75"><%= SpanishDates.long(training.held_on) %></span>
-        </span>
-      <% end %>
-    <% end %>
-  </div>
-
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="text-display font-extrabold tracking-tight text-ink-900">
         <%= @training ? "Asistencia a la capacitación" : "Registro de llegadas" %>
       </h1>
+      <%# Sin selector: solo hay un registro activo a la vez, se elige en Configuración. %>
+      <% if @training %>
+        <p class="text-body font-semibold text-ink-700" data-scan-current><%= @training.label %></p>
+      <% end %>
       <p class="text-label font-semibold text-ink-500">
         <span class="text-ink-900 tabular-nums" data-checkin-scanner-target="arrived" data-arrived><%= @registered %></span>
         de <%= @expected %> <%= @training ? "del staff" : "jóvenes" %> registrados
@@ -163,9 +137,9 @@
     <% else %>
       <section class="<%= card_classes("p-5 md:p-6") %>" data-scan-closed-card>
         <%= render EmptyStateComponent.new(title: "Este registro no está abierto", text: @window.closed_reason, icon: "lock", tone: :neutral, name: "scan-closed") do |empty| %>
-          <% if Current.user.superadmin? %>
+          <% if Current.user.scan_manager? %>
             <% empty.with_action do %>
-              <%= link_to "Abrirlo desde Configuración", settings_path(anchor: "settings-scan"), class: button_classes(:secondary) %>
+              <%= link_to "Activarlo desde Configuración", settings_path(anchor: "settings-scan"), class: button_classes(:secondary) %>
             <% end %>
           <% end %>
         <% end %>

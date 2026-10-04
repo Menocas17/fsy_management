@@ -6,8 +6,8 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     @company = Company.create!(number: 3)
     @joven = participants(:juan)
     @joven.update!(company: @company, room: "204", allergies: "Maní")
-    # La llegada solo se escanea el día del evento; estas pruebas la abren a mano, como haría el admin.
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "open"
+    # Sin nada activo el escáner está cerrado; estas pruebas activan la llegada, como haría el admin.
+    ScanWindow.activate!(ScanWindow.arrival)
   end
 
   test "the screen shows how many are still missing" do
@@ -121,63 +121,51 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
   end
 
-  test "outside its day the arrival is closed: no scanner, no roster, no registrations" do
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
+  test "with nothing active the scanner is closed: no scanner, no roster, no registrations" do
+    ScanWindow.activate!(nil)
 
-    travel_to Rails.configuration.x.event_start_on - 10.days do
-      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
-      get checkins_path
-      assert_select "[data-scan-closed-card]", text: /Se abre el/
-      assert_select "[data-controller='checkin-scanner']", 0
+    get checkins_path
+    assert_select "[data-scan-closed-card]", text: /No está activo/
+    assert_select "[data-controller='checkin-scanner']", 0
 
-      get checkins_roster_path, headers: { "Accept" => "application/json" }
-      assert_response :forbidden
+    get checkins_roster_path, headers: { "Accept" => "application/json" }
+    assert_response :forbidden
 
-      assert_no_difference -> { Checkin.count } do
-        post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "x1" } ] }, as: :json
-      end
-      assert_equal "closed", response.parsed_body["results"].first["status"]
+    assert_no_difference -> { Checkin.count } do
+      post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "x1" } ] }, as: :json
     end
+    assert_equal "closed", response.parsed_body["results"].first["status"]
   end
 
-  test "on its day the arrival opens by itself, and what was scanned that day syncs the day after" do
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
-    day = Rails.configuration.x.event_start_on
+  test "what was scanned offline while the arrival was active syncs after switching to a training" do
+    training = Training.create!(name: "Hoy", held_on: Date.current)
+    ScanWindow.activate!(nil)
+    travel_to(2.hours.ago) { ScanWindow.activate!(ScanWindow.arrival) }
+    ScanWindow.activate!(ScanWindow.for(training))
 
-    travel_to day.in_time_zone.change(hour: 9) do
-      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
-      get checkins_path
-      assert_select "[data-controller='checkin-scanner']", 1
+    assert_difference -> { Checkin.count }, 1 do
+      post register_checkins_path, as: :json, params: { checkins: [
+        { participant_id: @joven.id, client_token: "late", recorded_at: 1.hour.ago.iso8601 },
+        { participant_id: participants(:maria).id, client_token: "after" } ] }
     end
-
-    travel_to (day + 1).in_time_zone.change(hour: 8) do
-      sign_in_as(users(:one)) # la sesión creada «hoy» ya venció en la fecha simulada
-      scanned_at = day.in_time_zone.change(hour: 18).iso8601
-      assert_difference -> { Checkin.count }, 1 do
-        post register_checkins_path, params: { checkins: [ { participant_id: @joven.id, client_token: "late", recorded_at: scanned_at } ] }, as: :json
-      end
-    end
+    assert_equal %w[registered closed], response.parsed_body["results"].map { |result| result["status"] }
   end
 
-  test "a training that is not today is not offered for scanning" do
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "auto"
-    december = Training.create!(name: "Diciembre", held_on: 2.months.from_now.to_date)
+  test "only the active training is scanned, without a selector between registrations" do
+    other = Training.create!(name: "Diciembre", held_on: 2.months.from_now.to_date)
     today = Training.create!(name: "Hoy", held_on: Date.current)
-
-    get checkins_path(training_id: today.id)
-    assert_select "[data-scan-mode='training-#{today.id}']"
-    assert_select "[data-scan-mode='training-#{december.id}']", 0
-
-    get checkins_path(training_id: december.id)
-    assert_select "[data-scan-closed-card]"
-  end
-
-  test "with the arrival closed, the scanner goes straight to the training open today" do
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "closed"
-    today = Training.create!(name: "Hoy", held_on: Date.current)
+    ScanWindow.activate!(ScanWindow.for(today))
 
     get checkins_path
     assert_redirected_to checkins_path(training_id: today.id)
+
+    get checkins_path(training_id: today.id)
+    assert_select "[data-scan-current]", text: /Hoy/
+    assert_select "[data-scan-modes]", 0
+    assert_select "[data-controller='checkin-scanner']", 1
+
+    get checkins_path(training_id: other.id)
+    assert_select "[data-scan-closed-card]"
   end
 
   test "the short badge code typed by hand registers too" do
@@ -252,6 +240,7 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
 
   test "voiding a training attendance only touches that training" do
     training = Training.create!(name: "Primeros auxilios", held_on: Date.current)
+    ScanWindow.activate!(ScanWindow.for(training))
     staff = participants(:maria)
     Checkin.register(participant: @joven, recorded_by: nil, client_token: "llegada")
 

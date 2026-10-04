@@ -1,24 +1,23 @@
 class SettingsController < ApplicationController
-  before_action :require_superadmin!, only: :scan_windows
+  before_action :require_scan_manager!, only: :scan_windows
 
   def show
-    @trainings = Training.chronological if Current.user.superadmin?
+    @trainings = Training.chronological if Current.user.scan_manager?
   end
 
-  # Abrir o cerrar a mano el escaneo de la llegada y de cada capacitación. Por defecto, solo el día.
+  # Activa un registro (la llegada o una capacitación) y cierra el que estaba; scan vacío los cierra todos.
   def scan_windows
-    arrival = params[:arrival].to_s
-    AppSetting[ScanWindow::ARRIVAL_KEY] = arrival if ScanWindow::MODES.key?(arrival)
+    scan = params[:scan].to_s
+    training = Training.find_by(id: scan.delete_prefix("training:")) if scan.start_with?("training:")
+    window = scan == "arrival" ? ScanWindow.arrival : (training && ScanWindow.for(training))
 
-    params.fetch(:trainings, {}).each do |id, mode|
-      Training.find(id).update!(scan_mode: mode) if ScanWindow::MODES.key?(mode.to_s)
-    end
-
-    redirect_to settings_path(anchor: "settings-scan"), notice: "Se guardó cuándo se puede escanear cada registro."
+    ScanWindow.activate!(window)
+    notice = window ? "Se activó el registro de #{training&.name || "la llegada"}." : "Se cerró el registro por escaneo."
+    redirect_to settings_path(anchor: "settings-scan"), notice: notice
   end
 
   private
-    def require_superadmin!
-      redirect_to settings_path, alert: "Solo el administrador del sistema abre o cierra los registros." unless Current.user.superadmin?
+    def require_scan_manager!
+      redirect_to settings_path, alert: "Solo el director de logística o el administrador activan los registros." unless Current.user.scan_manager?
     end
 end

@@ -6,7 +6,7 @@
   came = held.count { |training| attended.include?(training.id) }
 %>
 <% if trainings.any? && participant.staff_member? %>
-  <section class="<%= card_classes("p-5 md:p-6") %>" data-trainings-card>
+  <section class="<%= card_classes("p-5 md:p-6 2xl:order-5 2xl:col-span-full") %>" data-trainings-card>
     <%= section_heading "Capacitaciones", "graduation-cap", tone: :amber %>
     <p class="-mt-2 mb-4 text-body font-semibold text-ink-900">
       <% if held.any? %>

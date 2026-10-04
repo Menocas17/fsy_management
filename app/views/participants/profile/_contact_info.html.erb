@@ -1,4 +1,4 @@
-<section class="<%= card_classes("p-6") %>">
+<section class="<%= card_classes("p-6 2xl:order-2") %>">
   <%= section_heading "Contacto", "phone", tone: :blue %>
   <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6">
     <div><%= info_row "Número", "phone", participant.phone_number, href: tel_href(participant.phone_number) %></div>

@@ -5,31 +5,45 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     @training = Training.create!(name: "Diciembre", held_on: 2.months.from_now.to_date)
   end
 
-  test "the system admin opens or closes each registration by hand" do
+  test "activating a registration closes the one that was open" do
     sign_in_as(users(:one))
+    patch scan_windows_settings_path, params: { scan: "arrival" }
 
     get settings_path
-    assert_select "[data-scan-window='arrival'] select"
-    assert_select "[data-scan-window='trainings[#{@training.id}]'] select"
+    assert_select "[data-scan-window='arrival'] [role='switch'][aria-checked='true']"
+    assert_select "[data-scan-window='training:#{@training.id}'] [role='switch'][aria-checked='false']"
 
-    patch scan_windows_settings_path, params: { arrival: "closed", trainings: { @training.id => "open" } }
+    patch scan_windows_settings_path, params: { scan: "training:#{@training.id}" }
 
     assert_redirected_to settings_path(anchor: "settings-scan")
-    assert_equal "closed", ScanWindow.arrival.mode
-    assert @training.reload.scan_open?
     assert @training.scan_window.open?
+    assert_not ScanWindow.arrival.open?
   end
 
-  test "an unknown mode is ignored instead of saved" do
+  test "turning off the active one closes the scanner, and an unknown one too" do
     sign_in_as(users(:one))
+    ScanWindow.activate!(ScanWindow.arrival)
 
-    patch scan_windows_settings_path, params: { arrival: "whenever", trainings: { @training.id => "sometimes" } }
+    patch scan_windows_settings_path, params: { scan: "" }
+    assert_nil ScanWindow.active
 
-    assert_equal "auto", ScanWindow.arrival.mode
-    assert @training.reload.scan_auto?
+    patch scan_windows_settings_path, params: { scan: "training:nope" }
+    assert_nil ScanWindow.active
   end
 
-  test "nobody else sees or changes the scan windows, not even the directors" do
+  test "the logistics director activates registrations too" do
+    director = Participant.create!(first_name: "Luis", last_name: "Mena", age: 40, stake: "las_americas",
+                                   shirt_number: "m", gender: "H", rol: :director_logistica)
+    sign_in_as(User.create!(email_address: "luis@fsy.com", password: "Logistica1!", participant: director))
+
+    get settings_path
+    assert_select "#settings-scan"
+
+    patch scan_windows_settings_path, params: { scan: "arrival" }
+    assert ScanWindow.arrival.open?
+  end
+
+  test "nobody else sees or changes them, not even the directors" do
     director = Participant.create!(first_name: "Ana", last_name: "Ruiz", age: 40, stake: "las_americas",
                                    shirt_number: "m", gender: "M", rol: :director)
     sign_in_as(User.create!(email_address: "ana@fsy.com", password: "Directora1!", participant: director))
@@ -37,7 +51,7 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     get settings_path
     assert_select "#settings-scan", 0
 
-    patch scan_windows_settings_path, params: { arrival: "open" }
-    assert_equal "auto", ScanWindow.arrival.mode
+    patch scan_windows_settings_path, params: { scan: "arrival" }
+    assert_nil ScanWindow.active
   end
 end

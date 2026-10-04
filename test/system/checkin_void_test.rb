@@ -3,7 +3,7 @@ require "application_system_test_case"
 # Llega alguien con el gafete de otra persona: desde el escáner se anula el último registro, con motivo.
 class CheckinVoidTest < ApplicationSystemTestCase
   setup do
-    AppSetting[ScanWindow::ARRIVAL_KEY] = "open"
+    ScanWindow.activate!(ScanWindow.arrival)
     @andrea = Participant.create!(first_name: "Andrea", last_name: "Chavarría", age: 15, stake: "villa_flor",
                                   shirt_number: "s", gender: "M", rol: "joven")
     @andrea.update_columns(code: "P-0421")
