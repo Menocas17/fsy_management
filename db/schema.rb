@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_120200) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -281,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120200) do
     t.string "code_prefix", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "infirmary", default: false, null: false
     t.index ["code_prefix"], name: "index_inventories_on_code_prefix", unique: true
     t.index ["name"], name: "index_inventories_on_name", unique: true
   end
@@ -311,6 +312,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120200) do
     t.string "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "infirmary_note_id"
+    t.index ["infirmary_note_id"], name: "index_inventory_movements_on_infirmary_note_id"
     t.index ["inventory_item_id", "created_at"], name: "index_inventory_movements_on_inventory_item_id_and_created_at"
     t.index ["inventory_item_id"], name: "index_inventory_movements_on_inventory_item_id"
     t.index ["participant_id"], name: "index_inventory_movements_on_participant_id"
@@ -526,6 +529,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120200) do
   add_foreign_key "infirmary_visits", "participants", column: "announced_by_id", on_delete: :nullify
   add_foreign_key "infirmary_visits", "participants", column: "discharged_by_id", on_delete: :nullify
   add_foreign_key "inventory_items", "inventories"
+  add_foreign_key "inventory_movements", "infirmary_notes", on_delete: :nullify
   add_foreign_key "inventory_movements", "inventory_items"
   add_foreign_key "inventory_movements", "participants"
   add_foreign_key "login_attempts", "users", on_delete: :nullify

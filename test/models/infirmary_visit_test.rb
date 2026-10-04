@@ -84,7 +84,7 @@ class InfirmaryVisitTest < ActiveSupport::TestCase
 
     medicine = visit.notes.build(author_name: "X", medication: true, temperature: "38")
     assert_not medicine.valid?
-    assert_includes medicine.errors[:body], "escribe qué medicamento y la dosis"
+    assert_includes medicine.errors[:base], "elige el medicamento que se le dio (o escríbelo si no está en el inventario)"
   end
 
   private

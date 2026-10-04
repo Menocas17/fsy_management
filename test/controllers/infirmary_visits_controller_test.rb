@@ -103,6 +103,31 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Dio de alta a Pedro Prueba de enfermería: volvió a su compañía", AuditLog.enfermeria.last.summary
   end
 
+  test "nursing gives a medicine from the infirmary inventory and it comes out of the stock" do
+    pharmacy = Inventory.create!(name: "Medicamentos", infirmary: true, icon: "package", color: "primary")
+    paracetamol = pharmacy.items.create!(name: "Acetaminofén 500 mg", unit: "tabletas")
+    paracetamol.adjust!(delta: 10, participant: @nurse, reason: :inicial)
+    visit = InfirmaryVisit.admit_directly(@juan, by: @nurse, reason: "fiebre").tap(&:start)
+    sign_in_as account(@nurse)
+
+    get infirmary_chart_path(@juan)
+    assert_select "[data-medicine-option='#{paracetamol.code}']", text: /10 tabletas/
+
+    post infirmary_visit_notes_path(visit), params: { infirmary_note: { medication: "true", body: "Con agua",
+                                                                       doses: [ { item_id: paracetamol.id, quantity: "2" } ] } }
+    assert_equal 8, paracetamol.reload.quantity
+    assert_equal "Agregó un medicamento (Acetaminofén 500 mg × 2 tabletas) a la ficha de enfermería de Juan Pérez", AuditLog.enfermeria.last.summary
+
+    post infirmary_visit_notes_path(visit), params: { infirmary_note: { medication: "true", doses: [ { item_id: paracetamol.id, quantity: "50" } ] } }
+    assert_response :unprocessable_entity
+    assert_select "[data-infirmary-note-errors]", text: /pides 50 y en el inventario hay 8/
+    assert_select "[data-dose-row][data-id='#{paracetamol.id}'] input[data-field=quantity][value='50']", 1, "what was chosen stays in the form"
+    assert_equal 8, paracetamol.reload.quantity
+
+    get infirmary_chart_path(@juan)
+    assert_select "[data-infirmary-note=medicamento] [data-dose='Acetaminofén 500 mg × 2 tabletas']"
+  end
+
   test "the clinical notes are read by nursing, the joven's carers and the director, not by the rest of the staff" do
     visit = InfirmaryVisit.admit_directly(@juan, by: @nurse, reason: "fiebre", detail: "Garganta roja").tap(&:start)
     visit.notes.create!(medication: true, body: "Acetaminofén 500 mg", author: @nurse, author_name: "Patricia Prueba")

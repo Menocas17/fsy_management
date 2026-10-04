@@ -3,26 +3,30 @@
 class InventoryMovement < ApplicationRecord
   belongs_to :inventory_item
   belongs_to :participant, optional: true
+  # La salida de un medicamento dado en enfermería: la nota de la ficha clínica que lo registró.
+  belongs_to :infirmary_note, optional: true
 
-  enum :reason, { entrega: 0, compra: 1, devolucion: 2, perdida: 3, conteo: 4, inicial: 5 }
+  enum :reason, { entrega: 0, compra: 1, devolucion: 2, perdida: 3, conteo: 4, inicial: 5, enfermeria: 6 }
   enum :source, { manual: 0, escaneo: 1 }, prefix: true
 
   REASON_LABELS = {
     "entrega" => "Entrega a compañías", "compra" => "Compra / reposición", "devolucion" => "Devolución",
-    "perdida" => "Pérdida o daño", "conteo" => "Conteo físico", "inicial" => "Inventario inicial"
+    "perdida" => "Pérdida o daño", "conteo" => "Conteo físico", "inicial" => "Inventario inicial",
+    "enfermeria" => "Dado en enfermería"
   }.freeze
 
   # Hay motivos que solo tienen sentido en un sentido: nada «se entrega a las compañías» sumando,
   # ni «se compra» restando. El conteo físico sirve para los dos, que para eso se cuenta.
   REASON_DIRECTIONS = {
     "compra" => :in, "devolucion" => :in, "inicial" => :in,
-    "entrega" => :out, "perdida" => :out,
+    "entrega" => :out, "perdida" => :out, "enfermeria" => :out,
     "conteo" => :both
   }.freeze
 
-  # Los que se ofrecen al ajustar; «inicial» no, porque lo pone sola la creación del artículo.
+  # Los que se ofrecen al ajustar; «inicial» no, porque lo pone sola la creación del artículo, ni «enfermería»,
+  # que lo pone la ficha clínica al anotar un medicamento.
   def self.reasons_for(direction)
-    REASON_LABELS.except("inicial").select { |reason, _| [ direction.to_s, "both" ].include?(REASON_DIRECTIONS[reason].to_s) }
+    REASON_LABELS.except("inicial", "enfermeria").select { |reason, _| [ direction.to_s, "both" ].include?(REASON_DIRECTIONS[reason].to_s) }
   end
 
   validates :delta, numericality: { only_integer: true, other_than: 0 }

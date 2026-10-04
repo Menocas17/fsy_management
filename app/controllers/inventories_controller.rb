@@ -65,6 +65,6 @@ class InventoriesController < ApplicationController
 
     # El prefijo de los códigos se deriva del nombre y no se cambia: las etiquetas ya impresas mandan.
     def inventory_params
-      params.expect(inventory: [ :name, :description, :icon, :color ])
+      params.expect(inventory: [ :name, :description, :icon, :color, :infirmary ])
     end
 end

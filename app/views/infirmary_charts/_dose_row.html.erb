@@ -1,0 +1,18 @@
+<%# Un medicamento que se le da, con su cantidad (máximo, lo que queda). La plantilla del selector usa esta misma
+    fila vacía y infirmary_note_controller.js la llena. %>
+<li class="flex items-center gap-3 rounded-control border border-cat-teal/40 bg-surface px-3 py-2" data-dose-row data-id="<%= item_id %>">
+  <input type="hidden" name="infirmary_note[doses][][item_id]" value="<%= item_id %>" data-field="item">
+  <%= icon "pill", class: "w-4 h-4 shrink-0 text-cat-teal-ink" %>
+  <span class="min-w-0 flex-1">
+    <span class="block text-body font-bold text-ink-900 truncate" data-field="name"><%= name %></span>
+    <span class="block text-meta font-semibold text-ink-500" data-field="stock">Quedan <%= stock %> <%= unit %></span>
+  </span>
+  <input type="number" name="infirmary_note[doses][][quantity]" value="<%= quantity %>" min="1" max="<%= stock %>" step="1" inputmode="numeric" required
+         aria-label="Cantidad de <%= name %>"
+         data-field="quantity" class="w-16 h-9 px-2 rounded-control bg-surface dark:bg-canvas border border-line text-body font-bold text-ink-900 text-center tabular-nums focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500">
+  <span class="text-label font-semibold text-ink-500 w-16 truncate" data-field="unit"><%= unit %></span>
+  <button type="button" data-action="infirmary-note#remove" aria-label="Quitar"
+          class="shrink-0 size-8 rounded-full flex items-center justify-center text-ink-500 hover:bg-muted hover:text-ink-900 cursor-pointer transition">
+    <%= icon "x", class: "w-4 h-4" %>
+  </button>
+</li>

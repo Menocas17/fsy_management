@@ -10,11 +10,14 @@ class InfirmaryNotesController < ApplicationController
     return redirect_to infirmary_chart_path(joven), alert: "Confirma primero que llegó a enfermería" if visit.en_camino?
 
     actor = Current.user.participant
-    @note = visit.notes.build(note_params.merge(author: actor, author_name: InfirmaryVisit.name_of(actor)))
-    if @note.save
+    @note = visit.notes.build(note_params.except(:doses).merge(author: actor, author_name: InfirmaryVisit.name_of(actor)))
+    @note.doses_to_give = note_params[:doses]
+    if @note.save_with_doses(by: actor)
+      given = @note.dose_labels.presence&.then { |labels| " (#{labels.to_sentence(two_words_connector: " y ", last_word_connector: " y ")})" }
       record_audit!(category: :enfermeria, action: "created", target: joven,
-                    summary: "Agregó #{@note.medication? ? "un medicamento" : "una nota"} a la ficha de enfermería de #{joven.full_name}")
-      redirect_to infirmary_chart_path(joven, anchor: "visita-#{visit.id}"), notice: "Nota agregada a la ficha."
+                    summary: "Agregó #{@note.medication? ? "un medicamento#{given}" : "una nota"} a la ficha de enfermería de #{joven.full_name}")
+      redirect_to infirmary_chart_path(joven, anchor: "visita-#{visit.id}"),
+                  notice: @note.doses.any? ? "Medicamento anotado y descontado del inventario." : "Nota agregada a la ficha."
     else
       load_infirmary_chart(joven)
       @note_visit = visit
@@ -24,6 +27,6 @@ class InfirmaryNotesController < ApplicationController
 
   private
     def note_params
-      params.expect(infirmary_note: [ :body, :medication, *InfirmaryNote::VITALS.keys ])
+      params.expect(infirmary_note: [ :body, :medication, *InfirmaryNote::VITALS.keys, doses: [ [ :item_id, :quantity ] ] ])
     end
 end

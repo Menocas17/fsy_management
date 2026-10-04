@@ -118,8 +118,18 @@
                     <p class="text-label font-bold text-ink-900 truncate"><%= note.author_name %></p>
                     <p class="text-label font-semibold text-ink-500 tabular-nums shrink-0"><%= infirmary_time(note.created_at) %></p>
                   </div>
-                  <% if note.medication? %>
+                  <%# Lo dado del inventario ya se ve en sus pastillas; la etiqueta queda para el escrito a mano. %>
+                  <% if note.medication? && note.doses.empty? %>
                     <div class="mt-1.5"><%= render ChipComponent.new(label: "Medicamento", tone: :teal, icon: "pill") %></div>
+                  <% end %>
+                  <% if note.doses.any? %>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                      <% note.dose_labels.each do |label| %>
+                        <span class="inline-flex items-center gap-1.5 h-6 px-2 rounded-inner text-label font-bold <%= Tones.tint(:teal) %>" data-dose="<%= label %>">
+                          <%= icon "pill", class: "size-3.5" %><%= label %>
+                        </span>
+                      <% end %>
+                    </div>
                   <% end %>
                   <% if note.body %>
                     <p class="mt-1 text-body text-ink-900 whitespace-pre-line"><%= note.body %></p>

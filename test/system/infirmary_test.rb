@@ -25,6 +25,26 @@ class InfirmaryTest < ApplicationSystemTestCase
     assert_current_path infirmary_chart_path(@joven)
   end
 
+  test "a medicine is picked from the infirmary inventory with its quantity and discounted" do
+    pharmacy = Inventory.create!(name: "Medicamentos", infirmary: true, icon: "package", color: "primary")
+    paracetamol = pharmacy.items.create!(name: "Acetaminofén 500 mg", unit: "tabletas")
+    paracetamol.adjust!(delta: 10, participant: nil, reason: :inicial)
+    pharmacy.items.create!(name: "Loratadina 10 mg", unit: "tabletas").adjust!(delta: 4, participant: nil, reason: :inicial)
+
+    visit infirmary_chart_path(@joven)
+    assert_no_selector "[data-medicine-panel]", visible: true
+    find("label", text: "Medicamento").click
+    fill_in "Buscar medicamento", with: "acetamin"
+    assert_no_selector "[data-medicine-option]", text: "Loratadina"
+    find("[data-medicine-option]", text: "Acetaminofén").click
+    fill_in "Cantidad de Acetaminofén 500 mg", with: "2"
+    fill_in "Nota", with: "Con agua"
+    click_on "Agregar a la ficha"
+
+    assert_selector "[data-dose='Acetaminofén 500 mg × 2 tabletas']"
+    assert_equal 8, paracetamol.reload.quantity
+  end
+
   test "a note says whether a medicine was given, with the vital signs below if they were taken" do
     visit infirmary_chart_path(@joven)
     find("label", text: "Medicamento").click
