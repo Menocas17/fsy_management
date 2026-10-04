@@ -2,18 +2,29 @@
   <%# Main nav bar %>
   <header class="h-[60px] md:h-[72px] px-3.5 md:px-8 flex items-center justify-between gap-4 bg-surface border-b border-line-soft">
     <div class="flex items-center gap-2 min-w-0">
+      <%# En el teléfono, una página que se abre desde otra (page_back) cambia el menú por el volver, como en iPhone:
+          la flecha ‹ y, en el lugar de la sección, a dónde vuelve; la flecha y los dos textos se tocan para volver.
+          El menú lateral queda en las páginas principales. %>
       <button type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-target="trigger"
-              class="md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer"
+              class="<%= "max-sm:hidden" if page_back %> md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer"
               data-action="click->mobile-menu#toggle">
         <%= icon "menu", class: "w-[22px] h-[22px]" %>
       </button>
-      <%# En móvil no va aquí: al lado del botón de menú se confunden dos iconos de navegación. Baja al contenido. %>
       <% if content_for?(:back) %>
         <div data-page-back class="hidden sm:block mr-0.5"><%= yield :back %></div>
       <% end %>
-      <div class="min-w-0" data-page-header>
-        <p class="text-meta md:text-meta font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300 truncate"><%= page_eyebrow %></p>
-        <%= content_tag page_heading_tag, page_heading, class: "mt-px text-sm md:text-display leading-tight font-bold text-ink-900 truncate" %>
+      <div class="relative min-w-0 flex items-center <%= "max-sm:-ml-2" if page_back %>" data-page-header>
+        <% if page_back %>
+          <%= icon "chevron-left", class: "sm:hidden w-[26px] h-[26px] shrink-0 -mr-px text-primary-600 dark:text-primary-300", aria: { hidden: true } %>
+        <% end %>
+        <div class="min-w-0">
+          <% if page_back %>
+            <%= link_to page_back[:label], page_back[:url], data: { scroll_restore: true, page_back_mobile: true }, aria: { label: "Volver a #{page_back[:label]}" },
+                  class: "sm:hidden block text-label font-bold text-primary-600 dark:text-primary-300 truncate after:absolute after:-inset-y-1.5 after:-inset-x-1 after:rounded-control active:after:bg-primary-500/10 focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary-500" %>
+          <% end %>
+          <p class="<%= "max-sm:hidden" if page_back %> text-meta md:text-meta font-bold tracking-[.09em] uppercase text-primary-500 dark:text-primary-300 truncate"><%= page_eyebrow %></p>
+          <%= content_tag page_heading_tag, page_heading, class: "mt-px text-sm md:text-display leading-tight font-bold text-ink-900 truncate" %>
+        </div>
       </div>
     </div>
 

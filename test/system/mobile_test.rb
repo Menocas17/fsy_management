@@ -34,7 +34,24 @@ class MobileTest < ApplicationSystemTestCase
     assert_no_selector "[data-account-status]"
     within("[data-contact-account]") { assert_text "Todavía no entra" }
 
+    # Como en iPhone: la barra cambia el menú por «‹ Jóvenes», y no hay otro volver sobre el contenido.
+    assert_no_selector "[data-mobile-menu-target='trigger']", visible: true
+    assert_selector "a[data-page-back-mobile]", text: "Jóvenes", count: 1
+    assert_no_selector "[data-page-back] a", visible: true
+
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
+    # Toda la zona del título vuelve, no solo la flecha: lo que hay bajo el centro del título es el enlace.
+    under_title = evaluate_script(<<~JS)
+      (() => {
+        const title = [...document.querySelectorAll("[data-page-header] p")].find((p) => p.textContent.includes("Perfil del participante"));
+        const box = title.getBoundingClientRect();
+        return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2).closest("a")?.dataset.pageBackMobile;
+      })()
+    JS
+    assert_equal "true", under_title
+    find("a[data-page-back-mobile]").click
+    assert_current_path participants_path
+    assert_selector "[data-mobile-menu-target='trigger']", visible: true
   end
 
   test "on a phone the list filters open in a sheet that counts what is applied" do
