@@ -2,8 +2,9 @@
 <% content_for :eyebrow, "Seguimiento" %>
 <%
   card = card_classes("p-5 flex flex-col gap-3 h-full")
-  # Una pantalla de puros documentos: ninguno es la acción principal, así que todos van como secundarios.
-  action = button_classes(:secondary)
+  # Una pantalla de puros documentos: generar el de cada tarjeta es la acción de esa tarjeta, así que va en azul
+  # (excepción a «un botón principal por pantalla», pedida a propósito: en gris la página se veía apagada).
+  action = button_classes
   secondary = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line bg-surface text-sm font-semibold text-ink-700 hover:bg-muted transition"
   inert = "inline-flex items-center justify-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-500 cursor-not-allowed"
 %>
