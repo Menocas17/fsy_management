@@ -11,7 +11,8 @@ module Authorization
                   :can_view_inventory?, :can_adjust_inventory?, :can_manage_inventories?, :can_check_in?, :can_manage_logistics_areas?,
                   :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
                   :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?,
-                  :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?
+                  :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
+                  :can_take_night_attendance?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -166,6 +167,15 @@ module Authorization
 
   def can_open_night_attendance?(company)
     can_view_night_attendance? || night_attendance_gender_for(company).present?
+  end
+
+  # Pasar una lista: la de su género, y solo la de esta noche. El superadmin, cualquiera, pero solo en la
+  # noche de prueba (antes del evento).
+  def can_take_night_attendance?(company, gender, night)
+    return false unless night == NightAttendance.current_night
+    return true if Current.user&.superadmin? && NightAttendance.testing?
+
+    night_attendance_gender_for(company) == gender.to_s
   end
 
   # Finanzas ------------------------------------------------------------------

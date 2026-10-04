@@ -85,21 +85,38 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio]", 0, "directors follow the lists, they don't take them"
   end
 
-  test "after 10 pm a new absence alerts the branch and the directors" do
-    travel_to Time.zone.local(2027, 1, 11, 22, 30)
-    sign_in_as account(@counselor)
+  test "the superadmin can take any list, but only on the test night before the event" do
+    travel_to Time.zone.local(2026, 10, 5, 20)
+    sign_in_as users(:one)
 
-    assert_difference -> { Alert.source_asistencia.count }, 1 do
-      patch company_night_attendance_path(@company, genero: "H"),
-            params: { marks: { @juan.id => { status: "ausente", absence_reason: "enfermeria" } } }
-    end
-    assert_equal @director, Alert.source_asistencia.last.recipient
-    assert_match "Juan Pérez (Enfermería)", Alert.source_asistencia.last.body
+    get night_attendances_path
+    assert_select "[data-night-option='2026-10-05']", text: "Hoy · prueba"
+    assert_select "[data-night-option='2027-01-11']"
 
-    assert_no_difference -> { Alert.count }, "saving again with the same absence doesn't repeat the alert" do
-      patch company_night_attendance_path(@company, genero: "H"),
-            params: { marks: { @juan.id => { status: "ausente", absence_reason: "enfermeria" } } }
-    end
+    patch company_night_attendance_path(@company, genero: "M"), params: { marks: { @ana.id => { status: "presente" } } }
+    assert_equal "Administrador del sistema", NightAttendance.find_by!(company: @company, gender: "M").taken_by_name
+
+    travel_to Time.zone.local(2027, 1, 12, 21)
+    sign_in_as users(:one) # la sesión de octubre ya venció
+    get company_night_attendance_path(@company, genero: "H")
+    assert_response :success
+    assert_select "input[type=radio]", 0, "during the event only the counselors take it"
+    get night_attendances_path
+    assert_select "[data-night-option='2027-01-12']"
+    assert_select "[data-night-option]", 5
+  end
+
+  test "opened from the panel, the company's profile and its list go back to the panel" do
+    sign_in_as account(@director)
+    panel = night_attendances_path(noche: "2027-01-11")
+
+    get company_path(@company, return_to: panel)
+    assert_select "a[title='Volver a Asistencia nocturna'][href='#{panel}']"
+    assert_select "a", text: /Gafetes/, count: 0
+    assert_select "a[href^='#{company_night_attendance_path(@company)}']", text: /Asistencia nocturna/
+
+    get company_night_attendance_path(@company, genero: "H", return_to: panel)
+    assert_select "a[title='Volver a Asistencia nocturna'][href='#{panel}']"
   end
 
   test "past nights are read-only" do

@@ -6,8 +6,8 @@ class NightAttendancesController < ApplicationController
   before_action :set_company, :set_gender, :set_night, only: %i[show update]
 
   def index
-    @night = requested_night
-    @nights = panel_nights
+    @nights = NightAttendance.panel_nights
+    @night = @nights.include?(requested_night) ? requested_night : NightAttendance.default_night
     @companies = Company.includes(:auxiliar_company).order(:number)
     @expected = Participant.joven.where(company_id: @companies.map(&:id)).where.not(gender: nil)
                            .group(:company_id, :gender).pluck(:company_id, :gender, Arel.sql("array_agg(participants.id)"))
@@ -29,12 +29,9 @@ class NightAttendancesController < ApplicationController
 
     @attendance = NightAttendance.includes(marks: :participant).find_or_initialize_by(company: @company, night_on: @night, gender: @gender)
     first_time = @attendance.new_record?
-    newly_absent = @attendance.record(marks_params, taken_by: Current.user.participant)
-
-    if newly_absent
+    if @attendance.record(marks_params, taken_by: Current.user.participant)
       record_audit!(category: :asistencia, action: first_time ? "created" : "updated", target: @company, summary: audit_summary(first_time))
-      NightAttendanceNotifier.absences(@attendance, newly_absent) if NightAttendance.past_alert_hour?(@night)
-      redirect_to company_night_attendance_path(@company, genero: @gender), notice: "Asistencia confirmada."
+      redirect_to company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), notice: "Asistencia confirmada."
     else
       @jovenes = NightAttendance.expected(@company, @gender).to_a
       @editable = true
@@ -68,13 +65,8 @@ class NightAttendancesController < ApplicationController
       NightAttendance.current_night
     end
 
-    # Las noches del evento y, fuera del evento, también la de hoy (para probar y para las capacitaciones).
-    def panel_nights
-      ([ NightAttendance.current_night ] | NightAttendance.event_nights).sort
-    end
-
     def editable?
-      @own_gender == @gender && @night == NightAttendance.current_night
+      can_take_night_attendance?(@company, @gender, @night)
     end
 
     def marks_params

@@ -1,8 +1,12 @@
 <% content_for :page_h1, true %>
 <% content_for :title, "Asistencia nocturna" %>
 <% content_for :eyebrow, @company.name %>
-<% back_to(can_view_night_attendance? ? "Asistencia nocturna" : @company.name,
-           can_view_night_attendance? ? night_attendances_path(noche: @night.iso8601) : company_path(@company)) %>
+<%# Vuelve a donde se abrió (return_to: el panel o el perfil de la compañía); sin eso, al panel si lo puede ver. %>
+<% if can_view_night_attendance? %>
+  <% back_to_origin "Asistencia nocturna", night_attendances_path(noche: @night.iso8601) %>
+<% else %>
+  <% back_to_origin @company.name, company_path(@company) %>
+<% end %>
 <% night_param = (@night.iso8601 unless @night == NightAttendance.current_night) %>
 <%= render PageComponent.new(width: :form) do %>
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
@@ -14,7 +18,8 @@
       </div>
     </div>
     <%= render SegmentedToggleComponent.new(label: "Lista de", items: NightAttendance::GENDER_LABELS.map { |gender, label|
-          { text: label, href: company_night_attendance_path(@company, genero: gender, noche: night_param), active: gender == @gender,
+          { text: label, href: company_night_attendance_path(@company, genero: gender, noche: night_param, return_to: params[:return_to].presence),
+            active: gender == @gender,
             data: { night_gender: gender } } }) %>
   </div>
 
@@ -38,8 +43,8 @@
       <%= render "night_attendances/form" %>
     <% else %>
       <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo %>
-      <% if @own_gender.nil? && @night == NightAttendance.current_night %>
-        <p class="-mt-2 mb-3 text-label text-ink-500">La pasa el consejero de esta compañía; aquí solo se consulta.</p>
+      <% if @night == NightAttendance.current_night %>
+        <p class="-mt-2 mb-3 text-label text-ink-500">La pasa <%= @gender == "H" ? "el consejero" : "la consejera" %> de esta compañía; aquí solo se consulta.</p>
       <% end %>
       <ul class="divide-y divide-line-soft" data-night-roster>
         <% @jovenes.each do |joven| %>

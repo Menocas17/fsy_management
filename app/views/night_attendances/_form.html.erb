@@ -1,6 +1,6 @@
 <%# Cada joven se marca a mano: presente, o ausente con su motivo (Enfermería, u Otro escrito). Sin marcar no
     se confirma. night_attendance_controller muestra el motivo solo al elegir «Ausente». %>
-<%= form_with url: company_night_attendance_path(@company, genero: @gender), method: :patch,
+<%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), method: :patch,
       data: { controller: "night-attendance" } do %>
   <%= section_heading NightAttendance.gender_label(@gender), "users", tone: :indigo do %>
     <button type="button" data-action="night-attendance#markAllPresent"

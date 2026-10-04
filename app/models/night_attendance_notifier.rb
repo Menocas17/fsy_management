@@ -1,55 +1,42 @@
-# Los avisos de la asistencia nocturna. Solo hay aviso si a partir de las 10 pm falta alguien en una compañía:
-# su lista no se ha pasado o alguien quedó ausente. Llegan al auxiliar y al coordinador de su rama y al
-# matrimonio director (NightAttendance.watchers_for), a la campanita y como push.
-#   - A las 10 pm (NightAttendanceCheckJob), un resumen por persona con lo que le toca.
-#   - Después, cada ausencia nueva que se marque esa noche.
+# El aviso de la asistencia nocturna: a las 10 pm (NightAttendanceCheckJob), si en alguna compañía falta
+# alguien —su lista no se ha pasado o alguien quedó ausente—, sale un solo aviso con todo junto (aunque
+# falten 20, es un aviso, no 20). Lo reciben los auxiliares, los coordinadores y el matrimonio director, en
+# la campanita y como push, y abre el panel de esa noche.
 module NightAttendanceNotifier
+  RECIPIENT_ROLES = %w[auxiliar coordinador director].freeze
+
   module_function
 
-  # El resumen de las 10 pm. Una vez por noche aunque el job corra dos veces.
+  # Una vez por noche aunque el job corra dos veces. Sin faltantes, no hay aviso.
   def nightly_check(night)
     key = "night_attendance_alerted:#{night.iso8601}"
     return if AppSetting[key].present?
 
     AppSetting[key] = Time.current.iso8601
-    lines_by_watcher = Hash.new { |hash, id| hash[id] = [] }
+    report = issues(night)
+    return if report.empty?
 
-    issues(night).each do |company, line|
-      NightAttendance.watchers_for(company).pluck(:id).each { |id| lines_by_watcher[id] << line }
-    end
+    pending = report.count { |line| line[:pending] }
+    absent = report.sum { |line| line[:absent].size }
+    title = [ (pluralize(pending, "lista sin pasar", "listas sin pasar") if pending.positive?),
+              (pluralize(absent, "joven ausente", "jóvenes ausentes") if absent.positive?) ].compact.join(" y ")
 
-    lines_by_watcher.each do |participant_id, lines|
-      notify(participant_id, "Asistencia nocturna: #{ActionController::Base.helpers.pluralize(lines.size, 'lista', plural: 'listas')} con faltantes",
-             lines.join("\n"), link: panel_path(night))
-    end
+    Alert.create!(title: "Asistencia nocturna: #{title}".truncate(120), body: report.map { |line| line[:text] }.join("\n"),
+                  audience: :por_roles, target_roles: RECIPIENT_ROLES, priority: :importante, source: :asistencia,
+                  sender_name: "Asistencia nocturna", link_path: url_helpers.night_attendances_path(noche: night.iso8601))
   end
 
-  # Una ausencia marcada después de las 10 pm.
-  def absences(attendance, participant_ids)
-    return if participant_ids.empty?
-
-    names = attendance.marks.select { |mark| participant_ids.include?(mark.participant_id) }
-                      .map { |mark| "#{mark.participant.full_name} (#{mark.reason_label})" }
-    title = "Ausente en #{attendance.company.name}: #{names.size == 1 ? names.first : "#{names.size} jóvenes"}"
-    body = "#{attendance.taken_by_name} pasó la asistencia de los #{attendance.gender_label.downcase}. Ausentes: #{names.join(', ')}."
-    link = url_helpers.company_night_attendance_path(attendance.company, genero: attendance.gender)
-
-    NightAttendance.watchers_for(attendance.company).pluck(:id).each { |id| notify(id, title, body, link: link) }
-  end
-
-  # [company, "Compañía 3 · hombres: sin pasar"] por cada lista con faltantes.
+  # Una línea por lista con faltantes: «Compañía 3 · hombres: sin pasar» o «… : Pedro López (Enfermería)».
   def issues(night)
     attendances = NightAttendance.where(night_on: night).includes(marks: :participant).index_by { |a| [ a.company_id, a.gender ] }
-    expected = Participant.joven.where.not(company_id: nil).group(:company_id, :gender).pluck(:company_id, :gender, Arel.sql("array_agg(id)"))
+    expected = Participant.joven.where.not(company_id: nil).where.not(gender: nil)
+                          .group(:company_id, :gender).pluck(:company_id, :gender, Arel.sql("array_agg(participants.id)"))
+    companies = Company.where(id: expected.map(&:first)).index_by(&:id)
 
-    companies = Company.where(id: expected.map(&:first)).includes(:auxiliar_company).index_by(&:id)
     expected.sort_by { |company_id, gender, _| [ companies[company_id].number.to_i, gender.to_s ] }.filter_map do |company_id, gender, ids|
-      next if gender.blank?
-
-      company = companies[company_id]
+      label = "#{companies[company_id].name} · #{NightAttendance.gender_label(gender).downcase}"
       attendance = attendances[[ company_id, gender ]]
-      label = "#{company.name} · #{NightAttendance.gender_label(gender).downcase}"
-      next [ company, "#{label}: sin pasar" ] if attendance.nil?
+      next { text: "#{label}: sin pasar", pending: true, absent: [] } if attendance.nil?
 
       missing = attendance.missing_ids(ids)
       next if missing.empty?
@@ -59,17 +46,12 @@ module NightAttendanceNotifier
         mark = attendance.marks.find { |m| m.participant_id == id }
         mark ? "#{mark.participant.full_name} (#{mark.reason_label})" : "#{unmarked[id].full_name} (sin marcar)"
       end
-      [ company, "#{label}: #{names.join(', ')}" ]
+      { text: "#{label}: #{names.join(', ')}", pending: false, absent: missing }
     end
   end
 
-  def notify(participant_id, title, body, link:)
-    Alert.create!(title: title.truncate(120), body: body, audience: :individual, recipient_id: participant_id,
-                  priority: :importante, source: :asistencia, sender_name: "Asistencia nocturna", link_path: link)
-  end
-
-  def panel_path(night)
-    url_helpers.night_attendances_path(noche: night.iso8601)
+  def pluralize(count, singular, plural)
+    "#{count} #{count == 1 ? singular : plural}"
   end
 
   def url_helpers

@@ -5,7 +5,6 @@
 # La noche va de 6 pm a 6 am: pasar la lista a la 1 de la mañana cuenta para la noche anterior.
 class NightAttendance < ApplicationRecord
   NIGHT_ENDS_AT = 6 # hora en que termina la noche (6 am)
-  ALERT_HOUR = 22   # a partir de esta hora, quien falte se avisa (NightAttendanceNotifier)
   GENDER_LABELS = { "H" => "Hombres", "M" => "Mujeres" }.freeze
 
   belongs_to :company
@@ -30,12 +29,22 @@ class NightAttendance < ApplicationRecord
     (config.event_start_on...config.event_end_on).to_a
   end
 
-  def self.alert_time(night)
-    night.in_time_zone.change(hour: ALERT_HOUR)
+  # Antes del evento la noche de hoy sirve de prueba: aparece en el panel y el superadmin puede pasar
+  # cualquier lista. Al empezar el evento esto se apaga solo.
+  def self.testing?(time = Time.current)
+    current_night(time) < Rails.configuration.x.event_start_on
   end
 
-  def self.past_alert_hour?(night, time = Time.current)
-    time >= alert_time(night) && current_night(time) == night
+  # Las que muestra el panel: las del evento, y la de prueba mientras no empiece.
+  def self.panel_nights(time = Time.current)
+    testing?(time) ? [ current_night(time), *event_nights ] : event_nights
+  end
+
+  # La que abre el panel: la de esta noche si está entre las del panel; si no, la última que ya pasó.
+  def self.default_night(time = Time.current)
+    nights = panel_nights(time)
+    tonight = current_night(time)
+    nights.include?(tonight) ? tonight : (nights.select { |night| night <= tonight }.last || nights.first)
   end
 
   def self.gender_label(gender)
@@ -55,23 +64,10 @@ class NightAttendance < ApplicationRecord
     attendance.missing_ids(expected_ids).any? ? :ausentes : :completa
   end
 
-  # Quiénes se avisan de una compañía: su auxiliar y su coordinador (la rama) y el matrimonio director.
-  def self.watchers_for(company)
-    branch = company.auxiliar_company
-    ids = Participant.where(rol: :director).pluck(:id)
-    if branch
-      ids += branch.auxiliars.pluck(:id)
-      ids += branch.coordinators.map(&:id)
-    end
-    Participant.where(id: ids.uniq)
-  end
-
   # Guarda las marcas que mandó el formulario (participant_id => { status:, absence_reason:, absence_detail: }).
-  # Todos los jóvenes de la lista deben quedar marcados; devuelve los que quedaron ausentes y antes no lo estaban.
+  # Todos los jóvenes de la lista deben quedar marcados; false (con errors) si falta alguno o algún motivo.
   def record(entries, taken_by:)
     expected = self.class.expected(company, gender).to_a
-    # Lo guardado, no lo que dejó en memoria un intento que no pasó la validación.
-    previously_absent = marks.select { |m| m.persisted? && m.status_in_database == "ausente" }.map(&:participant_id)
 
     expected.each do |joven|
       entry = entries.to_h.with_indifferent_access[joven.id] || {}
@@ -96,9 +92,7 @@ class NightAttendance < ApplicationRecord
       invalid.each { |m| errors.add(:base, "#{m.participant.full_name}: #{m.errors.messages.values.flatten.first}") }
       return false
     end
-    return false unless save
-
-    marks.select(&:ausente?).map(&:participant_id) - previously_absent
+    save
   end
 
   # Los que no están: ausentes, o de la compañía pero sin marca (llegaron a la lista después de pasarla).

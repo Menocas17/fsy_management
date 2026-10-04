@@ -12,12 +12,15 @@
   confirmed = lists.count { |*, status| status != :pendiente }
   pending = lists.size - confirmed
   current = @night == NightAttendance.current_night
+  test_night = current && NightAttendance.testing?
+  panel_url = night_attendances_path(noche: @night.iso8601)
 %>
 <%= render PageComponent.new(width: :page) do |page| %>
-  <% page.with_intro { "Noche del #{SpanishDates.long(@night, capitalize: false)}#{" · esta noche" if current}" } %>
+  <% page.with_intro { "Noche del #{SpanishDates.long(@night, capitalize: false)}#{" · prueba" if test_night}#{" · esta noche" if current && !test_night}" } %>
   <% page.with_actions do %>
     <%= render SegmentedToggleComponent.new(label: "Noche", items: @nights.map { |night|
-          { text: "#{SpanishDates.abbr(night)} #{night.day}", href: night_attendances_path(noche: night.iso8601), active: night == @night } }) %>
+          { text: night < Rails.configuration.x.event_start_on ? "Hoy · prueba" : "#{SpanishDates.abbr(night)} #{night.day}",
+            href: night_attendances_path(noche: night.iso8601), active: night == @night, data: { night_option: night.iso8601 } } }) %>
   <% end %>
 
   <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
@@ -35,18 +38,24 @@
             text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
     </div>
   <% else %>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-      <section class="lg:col-span-2 <%= card_classes("p-5 md:p-6") %>">
-        <%= section_heading "Compañías", "building-2", tone: :indigo %>
-        <div class="space-y-4">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
+      <div class="xl:col-span-2 space-y-6">
         <% lists.group_by { |company, *| company.auxiliar_company }.sort_by { |branch, _| branch&.name.to_s.presence || "~" }.each do |branch, branch_lists| %>
-          <div>
-            <p class="mb-1 text-meta font-bold uppercase tracking-[.08em] text-ink-500"><%= branch&.name || "Sin compañía auxiliar" %></p>
-            <ul class="divide-y divide-line-soft">
+          <section>
+            <h2 class="mb-2.5 text-meta font-bold uppercase tracking-[.08em] text-ink-500"><%= branch&.name || "Sin compañía auxiliar" %></h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <% branch_lists.group_by(&:first).each do |company, company_lists| %>
-                <li class="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5" data-night-company="<%= company.number %>">
-                  <%= link_to company.name, company_path(company), class: "min-w-0 flex-1 basis-32 text-body font-bold text-ink-900 hover:underline truncate" %>
-                  <div class="flex flex-wrap gap-2">
+                <article class="<%= card_classes("p-4") %>" data-night-company="<%= company.number %>">
+                  <div class="flex items-center gap-3 mb-3">
+                    <%= initials_tile "C#{company.number}", seed: company.name, size: :sm %>
+                    <p class="min-w-0 flex-1 text-body font-bold text-ink-900 truncate"><%= company.name %></p>
+                    <%= link_to company_path(company, return_to: panel_url), title: "Perfil de #{company.name}",
+                          class: "shrink-0 inline-flex items-center gap-1 text-label font-semibold text-ink-500 hover:text-ink-900 transition" do %>
+                      Perfil
+                      <%= icon "arrow-up-right", class: "w-3.5 h-3.5" %>
+                    <% end %>
+                  </div>
+                  <div class="space-y-2">
                     <% company_lists.each do |_, gender, ids, status| %>
                       <% attendance = @attendances[[ company.id, gender ]] %>
                       <% missing = attendance ? attendance.missing_ids(ids).size : ids.size %>
@@ -55,22 +64,28 @@
                            when :ausentes then [ "#{missing} #{missing == 1 ? "falta" : "faltan"}", :rose, "user-x" ]
                            else [ "Sin pasar", :amber, "clock" ]
                            end %>
-                      <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current)),
-                            class: "inline-flex items-center gap-2 rounded-full hover:opacity-80 transition", data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
-                        <span class="text-label font-semibold text-ink-500 w-16 text-right"><%= NightAttendance.gender_label(gender) %></span>
+                      <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current), return_to: panel_url),
+                            class: "flex items-center gap-3 min-h-11 px-3 py-2 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted transition-colors",
+                            data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
+                        <span class="min-w-0 flex-1">
+                          <span class="block text-label font-bold text-ink-900"><%= NightAttendance.gender_label(gender) %></span>
+                          <span class="block text-meta font-semibold text-ink-500">
+                            <%= attendance ? "#{attendance.taken_by_name} · #{attendance.confirmed_at.strftime("%H:%M")}" : pluralize(ids.size, "joven", plural: "jóvenes") %>
+                          </span>
+                        </span>
                         <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
+                        <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
                       <% end %>
                     <% end %>
                   </div>
-                </li>
+                </article>
               <% end %>
-            </ul>
-          </div>
+            </div>
+          </section>
         <% end %>
-        </div>
-      </section>
+      </div>
 
-      <section class="<%= card_classes("p-5 md:p-6") %>">
+      <section class="<%= card_classes("p-5 md:p-6") %> xl:sticky xl:top-24">
         <%= section_heading "Ausentes · #{@absences.size}", "user-x", tone: :rose %>
         <% if @absences.any? %>
           <ul class="divide-y divide-line-soft" data-night-absences>
