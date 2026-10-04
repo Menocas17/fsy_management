@@ -1,15 +1,14 @@
-<div class="bg-surface border border-line-soft rounded-card shadow-md pt-6 pb-2 overflow-hidden">
-  <div class="px-6 pb-4">
-    <%= render "dashboards/card_heading", eyebrow: "Tallas", title: "Camisas registradas",
-               icon_name: "shirt", tone: "bg-cat-amber/20 text-cat-amber-ink", size: "sm" %>
+<div class="<%= card_classes("pt-5 md:pt-6 pb-2 overflow-hidden") %>">
+  <div class="px-5 md:px-6">
+    <%= section_heading "Camisas registradas", "shirt", tone: :amber %>
   </div>
-  <table class="w-full text-[12.5px] font-semibold">
+  <table class="w-full text-body font-semibold">
     <caption class="sr-only">Camisas registradas por talla</caption>
     <tbody>
       <% %w[xs s m l xl].each_with_index do |size, index| %>
-        <tr class="<%= index.odd? ? "bg-canvas dark:bg-slate-700/40" : "" %>">
-          <th scope="row" class="px-6 py-2.5 text-left uppercase font-semibold <%= index.odd? ? "text-ink-900 dark:text-slate-100" : "text-ink-500 dark:text-slate-400" %>"><%= size %></th>
-          <td class="px-6 py-2.5 text-right <%= index.odd? ? "text-ink-900 dark:text-slate-100" : "text-ink-500 dark:text-slate-400" %>" data-shirt-size="<%= size %>"><%= shirt_counts[size] || 0 %></td>
+        <tr class="<%= "bg-canvas dark:bg-slate-800/60" if index.odd? %>">
+          <th scope="row" class="px-5 md:px-6 py-2.5 text-left uppercase font-semibold <%= index.odd? ? "text-ink-900" : "text-ink-500" %>"><%= size %></th>
+          <td class="px-5 md:px-6 py-2.5 text-right tabular-nums <%= index.odd? ? "text-ink-900" : "text-ink-500" %>" data-shirt-size="<%= size %>"><%= shirt_counts[size] || 0 %></td>
         </tr>
       <% end %>
     </tbody>

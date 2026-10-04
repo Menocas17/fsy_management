@@ -2,7 +2,7 @@
   <% if large? %>
     <%= render IconTileComponent.new(icon: @icon, tone: @tone, variant: :solid, size: :lg, classes: "max-md:size-8 max-md:rounded-control") %>
     <div class="min-w-0 flex-1 flex flex-col gap-0.5">
-      <span class="text-display md:text-stat font-extrabold tracking-tight text-ink-900" data-stat-value><%= @value %></span>
+      <%= tag.span @value, class: "text-display md:text-stat font-extrabold tracking-tight tabular-nums text-ink-900", data: @value_data %>
       <span class="text-label md:text-body font-semibold text-ink-700"><%= @label %></span>
       <% if @hint %><span class="hidden md:block text-label text-ink-500"><%= @hint %></span><% end %>
     </div>
@@ -10,7 +10,7 @@
   <% else %>
     <%= render IconTileComponent.new(icon: @icon, tone: @tone) %>
     <div class="min-w-0 flex flex-col">
-      <span class="text-display font-extrabold leading-tight text-ink-900" data-stat-value><%= @value %></span>
+      <%= tag.span @value, class: "text-display font-extrabold leading-tight tabular-nums text-ink-900", data: @value_data %>
       <span class="text-label font-semibold text-ink-700"><%= @label %></span>
     </div>
   <% end %>

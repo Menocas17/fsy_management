@@ -1,6 +1,5 @@
 <section class="<%= card_classes("p-5 md:p-6") %>" data-role-breakdown>
-  <%= render "dashboards/card_heading", eyebrow: "Por rol", title: title,
-             icon_name: "chart-column", tone: "bg-cat-indigo/15 text-cat-indigo-ink", spacing: "mb-4", size: "sm" %>
+  <%= section_heading title, "chart-column", tone: :indigo %>
   <% if by_role.any? %>
     <ul class="space-y-3">
       <% by_role.each do |label, figures| %>
