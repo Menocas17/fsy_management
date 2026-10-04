@@ -76,7 +76,7 @@
             <tr class="group border-b border-line dark:border-line-soft last:border-b-0 hover:bg-canvas dark:hover:bg-muted/40" data-staff-row="<%= person.id %>">
               <%# El nombre queda fijo al desplazar la tabla de lado en el teléfono: si no, se pierde de quién es cada fila. %>
               <td class="px-4 py-3 sticky left-0 z-[1] bg-surface group-hover:bg-canvas dark:group-hover:bg-muted">
-                <%= link_to person.full_name, participant_path(person, from: "staff"),
+                <%= link_to person.full_name, participant_path(person, from: "staff", return_to: return_here),
                       class: "text-body font-bold text-ink-900 hover:underline" %>
               </td>
               <td class="px-4 py-3 text-label font-medium text-ink-700">

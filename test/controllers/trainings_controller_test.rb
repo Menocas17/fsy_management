@@ -17,7 +17,7 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "[data-training-card='#{@past.id}'] [data-training-attended]", text: /1/
-    assert_select "a[href='#{agenda_training_path(@past)}']"
+    assert_select "a[href^='#{agenda_training_path(@past)}?return_to=']"
     assert_select "[data-staff-row='#{@counselor.id}'] [data-mark='yes']", 1
     assert_select "[data-staff-row='#{@logistics.id}'] [data-mark='no']", 1, "quien no vino a una que ya pasó, faltó"
     assert_select "[data-staff-row='#{@counselor.id}'] [data-mark='pending']", 1, "la que no llega todavía no se juzga"

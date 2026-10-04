@@ -1,6 +1,6 @@
 <% content_for :title, @area.name %>
 <% content_for :eyebrow, "Áreas de logística" %>
-<% back_to "Áreas", logistics_areas_path %>
+<% back_to_origin "Áreas", logistics_areas_path %>
 <%= render PageComponent.new(width: :page) do %>
 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-5 items-start">
   <div class="space-y-5 min-w-0">
@@ -47,7 +47,7 @@
         <% @members.each do |member| %>
           <li class="flex items-center gap-3 py-2.5 border-t border-line-soft first:border-t-0" data-member="<%= member.id %>">
             <%= render(AvatarComponent.new(participant: member)) %>
-            <%= link_to participant_path(member), class: "min-w-0 flex-1 group" do %>
+            <%= link_to participant_path(member, from: "staff", return_to: return_here), class: "min-w-0 flex-1 group" do %>
               <span class="block text-body font-bold text-ink-900 group-hover:underline truncate"><%= member.full_name %></span>
               <span class="block text-label text-ink-500"><%= member.role_label %></span>
             <% end %>

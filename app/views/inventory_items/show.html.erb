@@ -1,7 +1,7 @@
 <% content_for :page_h1, true %>
 <% content_for :title, @item.name %>
 <% content_for :eyebrow, @inventory.name %>
-<% back_to @inventory.name, inventory_path(@inventory) %>
+<% back_to_origin @inventory.name, inventory_path(@inventory) %>
 <%
   secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-muted transition"
 %>

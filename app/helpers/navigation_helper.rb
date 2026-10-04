@@ -107,14 +107,39 @@ module NavigationHelper
     back_to(url == fallback ? label : (page_label_for(url) || label), url)
   end
 
-  # El nombre de una página de la app por su dirección: los del menú y las pocas que no están en él.
+  # El nombre de una página de la app por su dirección: la ficha o el registro que muestra (el nombre del
+  # joven, de la compañía…), los del menú y las pocas que no están en él.
   def page_label_for(url)
     path = URI.parse(url).path.chomp("/")
+    record_label = record_page_label(path)
+    return record_label if record_label
+
     named = nav_items.filter_map { |item| [ URI.parse(item[:url]).path, item[:text] ] if item[:url] }
     extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ] ]
     # La dirección más larga que coincida gana: /companies/overview antes que /companies.
     (extra + named).sort_by { |route, _| -route.length }.find { |route, _| path == route || path.start_with?("#{route}/") }&.last
   rescue URI::InvalidURIError
+    nil
+  end
+
+  RECORD_PAGES = {
+    "participants" => ->(id) { Participant.find_by(id: id)&.first_name },
+    "companies" => ->(id) { Company.find_by(id: id)&.name },
+    "auxiliar_companies" => ->(id) { AuxiliarCompany.find_by(id: id)&.name },
+    "logistics_areas" => ->(id) { LogisticsArea.find_by(id: id)&.name },
+    "trainings" => ->(id) { Training.find_by(id: id)&.name },
+    "inventories" => ->(id) { Inventory.find_by(id: id)&.name },
+    "inventory_items" => ->(id) { InventoryItem.find_by(code: id)&.name },
+    "expenses" => ->(id) { Expense.find_by(id: id)&.concept }
+  }.freeze
+
+  def record_page_label(path)
+    route = Rails.application.routes.recognize_path(path)
+    return "Asistencia nocturna" if route[:controller] == "night_attendances"
+    return unless route[:action] == "show" && route[:id]
+
+    RECORD_PAGES[route[:controller]]&.call(route[:id])
+  rescue ActionController::RoutingError
     nil
   end
 
@@ -124,9 +149,9 @@ module NavigationHelper
     if params[:from] == "escaner"
       back_to "Escáner", safe_return_to(checkins_path)
     elsif params[:from] == "staff"
-      back_to "Staff", safe_return_to(staff_participants_path)
+      back_to_origin "Staff", staff_participants_path
     else
-      back_to "Jóvenes", safe_return_to(participants_path)
+      back_to_origin "Jóvenes", participants_path
     end
   end
 

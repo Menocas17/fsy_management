@@ -24,7 +24,7 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
     end
     assert_select "[data-company-id='#{@company.id}'] [data-jovenes-count='1']"
     assert_select "[data-logistics-area='Tecnología']", text: /Sergio Prueba/
-    assert_select "a[href='#{company_path(@company)}']", text: /Ver compañía/
+    assert_select "a[href^='#{company_path(@company)}?return_to=']", text: /Ver compañía/
   end
 
   test "general view heads both branches with the director couple inside the pan and zoom canvas" do

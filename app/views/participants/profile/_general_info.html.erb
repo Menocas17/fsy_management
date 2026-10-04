@@ -1,7 +1,7 @@
 <section class="<%= card_classes("p-6 2xl:order-1") %>">
   <%= section_heading "Información general", "layers" %>
   <div>
-    <%= info_row "Compañía asignada", "building-2", participant.company&.name, href: (company_path(participant.company) if participant.company) %>
+    <%= info_row "Compañía asignada", "building-2", participant.company&.name, href: (company_path(participant.company, return_to: return_here) if participant.company) %>
     <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
     <%= info_row "Cuarto", "door-open", participant.room %>
     <%# Los de su compañía hoy (el personal asignado), no lo que se copió en la ficha al importarla. %>

@@ -1,7 +1,7 @@
 <% content_for :page_h1, true %>
 <% content_for :title, @training.name %>
 <% content_for :eyebrow, "Capacitaciones" %>
-<% back_to "Capacitaciones", agenda_trainings_path %>
+<% back_to_origin "Capacitaciones", agenda_trainings_path %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">

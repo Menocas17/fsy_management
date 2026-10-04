@@ -29,12 +29,12 @@ module DashboardHelper
     case participant.rol.to_s
     when "auxiliar"
       auxiliar_company = participant.auxiliar_scope[:auxiliar_company]
-      auxiliar_company && auxiliar_company_path(auxiliar_company)
+      auxiliar_company && auxiliar_company_path(auxiliar_company, return_to: dashboard_path)
     when "consejero"
       company = participant.counselor_scope.first
-      company && company_path(company)
+      company && company_path(company, return_to: dashboard_path)
     else
-      participant.company && company_path(participant.company)
+      participant.company && company_path(participant.company, return_to: dashboard_path)
     end
   end
 

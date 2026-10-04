@@ -171,7 +171,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "Información general"
-    assert_select "a[href='#{company_path(company)}']", text: "Alfa 3"
+    assert_select "a[href^='#{company_path(company)}?return_to=']", text: "Alfa 3"
     assert_includes response.body, "María García"
     refute_includes response.body, "Ana Ruiz", "the counselors come from the company's staff, not what was copied on the ficha"
     assert_select "[data-empty-state='asignaciones']", text: /Sin asignaciones todavía/

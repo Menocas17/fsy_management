@@ -6,7 +6,7 @@
     [ company.dining_hall_label&.delete_prefix("Salón ") || "—", "Salón" ]
   ]
 %>
-<%= link_to company_path(company), data: { turbo_frame: "_top", company_card: company.number },
+<%= link_to company_path(company, return_to: return_here), data: { turbo_frame: "_top", company_card: company.number },
       class: card_classes("group block px-5 pt-[18px] pb-4 transition-[background-color,transform] duration-150 hover:bg-canvas active:scale-[0.99] focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas") do %>
   <div class="flex items-center gap-3">
     <%= initials_tile(company.initials, seed: company.name) %>
