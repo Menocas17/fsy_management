@@ -15,8 +15,14 @@ class PageComponent < ViewComponent::Base
   renders_one :actions
 
   # data: va en el contenedor de la página, por ejemplo el controlador de Stimulus que la gobierna.
-  def initialize(width: :page, data: {})
+  # banner: la página abre con un banner (Inicio, los perfiles): en el teléfono se acerca a la barra superior.
+  def initialize(width: :page, data: {}, banner: false)
     @width = WIDTHS.fetch(width)
     @data = data
+    @banner = banner
+  end
+
+  def top_padding
+    @banner ? "pt-3 md:pt-8" : "pt-6 md:pt-8"
   end
 end

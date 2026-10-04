@@ -2,12 +2,12 @@
 <% content_for :eyebrow, "Panel general" %>
 <% content_for :heading, "Bienvenido de nuevo" %>
 <% content_for :page_h1, true %>
-<%= render PageComponent.new(width: :page) do %>
+<%= render PageComponent.new(width: :page, banner: true) do %>
   <%# El banner de la cuenta regresiva queda tal cual: es la única pieza fuera de la guía, a propósito. %>
   <%# En el teléfono el banner llena la primera pantalla (la altura visible menos la barra de 60px, el relleno de
-      arriba de la página y 16px de aire): según el teléfono se asomaban solo los iconos de los KPI, que parecían
+      arriba de la página, 12px, y 16px de aire): según el teléfono se asomaban solo los iconos de los KPI, que parecían
       un menú inferior. Así los KPI empiezan siempre bajo el borde, y los atajos quedan abajo, a mano del pulgar. %>
-  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9 max-sm:flex max-sm:flex-col max-sm:min-h-[calc(100dvh-100px)]">
+  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9 max-sm:flex max-sm:flex-col max-sm:min-h-[calc(100dvh-88px)]">
     <%# El lockup oficial ocupa el aire de la derecha; donde no cabe, el mismo texto queda en la píldora. %>
     <%= image_tag "fsy-lettering.png", alt: "#{Rails.configuration.x.event_name} · Nicaragua #{Rails.configuration.x.event_region}", aria: { hidden: true },
           data: { hero_lettering: true },
@@ -55,9 +55,9 @@
           «Próximas fechas», más abajo), y una segunda y una tercera mientras sobre aire. Por alto de pantalla: por
           debajo de cada umbral no caben sin empujar los KPI a la vista. %>
       <% hero_next = next_up_items(@dashboard.next_activities) %>
-      <% row_visibility = [ "flex", "hidden [@media(min-height:860px)]:flex", "hidden [@media(min-height:920px)]:flex" ] %>
+      <% row_visibility = [ "flex", "hidden [@media(min-height:830px)]:flex", "hidden [@media(min-height:890px)]:flex" ] %>
       <% if hero_next.any? %>
-        <div class="hidden max-sm:[@media(min-height:780px)]:block rounded-tile bg-white/10 border border-white/15 px-4 py-3.5" data-hero-next>
+        <div class="hidden max-sm:[@media(min-height:770px)]:block max-sm:-mt-2 rounded-tile bg-white/10 border border-white/15 px-4 py-3.5" data-hero-next>
           <div class="flex items-center justify-between gap-3 mb-2.5">
             <span class="text-[11px] font-bold tracking-[.08em] uppercase text-white/70">Lo que sigue</span>
             <%= link_to "Ver agenda ›", agenda_path, class: "text-label font-bold text-sun hover:underline" %>
