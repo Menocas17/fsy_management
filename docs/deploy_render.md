@@ -51,12 +51,16 @@ Por qué así y no todo en Render:
 1. Crea una cuenta en <https://dash.cloudflare.com>, entra a **R2 Object Storage** y actívalo. Pide un
    método de pago para verificar (tarjeta o **PayPal**); no cobra mientras no pases de 10 GB.
 2. **Create bucket** → nombre `fsy-management`, ubicación *Automatic*.
-3. **Manage R2 API Tokens → Create API token**:
+3. Vuelve a la página principal de **R2 Object Storage** (no la del bucket). A la derecha, en
+   **Account details**, está el **Account ID** y, junto a **API Tokens**, el botón **Manage** (en
+   algunas cuentas es el menú **API → Manage API tokens**). Ahí: **Create Account API token**:
    - Permisos: **Object Read & Write**.
-   - Alcance: solo el bucket `fsy-management`.
-4. Al crearlo te muestra (una sola vez) el **Access Key ID** y el **Secret Access Key**. El
-   **Account ID** está en la página principal de R2. Esos tres son `R2_ACCESS_KEY_ID`,
-   `R2_SECRET_ACCESS_KEY` y `R2_ACCOUNT_ID`.
+   - Alcance: **Apply to specific buckets only** → `fsy-management`.
+   - TTL: *Forever*. Luego **Create API Token**.
+4. La página siguiente muestra (una sola vez) el **Token value**, el **Access Key ID** y el **Secret
+   Access Key**. Solo necesitas los dos últimos; cópialos antes de salir. Con el Account ID son
+   `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` y `R2_ACCOUNT_ID`. Si cerraste la página sin copiarlos,
+   el secreto no se puede volver a ver: borra ese token y crea otro.
 5. **Acceso público** (bucket → **Settings → Public access**): conecta un dominio propio (**Custom
    Domains**, si el dominio está en Cloudflare) o activa el **R2.dev subdomain**. La dirección que da
    (`https://pub-….r2.dev` o `https://fotos.tu-dominio`) es `R2_PUBLIC_URL`. Con ella las fotos salen
