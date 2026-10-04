@@ -7,6 +7,7 @@ class Participant < ApplicationRecord
   has_one :checkin, dependent: :destroy
   has_many :training_attendances, dependent: :destroy
   has_many :assignments, dependent: :destroy
+  has_many :infirmary_visits, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
@@ -85,6 +86,12 @@ class Participant < ApplicationRecord
   scope :jovenes, -> { where(rol: "joven") }
   scope :staff,   -> { where(rol: [ "logistica", "director_logistica", "coordinador", "director", "consejero", "auxiliar", "registrador" ]) }
   scope :search_by_name, ->(query) { where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{query}%") if query.present? }
+  # Nombre y apellido juntos, sin importar tildes ni mayúsculas: «ana perez» encuentra a Ana Pérez.
+  scope :search_full_name, ->(query) {
+    term = "%#{sanitize_sql_like(I18n.transliterate(query.to_s.strip).downcase)}%"
+    where("translate(lower(concat_ws(' ', first_name, last_name)), :accented, :plain) LIKE :term",
+          accented: AuditLog::ACCENTS[0], plain: AuditLog::ACCENTS[1], term: term)
+  }
   scope :by_stake, ->(stake) { where(stake: stake) if stake.present? }
   scope :by_ward, ->(ward) { where(ward: ward) if ward.present? }
   scope :by_gender, ->(gender) { where(gender: gender) if gender.present? }

@@ -1,0 +1,74 @@
+<%# Un joven en el tablero: en camino (avisado por su consejero) o adentro. El detalle del motivo solo lo ve
+    quien puede leer su ficha clínica; el resto, el motivo a secas. %>
+<% joven = visit.participant %>
+<% arriving = visit.en_camino? %>
+<% flags = infirmary_medical_flags(joven) %>
+<article class="<%= card_classes("p-4 md:p-5 flex flex-col gap-3 #{"border-cat-amber/55" if arriving}") %>"
+         data-infirmary-visit="<%= joven.id %>" data-infirmary-status="<%= visit.status %>" data-controller="dialog">
+  <div class="flex items-center gap-3">
+    <%= render AvatarComponent.new(participant: joven) %>
+    <div class="min-w-0 flex-1">
+      <%= link_to joven.full_name, infirmary_chart_path(joven),
+            class: "block text-title font-bold text-ink-900 truncate hover:underline decoration-line underline-offset-2" %>
+      <p class="text-label font-semibold text-ink-500 truncate"><%= joven.company&.name || "Sin compañía" %></p>
+    </div>
+    <div class="shrink-0 text-right">
+      <p class="text-title font-extrabold tabular-nums <%= arriving ? "text-cat-amber-ink" : "text-ink-900" %>"
+         data-controller="elapsed" data-elapsed-since-value="<%= visit.started_at.iso8601 %>"><%= infirmary_elapsed(visit.started_at) %></p>
+      <p class="text-meta font-bold uppercase tracking-[.07em] text-ink-500"><%= arriving ? "avisó" : "desde" %> <%= visit.started_at.strftime("%H:%M") %></p>
+    </div>
+  </div>
+
+  <div class="rounded-tile bg-sunken px-3.5 py-2.5">
+    <p class="flex items-center gap-2 text-label font-bold text-ink-900">
+      <%= icon infirmary_reason_icon(visit), class: "size-4 shrink-0 text-cat-rose-ink" %>
+      <%= visit.reason_label %>
+    </p>
+    <% if visit.reason_detail.present? && can_read_infirmary_notes?(joven) %>
+      <p class="mt-1 text-body text-ink-700 line-clamp-3" data-infirmary-detail><%= visit.reason_detail %></p>
+    <% end %>
+    <% if arriving %>
+      <p class="mt-1 text-label font-semibold text-ink-500">Lo lleva <%= visit.announced_by_name %></p>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-2 mt-auto">
+    <div class="flex flex-wrap gap-1.5 min-w-0">
+      <% if flags[:allergies] %>
+        <%= render ChipComponent.new(label: "Alergia: #{flags[:allergies].truncate(28)}", tone: :rose, icon: "triangle-alert", data: { infirmary_flag: "allergies" }) %>
+      <% end %>
+      <% if flags[:medicines] %>
+        <%= render ChipComponent.new(label: "Toma: #{flags[:medicines].truncate(24)}", tone: :amber, icon: "pill", data: { infirmary_flag: "medicines" }) %>
+      <% end %>
+      <% if flags.empty? %>
+        <%= render ChipComponent.new(label: "Sin alergias ni medicinas") %>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <% if arriving && can_cancel_infirmary_visit?(visit) %>
+        <%= button_to infirmary_visit_path(visit), method: :delete,
+              form: { data: { turbo_confirm: "¿Retirar el aviso de #{joven.full_name}?", turbo_confirm_detail: "Deja de aparecer en camino a enfermería.",
+                              turbo_confirm_button: "Sí, retirar" } },
+              class: button_classes(:secondary, size: :sm), data: { infirmary_action: "retirar" } do %>
+          Retirar
+        <% end %>
+      <% end %>
+      <% if can_operate_infirmary? %>
+        <% if arriving %>
+          <%= button_to admit_infirmary_visit_path(visit), method: :patch, class: button_classes(size: :sm), data: { infirmary_action: "confirmar" } do %>
+            <%= icon "log-in", class: "w-4 h-4" %>
+            Confirmar entrada
+          <% end %>
+        <% else %>
+          <button type="button" data-action="click->dialog#open" data-infirmary-action="alta" class="<%= button_classes(:secondary, size: :sm) %>">
+            <%= icon "log-out", class: "w-4 h-4" %>
+            Dar de alta
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <% if can_operate_infirmary? && visit.adentro? %>
+    <%= render "infirmary_visits/discharge_dialog", visit: visit %>
+  <% end %>
+</article>

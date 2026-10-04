@@ -2,9 +2,11 @@
     y otro lo quita. «Falta» abre una hoja con el motivo (Enfermería, u Otro escrito). Lo marcado viaja en campos
     ocultos; confirmar se habilita cuando no queda nadie sin marcar (el servidor lo vuelve a revisar).
     night_attendance_controller lleva la cuenta y la hoja. %>
-<% marked = @jovenes.count { |joven| @attendance&.mark_for(joven)&.status.present? } %>
+<%# Quien sigue en enfermería llega marcado «ausente · Enfermería» si nadie lo marcó todavía (set_in_infirmary). %>
+<% mark_of = ->(joven) { @attendance&.mark_for(joven) || (NightAttendanceMark.new(status: :ausente, absence_reason: :enfermeria) if @in_infirmary.include?(joven.id)) } %>
+<% marked = @jovenes.count { |joven| mark_of.(joven)&.status.present? } %>
 <%# Los ausentes van primero (en el navegador suben con una animación al marcarlos); el resto, en orden alfabético. %>
-<% ordered = @jovenes.each_with_index.sort_by { |joven, index| [ @attendance&.mark_for(joven)&.ausente? ? 0 : 1, index ] } %>
+<% ordered = @jovenes.each_with_index.sort_by { |joven, index| [ mark_of.(joven)&.ausente? ? 0 : 1, index ] } %>
 <%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), method: :patch,
       id: "night_attendance_#{@gender}", data: { controller: "night-attendance" } do %>
   <div class="flex items-center gap-3 mb-4">
@@ -25,11 +27,11 @@
 
   <ul class="flex flex-col gap-2" data-night-attendance-target="list">
     <% ordered.each do |joven, index| %>
-      <% mark = @attendance&.mark_for(joven) %>
+      <% mark = mark_of.(joven) %>
       <% field = "marks[#{joven.id}]" %>
       <li class="group flex items-stretch rounded-tile border border-line-soft bg-surface overflow-hidden transition-colors data-[state=ausente]:border-cat-rose/45 data-[state=presente]:border-cat-green/45"
           data-night-attendance-target="row" data-night-joven="<%= joven.id %>" data-name="<%= joven.full_name %>" data-order="<%= index %>"
-          <%= tag.attributes(data: { state: mark&.status }) %>>
+          <%= tag.attributes(data: { state: mark&.status, night_infirmary: (true if @in_infirmary.include?(joven.id)) }) %>>
         <%= hidden_field_tag "#{field}[status]", mark&.status, id: nil, data: { field: "status" } %>
         <%= hidden_field_tag "#{field}[absence_reason]", mark&.absence_reason, id: nil, data: { field: "reason" } %>
         <%= hidden_field_tag "#{field}[absence_detail]", mark&.absence_detail, id: nil, data: { field: "detail" } %>

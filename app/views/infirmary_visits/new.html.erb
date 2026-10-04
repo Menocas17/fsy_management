@@ -1,0 +1,135 @@
+<% content_for :page_h1, true %>
+<% operator = can_operate_infirmary? %>
+<% content_for :title, operator ? "Ingresar a enfermería" : "Llevar a enfermería" %>
+<% content_for :eyebrow, "Enfermería" %>
+<% back_to "Enfermería", infirmary_visits_path %>
+<%= render PageComponent.new(width: :form) do %>
+  <% if @participant %>
+    <%# Elegido el joven: el motivo y qué pasó. Enfermería lo ingresa de una vez; el consejero avisa que lo lleva. %>
+    <% flags = infirmary_medical_flags(@participant) %>
+    <section class="<%= card_classes("p-5 md:p-6 flex flex-col gap-4") %>">
+      <div class="flex items-center gap-3">
+        <%= render AvatarComponent.new(participant: @participant) %>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-title font-extrabold text-ink-900 truncate"><%= @participant.full_name %></h1>
+          <p class="text-label font-semibold text-ink-500 truncate">
+            <%= [ "#{@participant.age} años", @participant.company&.name || "Sin compañía" ].join(" · ") %>
+          </p>
+        </div>
+        <%= link_to "Cambiar", new_infirmary_visit_path, class: button_classes(:secondary, size: :sm) %>
+      </div>
+
+      <% if flags.any? %>
+        <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-cat-rose-ink" role="note" data-infirmary-medical>
+          <% if flags[:allergies] %><p class="text-label font-bold">Alergias: <%= flags[:allergies] %></p><% end %>
+          <% if flags[:medicines] %><p class="text-label font-bold">Toma: <%= flags[:medicines] %></p><% end %>
+        </div>
+      <% end %>
+
+      <% if @ongoing %>
+        <div class="rounded-tile bg-sunken px-4 py-3" data-infirmary-ongoing>
+          <p class="text-body font-bold text-ink-900">
+            <%= @ongoing.en_camino? ? "Ya va en camino a enfermería" : "Ya está en enfermería" %>
+          </p>
+          <p class="text-label font-semibold text-ink-500">Desde las <%= @ongoing.started_at.strftime("%H:%M") %> · <%= @ongoing.reason_label %></p>
+          <%= link_to "Abrir su ficha", infirmary_chart_path(@participant), class: button_classes(:secondary, size: :sm, extra: "mt-3") %>
+        </div>
+      <% else %>
+        <%= form_with model: @visit, url: infirmary_visits_path(participant_id: @participant.id), class: "flex flex-col gap-4", data: { infirmary_form: true } do |form| %>
+          <% if @visit.errors.any? %>
+            <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/10 px-4 py-3" role="alert" data-infirmary-errors>
+              <% @visit.errors.full_messages.each do |message| %>
+                <p class="text-label font-semibold text-cat-rose-ink"><%= message %></p>
+              <% end %>
+            </div>
+          <% end %>
+          <fieldset>
+            <legend class="<%= field_label_classes %>">Motivo</legend>
+            <div class="flex flex-wrap gap-2">
+              <% InfirmaryVisit::REASON_LABELS.each do |value, label| %>
+                <label class="inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-label font-bold text-ink-700 cursor-pointer transition
+                              hover:bg-canvas has-[:checked]:bg-primary-700 has-[:checked]:border-primary-700 has-[:checked]:text-white
+                              has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-500">
+                  <%= form.radio_button :reason, value, class: "sr-only" %>
+                  <%= icon InfirmaryHelper::REASON_ICONS.fetch(value), class: "w-4 h-4" %>
+                  <%= label %>
+                </label>
+              <% end %>
+            </div>
+          </fieldset>
+          <div>
+            <%= form.label :reason_detail, "Qué pasó", class: field_label_classes %>
+            <%= form.text_area :reason_detail, rows: 3, maxlength: 1000, class: field_textarea_classes,
+                  placeholder: "Mareo y dolor de cabeza después del almuerzo…" %>
+            <p class="mt-1.5 text-label text-ink-500">Lo leen enfermería, sus consejeros, su auxiliar y la dirección.</p>
+          </div>
+          <button type="submit" data-turbo-submits-with="Guardando…" class="<%= button_classes(:primary, extra: "w-full") %>">
+            <% if operator %>
+              <%= icon "log-in", class: "w-4 h-4" %>
+              Ingresar y avisar a sus consejeros
+            <% else %>
+              <%= icon "footprints", class: "w-4 h-4" %>
+              Avisar a enfermería que lo llevo
+            <% end %>
+          </button>
+        <% end %>
+      <% end %>
+    </section>
+  <% else %>
+    <%# Elegir al joven: buscándolo por nombre o escaneando su gafete. %>
+    <section class="<%= card_classes("p-5 md:p-6 mb-5") %>">
+      <h1 class="mb-3 text-title font-bold text-ink-900"><%= operator ? "¿A quién ingresas?" : "¿A quién llevas?" %></h1>
+      <%= form_with url: new_infirmary_visit_path, method: :get, class: "flex gap-2", data: { turbo_action: "replace" } do %>
+        <label for="infirmary_q" class="sr-only">Buscar por nombre</label>
+        <div class="relative flex-1">
+          <%= icon "search", class: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500 pointer-events-none" %>
+          <%= search_field_tag :q, @query, id: "infirmary_q", placeholder: "Nombre del joven", autocomplete: "off",
+                autofocus: @query.blank?, class: "#{field_input_classes} pl-9" %>
+        </div>
+        <button type="submit" class="<%= button_classes(:secondary) %>">Buscar</button>
+      <% end %>
+
+      <% if @query.present? %>
+        <% if @results.empty? %>
+          <p class="mt-4 text-body text-ink-500" data-infirmary-no-results>
+            Nadie coincide con «<%= @query %>»<%= " entre tus jóvenes" unless operator %>.
+          </p>
+        <% else %>
+          <ul class="mt-4 divide-y divide-line-soft">
+            <% @results.each do |joven| %>
+              <li>
+                <%= link_to new_infirmary_visit_path(participant_id: joven.id), data: { infirmary_result: joven.id },
+                      class: "flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-control hover:bg-canvas transition-colors" do %>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+                    <span class="block text-label font-semibold text-ink-500 truncate"><%= joven.company&.name || "Sin compañía" %></span>
+                  </span>
+                  <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      <% elsif !operator %>
+        <p class="mt-4 text-label text-ink-500">Aparecen solo los jóvenes de tu compañía o de tu rama.</p>
+      <% end %>
+    </section>
+    <section class="<%= card_classes("overflow-hidden") %>"
+             data-controller="qr-scanner" data-qr-scanner-url-value="<%= new_infirmary_visit_path(code: "CODE") %>"
+             data-qr-scanner-aim-value="Apunta al código del gafete" data-qr-scanner-found-value="Buscando">
+      <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
+        <h2 class="text-title font-bold text-ink-900">O escanea su gafete</h2>
+        <p role="status" class="text-label font-semibold text-ink-500" data-qr-scanner-target="status">Activa la cámara</p>
+      </div>
+      <div class="relative bg-primary-950 aspect-[4/3] max-h-[32dvh] w-full flex items-center justify-center">
+        <video data-qr-scanner-target="video" data-no-pull-refresh class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
+        <canvas data-qr-scanner-target="canvas" class="hidden"></canvas>
+        <button type="button" data-action="qr-scanner#start" data-qr-scanner-target="start"
+                class="absolute inline-flex items-center gap-2 h-11 px-5 rounded-control bg-white text-sm font-semibold text-primary-800 shadow-md hover:bg-primary-50 cursor-pointer transition">
+          <%= icon "scan-qr-code", class: "w-4 h-4" %>
+          Escanear gafete
+        </button>
+      </div>
+    </section>
+  <% end %>
+<% end %>

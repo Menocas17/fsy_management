@@ -1,0 +1,164 @@
+<% content_for :page_h1, true %>
+<% content_for :title, "Ficha de enfermería" %>
+<% content_for :eyebrow, "Enfermería" %>
+<% content_for :head do %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+<%= turbo_stream_from "infirmary" %>
+<% back_to "Enfermería", infirmary_visits_path %>
+<% flags = infirmary_medical_flags(@participant) %>
+<%= render PageComponent.new(width: :page) do %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5" data-controller="dialog">
+    <div class="flex items-center gap-3 min-w-0">
+      <%= render AvatarComponent.new(participant: @participant) %>
+      <div class="min-w-0">
+        <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @participant.full_name %></h1>
+        <p class="text-label font-semibold text-ink-500">
+          <%= [ "#{@participant.age} años", @company&.name, @participant.stake&.titleize ].compact.join(" · ") %>
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <% if @ongoing&.adentro? %>
+        <%= render ChipComponent.new(label: "En enfermería · #{infirmary_elapsed(@ongoing.started_at)}", tone: :rose, icon: "bed-single", data: { infirmary_state: "adentro" }) %>
+        <% if can_operate_infirmary? %>
+          <button type="button" data-action="click->dialog#open" data-infirmary-action="alta" class="<%= button_classes %>">
+            <%= icon "log-out", class: "w-4 h-4" %>
+            Dar de alta
+          </button>
+          <%= render "infirmary_visits/discharge_dialog", visit: @ongoing %>
+        <% end %>
+      <% elsif @ongoing&.en_camino? %>
+        <%= render ChipComponent.new(label: "En camino", tone: :amber, icon: "footprints", data: { infirmary_state: "en_camino" }) %>
+        <% if can_cancel_infirmary_visit?(@ongoing) %>
+          <%= button_to "Retirar aviso", infirmary_visit_path(@ongoing), method: :delete, class: button_classes(:secondary),
+                form: { data: { turbo_confirm: "¿Retirar el aviso?", turbo_confirm_button: "Sí, retirar" } } %>
+        <% end %>
+        <% if can_operate_infirmary? %>
+          <%= button_to admit_infirmary_visit_path(@ongoing), method: :patch, class: button_classes, data: { infirmary_action: "confirmar" } do %>
+            <%= icon "log-in", class: "w-4 h-4" %>
+            Confirmar entrada
+          <% end %>
+        <% end %>
+      <% elsif can_operate_infirmary? || can_announce_infirmary?(@participant) %>
+        <%= link_to new_infirmary_visit_path(participant_id: @participant.id), class: button_classes do %>
+          <%= icon can_operate_infirmary? ? "log-in" : "footprints", class: "w-4 h-4" %>
+          <%= can_operate_infirmary? ? "Ingresar" : "Llevar a enfermería" %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-5 items-start">
+    <%# Lo que ya dice su ficha, para no tener que buscarlo. Se corrige en la ficha del participante. %>
+    <aside class="flex flex-col gap-4">
+      <% if flags[:allergies] %>
+        <div class="rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-cat-rose-ink" role="note" data-infirmary-allergies>
+          <p class="flex items-center gap-2 text-label font-bold"><%= icon "triangle-alert", class: "size-4" %>Alergias</p>
+          <p class="mt-1 text-body font-semibold"><%= flags[:allergies] %></p>
+        </div>
+      <% end %>
+      <section class="<%= card_classes("p-5") %>">
+        <%= section_heading "De su ficha", "shield-plus", tone: :rose %>
+        <%= info_row "Medicinas", "pill", @participant.medicines %>
+        <%= info_row "Dieta", "leaf", @participant.diet %>
+        <%= info_row "Notas", "notebook-pen", @participant.additional_instructions %>
+        <%= info_row "Contacto de emergencia", "phone",
+              [ @participant.emergency_contact_name, @participant.emergency_contact_relation.presence&.then { "(#{_1})" }, @participant.emergency_contact_number ].compact_blank.join(" "),
+              href: tel_href(@participant.emergency_contact_number) %>
+        <%= info_row "Consejeros", "users", @company&.counselor_names %>
+        <%= link_to "Ver su ficha completa", participant_path(@participant), class: button_classes(:secondary, size: :sm, extra: "mt-4 w-full") %>
+      </section>
+    </aside>
+
+    <section class="flex flex-col gap-4" data-infirmary-visits>
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-title font-bold text-ink-900">Visitas</h2>
+        <%= render ChipComponent.new(label: pluralize(@visits.size, "visita")) %>
+      </div>
+
+      <% if @visits.empty? %>
+        <div class="<%= card_classes("p-5 md:p-6") %>">
+          <%= render EmptyStateComponent.new(title: "No ha pasado por enfermería", icon: "heart-pulse", tone: :green, name: "infirmary-chart") %>
+        </div>
+      <% end %>
+
+      <% @visits.each do |visit| %>
+        <article id="visita-<%= visit.id %>" class="<%= card_classes("overflow-hidden") %>" data-infirmary-chart-visit="<%= visit.status %>">
+          <header class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
+            <div class="min-w-0">
+              <p class="text-body font-bold text-ink-900 tabular-nums">
+                <%= infirmary_time(visit.started_at) %><%= " – #{visit.discharged_at.strftime("%H:%M")}" if visit.discharged_at %><%= " · en curso" if visit.adentro? %>
+              </p>
+              <p class="text-label font-semibold text-ink-500">
+                <%= [ ("Avisó #{visit.announced_by_name}" if visit.announced_by_name), ("Ingresó #{visit.admitted_by_name}" if visit.admitted_by_name),
+                      "Motivo: #{visit.reason_label.downcase}" ].compact.join(" · ") %>
+              </p>
+            </div>
+            <% if visit.alta? %>
+              <%= infirmary_disposition_chip(visit) %>
+            <% elsif visit.adentro? %>
+              <%= render ChipComponent.new(label: "Adentro", tone: :rose) %>
+            <% else %>
+              <%= render ChipComponent.new(label: "En camino", tone: :amber) %>
+            <% end %>
+          </header>
+
+          <% if @read_notes %>
+            <ol class="px-5 divide-y divide-dashed divide-line" data-infirmary-notes>
+              <% if visit.reason_detail.present? %>
+                <li class="py-3.5">
+                  <p class="text-meta font-bold uppercase tracking-[.07em] text-ink-500">Qué pasó</p>
+                  <p class="mt-1 text-body text-ink-900 whitespace-pre-line"><%= visit.reason_detail %></p>
+                </li>
+              <% end %>
+              <% visit.notes.each do |note| %>
+                <li class="py-3.5" data-infirmary-note="<%= note.kind %>">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="text-label font-bold text-ink-900 truncate"><%= note.author_name %></p>
+                    <p class="text-label font-semibold text-ink-500 tabular-nums shrink-0"><%= infirmary_time(note.created_at) %></p>
+                  </div>
+                  <% unless note.nota? %>
+                    <div class="mt-1.5">
+                      <%= render ChipComponent.new(label: note.kind_label, tone: note.medicamento? ? :teal : :blue, icon: note.medicamento? ? "pill" : "thermometer") %>
+                    </div>
+                  <% end %>
+                  <% if note.body %>
+                    <p class="mt-1 text-body text-ink-900 whitespace-pre-line"><%= note.body %></p>
+                  <% end %>
+                  <% if note.vital_readings.any? %>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                      <% note.vital_readings.each do |reading, fever| %>
+                        <span class="inline-flex items-center h-6 px-2 rounded-inner text-label font-bold tabular-nums <%= fever ? Tones.tint(:rose) : "bg-sunken text-ink-900" %>"
+                              data-vital="<%= reading %>"><%= reading %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </li>
+              <% end %>
+              <% if visit.alta? %>
+                <li class="py-3.5">
+                  <p class="text-meta font-bold uppercase tracking-[.07em] text-ink-500">Alta · <%= visit.discharged_by_name %></p>
+                  <p class="mt-1 text-body text-ink-900"><%= visit.disposition_label %><%= ". #{visit.discharge_notes}" if visit.discharge_notes %></p>
+                </li>
+              <% end %>
+            </ol>
+            <% if visit.notes.empty? && visit.reason_detail.blank? && !visit.alta? %>
+              <p class="px-5 py-4 text-body text-ink-500">Todavía no hay notas.</p>
+            <% end %>
+
+            <% if can_operate_infirmary? && !visit.en_camino? %>
+              <% note = @note_visit == visit ? @note : InfirmaryNote.new(kind: :nota) %>
+              <%= render "infirmary_charts/note_form", visit: visit, note: note %>
+            <% end %>
+          <% else %>
+            <p class="flex items-center gap-2.5 px-5 py-4 text-label font-semibold text-ink-500" data-infirmary-notes-locked>
+              <%= icon "lock", class: "w-4 h-4 shrink-0" %>
+              Las notas clínicas las leen enfermería, sus consejeros, su auxiliar y la dirección.
+            </p>
+          <% end %>
+        </article>
+      <% end %>
+    </section>
+  </div>
+<% end %>

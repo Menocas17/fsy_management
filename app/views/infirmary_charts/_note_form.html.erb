@@ -1,0 +1,42 @@
+<%# Agregar a la ficha clínica de una visita (solo enfermería): una nota, signos vitales o un medicamento. %>
+<%= form_with model: note, url: infirmary_visit_notes_path(visit), class: "m-5 mt-1 p-4 rounded-tile border border-line bg-canvas flex flex-col gap-3",
+      data: { infirmary_note_form: visit.id } do |form| %>
+  <% if note.errors.any? %>
+    <p class="text-label font-semibold text-cat-rose-ink" role="alert" data-infirmary-note-errors><%= note.errors.full_messages.to_sentence %></p>
+  <% end %>
+  <fieldset class="flex flex-wrap gap-1.5">
+    <legend class="sr-only">Tipo de nota</legend>
+    <% InfirmaryNote::KIND_LABELS.each do |value, label| %>
+      <label class="inline-flex items-center h-8 px-3 rounded-full border border-line bg-surface text-label font-bold text-ink-700 cursor-pointer transition
+                    hover:bg-muted has-[:checked]:bg-primary-700 has-[:checked]:border-primary-700 has-[:checked]:text-white
+                    has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-500">
+        <%= form.radio_button :kind, value, id: "note_#{visit.id}_#{value}", class: "sr-only" %>
+        <%= label %>
+      </label>
+    <% end %>
+  </fieldset>
+  <%= form.label :body, "Nota", for: "note_body_#{visit.id}", class: "sr-only" %>
+  <%= form.text_area :body, id: "note_body_#{visit.id}", rows: 2, maxlength: 2000, class: field_textarea_classes,
+        placeholder: "Qué observaste o qué se le dio (medicamento y dosis)…" %>
+  <details class="group" <%= "open" if note.vitals.present? || note.signos? %>>
+    <summary class="inline-flex items-center gap-1.5 text-label font-bold text-primary-700 dark:text-primary-300 cursor-pointer list-none">
+      <%= icon "thermometer", class: "w-4 h-4" %>
+      Signos vitales
+      <%= icon "chevron-down", class: "w-4 h-4 transition-transform group-open:rotate-180" %>
+    </summary>
+    <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <% InfirmaryNote::VITALS.each do |key, meta| %>
+        <div>
+          <%= form.label key, "#{meta[:label]} (#{meta[:unit]})", for: "note_#{visit.id}_#{key}", class: "block mb-1 text-meta font-bold text-ink-500" %>
+          <%= form.text_field key, id: "note_#{visit.id}_#{key}", maxlength: 12, inputmode: (key == "blood_pressure" ? "text" : "decimal"),
+                placeholder: { "temperature" => "37.5", "heart_rate" => "80", "blood_pressure" => "110/70", "oxygen" => "98" }[key],
+                class: field_input_classes %>
+        </div>
+      <% end %>
+    </div>
+  </details>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="text-label text-ink-500">Queda con tu nombre y la hora; no se edita.</p>
+    <button type="submit" data-turbo-submits-with="Guardando…" class="<%= button_classes(size: :sm) %>">Agregar a la ficha</button>
+  </div>
+<% end %>

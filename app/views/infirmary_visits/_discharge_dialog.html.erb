@@ -1,0 +1,34 @@
+<%# Dar de alta: cómo salió y, si hace falta, una indicación. Va dentro de un data-controller="dialog".
+    Si se va a casa o al hospital, se avisa a sus consejeros y auxiliares (InfirmaryNotifier). %>
+<dialog data-dialog-target="modal" data-action="click->dialog#clickOutside" aria-modal="true" aria-labelledby="discharge-title-<%= visit.id %>"
+        class="app-dialog p-0 m-auto w-[calc(100%-2rem)] max-w-md rounded-card shadow-lg bg-surface text-ink-900 backdrop:bg-ink-900/55">
+  <%= form_with url: discharge_infirmary_visit_path(visit), method: :patch, class: "p-5 md:p-6 flex flex-col gap-4", data: { discharge_form: visit.id } do %>
+    <div>
+      <h2 id="discharge-title-<%= visit.id %>" class="text-title font-extrabold text-ink-900">Dar de alta a <%= visit.participant.full_name %></h2>
+      <p class="mt-1 text-label font-semibold text-ink-500">Si se va a casa o al hospital, se avisa a sus consejeros y auxiliares.</p>
+    </div>
+    <fieldset class="flex flex-col gap-2">
+      <legend class="sr-only">¿Cómo salió?</legend>
+      <% InfirmaryVisit::DISPOSITION_LABELS.each do |value, label| %>
+        <% icon_name, _ = InfirmaryHelper::DISPOSITION_STYLES.fetch(value) %>
+        <label class="flex items-center gap-3 rounded-tile border border-line px-3.5 py-3 cursor-pointer transition hover:bg-canvas has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-700/30">
+          <%= radio_button_tag :disposition, value, value == "regreso", id: "disposition_#{visit.id}_#{value}", class: "w-4 h-4 accent-primary-600" %>
+          <%= icon icon_name, class: "w-4 h-4 text-ink-500" %>
+          <span class="text-body font-bold text-ink-900"><%= label %></span>
+        </label>
+      <% end %>
+    </fieldset>
+    <div>
+      <%= label_tag "discharge_notes_#{visit.id}", "Indicaciones (opcional)", class: field_label_classes %>
+      <%= text_area_tag :discharge_notes, nil, id: "discharge_notes_#{visit.id}", rows: 2, maxlength: 1000,
+            placeholder: "Reposo hasta la cena, tomar agua…", class: field_textarea_classes %>
+    </div>
+    <div class="flex gap-2.5 justify-end">
+      <button type="button" data-action="click->dialog#close" class="<%= button_classes(:secondary) %>">Cancelar</button>
+      <button type="submit" data-turbo-submits-with="Guardando…" class="<%= button_classes %>">
+        <%= icon "log-out", class: "w-4 h-4" %>
+        Dar de alta
+      </button>
+    </div>
+  <% end %>
+</dialog>

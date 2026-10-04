@@ -1,0 +1,102 @@
+<% content_for :title, "Enfermería" %>
+<% content_for :eyebrow, "Seguimiento" %>
+<% content_for :head do %>
+  <%# Cada ingreso, nota o alta refresca el tablero abierto (InfirmaryVisit#after_commit), sin perder el scroll. %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+<% end %>
+<%= turbo_stream_from "infirmary" %>
+<% announcer = !can_operate_infirmary? && %w[consejero auxiliar].include?(Current.user.participant&.rol.to_s) %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro do %>
+    <span class="inline-flex items-center gap-2">
+      <span class="relative flex size-2" aria-hidden="true">
+        <span class="absolute inline-flex size-full rounded-full bg-cat-green-solid opacity-60 motion-safe:animate-ping"></span>
+        <span class="relative inline-flex size-2 rounded-full bg-cat-green-solid"></span>
+      </span>
+      En vivo · <%= SpanishDates.long(Time.zone.today, capitalize: false) %>
+    </span>
+  <% end %>
+  <% page.with_actions do %>
+    <% if can_operate_infirmary? %>
+      <%= link_to new_infirmary_visit_path, class: button_classes, data: { infirmary_action: "ingresar" } do %>
+        <%= icon "plus", class: "w-4 h-4" %>
+        Ingresar joven
+      <% end %>
+    <% elsif announcer %>
+      <%= link_to new_infirmary_visit_path, class: button_classes, data: { infirmary_action: "avisar" } do %>
+        <%= icon "footprints", class: "w-4 h-4" %>
+        Llevar a enfermería
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
+    <%= render StatTileComponent.new(value: @inside.size, label: "En enfermería ahora", short_label: "Ahora",
+          icon: "bed-single", tone: :rose, value_data: { figure: "adentro" }) %>
+    <%= render StatTileComponent.new(value: @attended_today, label: "Atendidos hoy", short_label: "Hoy",
+          icon: "stethoscope", tone: :teal, value_data: { figure: "hoy" }) %>
+    <%= render StatTileComponent.new(value: @attended_total, label: "Visitas en el evento", short_label: "En total",
+          icon: "notebook-pen", tone: :green, value_data: { figure: "total" }) %>
+  </div>
+
+  <% if @arriving.any? %>
+    <section class="mb-5" data-infirmary-section="en-camino">
+      <%= section_heading "En camino", "footprints", tone: :amber %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <% @arriving.each do |visit| %>
+          <%= render "infirmary_visits/visit_card", visit: visit %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="mb-5" data-infirmary-section="adentro">
+    <%= section_heading "Ahora en enfermería", "heart-pulse", tone: :rose %>
+    <% if @inside.empty? %>
+      <div class="<%= card_classes("p-5 md:p-6") %>">
+        <%= render EmptyStateComponent.new(title: "Nadie en enfermería", icon: "heart-pulse", tone: :green, name: "infirmary-inside",
+              text: "Cuando enfermería ingrese a un joven, aparece aquí con el tiempo que lleva y su motivo.") %>
+      </div>
+    <% else %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <% @inside.each do |visit| %>
+          <%= render "infirmary_visits/visit_card", visit: visit %>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-infirmary-section="pasaron">
+    <%= section_heading "Pasaron por enfermería", "clipboard-clock", tone: :teal do %>
+      <%= render SegmentedToggleComponent.new(label: "Periodo", items: InfirmaryVisitsController::PERIODS.map { |key, label|
+            { text: label, href: infirmary_visits_path(periodo: (key unless key == "hoy")), active: key == @period, data: { infirmary_period: key } } }) %>
+    <% end %>
+    <% if @discharged.empty? %>
+      <%= render EmptyStateComponent.new(title: @period == "hoy" ? "Nadie ha salido hoy" : "Todavía no hay visitas", icon: "clipboard-clock", tone: :teal,
+            name: "infirmary-discharged", text: "Aquí queda quién salió, a qué hora y cómo.") %>
+    <% else %>
+      <ul class="divide-y divide-line-soft">
+        <% @discharged.each do |visit| %>
+          <% joven = visit.participant %>
+          <li data-infirmary-discharged="<%= joven.id %>">
+            <%= link_to infirmary_chart_path(joven), class: "flex flex-wrap items-center gap-x-3 gap-y-2 py-3 -mx-2 px-2 rounded-control hover:bg-canvas transition-colors" do %>
+              <span class="flex items-center gap-3 min-w-0 flex-1 basis-56">
+                <%= render AvatarComponent.new(participant: joven) %>
+                <span class="min-w-0">
+                  <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
+                  <span class="block text-label font-semibold text-ink-500 truncate">
+                    <%= [ joven.company&.name, visit.reason_label ].compact.join(" · ") %>
+                  </span>
+                </span>
+              </span>
+              <span class="text-label font-semibold text-ink-500 tabular-nums whitespace-nowrap">
+                <%= infirmary_time(visit.admitted_at || visit.announced_at) %> – <%= visit.discharged_at.strftime("%H:%M") %>
+              </span>
+              <%= infirmary_disposition_chip(visit) %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+<% end %>
