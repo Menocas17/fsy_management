@@ -7,7 +7,7 @@
   badge = "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cat-rose text-white text-meta font-extrabold flex items-center justify-center border-2 border-surface empty:hidden"
 %>
 <div id="notifications_bell" class="contents" data-controller="alert-chime" data-alert-chime-unread-value="<%= unread %>"
-     data-alert-chime-count-url-value="<%= count_notifications_path %>">
+     data-alert-chime-count-url-value="<%= count_notifications_path %>" data-alert-chime-read-url-value="<%= read_notifications_path %>">
 <%= link_to notifications_path, aria: { label: "Notificaciones#{unread.positive? ? ", #{unread} sin leer" : ""}" },
       class: "md:hidden relative w-8 h-8 after:absolute after:-inset-1.5 rounded-control border border-line bg-canvas flex items-center justify-center text-ink-500 dark:text-ink-700" do %>
   <%= icon "bell", class: "w-[17px] h-[17px]" %>
@@ -16,7 +16,7 @@
 <div data-controller="dropdown" class="relative hidden md:block">
   <button type="button" data-notifications-trigger aria-haspopup="true"
           aria-label="Notificaciones<%= ", #{unread} sin leer" if unread.positive? %>"
-          data-action="click->dropdown#toggle click@window->dropdown#hide keydown.esc@window->dropdown#close"
+          data-action="click->dropdown#toggle click->alert-chime#markRead click@window->dropdown#hide keydown.esc@window->dropdown#close"
           class="relative w-10 h-10 rounded-control border border-line bg-canvas flex items-center justify-center text-ink-500 dark:text-ink-700 hover:text-ink-900 cursor-pointer transition">
     <%= icon "bell", class: "w-5 h-5" %>
     <span class="<%= badge %>" data-unread-count data-alert-chime-target="badge" <%= "hidden" unless unread.positive? %>><%= unread %></span>

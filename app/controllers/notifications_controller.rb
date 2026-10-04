@@ -1,7 +1,13 @@
 class NotificationsController < ApplicationController
   def index
     @pagy, @alerts = pagy(Alert.inbox_for(Current.user).includes(images_attachments: :blob).recent)
-    Current.user&.update_column(:alerts_read_at, Time.current)
+    mark_read
+  end
+
+  # El menú de la campanita se abrió: lo que había quedó visto.
+  def read
+    mark_read
+    head :no_content
   end
 
   # Lo consulta la campanita al volver atrás: el HTML cacheado trae el contador de antes de leerlas.
@@ -32,6 +38,11 @@ class NotificationsController < ApplicationController
   end
 
   private
+    # Viendo como otra persona, el superadmin no le marca nada como leído (y la ficha sin cuenta no tiene dónde).
+    def mark_read
+      Current.user&.update_column(:alerts_read_at, Time.current) unless Current.viewing_as?
+    end
+
     # La misma alerta puede estar a la vez en la página y en el menú de la campanita: se actualizan los dos
     # en su lugar, sin reemplazar la campanita (cerraría el menú que la persona tiene abierto).
     def inbox_streams(removed: nil)

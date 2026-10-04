@@ -32,6 +32,24 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, response.parsed_body["unread"], "abrir la lista deja la campanita en cero"
   end
 
+  test "opening the bell's menu marks everything as read" do
+    Alert.create!(title: "Una", body: "Texto", sender_name: "Marta", audience: :todos)
+
+    patch read_notifications_path
+
+    assert_response :no_content
+    assert_equal 0, users(:one).reload.unread_alerts_count
+  end
+
+  test "the bell's menu carries the address that marks it read" do
+    Alert.create!(title: "Una", body: "Texto", sender_name: "Marta", audience: :todos)
+
+    get notifications_path
+
+    assert_select "[data-alert-chime-read-url-value='#{read_notifications_path}']"
+    assert_select "[data-action*='alert-chime#markRead']"
+  end
+
   test "explains the empty state when there are no alerts" do
     get notifications_path
 

@@ -79,6 +79,20 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     assert_select "nav", text: /Historial/
   end
 
+  test "reading the notifications while viewing as marks nothing as read for that person" do
+    sign_in_as @admin
+    Alert.create!(title: "Aviso", body: "Texto", sender_name: "Marta", audience: :todos)
+
+    post view_as_path, params: { participant_id: @nurse.id }
+    get notifications_path
+    assert_response :success, "a ficha without an account has nowhere to write it"
+
+    post view_as_path, params: { participant_id: @registrar.id }
+    get notifications_path
+    patch read_notifications_path
+    assert_nil @registrar.user.reload.alerts_read_at
+  end
+
   test "actions while viewing as are logged under the superadmin" do
     sign_in_as @admin
     post view_as_path, params: { participant_id: @coordinator.id }

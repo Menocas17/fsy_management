@@ -15,7 +15,7 @@ document.addEventListener("turbo:load", () => {
 // Suena y vibra cuando entra una alerta con la app abierta. Con la app cerrada avisa el sistema.
 export default class extends Controller {
   static targets = ["badge"]
-  static values = { unread: Number, countUrl: String }
+  static values = { unread: Number, countUrl: String, readUrl: String }
 
   connect() {
     // La vista previa de la caché se reemplaza sola por la respuesta real: no hay nada que hacer.
@@ -41,6 +41,23 @@ export default class extends Controller {
       this.remember(unread)
     } catch (error) {
       // Sin red: se queda lo que hay, y la próxima navegación lo corrige.
+    }
+  }
+
+  // Abrir el menú es leerlas: el número se va al instante y el servidor lo anota para la próxima página.
+  // Sin esto el número solo bajaba al entrar a Notificaciones, y en escritorio casi nadie entra.
+  async markRead() {
+    if (this.unreadValue < 1 || !this.hasReadUrlValue) return
+
+    this.paint(0)
+    this.remember(0)
+    try {
+      await fetch(this.readUrlValue, {
+        method: "PATCH",
+        headers: { "X-CSRF-Token": document.querySelector("meta[name=csrf-token]")?.content }
+      })
+    } catch (error) {
+      // Sin red: la próxima página vuelve a traer el número real.
     }
   }
 
