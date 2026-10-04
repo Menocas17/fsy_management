@@ -2,7 +2,7 @@ require "test_helper"
 
 class NavigationHelperTest < ActionView::TestCase
   test "lists the sections in sidebar order" do
-    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Inventario", "Finanzas", "Librería", "Reportes" ],
+    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda" ],
                  nav_items.map { |item| item[:text] }
   end
 
@@ -15,18 +15,23 @@ class NavigationHelperTest < ActionView::TestCase
     Current.reset
   end
 
-  test "enabled items point at a real route" do
-    nav_items.reject { |item| item[:disabled] }.each do |item|
+  test "every item points at a real route" do
+    Current.session = users(:one).sessions.create!
+
+    nav_items.each do |item|
       assert item[:is_nav], "#{item[:text]} should be a nav item"
       assert item[:url].start_with?("/"), "#{item[:text]} should point at an app route"
     end
   end
 
-  test "not-yet-built sections are disabled and have no destination" do
-    disabled = nav_items.select { |item| item[:disabled] }
+  test "a module the person can't open is left out, not greyed out" do
+    Current.session = users(:one).sessions.create!
+    Current.viewing_as = User.stand_in_for(participants(:maria))
 
-    assert_equal [ "Inventario", "Finanzas", "Librería", "Reportes" ], disabled.map { |item| item[:text] }
-    assert disabled.all? { |item| item[:url].nil? }
+    assert nav_items.none? { |item| item[:disabled] }
+    assert_empty nav_items.map { |item| item[:text] } & [ "Inventario", "Finanzas", "Librería", "Reportes", "Historial" ]
+  ensure
+    Current.reset
   end
 
   test "groups items under the sidebar categories" do
@@ -36,7 +41,7 @@ class NavigationHelperTest < ActionView::TestCase
     assert_equal({ nil => [ "Inicio" ],
                    "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
                    "Evento" => [ "Agenda", "Registro", "Alertas" ],
-                   "Logística" => [ "Áreas", "Inventario", "Finanzas", "Librería" ],
+                   "Logística" => [ "Áreas", "Inventario", "Finanzas" ],
                    "Seguimiento" => [ "Reportes", "Asistencia nocturna", "Historial" ] }, groups)
   ensure
     Current.reset
@@ -70,6 +75,7 @@ class NavigationHelperTest < ActionView::TestCase
   end
 
   test "items can be splatted straight into ButtonComponent" do
+    Current.session = users(:one).sessions.create!
     nav_items.each { |item| assert ButtonComponent.new(**item) }
   end
 
