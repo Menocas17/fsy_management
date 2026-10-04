@@ -16,7 +16,7 @@ module AccessesHelper
   end
 
   def login_result_chip(attempt)
-    tag.span(attempt.result_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap #{RESULT_CHIPS.fetch(attempt.result)}")
+    tag.span(attempt.result_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold whitespace-nowrap #{RESULT_CHIPS.fetch(attempt.result)}")
   end
 
   def account_label(user)

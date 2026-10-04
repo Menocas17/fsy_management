@@ -24,13 +24,13 @@
       <div>
         <%= form.label :minimum, "Mínimo antes de avisar", class: field_label_classes %>
         <%= form.number_field :minimum, min: 0, step: 1, class: field_input_classes %>
-        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Por debajo de esto el artículo se marca «por agotarse».</p>
+        <p class="mt-1.5 text-label font-medium text-ink-500">Por debajo de esto el artículo se marca «por agotarse».</p>
       </div>
       <% unless item.persisted? %>
         <div>
           <%= label_tag "inventory_item[starting_quantity]", "Existencia inicial", class: field_label_classes %>
           <%= number_field_tag "inventory_item[starting_quantity]", 0, min: 0, step: 1, class: field_input_classes %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Queda registrada como el primer movimiento del artículo.</p>
+          <p class="mt-1.5 text-label font-medium text-ink-500">Queda registrada como el primer movimiento del artículo.</p>
         </div>
       <% end %>
       <div>
@@ -43,7 +43,7 @@
       </div>
     </div>
     <% if item.persisted? %>
-      <p class="mt-4 px-3.5 py-2.5 rounded-control bg-canvas text-[12.5px] font-semibold text-ink-500">
+      <p class="mt-4 px-3.5 py-2.5 rounded-control bg-canvas text-label font-semibold text-ink-500">
         La existencia (<%= item.quantity_label %>) no se edita aquí: se mueve con los ajustes, y así queda el registro de quién y por qué.
       </p>
     <% end %>

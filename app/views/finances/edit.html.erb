@@ -1,7 +1,7 @@
 <% content_for :title, "Presupuesto" %>
 <% content_for :eyebrow, "Finanzas" %>
 <% back_to "Finanzas", finances_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl space-y-5">
+<%= render PageComponent.new(width: :form) do %>
   <section class="<%= card_classes("p-5 md:p-6") %>">
     <%= section_heading "Presupuesto general y tipo de cambio", "wallet" %>
     <%= form_with url: finances_path, method: :patch, class: "grid grid-cols-1 sm:grid-cols-2 gap-4" do %>
@@ -9,12 +9,12 @@
         <%= label_tag :budget, "Presupuesto general (C$)", class: field_label_classes %>
         <%= text_field_tag :budget, Money.to_input(FinanceSettings.budget_cents), required: true, inputmode: "decimal",
               placeholder: "Ej. 250000", class: field_input_classes %>
-        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Todo el gasto del evento cuenta contra este monto.</p>
+        <p class="mt-1.5 text-label font-medium text-ink-500">Todo el gasto del evento cuenta contra este monto.</p>
       </div>
       <div>
         <%= label_tag :usd_rate, "Tipo de cambio (C$ por US$)", class: field_label_classes %>
         <%= text_field_tag :usd_rate, FinanceSettings.usd_rate, inputmode: "decimal", placeholder: "Ej. 36.62", class: field_input_classes %>
-        <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">Fíjalo antes de la semana del evento; se puede cambiar en un gasto puntual.</p>
+        <p class="mt-1.5 text-label font-medium text-ink-500">Fíjalo antes de la semana del evento; se puede cambiar en un gasto puntual.</p>
       </div>
       <div class="sm:col-span-2">
         <%= tag.button "Guardar", type: "submit", data: { turbo_submits_with: "Guardando…" }, class: button_classes %>
@@ -30,18 +30,18 @@
         Nueva categoría
       <% end %>
     </div>
-    <p class="mb-4 text-[12.5px] text-ink-500">
+    <p class="mb-4 text-label text-ink-500">
       Opcionales. Con presupuesto propio, el panel muestra cuánto les queda; sin él, solo lo gastado. Un gasto sin categoría cuenta como «General».
     </p>
     <% if @categories.any? %>
       <ul class="divide-y divide-line-soft">
         <% @categories.each do |category| %>
           <li>
-            <%= link_to edit_expense_category_path(category), class: "flex items-center gap-3 py-3 -mx-2 px-2 rounded-lg hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+            <%= link_to edit_expense_category_path(category), class: "flex items-center gap-3 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-muted/40" do %>
               <%= category_tile(category) %>
               <span class="min-w-0 flex-1">
-                <span class="block text-[14px] font-bold text-ink-900 truncate"><%= category.name %></span>
-                <span class="block text-[12px] font-semibold text-ink-500"><%= category.budget_cents ? money(category.budget_cents) : "Sin presupuesto propio" %></span>
+                <span class="block text-body font-bold text-ink-900 truncate"><%= category.name %></span>
+                <span class="block text-label font-semibold text-ink-500"><%= category.budget_cents ? money(category.budget_cents) : "Sin presupuesto propio" %></span>
               </span>
               <%= icon "chevron-right", class: "w-4 h-4 text-ink-500 shrink-0" %>
             <% end %>
@@ -49,7 +49,7 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="text-[13px] text-ink-500">Todavía no hay categorías: todo cuenta contra el presupuesto general.</p>
+      <p class="text-body text-ink-500">Todavía no hay categorías: todo cuenta contra el presupuesto general.</p>
     <% end %>
   </section>
-</div>
+<% end %>

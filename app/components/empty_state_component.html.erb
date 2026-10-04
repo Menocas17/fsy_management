@@ -1,0 +1,6 @@
+<div class="flex flex-col items-center gap-2 px-6 py-8 text-center rounded-tile border-[1.5px] border-dashed border-line" data-empty-state="<%= @name %>">
+  <%= render IconTileComponent.new(icon: @icon, tone: @tone, size: :md) %>
+  <p class="mt-1 text-body font-bold text-ink-900"><%= @title %></p>
+  <% if @text %><p class="max-w-80 text-label text-ink-500 text-pretty"><%= @text %></p><% end %>
+  <% if action? %><div class="mt-2"><%= action %></div><% end %>
+</div>

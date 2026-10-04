@@ -1,12 +1,12 @@
 <% content_for :title, "Compañías auxiliares" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Compañías" %>
 <%
-  secondary_link = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
+  secondary_link = button_classes(:secondary)
   company_total = @auxiliar_companies.sum { |auxiliar_company| auxiliar_company.companies.size }
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
-    <p class="text-[13px] font-semibold text-ink-500" data-auxiliar-summary>
+<%= render PageComponent.new(width: :page) do %>
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <p class="text-body font-semibold text-ink-500" data-auxiliar-summary>
       <%= pluralize(@auxiliar_companies.size, "compañía auxiliar", plural: "compañías auxiliares") %>
       · <%= pluralize(company_total, "compañía", plural: "compañías") %>
       · <%= pluralize(@jovenes_counts.values.sum, "joven", plural: "jóvenes") %>
@@ -35,8 +35,9 @@
                  locals: { jovenes_counts: @jovenes_counts } %>
     </div>
   <% else %>
-    <div class="<%= card_classes("p-10 text-center") %>">
-      <p class="text-ink-500">Aún no hay compañías auxiliares registradas.</p>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Aún no hay compañías auxiliares", icon: "network", name: "auxiliar-companies",
+            text: "Cada una agrupa varias compañías bajo un coordinador.") %>
     </div>
   <% end %>
-</div>
+<% end %>

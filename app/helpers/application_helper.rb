@@ -48,7 +48,7 @@ module ApplicationHelper
 
   # options[:class] sets the size (and initials font size); the round shape and gradient fallback are always applied.
   def current_user_avatar_tag(options = {})
-    size_classes = options[:class] || "w-9 h-9 text-[13px]"
+    size_classes = options[:class] || "w-9 h-9 text-body"
     participant = Current.user&.participant
 
     if participant&.avatar&.attached?

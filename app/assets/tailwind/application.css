@@ -56,6 +56,10 @@
   --color-canvas: oklch(96.5% 0.006 258);
   --color-line: oklch(90% 0.008 258);
   --color-line-soft: oklch(93.5% 0.006 258);
+  /* Rellenos neutros que cambian en oscuro (antes, un dark:slate-* suelto en cada vista): muted para el hover y
+     los fondos neutros de mosaicos y botones; sunken para los bloques hundidos dentro de una tarjeta. */
+  --color-muted: oklch(96.5% 0.006 258);
+  --color-sunken: oklch(96.5% 0.006 258);
 
   --color-cat-blue: oklch(62% 0.13 230);
   --color-cat-indigo: oklch(55% 0.16 275);
@@ -75,6 +79,15 @@
   --color-cat-rose-ink: oklch(48% 0.17 15);
   --color-cat-teal-ink: oklch(46% 0.09 195);
 
+  /* Rellenos sólidos de categoría (mosaicos de cifra, barras de gráfico). Un tono más oscuro que el base para
+     que el ícono blanco encima llegue a 3:1; el ámbar base no llegaba (2.5:1). Ver DESIGN.md, «regla de color». */
+  --color-cat-blue-solid: oklch(56% 0.13 230);
+  --color-cat-indigo-solid: oklch(52% 0.16 275);
+  --color-cat-green-solid: oklch(56% 0.14 148);
+  --color-cat-amber-solid: oklch(62% 0.14 70);
+  --color-cat-rose-solid: oklch(55% 0.17 15);
+  --color-cat-teal-solid: oklch(56% 0.1 195);
+
   /* Radios: controles (botones, campos, pestañas), baldosas (iconos, bloques internos), tarjetas y paneles. */
   --radius-control: 11px;
   --radius-tile: 13px;
@@ -83,10 +96,37 @@
   /* Avatares: cuadrados como la foto de la ficha (22 px a 92 px), en la misma proporción a 40 y 28 px. */
   --radius-avatar: 10px;
   --radius-avatar-sm: 7px;
+  /* Lo que va dentro de un control con 4 px de relleno (las opciones de un conmutador): 11 − 4. */
+  --radius-inner: 7px;
 
   --shadow-sm: 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-md: 0 6px 20px -6px oklch(20% 0.03 260 / 0.14), 0 1px 2px oklch(20% 0.02 260 / 0.06);
   --shadow-lg: 0 20px 40px -12px oklch(20% 0.05 260 / 0.22);
+
+  /* Escala de letra: cinco tamaños y la cifra grande (DESIGN.md, «Typography»). Siguen a --type-scale como los
+     tamaños sueltos de abajo, así el teléfono y «Texto grande» los agrandan igual. Se usan como text-body, etc. */
+  --text-meta: calc(11px * var(--type-scale));
+  --text-meta--line-height: 1.4;
+  --text-label: calc(12px * var(--type-scale));
+  --text-label--line-height: 1.4;
+  --text-body: calc(13px * var(--type-scale));
+  --text-body--line-height: 1.5;
+  --text-title: calc(15px * var(--type-scale));
+  --text-title--line-height: 1.35;
+  --text-display: 22px;
+  --text-display--line-height: 1.2;
+  --text-stat: 34px;
+  --text-stat--line-height: 1;
+
+  /* Los dos anchos de página: max-w-page para listas y tableros, max-w-form para crear, editar y ajustes. */
+  --container-page: 1400px;
+  --container-form: 48rem;
+
+  /* Curvas de movimiento: salida fuerte para lo que entra o responde, la de cajón para lo que se desliza. */
+  --ease-fluid: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* La curva de toda clase transition sin curva propia: la de la app, no la genérica de Tailwind. */
+  --default-transition-timing-function: var(--ease-fluid);
 
 }
 
@@ -98,6 +138,8 @@
   --color-canvas: oklch(20.8% 0.042 265.755);
   --color-line: oklch(44.6% 0.043 257.281);
   --color-line-soft: oklch(37.2% 0.044 257.287);
+  --color-muted: oklch(37.2% 0.044 257.287);
+  --color-sunken: oklch(24% 0.042 262);
   --color-ink-900: oklch(96.8% 0.007 247.896);
   --color-ink-700: oklch(86.9% 0.022 252.894);
   --color-ink-500: oklch(70.4% 0.04 256.788);
@@ -383,8 +425,8 @@ html.text-lg-mode { --type-scale: 1.12; }
 /* Avisos: la entrada confirma la acción, así que se nota; la salida es más corta que la entrada. */
 .toast {
   transition:
-    opacity 220ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+    opacity 220ms var(--ease-fluid),
+    transform 220ms var(--ease-fluid);
   @starting-style {
     opacity: 0;
     transform: translateY(-8px);
@@ -394,7 +436,7 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 0;
   transform: translateX(16px);
   transition-duration: 160ms;
-  transition-timing-function: ease-in;
+  transition-timing-function: var(--ease-fluid);
 }
 
 /* Diálogos modales: aparecen con un leve crecimiento en vez de saltar; el cierre es más corto. */
@@ -402,8 +444,8 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 0;
   transform: scale(0.96);
   transition:
-    opacity 120ms ease-in,
-    transform 120ms ease-in,
+    opacity 120ms var(--ease-fluid),
+    transform 120ms var(--ease-fluid),
     overlay 120ms allow-discrete,
     display 120ms allow-discrete;
 }
@@ -411,7 +453,7 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 1;
   transform: none;
   transition-duration: 180ms;
-  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  transition-timing-function: var(--ease-fluid);
   @starting-style {
     opacity: 0;
     transform: scale(0.96);
@@ -443,8 +485,8 @@ form[aria-busy='true'] [type='submit'],
 /* Capacitaciones: la persona que se acaba de marcar o quitar entra con un leve fundido en su nueva lista. */
 .roster-moved {
   transition:
-    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms var(--ease-fluid),
+    transform 200ms var(--ease-fluid),
     background-color 900ms ease-out;
   @starting-style {
     opacity: 0;
@@ -464,8 +506,8 @@ turbo-frame[aria-busy='true'] {
 .dropdown-menu {
   transform-origin: top right;
   transition:
-    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    opacity 150ms var(--ease-fluid),
+    scale 150ms var(--ease-fluid);
   @starting-style {
     opacity: 0;
     scale: 0.97;
@@ -482,7 +524,7 @@ turbo-frame[aria-busy='true'] {
     height: 0;
     overflow: clip;
     transition:
-      height 200ms cubic-bezier(0.23, 1, 0.32, 1),
+      height 200ms var(--ease-fluid),
       content-visibility 200ms allow-discrete;
   }
   .agenda-details[open]::details-content {
@@ -499,7 +541,7 @@ turbo-frame[aria-busy='true'] {
   grid-template-rows: 1fr;
   opacity: 1;
   transition:
-    grid-template-rows 240ms cubic-bezier(0.23, 1, 0.32, 1),
+    grid-template-rows 240ms var(--ease-fluid),
     opacity 180ms ease-out;
 }
 .nav-group-panel > * {

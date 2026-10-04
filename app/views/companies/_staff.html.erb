@@ -1,11 +1,11 @@
 <%
-  subheading = "mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500"
+  subheading = "mb-2 text-meta font-bold tracking-[.07em] uppercase text-ink-500"
   # El consejero ve a sus líderes pero no cambia la plantilla de su propia compañía.
   staffing = can_edit_company_staffing?(company)
 %>
 <section id="lideres" class="<%= card_classes("p-6 min-w-0") %>">
   <%= section_heading "Líderes", "user-check" %>
-  <p class="-mt-2 mb-5 text-[12px] font-medium text-ink-500">
+  <p class="-mt-2 mb-5 text-label font-medium text-ink-500">
     <% if staffing %>
       Los cambios de líderes se guardan al instante · 1 hombre y 1 mujer por rol.
     <% else %>
@@ -31,7 +31,7 @@
           <%= render "companies/leader_slot", person: auxiliars.find { |auxiliar| auxiliar.gender == gender }, role: "auxiliar", gender: gender %>
         <% end %>
       </div>
-      <p class="mt-2 text-[11.5px] font-medium text-ink-500">
+      <p class="mt-2 text-label font-medium text-ink-500">
         <% if company.auxiliar_company %>
           Se asignan desde <%= link_to company.auxiliar_company.name, company.auxiliar_company, class: "font-semibold text-primary-600 dark:text-primary-300 hover:underline" %>.
         <% else %>
@@ -54,7 +54,7 @@
           Asignar
         <% end %>
       </div>
-      <p class="mt-2 text-[11.5px] font-medium text-ink-500">Solo aparecen consejeros sin compañía que llenan un espacio vacante.</p>
+      <p class="mt-2 text-label font-medium text-ink-500">Solo aparecen consejeros sin compañía que llenan un espacio vacante.</p>
     <% end %>
   <% end %>
 </section>

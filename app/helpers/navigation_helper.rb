@@ -81,13 +81,31 @@ module NavigationHelper
   # así nadie depende de las flechas del navegador.
   def back_to(label, url)
     content_for :back do
-      link_to url, title: "Volver a #{label}", data: { scroll_restore: true }, class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition" do
+      link_to url, title: "Volver a #{label}", data: { scroll_restore: true }, class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted transition" do
         safe_join([
           icon("arrow-left", class: "w-4 h-4 shrink-0"),
-          tag.span(label, class: "max-w-[180px] truncate text-[12.5px] font-semibold")
+          tag.span(label, class: "max-w-[180px] truncate text-label font-semibold")
         ])
       end
     end
+  end
+
+  # Volver a donde se vino (return_to), con el nombre de esa página: desde el organigrama dice «Organigrama»,
+  # no «Compañías». Sin return_to, o si no se reconoce la página, quedan el destino y el nombre de siempre.
+  def back_to_origin(label, fallback)
+    url = safe_return_to(fallback)
+    back_to(url == fallback ? label : (page_label_for(url) || label), url)
+  end
+
+  # El nombre de una página de la app por su dirección: los del menú y las pocas que no están en él.
+  def page_label_for(url)
+    path = URI.parse(url).path.chomp("/")
+    named = nav_items.filter_map { |item| [ URI.parse(item[:url]).path, item[:text] ] if item[:url] }
+    extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ] ]
+    # La dirección más larga que coincida gana: /companies/overview antes que /companies.
+    (extra + named).sort_by { |route, _| -route.length }.find { |route, _| path == route || path.start_with?("#{route}/") }&.last
+  rescue URI::InvalidURIError
+    nil
   end
 
   # La ficha de un participante vuelve a donde se abrió: la lista de jóvenes o de staff, o el escáner

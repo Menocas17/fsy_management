@@ -3,10 +3,10 @@
   form_url = local_assigns.fetch(:form_url, participants_path)
   show_role = local_assigns.fetch(:show_role, false)
   staff_roles = Participant.rols.keys.reject { |key| key == "joven" }
-  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-[13px] font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
+  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
 %>
 <%= form_with url: form_url, method: :get, data: { turbo_frame: "participants_table", turbo_action: "advance", controller: "auto-submit" },
-      class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-3" do |f| %>
+      class: "flex flex-col lg:flex-row lg:items-start gap-3" do |f| %>
   <%# Todo en una sola fila. La búsqueda toma el ancho que sobra y es la que cede (hasta 11rem); los filtros
       no ceden y miden como mucho lo que queda, y si aun así no caben se deslizan de lado, como en el
       teléfono, en vez de bajar el último a una segunda fila. %>
@@ -16,7 +16,7 @@
           value: params[:query],
           placeholder: "Buscar por nombre…",
           aria: { label: "Buscar por nombre" },
-          class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+          class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           data: { action: "input->auto-submit#typed" } %>
   </div>
   <div data-controller="scroll-reveal" data-participant-filters
@@ -45,7 +45,7 @@
           placeholder: "Compañía o número",
           aria: { label: "Filtrar por compañía" },
           title: "Número o nombre de la compañía",
-          class: "h-10 w-40 px-3 rounded-control bg-surface border border-line text-[13px] font-semibold text-ink-700 placeholder:text-ink-300 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
+          class: "h-10 w-40 px-3 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 placeholder:text-ink-300 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
           data: { action: "input->auto-submit#typed" } %>
   </div>
 <% end %>

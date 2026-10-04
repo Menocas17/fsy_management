@@ -7,8 +7,8 @@
 %>
 <% if trainings.any? && participant.staff_member? %>
   <section class="<%= card_classes("p-5 md:p-6") %>" data-trainings-card>
-    <%= section_heading "Capacitaciones", "graduation-cap" %>
-    <p class="-mt-2 mb-4 text-[13px] font-semibold text-ink-900">
+    <%= section_heading "Capacitaciones", "graduation-cap", tone: :amber %>
+    <p class="-mt-2 mb-4 text-body font-semibold text-ink-900">
       <% if held.any? %>
         Asistió a <%= came %> de <%= held.size %> hasta ahora
       <% else %>
@@ -26,7 +26,7 @@
             [ "faltó", "text-cat-rose-ink border-cat-rose/30", "x" ]
           end
         %>
-        <span class="inline-flex items-center gap-2 px-3 py-2 rounded-control border bg-canvas dark:bg-slate-900/60 text-[12.5px] font-bold <%= tone %>"
+        <span class="inline-flex items-center gap-2 px-3 py-2 rounded-control border bg-sunken text-label font-bold <%= tone %>"
               title="<%= training.name %>: <%= state %>" data-training-mark="<%= state %>">
           <%= icon icon_name, class: "w-3.5 h-3.5" %>
           <%= SpanishDates.long(training.held_on).sub(/\A\w+ /, "") %>

@@ -3,19 +3,19 @@
 <% content_for :eyebrow, "Inventario" %>
 <% back_to "Inventario", inventories_path %>
 <%
-  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-[13px] font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
-  filter_chip = ->(active) { "inline-flex items-center h-10 px-3.5 rounded-control text-[13px] font-semibold transition #{active ? 'bg-primary-700 text-white shadow-sm' : 'border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700'}" }
+  secondary = "inline-flex items-center gap-2 h-10 px-3.5 rounded-control border border-line bg-surface text-body font-semibold text-ink-700 hover:bg-muted transition"
+  filter_chip = ->(active) { "inline-flex items-center h-10 px-3.5 rounded-control text-body font-semibold transition #{active ? 'bg-primary-700 text-white shadow-sm' : 'border border-line bg-surface text-ink-700 hover:bg-muted'}" }
   low_count = @inventory.items.count { |item| item.low? || item.out? }
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10" data-controller="inventory-adjust">
+<%= render PageComponent.new(width: :page, data: { controller: "inventory-adjust" }) do %>
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
     <div class="flex items-center gap-3 min-w-0">
       <span class="w-11 h-11 shrink-0 rounded-tile text-white flex items-center justify-center <%= inventory_tile_class(@inventory) %>">
         <%= icon @inventory.icon, class: "w-5 h-5" %>
       </span>
       <div class="min-w-0">
-        <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 truncate"><%= @inventory.name %></h1>
-        <p class="text-[12.5px] font-semibold text-ink-500">
+        <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @inventory.name %></h1>
+        <p class="text-label font-semibold text-ink-500">
           <%= pluralize(@inventory.items.size, "artículo") %> · <%= low_count %> por agotarse · códigos <%= @inventory.code_prefix %>-0000
         </p>
       </div>
@@ -59,7 +59,7 @@
           <thead>
             <tr class="border-b border-line-soft">
               <% [ "Artículo", "Código", "Existencia", "Mínimo", "Estado", "" ].each_with_index do |header, index| %>
-                <th scope="col" class="px-4 py-3 text-[10.5px] font-bold tracking-[.06em] uppercase text-ink-500 <%= index == 2 ? 'text-right' : index == 5 ? 'text-right' : 'text-left' %>"><%= header %></th>
+                <th scope="col" class="px-4 py-3 text-meta font-bold tracking-[.06em] uppercase text-ink-500 <%= index == 2 ? 'text-right' : index == 5 ? 'text-right' : 'text-left' %>"><%= header %></th>
               <% end %>
             </tr>
           </thead>
@@ -67,16 +67,16 @@
             <% @items.each do |item| %>
               <tr class="border-b border-line-soft last:border-b-0" data-item-code="<%= item.code %>">
                 <td class="px-4 py-3">
-                  <%= link_to item.name, item, class: "text-[13.5px] font-bold text-ink-900 hover:underline" %>
+                  <%= link_to item.name, item, class: "text-body font-bold text-ink-900 hover:underline" %>
                   <% if item.location.present? %>
-                    <span class="block text-[11.5px] font-semibold text-ink-500"><%= item.location %></span>
+                    <span class="block text-label font-semibold text-ink-500"><%= item.location %></span>
                   <% end %>
                 </td>
-                <td class="px-4 py-3 text-[12.5px] font-mono text-ink-500"><%= item.code %></td>
-                <td class="px-4 py-3 text-right text-[13.5px] font-bold tabular-nums text-ink-900" data-item-quantity>
+                <td class="px-4 py-3 text-label font-mono text-ink-500"><%= item.code %></td>
+                <td class="px-4 py-3 text-right text-body font-bold tabular-nums text-ink-900" data-item-quantity>
                   <%= item.quantity %> <span class="font-semibold text-ink-500"><%= item.unit %></span>
                 </td>
-                <td class="px-4 py-3 text-[13px] tabular-nums text-ink-500"><%= item.minimum %></td>
+                <td class="px-4 py-3 text-body tabular-nums text-ink-500"><%= item.minimum %></td>
                 <td class="px-4 py-3"><%= inventory_status_chip(item) %></td>
                 <td class="px-4 py-3">
                   <div class="flex justify-end gap-1">
@@ -99,16 +99,16 @@
       </div>
     </div>
     <% if @pagy.pages > 1 %>
-      <nav class="mt-4 flex justify-center" aria-label="Paginación"><%== @pagy.series_nav(anchor_string: 'class="px-3 py-1.5 mx-0.5 rounded-lg text-[13px] font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700"') %></nav>
+      <nav class="mt-4 flex justify-center" aria-label="Paginación"><%== @pagy.series_nav(anchor_string: 'class="px-3 py-1.5 mx-0.5 rounded-inner text-body font-semibold text-ink-700 hover:bg-muted"') %></nav>
     <% end %>
   <% else %>
-    <div class="<%= card_classes("p-10 text-center") %>">
-      <p class="text-[15px] font-bold text-ink-900">
-        <%= params[:query].present? || params[:filter] == "low" ? "Nada que coincida con esa búsqueda" : "Este inventario todavía no tiene artículos" %>
-      </p>
-      <p class="mt-1 text-[13px] text-ink-500">Agrega el primero y su código QR se genera solo.</p>
+    <% searching = params[:query].present? || params[:filter] == "low" %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(name: "inventory-items", icon: searching ? "search-x" : "package",
+            title: searching ? "Nada que coincida con esa búsqueda" : "Este inventario todavía no tiene artículos",
+            text: searching ? "Prueba con otra búsqueda o quita el filtro." : "Agrega el primero y su código QR se genera solo.") %>
     </div>
   <% end %>
 
   <%= render "inventories/adjust_dialog" %>
-</div>
+<% end %>

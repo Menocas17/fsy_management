@@ -12,35 +12,35 @@
           <%= image_tag "fsy-mark.png", alt: "", aria: { hidden: true }, class: "w-8 h-8" %>
         </span>
         <span>
-          <span class="block text-[15px] font-extrabold leading-tight">FSY Management</span>
-          <span class="block mt-0.5 text-[11px] font-bold tracking-[.07em] uppercase text-white/70">Managua-Caribe</span>
+          <span class="block text-title font-extrabold leading-tight">FSY Management</span>
+          <span class="block mt-0.5 text-meta font-bold tracking-[.07em] uppercase text-white/70">Managua-Caribe</span>
         </span>
       </div>
 
-      <h2 class="text-[21px] md:text-[25px] font-extrabold leading-tight tracking-tight text-balance"><%= headline %></h2>
+      <h2 class="text-display md:text-[25px] font-extrabold leading-tight tracking-tight text-balance"><%= headline %></h2>
 
-      <p class="inline-flex items-center gap-2 text-[12.5px] font-semibold text-white/80">
+      <p class="inline-flex items-center gap-2 text-label font-semibold text-white/80">
         <%= icon meta_icon, class: "w-4 h-4 shrink-0" %>
         <%= meta_text %>
       </p>
 
       <figure class="hidden md:block mt-auto rounded-tile bg-white/10 border border-white/15 px-4 py-4">
-        <blockquote class="text-[12.5px] leading-relaxed italic text-white/90">
+        <blockquote class="text-label leading-relaxed italic text-white/90">
           “He aquí mi Espíritu reposa sobre ti; por consiguiente justificaré todas tus palabras… por tanto, anda conmigo.”
         </blockquote>
-        <figcaption class="mt-2 text-[10.5px] font-bold tracking-[.06em] uppercase text-white/70">Moisés 6:34</figcaption>
+        <figcaption class="mt-2 text-meta font-bold tracking-[.06em] uppercase text-white/70">Moisés 6:34</figcaption>
       </figure>
     </aside>
 
     <div class="px-6 py-8 md:px-9 md:py-10 flex flex-col justify-center">
       <% if flash[:alert].present? %>
-        <div id="alert" role="alert" class="mb-5 flex items-start gap-2.5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-3.5 py-3 text-[13px] font-semibold leading-snug text-cat-rose-ink">
+        <div id="alert" role="alert" class="mb-5 flex items-start gap-2.5 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-3.5 py-3 text-body font-semibold leading-snug text-cat-rose-ink">
           <%= icon "circle-alert", class: "w-[17px] h-[17px] shrink-0 mt-px" %>
           <span><%= flash[:alert] %></span>
         </div>
       <% end %>
       <% if flash[:notice].present? %>
-        <div id="notice" role="status" class="mb-5 flex items-start gap-2.5 rounded-xl border border-cat-green/30 bg-cat-green/10 px-3.5 py-3 text-[13px] font-semibold leading-snug text-cat-green-ink">
+        <div id="notice" role="status" class="mb-5 flex items-start gap-2.5 rounded-tile border border-cat-green/30 bg-cat-green/10 px-3.5 py-3 text-body font-semibold leading-snug text-cat-green-ink">
           <%= icon "check", class: "w-[17px] h-[17px] shrink-0 mt-px" %>
           <span><%= flash[:notice] %></span>
         </div>
@@ -50,5 +50,5 @@
     </div>
   </div>
 
-  <p class="mt-5 text-center text-[11.5px] font-semibold text-ink-500"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %> · 11 al 16 de enero</p>
+  <p class="mt-5 text-center text-label font-semibold text-ink-500"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %> · 11 al 16 de enero</p>
 </div>

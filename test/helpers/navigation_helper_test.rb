@@ -72,4 +72,12 @@ class NavigationHelperTest < ActionView::TestCase
   test "items can be splatted straight into ButtonComponent" do
     nav_items.each { |item| assert ButtonComponent.new(**item) }
   end
+
+  test "the way back is named after the page it returns to" do
+    assert_equal "Organigrama", page_label_for("/organigrama?scope=logistica")
+    assert_equal "Vista general", page_label_for(overview_companies_path)
+    assert_equal "Compañías", page_label_for(companies_path)
+    assert_equal "Jóvenes", page_label_for("#{participants_path}?stake=villa_flor")
+    assert_nil page_label_for("/no-existe")
+  end
 end

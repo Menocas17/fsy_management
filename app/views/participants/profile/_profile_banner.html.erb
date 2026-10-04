@@ -16,10 +16,10 @@
         </button>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-            <h1 class="text-[22px] font-extrabold leading-tight tracking-tight text-ink-900 text-balance break-words"><%= participant.full_name %></h1>
+            <h1 class="text-display font-extrabold leading-tight tracking-tight text-ink-900 text-balance break-words"><%= participant.full_name %></h1>
             <%= render(RoleSpanComponent.new(role: participant.rol)) %>
           </div>
-          <p class="mt-1.5 sm:mt-1 text-[13.5px] sm:text-[13px] font-medium text-ink-500 text-pretty">
+          <p class="mt-1.5 sm:mt-1 text-body font-medium text-ink-500 text-pretty">
             <%= [ participant.stake&.titleize.then { |s| s && "Estaca #{s}" }, participant.ward&.titleize.then { |w| w && "Barrio #{w}" }, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
         </div>
@@ -43,17 +43,17 @@
     </div>
 
     <dialog data-dialog-target="modal" data-dialog-name="photo" data-action="click->dialog#clickOutside" aria-modal="true"
-            class="p-0 m-auto w-full max-w-lg rounded-2xl shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
-      <div class="relative p-4 bg-surface rounded-2xl">
+            class="p-0 m-auto w-full max-w-lg rounded-card shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+      <div class="relative p-4 bg-surface rounded-card">
         <button type="button" data-action="click->dialog#close" aria-label="Cerrar"
-                class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-700 dark:text-slate-200 hover:bg-line-soft cursor-pointer transition">
+                class="absolute top-3 right-3 w-8 h-8 after:absolute after:-inset-1.5 rounded-full flex items-center justify-center bg-muted text-ink-700 dark:text-ink-700 hover:bg-line-soft cursor-pointer transition">
           <%= icon "x", class: "w-4 h-4" %>
         </button>
         <h2 class="mb-3 pl-2 pr-10 text-lg font-bold text-balance break-words text-ink-900">Fotografía de <%= participant.full_name %></h2>
         <% if participant.avatar.attached? %>
           <%# La versión de vista previa (1200px), no el original; y una altura mínima para que el cuadro no salte al cargar. %>
           <%= image_tag participant.avatar.variant(:preview), loading: "lazy", decoding: "async",
-                class: "w-full min-h-60 max-h-[70vh] object-contain rounded-xl bg-canvas" %>
+                class: "w-full min-h-60 max-h-[70vh] object-contain rounded-tile bg-canvas" %>
         <% else %>
           <p class="px-2 pb-2 text-sm text-ink-500">Este participante aún no tiene fotografía.</p>
         <% end %>

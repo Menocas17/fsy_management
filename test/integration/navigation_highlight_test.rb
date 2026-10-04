@@ -41,6 +41,14 @@ class NavigationHighlightTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a company opened from another page goes back there, named after it" do
+    get company_path(@company, return_to: "/organigrama?scope=logistica")
+    assert_select "[data-page-back] a[href='/organigrama?scope=logistica']", text: /Organigrama/
+
+    get company_path(@company, return_to: "https://otro-sitio.com")
+    assert_select "[data-page-back] a[href='#{companies_path}']", text: /Compañías/
+  end
+
   test "detail pages carry a way back in the top bar" do
     {
       participant_path(@participant) => "Jóvenes",

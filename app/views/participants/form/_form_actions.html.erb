@@ -11,7 +11,7 @@
     <%# Solo en la propia ficha: la contraseña de otro no se toca desde aquí. %>
     <% if participant.persisted? && participant == Current.user&.participant %>
       <%= link_to edit_password_change_path,
-            class: "inline-flex items-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition cursor-pointer" do %>
+            class: "inline-flex items-center gap-2 h-10 px-4 rounded-control border border-line text-sm font-semibold text-ink-700 hover:bg-muted transition cursor-pointer" do %>
         <%= icon "key-round", class: "w-4 h-4" %>
         Cambiar contraseña
       <% end %>

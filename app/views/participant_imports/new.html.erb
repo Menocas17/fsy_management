@@ -1,7 +1,7 @@
 <% content_for :title, "Carga de participantes" %>
-<% content_for :eyebrow, "Reportes" %>
+<% content_for :eyebrow, "Participantes" %>
 <% back_to "Reportes", reports_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-5xl mx-auto space-y-5">
+<%= render PageComponent.new(width: :page) do %>
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading "Subir archivo", "upload" %>
@@ -10,8 +10,8 @@
         <div>
           <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
           <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
-                class: "w-full text-[13px] text-ink-700 file:mr-3 file:h-10 file:px-4 file:rounded-control file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-[13px] file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
-          <p class="mt-1.5 text-[11.5px] font-medium text-ink-500">
+                class: "w-full text-body text-ink-700 file:mr-3 file:h-10 file:px-4 file:rounded-control file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-body file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
+          <p class="mt-1.5 text-label font-medium text-ink-500">
             La primera fila tiene que ser la de los títulos de columna.
           </p>
         </div>
@@ -24,17 +24,17 @@
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
       <%= section_heading "Columnas que reconoce", "table" %>
-      <p class="-mt-2 mb-4 text-[12.5px] leading-relaxed text-ink-500">
+      <p class="-mt-2 mb-4 text-label leading-relaxed text-ink-500">
         No importan mayúsculas, acentos ni el orden. Las columnas que no aparezcan aquí se ignoran, y lo que falte
         se puede completar después desde la ficha.
       </p>
       <div class="flex flex-wrap gap-1.5">
         <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Compañía\ auxiliar Teléfono Correo
               Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
-          <span class="px-2.5 py-1 rounded-lg bg-canvas dark:bg-slate-900/60 border border-line-soft text-[11.5px] font-semibold text-ink-700"><%= column %></span>
+          <span class="px-2.5 py-1 rounded-inner bg-sunken border border-line-soft text-label font-semibold text-ink-700"><%= column %></span>
         <% end %>
       </div>
-      <ul class="mt-4 space-y-1.5 text-[12.5px] leading-relaxed text-ink-500 list-disc list-inside">
+      <ul class="mt-4 space-y-1.5 text-label leading-relaxed text-ink-500 list-disc list-inside">
         <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
         <li><strong>Compañía</strong> se busca por número: la del joven, o la del consejero que la acompaña.</li>
         <li><strong>Compañía auxiliar</strong> (Alfa, «Auxiliar Beta»…) es la del auxiliar; sin ella, se toma la de su compañía.</li>
@@ -50,21 +50,21 @@
       <ul class="divide-y divide-line-soft">
         <% @imports.each do |import| %>
           <li>
-            <%= link_to participant_import_path(import), class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-lg hover:bg-canvas dark:hover:bg-slate-700/40" do %>
+            <%= link_to participant_import_path(import), class: "flex flex-wrap items-center gap-x-3 gap-y-1 py-3 -mx-2 px-2 rounded-inner hover:bg-canvas dark:hover:bg-muted/40" do %>
               <span class="min-w-0 flex-1">
-                <span class="block text-[14px] font-bold text-ink-900 truncate"><%= import.filename %></span>
-                <span class="block text-[12px] font-semibold text-ink-500"><%= SpanishDates.short_with_time(import.created_at) %> · <%= import.uploaded_by_name %></span>
+                <span class="block text-body font-bold text-ink-900 truncate"><%= import.filename %></span>
+                <span class="block text-label font-semibold text-ink-500"><%= SpanishDates.short_with_time(import.created_at) %> · <%= import.uploaded_by_name %></span>
               </span>
-              <span class="text-[12.5px] font-semibold text-ink-500 tabular-nums"><%= import.entered_count %> entraron</span>
+              <span class="text-label font-semibold text-ink-500 tabular-nums"><%= import.entered_count %> entraron</span>
               <% if import.pending_count.positive? %>
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-cat-amber/20 text-cat-amber-ink"><%= import.pending_count %> por resolver</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold bg-cat-amber/20 text-cat-amber-ink"><%= import.pending_count %> por resolver</span>
               <% end %>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="text-[13px] text-ink-500">Todavía no hay cargas.</p>
+      <p class="text-body text-ink-500">Todavía no hay cargas.</p>
     <% end %>
   </section>
-</div>
+<% end %>

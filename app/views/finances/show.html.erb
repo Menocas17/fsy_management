@@ -1,74 +1,74 @@
 <% content_for :title, "Finanzas" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Logística" %>
 <% total = @summary.total %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl space-y-5">
+<%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-wrap items-center justify-between gap-3">
-    <p class="text-[13px] font-medium text-ink-500">
-      Todo en córdobas<%= " · dólar a C$ #{FinanceSettings.usd_rate}" if FinanceSettings.usd_rate %>.
-    </p>
+    <div class="flex flex-wrap items-center gap-2.5">
+      <p class="text-body font-medium text-ink-700">
+        Todo en córdobas<%= " · dólar a C$ #{FinanceSettings.usd_rate}" if FinanceSettings.usd_rate %>.
+      </p>
+      <% unless can_operate_finances? %>
+        <span role="note" title="Los gastos los presentan y aprueban el área de Finanzas y el director de logística.">
+          <%= render ChipComponent.new(label: "Solo lectura", icon: "eye", data: { finance_readonly: true }) %>
+        </span>
+      <% end %>
+    </div>
     <div class="flex flex-wrap gap-2">
       <%= link_to expenses_path, class: button_classes(:secondary) do %>
-        <%= icon "list", class: "w-4 h-4" %>
+        <%= icon "list", class: "size-4" %>
         Ver gastos
       <% end %>
       <%= link_to expenses_reports_path, target: "_blank", rel: "noopener", class: button_classes(:secondary) do %>
-        <%= icon "printer", class: "w-4 h-4" %>
+        <%= icon "printer", class: "size-4" %>
         Rendición PDF
       <% end %>
       <%= link_to expenses_workbook_reports_path, class: button_classes(:secondary) do %>
-        <%= icon "sheet", class: "w-4 h-4" %>
+        <%= icon "sheet", class: "size-4" %>
         Excel
       <% end %>
       <% if can_configure_finances? %>
         <%= link_to edit_finances_path, class: button_classes(:secondary) do %>
-          <%= icon "settings", class: "w-4 h-4" %>
+          <%= icon "settings", class: "size-4" %>
           Presupuesto
         <% end %>
       <% end %>
       <% if can_operate_finances? %>
         <%= link_to new_expense_path, class: button_classes do %>
-          <%= icon "plus", class: "w-4 h-4" %>
+          <%= icon "plus", class: "size-4" %>
           Nuevo gasto
         <% end %>
       <% end %>
     </div>
   </div>
-  <% unless can_operate_finances? %>
-    <p class="rounded-tile border border-line-soft bg-canvas px-4 py-3 text-[12.5px] font-semibold text-ink-500" role="note" data-finance-readonly>
-      Solo lectura. Los gastos los presentan y aprueban el área de Finanzas y el director de logística.
-    </p>
-  <% end %>
 
-  <% if total.budget.nil? %>
-    <div class="rounded-tile border border-cat-amber/30 bg-cat-amber/10 px-5 py-4 text-[13.5px] font-semibold text-cat-amber-ink" role="status">
-      Todavía no hay presupuesto general.
-      <%= can_configure_finances? ? link_to("Fijarlo ahora", edit_finances_path, class: "underline") : "Lo fija el director de logística." %>
-    </div>
-  <% end %>
+  <%# Las cuatro cifras que abren Finanzas (mosaicos de cifra grandes), como en el inicio. %>
+  <section class="grid grid-cols-2 gap-3 md:gap-4" aria-label="Resumen del gasto">
+    <% [ [ "Ejecutado", total.executed, "Consolidado con factura o justificación", "circle-check", :green ],
+         [ "Comprometido", total.committed, "Aprobado, falta consolidar", "clock", :blue ],
+         [ "Por aprobar", total.presented, "Presentado, sin aprobar", "hourglass", :amber ],
+         [ "Asignado a categorías", @summary.assigned_cents, "Suma de los presupuestos propios", "layout-grid", :indigo, "Asignado" ] ].each do |label, value, hint, icon_name, tone, short| %>
+      <%= render StatTileComponent.new(value: money(value), label: label, short_label: short, hint: hint, icon: icon_name, tone: tone, value_data: { finance_figure: label.parameterize }) %>
+    <% end %>
+  </section>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-finance-total>
-    <div class="flex flex-wrap items-end justify-between gap-3 mb-3">
-      <div>
-        <p class="text-[13px] font-bold text-ink-700">Presupuesto general</p>
-        <p class="text-[30px] font-extrabold leading-tight tabular-nums text-ink-900"><%= money(total.budget) %></p>
-      </div>
-      <p class="text-[13px] font-semibold text-ink-500 tabular-nums">Disponible: <span class="font-bold text-ink-900" data-available><%= money(total.available) %></span></p>
-    </div>
-    <%= budget_bar(total) %>
-    <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12.5px]">
-      <% [ [ "Ejecutado", total.executed, "Consolidado con factura o justificación" ],
-           [ "Comprometido", total.committed, "Aprobado, falta consolidar" ],
-           [ "Por aprobar", total.presented, "Presentado, sin aprobar" ],
-           [ "Asignado a categorías", @summary.assigned_cents, "Suma de los presupuestos propios" ] ].each do |label, value, hint| %>
-        <div>
-          <dt class="font-bold text-ink-700"><%= label %></dt>
-          <dd class="text-[16px] font-extrabold tabular-nums text-ink-900"><%= money(value) %></dd>
-          <dd class="text-[11px] font-medium text-ink-500"><%= hint %></dd>
-        </div>
+    <%= section_heading "Presupuesto general", "wallet" %>
+    <% if total.budget.nil? %>
+      <%= render EmptyStateComponent.new(title: "Todavía no hay presupuesto general", icon: "circle-alert", tone: :amber, name: "finance-budget",
+            text: "Lo fija el director de logística. Mientras tanto los gastos se presentan y aprueban igual; la barra de avance aparece en cuanto haya un monto.") do |empty| %>
+        <% if can_configure_finances? %>
+          <% empty.with_action { link_to "Fijarlo ahora", edit_finances_path, class: button_classes(:secondary) } %>
+        <% end %>
       <% end %>
-    </dl>
-    <% if total.budget && @summary.assigned_cents > total.budget %>
-      <p class="mt-3 text-[12.5px] font-semibold text-cat-rose-ink">Los presupuestos de las categorías suman más que el general.</p>
+    <% else %>
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-3">
+        <p class="text-stat font-extrabold tracking-tight tabular-nums text-ink-900"><%= money(total.budget) %></p>
+        <p class="text-body font-semibold text-ink-500 tabular-nums">Disponible: <span class="font-bold text-ink-900" data-available><%= money(total.available) %></span></p>
+      </div>
+      <%= budget_bar(total) %>
+      <% if @summary.assigned_cents > total.budget %>
+        <p class="mt-3 text-label font-semibold text-cat-rose-ink">Los presupuestos de las categorías suman más que el general.</p>
+      <% end %>
     <% end %>
   </section>
 
@@ -79,20 +79,20 @@
           <div class="flex items-center gap-3">
             <%= category_tile(row.category) %>
             <div class="min-w-0">
-              <p class="text-[14.5px] font-bold text-ink-900 truncate"><%= row.name %></p>
-              <p class="text-[12px] font-semibold text-ink-500 tabular-nums">
+              <p class="text-title font-bold text-ink-900 truncate"><%= row.name %></p>
+              <p class="text-label font-semibold text-ink-500 tabular-nums">
                 <%= row.budget ? "de #{money(row.budget)}" : "sin presupuesto propio" %>
               </p>
             </div>
           </div>
-          <p class="mt-1 text-[22px] font-extrabold tabular-nums text-ink-900"><%= money(row.spent) %></p>
+          <p class="mt-1 text-display font-extrabold tabular-nums text-ink-900"><%= money(row.spent) %></p>
           <% if row.budget %>
             <div class="mt-2"><%= budget_bar(row) %></div>
-            <p class="mt-1.5 text-[12px] font-semibold <%= row.tone == :over ? "text-cat-rose-ink" : "text-ink-500" %> tabular-nums">
+            <p class="mt-1.5 text-label font-semibold <%= row.tone == :over ? "text-cat-rose-ink" : "text-ink-500" %> tabular-nums">
               <%= row.tone == :over ? "Pasado por #{money(-row.available)}" : "Quedan #{money(row.available)}" %>
             </p>
           <% end %>
-          <p class="mt-1 text-[11.5px] font-medium text-ink-500 tabular-nums">
+          <p class="mt-1 text-label font-medium text-ink-500 tabular-nums">
             Ejecutado <%= money(row.executed) %> · comprometido <%= money(row.committed) %><%= " · por aprobar #{money(row.presented)}" if row.presented.positive? %>
           </p>
         </div>
@@ -110,4 +110,4 @@
       <%= render "expenses/compact_list", expenses: @missing_receipt, empty: "Todos los gastos aprobados tienen su factura." %>
     </section>
   </div>
-</div>
+<% end %>

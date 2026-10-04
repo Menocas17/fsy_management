@@ -7,7 +7,7 @@
   logistics_title = @logistics_directors.map(&:full_name).join(" · ").presence || "Logística"
   logistics_groups = @logistics.group_by(&:logistics_area).sort_by { |area, _| area&.name || "~" }
   company_node = ->(company) { render("organigrama/company_node", company: company, jovenes_count: @jovenes_counts.fetch(company.id, 0)) }
-  control = "w-8 h-8 inline-flex items-center justify-center rounded-lg text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition"
+  control = "w-8 h-8 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer transition"
 %>
 
 <% if branches || @directors.any? %>
@@ -80,17 +80,17 @@
 
         <div class="absolute left-3 top-3"><%= render "organigrama/view_switch", floating: true %></div>
 
-        <p class="absolute left-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-surface/90 px-2.5 py-1.5 text-[11.5px] font-semibold text-ink-500 shadow-sm pointer-events-none">
+        <p class="absolute left-3 bottom-3 inline-flex items-center gap-1.5 rounded-inner bg-surface/90 px-2.5 py-1.5 text-label font-semibold text-ink-500 shadow-sm pointer-events-none">
           <%= icon "move", class: "w-3.5 h-3.5" %>
           Arrastra para moverte · Ctrl + rueda para acercar
         </p>
 
         <div data-org-chart-controls
-             class="absolute right-3 bottom-3 flex items-center gap-0.5 p-1 rounded-xl bg-surface/95 border border-line-soft shadow-md">
+             class="absolute right-3 bottom-3 flex items-center gap-0.5 p-1 rounded-tile bg-surface/95 border border-line-soft shadow-md">
           <button type="button" data-action="org-chart#zoomOut" aria-label="Alejar" title="Alejar" class="<%= control %>">
             <%= icon "zoom-out", class: "w-4 h-4" %>
           </button>
-          <span data-org-chart-target="zoomLabel" class="w-11 text-center text-[12px] font-bold tabular-nums text-ink-700">100%</span>
+          <span data-org-chart-target="zoomLabel" class="w-11 text-center text-label font-bold tabular-nums text-ink-700">100%</span>
           <button type="button" data-action="org-chart#zoomIn" aria-label="Acercar" title="Acercar" class="<%= control %>">
             <%= icon "zoom-in", class: "w-4 h-4" %>
           </button>
@@ -98,13 +98,13 @@
           <% if @show_companies && @auxiliar_companies.any? %>
             <button type="button" data-action="org-chart#toggleAll" data-org-chart-target="toggleAllButton" aria-pressed="false"
                     title="Mostrar u ocultar las compañías de cada rama"
-                    class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+                    class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-inner text-label font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
               <%= icon "list-tree", class: "w-4 h-4" %>
               <span data-org-chart-target="toggleAllLabel">Mostrar compañías</span>
             </button>
           <% end %>
           <button type="button" data-action="org-chart#fit" title="Ver todo el organigrama"
-                  class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12px] font-bold text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+                  class="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-inner text-label font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
             <%= icon "scan", class: "w-4 h-4" %>
             Ajustar
           </button>
@@ -173,8 +173,8 @@
     <div class="md:hidden px-4 pt-6"><%= render "organigrama/view_switch" %></div>
     <div class="hidden md:block absolute left-3 top-3 z-10"><%= render "organigrama/view_switch", floating: true %></div>
     <div class="px-4 md:px-8 pt-5 md:pt-20 pb-10">
-      <div class="<%= card_classes("p-10 text-center") %>">
-        <p class="text-ink-500">Aún no hay compañías ni personal registrados.</p>
+      <div class="<%= card_classes("p-5 md:p-6") %>">
+        <%= render EmptyStateComponent.new(title: "Aún no hay compañías ni personal registrados", icon: "network", name: "organigrama") %>
       </div>
     </div>
   </div>

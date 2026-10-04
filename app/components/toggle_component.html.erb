@@ -2,12 +2,12 @@
   <span class="pr-4">
     <span class="block text-sm font-semibold text-ink-900"><%= @label %></span>
     <% if @description.present? %>
-      <span class="block text-[12.5px] text-ink-500 mt-0.5"><%= @description %></span>
+      <span class="block text-label text-ink-500 mt-0.5"><%= @description %></span>
     <% end %>
   </span>
   <span class="relative inline-flex items-center shrink-0">
     <%= tag.input type: "checkbox", id: @id, class: "sr-only peer", data: input_data %>
-    <span class="w-[42px] h-6 bg-line dark:bg-slate-600 rounded-full transition-colors peer-checked:bg-primary-600
+    <span class="w-[42px] h-6 bg-line dark:bg-line rounded-full transition-colors peer-checked:bg-primary-600
                  peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary-500
                  after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:shadow-sm
                  after:h-5 after:w-5 after:transition-transform after:duration-200 after:ease-[cubic-bezier(0.23,1,0.32,1)] peer-checked:after:translate-x-[18px]"></span>

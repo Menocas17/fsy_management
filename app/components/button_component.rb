@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ButtonComponent < ViewComponent::Base
-  def initialize(url: nil, text:, type: nil, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [], except_paths: [], hint: nil)
+  def initialize(url: nil, text:, icon: nil, secondary_icon: nil, is_submit: false, is_delete: nil, is_button: nil, is_nav: nil, classes: nil, section: nil, method: nil, disabled: false, lucide_icon: nil, active_paths: [], except_paths: [], hint: nil)
     @url = url
     # Por qué está deshabilitado: «Próximamente» si todavía no existe, o quién tiene acceso si es por permiso.
     @hint = hint || "Próximamente"
@@ -10,7 +10,6 @@ class ButtonComponent < ViewComponent::Base
     @active_paths = active_paths
     @except_paths = except_paths
     @text = text
-    @type = type
     @icon = icon
     @is_submit = is_submit
     @classes = classes
@@ -22,29 +21,10 @@ class ButtonComponent < ViewComponent::Base
     @method = method
   end
 
+  # Solo lo usa el menú lateral (is_nav); las variantes de botón suelto se fueron con la guía de estilo:
+  # los botones salen de button_classes.
   def styles
-    base_styles = case @type
-    when "muted", "primary", "cancel", "delete"
-      "transition cursor-pointer shadow-md rounded-xl text-sm font-bold flex items-center justify-center"
-    else
-      ""
-    end
-
-    type_styles = case @type
-    when "muted"
-      "border py-1 px-2 border-gray-200 text-gray-600 rounded-lg hover:border-gray-400 font-normal dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-400"
-    when "primary"
-      "border py-2 px-4 text-white bg-primary-600 hover:border-gray-600"
-
-    when "cancel"
-      "border border-gray-300 text-gray-600 hover:border-gray-600 py-1 px-2 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-400"
-    when "delete"
-      "border py-2 px-4 text-white bg-rose-800 hover:border-gray-600"
-    else
-      "flex items-center gap-3 px-4 py-2.5 rounded-xl text-[14.5px] font-semibold transition-colors duration-200"
-    end
-
-    [ base_styles, type_styles, @classes ].compact.join(" ")
+    [ "flex items-center gap-3 px-4 py-2.5 rounded-tile text-title font-semibold transition-colors duration-200", @classes ].compact.join(" ")
   end
 
   def disabled?
@@ -62,7 +42,7 @@ class ButtonComponent < ViewComponent::Base
       "relative bg-primary-100/80 text-primary-700 shadow-sm dark:bg-primary-700/50 dark:text-white " \
         "before:absolute before:left-1 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-sun"
     else
-      "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-100"
+      "text-ink-500 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted/60 dark:hover:text-ink-900"
     end
   end
 

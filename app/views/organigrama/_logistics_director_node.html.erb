@@ -1,11 +1,11 @@
 <div class="<%= card_classes("inline-block w-full md:w-auto md:min-w-56 text-left px-4 py-3.5") %>" data-node="logistica">
-  <p class="text-[10px] font-bold tracking-[.08em] uppercase text-cat-amber-ink">Dirección de logística</p>
+  <p class="text-meta font-bold tracking-[.08em] uppercase text-cat-amber-ink">Dirección de logística</p>
   <% if directors.any? %>
     <div class="mt-2 flex items-center gap-2">
       <%= render "organigrama/people", people: directors, ring: "ring-surface" %>
-      <p class="text-[12.5px] font-semibold leading-snug text-ink-700"><%= directors.map(&:full_name).join(" · ") %></p>
+      <p class="text-label font-semibold leading-snug text-ink-700"><%= directors.map(&:full_name).join(" · ") %></p>
     </div>
   <% else %>
-    <p class="mt-2 text-[12.5px] font-semibold text-ink-500">Sin director de logística</p>
+    <p class="mt-2 text-label font-semibold text-ink-500">Sin director de logística</p>
   <% end %>
 </div>

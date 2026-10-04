@@ -57,4 +57,9 @@ class CompanyTest < ActiveSupport::TestCase
     assert_equal "Salón Las Américas", Company.new(dining_hall: :salon_las_americas).dining_hall_label
     assert_nil Company.new.dining_hall_label
   end
+
+  test "its initials tile reads C plus its number" do
+    assert_equal "C3", Company.new(name: "Compañía 3", number: 3).initials
+    assert_equal "L", Company.new(name: "Luz del Mundo").initials
+  end
 end

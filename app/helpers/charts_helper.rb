@@ -3,9 +3,10 @@ module ChartsHelper
   # no cambia de color al pasar del panel a la lista. Cada dato apunta a una categoría; la categoría tiene
   # su chip (clases de los tokens cat-* de application.css) y su hex para ApexCharts, que no entiende
   # OKLCH. Los hex son esos mismos tokens convertidos: si se cambia uno, se cambia el otro.
+  # Las barras son relleno sólido (DESIGN.md, «regla de color»): estos hex son los tokens cat-*-solid.
   CATEGORY_HEX = {
-    "blue" => "#0093c5", "indigo" => "#5965cd", "green" => "#369e4e", "amber" => "#dc932e",
-    "rose" => "#d14a5f", "teal" => "#0f9293", "navy" => "#1d447c", "neutral" => "#6f757e"
+    "blue" => "#0081b1", "indigo" => "#515bc3", "green" => "#298a41", "amber" => "#bb7400",
+    "rose" => "#c03a51", "teal" => "#008687", "navy" => "#1d447c", "neutral" => "#6f757e"
   }.freeze
   CATEGORY_CHIP = {
     "blue" => "bg-cat-blue/15 text-cat-blue-ink",
@@ -15,7 +16,7 @@ module ChartsHelper
     "rose" => "bg-cat-rose/15 text-cat-rose-ink",
     "teal" => "bg-cat-teal/15 text-cat-teal-ink",
     "navy" => "bg-primary-100 text-primary-700 dark:bg-primary-700/40 dark:text-primary-100",
-    "neutral" => "bg-canvas text-ink-500 dark:bg-slate-700 dark:text-slate-300"
+    "neutral" => "bg-canvas text-ink-500 dark:bg-muted dark:text-ink-700"
   }.freeze
 
   ROLE_CATEGORY = {

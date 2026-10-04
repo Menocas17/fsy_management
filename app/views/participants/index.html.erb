@@ -1,18 +1,18 @@
 <% content_for :title, "Jóvenes" %>
 <% content_for :eyebrow, "Participantes" %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <p class="text-[13px] font-medium text-ink-500"><%= pluralize(@pagy.count, "joven registrado", plural: "jóvenes registrados") %></p>
-    <% if can_create_participants? %>
-      <%= link_to new_participant_path, class: "inline-flex items-center gap-2 rounded-control bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-800 transition" do %>
-        <%= icon "plus", class: "w-4 h-4" %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { pluralize(@pagy.count, "joven registrado", plural: "jóvenes registrados") } %>
+  <% if can_create_participants? %>
+    <% page.with_actions do %>
+      <%= link_to new_participant_path, class: button_classes do %>
+        <%= icon "plus", class: "size-4" %>
         Nuevo participante
       <% end %>
     <% end %>
-  </div>
+  <% end %>
   <%= render "filters", form_url: participants_path %>
   <%= turbo_frame_tag "participants_table" do %>
     <%= render "results", participants: @participants, pagy: @pagy, is_staff: false,
                           empty_message: "No hay jóvenes que coincidan con la búsqueda." %>
   <% end %>
-</div>
+<% end %>

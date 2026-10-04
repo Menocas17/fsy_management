@@ -8,12 +8,12 @@
       <% open = nav_group_open?(section) %>
       <div data-nav-group="<%= section[:id] %>" data-open="<%= open %>" class="group/nav mt-2">
         <button type="button" data-action="nav-groups#toggle" aria-expanded="<%= open %>" aria-controls="<%= panel_id %>"
-                class="w-full flex items-center gap-2 h-8 px-3.5 rounded-lg text-[10.5px] font-bold tracking-[.08em] uppercase text-ink-500 hover:text-ink-700 dark:hover:text-slate-200 cursor-pointer transition-colors">
+                class="w-full flex items-center gap-2 h-8 px-3.5 rounded-inner text-meta font-bold tracking-[.08em] uppercase text-ink-500 hover:text-ink-700 dark:hover:text-ink-700 cursor-pointer transition-colors">
           <span class="flex-1 text-left"><%= section[:label] %></span>
           <% if section[:active] %>
             <span class="hidden group-data-[open=false]/nav:block size-[7px] rounded-full bg-sun" title="La página abierta está en este grupo"></span>
           <% end %>
-          <span class="hidden group-data-[open=false]/nav:inline text-[11px] font-semibold tracking-normal text-ink-500 tabular-nums"><%= section[:items].size %></span>
+          <span class="hidden group-data-[open=false]/nav:inline text-meta font-semibold tracking-normal text-ink-500 tabular-nums"><%= section[:items].size %></span>
           <%= icon "chevron-down", class: "w-3.5 h-3.5 shrink-0 transition-transform duration-200 group-data-[open=false]/nav:-rotate-90" %>
         </button>
         <%# Cerrado queda inert: invisible y además fuera del Tab y de los lectores de pantalla. %>

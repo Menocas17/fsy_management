@@ -2,14 +2,14 @@
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Compañía auxiliar" %>
 <% content_for :page_h1, "true" %>
-<% back_to "Compañías auxiliares", auxiliar_companies_path %>
+<% back_to_origin "Compañías auxiliares", auxiliar_companies_path %>
 <%
   counselor_total = @companies.sum { |company| company.counselors.size }
   counselor_capacity = @companies.size * 2
   jovenes_total = @companies.sum { |company| @jovenes_counts.fetch(company.id, 0) }
   numbers = @auxiliar_company.company_numbers_label
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl 2xl:max-w-[1500px] mx-auto">
+<%= render PageComponent.new(width: :page) do %>
   <%= render "shared/event_banner" %>
 
   <div class="<%= card_classes("relative -mt-[58px] mx-3 md:mx-7 px-5 py-5 md:px-7 md:py-6") %>">
@@ -17,26 +17,21 @@
       <div class="flex items-center gap-4 md:gap-[18px] min-w-0 flex-1 basis-72">
         <span aria-hidden="true"
               class="-mt-10 md:-mt-[46px] shrink-0 w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-panel md:rounded-panel border-4 border-surface shadow-md bg-brand-tile text-white flex flex-col items-center justify-center">
-          <span class="text-[9px] md:text-[10px] font-bold tracking-[.08em] uppercase opacity-75">Aux.</span>
+          <span class="text-meta md:text-meta font-bold tracking-[.08em] uppercase opacity-75">Aux.</span>
           <span class="text-[26px] md:text-[34px] font-extrabold leading-none"><%= @auxiliar_company.initial %></span>
         </span>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <h1 class="text-xl md:text-[22px] font-extrabold tracking-tight text-ink-900"><%= @auxiliar_company.name %></h1>
+            <h1 class="text-xl md:text-display font-extrabold tracking-tight text-ink-900"><%= @auxiliar_company.name %></h1>
             <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-indigo/15 text-cat-indigo-ink text-xs font-semibold whitespace-nowrap"><%= pluralize(@companies.size, "compañía", plural: "compañías") %></span>
             <span class="inline-flex items-center px-3 py-1 rounded-full bg-cat-blue/15 text-cat-blue-ink text-xs font-semibold whitespace-nowrap"><%= pluralize(jovenes_total, "joven", plural: "jóvenes") %></span>
           </div>
-          <p class="mt-1 text-[13px] font-medium text-ink-500">
+          <p class="mt-1 text-body font-medium text-ink-500">
             <%= [ numbers && "Compañías #{numbers}", "#{counselor_total} de #{counselor_capacity} consejeros", "#{@auxiliars.size} de 2 auxiliares" ].compact.join(" · ") %>
           </p>
         </div>
       </div>
       <div class="flex gap-2.5 w-full sm:w-auto sm:ml-auto shrink-0">
-        <%= link_to safe_return_to(auxiliar_companies_path),
-              class: button_classes(:secondary, extra: "flex-1 sm:flex-none") do %>
-          <%= icon "arrow-left", class: "w-4 h-4" %>
-          Volver
-        <% end %>
         <% if can_edit_auxiliar_company?(@auxiliar_company) %>
           <%= link_to edit_auxiliar_company_path(@auxiliar_company),
                 class: button_classes(:primary, extra: "flex-1 sm:flex-none") do %>
@@ -48,7 +43,7 @@
     </div>
   </div>
 
-  <div class="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-5 items-start">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,336px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-5 items-start">
     <div class="space-y-5">
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Información general", "layers" %>
@@ -62,7 +57,7 @@
 
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Auxiliares", "user-check" %>
-        <p class="mb-2 text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500">Auxiliares · <%= @auxiliars.size %>/2</p>
+        <p class="mb-2 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Auxiliares · <%= @auxiliars.size %>/2</p>
         <div class="space-y-2">
           <% %w[H M].each do |gender| %>
             <%= render "companies/leader_slot", person: @auxiliars.find { |auxiliar| auxiliar.gender == gender }, role: "auxiliar", gender: gender %>
@@ -72,9 +67,9 @@
     </div>
 
     <section class="min-w-0">
-      <div class="flex items-center gap-2.5 mb-3 px-1">
-        <%= icon "building-2", class: "w-[17px] h-[17px] text-primary-500 dark:text-primary-300" %>
-        <h2 class="text-[15px] font-bold text-ink-900">Compañías · <%= @companies.size %></h2>
+      <div class="flex items-center gap-3 mb-3 px-1">
+        <%= render IconTileComponent.new(icon: "building-2", tone: :blue) %>
+        <h2 class="text-title font-bold text-ink-900">Compañías · <%= @companies.size %></h2>
       </div>
       <% if @companies.any? %>
         <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
@@ -88,4 +83,4 @@
       <% end %>
     </section>
   </div>
-</div>
+<% end %>

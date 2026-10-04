@@ -18,7 +18,7 @@
       </thead>
       <tbody class="divide-y divide-line-soft">
         <% @participants.each do |participant| %>
-          <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors">
+          <tr class="hover:bg-primary-50/60 dark:hover:bg-muted/40 transition-colors">
             <td class="<%= cell_classes %>">
               <div class="flex items-center gap-3">
                 <%= render(AvatarComponent.new(participant: participant)) %>
@@ -42,7 +42,7 @@
             <td class="<%= cell_classes %>"><%= company_name(participant) %></td>
             <td class="<%= cell_classes %> hidden lg:table-cell">
               <% if participant.room.present? %>
-                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-canvas dark:bg-slate-700 border border-line text-xs font-semibold"><%= participant.room %></span>
+                <span class="inline-flex px-2.5 py-0.5 rounded-[7px] bg-muted border border-line text-xs font-semibold"><%= participant.room %></span>
               <% else %>
                 —
               <% end %>

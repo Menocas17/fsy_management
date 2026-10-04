@@ -1,10 +1,10 @@
 <%
-  hint = "mt-1.5 text-[11.5px] font-medium text-ink-500"
+  hint = "mt-1.5 text-label font-medium text-ink-500"
   activities = Activity.chronological.map { |activity| [ "#{SpanishDates.long(activity.day)} · #{activity.starts_at.strftime('%H:%M')} · #{activity.title}", activity.id ] }
 %>
 <%= form_with model: assignment, url: participant_assignments_path(participant), id: "assignment-form", class: card_classes("px-5 py-6 md:px-7") do |form| %>
   <% if assignment.errors.any? %>
-    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose-ink" role="alert">
+    <div class="mb-5 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-body font-semibold text-cat-rose-ink" role="alert">
       <% assignment.errors.full_messages.each do |message| %>
         <p><%= message %></p>
       <% end %>
@@ -53,7 +53,7 @@
 <% end %>
 
 <div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
-  <p class="min-w-0 flex-1 text-[11.5px] font-medium text-ink-500">La asignación aparece en el perfil de la persona y se le envía una alerta.</p>
+  <p class="min-w-0 flex-1 text-label font-medium text-ink-500">La asignación aparece en el perfil de la persona y se le envía una alerta.</p>
   <div class="flex gap-2.5 shrink-0 sm:justify-end">
     <%= link_to "Cancelar", participant_path(participant),
           class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>

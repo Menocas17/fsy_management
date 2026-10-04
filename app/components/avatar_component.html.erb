@@ -7,7 +7,7 @@
     </div>
     <%= image_tag avatar_url, width: 40, height: 40, loading: (@is_profile ? "eager" : "lazy"), decoding: "async",
           data: { avatar_target: "image", action: "load->avatar#loaded" },
-          class: "absolute inset-0 h-full w-full rounded-[inherit] object-cover bg-slate-100 opacity-0 transition-opacity duration-200",
+          class: "absolute inset-0 h-full w-full rounded-[inherit] object-cover bg-canvas opacity-0 transition-opacity duration-200",
           alt: "Avatar de #{@participant.full_name}" %>
   </div>
 <%else%>

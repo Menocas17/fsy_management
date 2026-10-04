@@ -25,34 +25,39 @@ class AvatarComponent < ViewComponent::Base
     if @is_profile
       "w-[72px] h-[72px] md:w-[92px] md:h-[92px] rounded-panel md:rounded-panel shrink-0 text-2xl md:text-[28px] border-4 border-surface"
     elsif @size == :sm
-      "w-7 h-7 rounded-avatar-sm shrink-0 text-[10px]"
+      "w-7 h-7 rounded-avatar-sm shrink-0 text-meta"
     else
       "w-10 h-10 rounded-avatar shrink-0"
     end
   end
 
   def avatar_colors_for(name)
-      colors = [
-      "bg-red-100 text-red-600",
-      "bg-orange-100 text-orange-600",
-      "bg-amber-100 text-amber-600",
-      "bg-green-100 text-green-600",
-      "bg-emerald-100 text-emerald-600",
-      "bg-teal-100 text-teal-600",
-      "bg-cyan-100 text-cyan-600",
-      "bg-blue-100 text-blue-600",
-      "bg-indigo-100 text-indigo-600",
-      "bg-violet-100 text-violet-600",
-      "bg-purple-100 text-purple-600",
-      "bg-fuchsia-100 text-fuchsia-600",
-      "bg-pink-100 text-pink-600",
-      "bg-rose-100 text-rose-600",
-      "bg-slate-100 text-slate-600"
-    ]
+    self.class.colors_for(name)
+  end
 
-    return colors.last if name.blank?
+  # El color de unas iniciales sale del nombre: siempre el mismo para la misma persona (o compañía), y
+  # distinto entre vecinos. Lo usan también los mosaicos de compañía (UiHelper#initials_tile).
+  COLORS = [
+    "bg-red-100 text-red-600",
+    "bg-orange-100 text-orange-600",
+    "bg-amber-100 text-amber-600",
+    "bg-green-100 text-green-600",
+    "bg-emerald-100 text-emerald-600",
+    "bg-teal-100 text-teal-600",
+    "bg-cyan-100 text-cyan-600",
+    "bg-blue-100 text-blue-600",
+    "bg-indigo-100 text-indigo-600",
+    "bg-violet-100 text-violet-600",
+    "bg-purple-100 text-purple-600",
+    "bg-fuchsia-100 text-fuchsia-600",
+    "bg-pink-100 text-pink-600",
+    "bg-rose-100 text-rose-600",
+    "bg-slate-100 text-slate-600"
+  ].freeze
 
-    index = name.sum % (colors.length - 1)
-    colors[index]
+  def self.colors_for(name)
+    return COLORS.last if name.blank?
+
+    COLORS[name.sum % (COLORS.length - 1)]
   end
 end

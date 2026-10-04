@@ -80,7 +80,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     # Lo que viene, cocina, estaca, rol, género, tallas y edad; los tres totales no llevan cabecera.
     assert_select "section h2", 7
     %w[map-pin user-cog venus-and-mars shirt cake].each do |lucide|
-      assert_select "[data-card-icon='#{lucide}'] svg", { count: 1 }, "falta la baldosa con el icono #{lucide}"
+      assert_select "[data-icon-tile='#{lucide}'] svg", { count: 1 }, "falta la baldosa con el icono #{lucide}"
     end
   end
 

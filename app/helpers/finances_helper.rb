@@ -13,7 +13,7 @@ module FinancesHelper
   def category_tile(category, size: :md)
     box = size == :sm ? "w-8 h-8 rounded-control" : "w-10 h-10 rounded-tile"
     glyph = size == :sm ? "w-4 h-4" : "w-5 h-5"
-    color = category ? Appearance.color_class(category.color) : "bg-slate-500"
+    color = category ? Appearance.color_class(category.color) : "bg-ink-500"
     tag.span(icon(category&.icon || "wallet", class: glyph), aria: { hidden: true },
              class: "#{box} shrink-0 text-white flex items-center justify-center #{color}")
   end
@@ -23,7 +23,7 @@ module FinancesHelper
   end
 
   def expense_status_chip(expense)
-    tag.span(expense.status_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap #{STATUS_CHIPS.fetch(expense.status)}")
+    tag.span(expense.status_label, class: "inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold whitespace-nowrap #{STATUS_CHIPS.fetch(expense.status)}")
   end
 
   # Monto en su moneda y, si es en dólares, su equivalente en córdobas.

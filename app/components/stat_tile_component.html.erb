@@ -1,0 +1,21 @@
+<%= content_tag(@href ? :a : :div, href: @href, class: wrapper_classes, data: { stat_tile: true }.merge(@data)) do %>
+  <% if large? %>
+    <%= render IconTileComponent.new(icon: @icon, tone: @tone, variant: :solid, size: :lg, classes: "max-md:size-8 max-md:rounded-control") %>
+    <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+      <%= tag.span @value, class: "text-display md:text-stat font-extrabold tracking-tight tabular-nums text-ink-900", data: @value_data %>
+      <%# En el teléfono, la corta y nunca más de dos líneas; la completa queda para lectores de pantalla. %>
+      <span class="text-label md:text-body font-semibold text-ink-700 line-clamp-2 md:line-clamp-none [overflow-wrap:anywhere]">
+        <% if @short_label %><span class="md:hidden" aria-hidden="true"><%= @short_label %></span><span class="max-md:sr-only"><%= @label %></span><% else %><%= @label %><% end %>
+      </span>
+      <% if @hint %><span class="hidden md:block text-label text-ink-500"><%= @hint %></span><% end %>
+    </div>
+    <% if @href %><%= helpers.icon "arrow-right", class: "hidden md:block size-[18px] shrink-0 text-ink-500" %><% end %>
+  <% else %>
+    <%= render IconTileComponent.new(icon: @icon, tone: @tone) %>
+    <div class="min-w-0 flex-1 flex flex-col">
+      <%= tag.span @value, class: "text-display font-extrabold leading-tight tabular-nums text-ink-900", data: @value_data %>
+      <span class="text-label font-semibold text-ink-700 line-clamp-2"><%= @label %></span>
+    </div>
+    <% if @href %><%= helpers.icon "chevron-right", class: "absolute top-3 right-3 md:static size-[18px] shrink-0 text-ink-500" %><% end %>
+  <% end %>
+<% end %>
