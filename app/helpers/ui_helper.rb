@@ -81,16 +81,21 @@ module UiHelper
   end
 
   # href convierte el valor en enlace (p. ej. tel: para llamar desde la ficha); sin valor no hay enlace.
-  def info_row(label, icon_name, value, href: nil)
+  # links: varios valores que llevan cada uno a su página, como [[nombre, ruta], …]; se unen con «y».
+  def info_row(label, icon_name, value, href: nil, links: nil)
     display = Array(value).compact_blank.join(" · ").presence || "—"
     value_classes = "mt-px text-body font-semibold text-ink-900 [overflow-wrap:anywhere]"
+    link_classes = "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"
     tag.div(class: "flex items-start gap-3 py-3 first:pt-0 last:pb-0 border-t first:border-t-0 border-line-soft") do
       tag.span(icon(icon_name, class: "w-4 h-4"),
                class: "w-[34px] h-[34px] shrink-0 rounded-control flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100") +
         tag.div(class: "min-w-0") do
           tag.p(label, class: "text-label font-semibold text-ink-500") +
-            if href && display != "—"
-              tag.p(link_to(display, href, class: "text-primary-700 dark:text-primary-300 underline decoration-primary-300/60 underline-offset-2 hover:decoration-primary-500"), class: value_classes)
+            if links.present?
+              anchors = links.map { |text, path| link_to(text, path, class: link_classes) }
+              tag.p(anchors.to_sentence(two_words_connector: " y ", last_word_connector: " y ").html_safe, class: value_classes)
+            elsif href && display != "—"
+              tag.p(link_to(display, href, class: link_classes), class: value_classes)
             else
               tag.p(display, class: value_classes)
             end
