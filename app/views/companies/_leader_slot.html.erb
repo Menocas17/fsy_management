@@ -9,13 +9,13 @@
     <%= render(AvatarComponent.new(participant: person)) %>
     <div class="min-w-0 flex-1">
       <%= link_to person.full_name, participant_path(person, return_to: request.fullpath), data: { turbo_frame: "_top" },
-            class: "block truncate text-[13.5px] font-bold text-ink-900 hover:underline" %>
-      <p class="text-[11.5px] font-semibold text-ink-500"><%= role_label %> · <%= gender_label %></p>
+            class: "block truncate text-body font-bold text-ink-900 hover:underline" %>
+      <p class="text-label font-semibold text-ink-500"><%= role_label %> · <%= gender_label %></p>
     </div>
     <% if remove_url %>
       <%= button_to "Quitar", remove_url, method: :delete,
             form: { data: { turbo_confirm: "¿Quitar a #{person.full_name} de esta compañía?", turbo_confirm_detail: "Se puede volver a asignar después.", turbo_confirm_button: "Sí, quitar" } },
-            class: "shrink-0 px-1 text-[12px] font-bold text-cat-rose-ink hover:underline cursor-pointer" %>
+            class: "shrink-0 px-1 text-label font-bold text-cat-rose-ink hover:underline cursor-pointer" %>
     <% end %>
   </div>
 <% else %>
@@ -25,8 +25,8 @@
       <%= icon "plus", class: "w-4 h-4" %>
     </span>
     <div>
-      <p class="text-[13px] font-semibold text-ink-500">Vacante</p>
-      <p class="text-[11.5px] font-semibold text-ink-500"><%= role == "consejero" ? "Consejero" : "Auxiliar" %> · <%= gender_label %></p>
+      <p class="text-body font-semibold text-ink-500">Vacante</p>
+      <p class="text-label font-semibold text-ink-500"><%= role == "consejero" ? "Consejero" : "Auxiliar" %> · <%= gender_label %></p>
     </div>
   </div>
 <% end %>

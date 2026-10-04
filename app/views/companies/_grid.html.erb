@@ -2,7 +2,7 @@
   jovenes_total = companies.sum { |company| jovenes_counts.fetch(company.id, 0) }
   company_count = pluralize(companies.size, "compañía", plural: "compañías")
 %>
-<p class="mb-4 text-[13px] font-semibold text-ink-500" data-companies-summary>
+<p class="mb-4 text-body font-semibold text-ink-500" data-companies-summary>
   <%= params[:query].present? ? "#{company_count} de #{total_companies}" : company_count %> · <%= pluralize(jovenes_total, "joven", plural: "jóvenes") %>
 </p>
 

@@ -4,11 +4,11 @@
     <% [ [ company.participants.count, "Jóvenes" ], [ company.room_occupancy.size, "Cuartos" ] ].each do |value, label| %>
       <div class="px-3.5 py-3 rounded-tile bg-canvas dark:bg-slate-900/60">
         <p class="text-xl font-extrabold text-ink-900 tabular-nums"><%= value %></p>
-        <p class="text-[11.5px] font-semibold text-ink-500"><%= label %></p>
+        <p class="text-label font-semibold text-ink-500"><%= label %></p>
       </div>
     <% end %>
   </div>
-  <p class="mt-3.5 flex gap-2 rounded-tile px-3.5 py-3 bg-primary-50 text-primary-700 dark:bg-primary-700/25 dark:text-primary-100 text-[12.5px] font-semibold leading-snug">
+  <p class="mt-3.5 flex gap-2 rounded-tile px-3.5 py-3 bg-primary-50 text-primary-700 dark:bg-primary-700/25 dark:text-primary-100 text-label font-semibold leading-snug">
     <%= icon "info", class: "w-4 h-4 mt-0.5 shrink-0" %>
     <span>Los jóvenes y sus cuartos se asignan desde el perfil de cada participante.</span>
   </p>

@@ -9,12 +9,12 @@
   ]
 %>
 <%= link_to auxiliar_company_path(auxiliar_company), data: { auxiliar_company_card: auxiliar_company.name },
-      class: card_classes("group block px-5 pt-[18px] pb-4 transition duration-200 hover:-translate-y-0.5 active:scale-[0.99] hover:shadow-lg focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas") do %>
+      class: card_classes("group block px-5 pt-[18px] pb-4 transition-[background-color,transform] duration-150 hover:bg-canvas active:scale-[0.99] focus:outline-none focus-visible:ring-3 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas") do %>
   <div class="flex items-center gap-3">
-    <span class="w-11 h-11 shrink-0 rounded-tile bg-brand-tile text-white text-[17px] font-extrabold flex items-center justify-center shadow-sm"><%= auxiliar_company.initial %></span>
+    <span class="w-11 h-11 shrink-0 rounded-tile bg-primary-100 text-primary-700 dark:bg-primary-700/30 dark:text-primary-100 text-title font-extrabold flex items-center justify-center"><%= auxiliar_company.initial %></span>
     <div class="min-w-0 flex-1">
-      <p class="text-[15.5px] font-extrabold text-ink-900 truncate"><%= auxiliar_company.name %></p>
-      <p class="mt-px text-[12px] font-semibold text-ink-500 truncate">
+      <p class="text-title font-extrabold text-ink-900 truncate"><%= auxiliar_company.name %></p>
+      <p class="mt-px text-label font-semibold text-ink-500 truncate">
         <%= numbers ? "Compañías #{numbers}" : "Sin compañías asignadas" %>
       </p>
     </div>
@@ -30,18 +30,18 @@
           </span>
         <% end %>
       </span>
-      <span class="text-[12px] font-semibold text-ink-700 truncate"><%= auxiliars.map(&:full_name).join(" · ") %></span>
+      <span class="text-label font-semibold text-ink-700 truncate"><%= auxiliars.map(&:full_name).join(" · ") %></span>
     <% else %>
       <span class="w-7 h-7 shrink-0 rounded-avatar-sm border-[1.5px] border-dashed border-line"></span>
-      <span class="text-[12px] font-semibold text-ink-500">Auxiliares por asignar</span>
+      <span class="text-label font-semibold text-ink-500">Auxiliares por asignar</span>
     <% end %>
   </div>
 
   <div class="grid grid-cols-3 gap-2 mt-3.5">
     <% stats.each do |value, label| %>
       <div class="px-1 py-2 rounded-control bg-canvas dark:bg-slate-900/60 text-center">
-        <p class="text-[15px] leading-5.5 font-extrabold text-ink-900 tabular-nums"><%= value %></p>
-        <p class="text-[10.5px] font-semibold text-ink-500"><%= label %></p>
+        <p class="text-title leading-5.5 font-extrabold text-ink-900 tabular-nums"><%= value %></p>
+        <p class="text-meta font-semibold text-ink-500"><%= label %></p>
       </div>
     <% end %>
   </div>
