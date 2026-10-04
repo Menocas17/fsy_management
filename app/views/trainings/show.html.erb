@@ -2,15 +2,15 @@
 <% content_for :title, @training.name %>
 <% content_for :eyebrow, "Capacitaciones" %>
 <% back_to "Capacitaciones", agenda_trainings_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-6xl mx-auto">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+<%= render PageComponent.new(width: :page) do %>
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">
       <span class="w-11 h-11 shrink-0 rounded-tile bg-cat-indigo text-white flex items-center justify-center">
         <%= icon "graduation-cap", class: "w-5 h-5" %>
       </span>
       <div class="min-w-0">
-        <h1 class="text-[19px] font-extrabold tracking-tight text-ink-900 truncate"><%= @training.name %></h1>
-        <p class="text-[12.5px] font-semibold text-ink-500">
+        <h1 class="text-display font-extrabold tracking-tight text-ink-900 truncate"><%= @training.name %></h1>
+        <p class="text-label font-semibold text-ink-500">
           <%= SpanishDates.long(@training.held_on) %> de <%= @training.held_on.year %>
           <%= " · #{@training.location}" if @training.location.present? %>
         </p>
@@ -35,10 +35,10 @@
 
   <% if @training.notes.present? %>
     <div class="mb-5 rounded-tile border border-line-soft bg-canvas px-5 py-4" data-training-notes>
-      <p class="text-[13px] font-bold text-ink-700">Notas</p>
-      <p class="mt-1 text-[13.5px] leading-relaxed text-ink-900 whitespace-pre-line"><%= @training.notes %></p>
+      <p class="text-body font-bold text-ink-700">Notas</p>
+      <p class="mt-1 text-body leading-relaxed text-ink-900 whitespace-pre-line"><%= @training.notes %></p>
     </div>
   <% end %>
 
   <%= render "trainings/roster", training: @training %>
-</div>
+<% end %>

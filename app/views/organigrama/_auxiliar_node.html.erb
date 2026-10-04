@@ -4,10 +4,10 @@
 %>
 <div class="<%= card_classes("inline-block w-full md:w-auto md:min-w-52 text-left px-4 py-3") %>" data-node="auxiliar" data-auxiliar-company-id="<%= auxiliar_company.id %>">
   <div class="flex items-center gap-2.5">
-    <span class="w-8 h-8 shrink-0 rounded-control bg-brand-tile text-white text-[13px] font-extrabold flex items-center justify-center"><%= auxiliar_company.initial %></span>
+    <span class="w-8 h-8 shrink-0 rounded-control bg-primary-100 text-primary-700 dark:bg-primary-700/30 dark:text-primary-100 text-body font-extrabold flex items-center justify-center"><%= auxiliar_company.initial %></span>
     <div class="min-w-0">
-      <p class="text-[13px] font-extrabold text-ink-900"><%= auxiliar_company.name %></p>
-      <p class="text-[10.5px] font-semibold text-ink-500"><%= numbers ? "Compañías #{numbers}" : "Sin compañías" %></p>
+      <p class="text-body font-extrabold text-ink-900"><%= auxiliar_company.name %></p>
+      <p class="text-meta font-semibold text-ink-500"><%= numbers ? "Compañías #{numbers}" : "Sin compañías" %></p>
     </div>
   </div>
   <div class="mt-2 space-y-1.5">
@@ -15,22 +15,22 @@
       <% auxiliars.each do |auxiliar| %>
         <div class="flex items-center gap-2">
           <%= render(AvatarComponent.new(participant: auxiliar, size: :sm)) %>
-          <p class="text-[11.5px] font-semibold text-ink-700"><%= auxiliar.full_name %></p>
+          <p class="text-label font-semibold text-ink-700"><%= auxiliar.full_name %></p>
         </div>
       <% end %>
     <% else %>
-      <p class="text-[11.5px] font-semibold text-ink-500">Sin auxiliares asignados</p>
+      <p class="text-label font-semibold text-ink-500">Sin auxiliares asignados</p>
     <% end %>
   </div>
   <%= link_to auxiliar_company_path(auxiliar_company),
-        class: "mt-2.5 pt-2 flex items-center gap-1 border-t border-line-soft text-[11px] font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
+        class: "mt-2.5 pt-2 flex items-center gap-1 border-t border-line-soft text-meta font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
     Ver compañía auxiliar
     <%= icon "arrow-right", class: "w-3 h-3" %>
   <% end %>
   <% if local_assigns[:branch_id] && auxiliar_company.companies.any? %>
     <button type="button" data-action="org-chart#toggleBranch" data-branch="<%= branch_id %>"
             aria-expanded="false" aria-controls="<%= branch_id %>"
-            class="mt-1.5 w-full flex items-center justify-between gap-2 rounded-lg px-1.5 py-1 text-[11px] font-bold text-ink-500 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
+            class="mt-1.5 w-full flex items-center justify-between gap-2 rounded-inner px-1.5 py-1 text-meta font-bold text-ink-500 hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
       <span><%= pluralize(auxiliar_company.companies.size, "compañía", plural: "compañías") %></span>
       <%= icon "chevron-down", class: "w-3.5 h-3.5 transition-transform" %>
     </button>

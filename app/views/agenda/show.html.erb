@@ -4,8 +4,8 @@
   nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
   nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-slate-600 cursor-not-allowed"
 %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
-  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-5">
+<%= render PageComponent.new(width: :page) do %>
+  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">
       <% if @view == "dia" %>
         <div class="flex items-center gap-1.5 shrink-0">
@@ -26,10 +26,10 @@
         </div>
       <% end %>
       <div class="min-w-0">
-        <p class="text-[15px] md:text-base font-extrabold text-ink-900 truncate">
+        <p class="text-title md:text-base font-extrabold text-ink-900 truncate">
           <%= @view == "dia" ? spanish_date(@selected_day) : spanish_range(@days.first, @days.last) %>
         </p>
-        <p class="text-[11.5px] font-semibold text-ink-500">
+        <p class="text-label font-semibold text-ink-500">
           <% if @view == "dia" %>
             <%= pluralize(@day_activities.size, "actividad", plural: "actividades") %> este día
           <% else %>
@@ -59,9 +59,9 @@
     <div class="min-w-0">
       <%# La leyenda va antes de la agenda: los colores se entienden al llegar, no después de recorrerla. %>
       <div class="<%= card_classes("mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5") %>" data-agenda-legend>
-        <span class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500">Tipos</span>
+        <span class="text-meta font-bold tracking-[.07em] uppercase text-ink-500">Tipos</span>
         <% Activity::CATEGORY_LABELS.each do |key, label| %>
-          <span class="inline-flex items-center gap-2 text-[12px] font-semibold text-ink-700">
+          <span class="inline-flex items-center gap-2 text-label font-semibold text-ink-700">
             <span class="w-2.5 h-2.5 rounded-[3px] <%= Activity::CATEGORY_STYLES[key][:dot] %>"></span>
             <%= label %>
           </span>
@@ -76,4 +76,4 @@
 
     <div class="hidden xl:block"><%= render "agenda/detail", activity: @activity %></div>
   </div>
-</div>
+<% end %>

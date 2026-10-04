@@ -5,21 +5,18 @@
 
   <div class="px-4 md:px-8 pt-5 md:pt-20 pb-10">
     <% if @my_companies.empty? %>
-      <div class="<%= card_classes("p-8 md:p-10 text-center max-w-lg mx-auto") %>">
-        <span class="mx-auto w-11 h-11 rounded-full flex items-center justify-center bg-canvas dark:bg-slate-700 text-ink-500 dark:text-slate-400">
-          <%= icon "target", class: "w-5 h-5" %>
-        </span>
-        <p class="mt-3 text-[15px] font-bold text-ink-900">Tu cuenta no está asignada a ninguna compañía</p>
-        <p class="mt-1 text-[13px] text-ink-500">Consulta la estructura completa en la vista general.</p>
-        <%= link_to "Ver organigrama general", organigrama_path,
-              class: button_classes(:primary, extra: "mt-4") %>
+      <div class="<%= card_classes("p-5 md:p-6 max-w-lg mx-auto") %>">
+        <%= render EmptyStateComponent.new(title: "Tu cuenta no está asignada a ninguna compañía", icon: "target", name: "my-company",
+              text: "Consulta la estructura completa en la vista general.") do |empty| %>
+          <% empty.with_action { link_to "Ver organigrama general", organigrama_path, class: button_classes(:secondary) } %>
+        <% end %>
       </div>
     <% else %>
       <div class="space-y-10">
         <% @my_companies.each do |company| %>
           <section>
             <div class="text-center mb-6">
-              <p class="text-[13px] font-bold text-ink-700">Tu cadena de mando</p>
+              <p class="text-body font-bold text-ink-700">Tu cadena de mando</p>
               <h2 class="mt-1 text-base md:text-lg font-bold text-ink-900">
                 Ruta directa hasta <span class="text-primary-600 dark:text-primary-300"><%= company.name %></span>
               </h2>

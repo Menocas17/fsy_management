@@ -4,8 +4,8 @@
     <% activities = @activities_by_day.fetch(day, []) %>
     <div class="<%= card_classes("overflow-hidden") %>">
       <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-line-soft">
-        <p class="text-[13px] font-bold text-ink-900"><%= spanish_date(day) %></p>
-        <p class="text-[11.5px] font-semibold text-ink-500"><%= pluralize(activities.size, "actividad", plural: "actividades") %></p>
+        <p class="text-body font-bold text-ink-900"><%= spanish_date(day) %></p>
+        <p class="text-label font-semibold text-ink-500"><%= pluralize(activities.size, "actividad", plural: "actividades") %></p>
       </div>
 
       <% if activities.any? %>
@@ -13,10 +13,10 @@
           <% activities.each do |activity| %>
             <details class="group agenda-details" data-activity-id="<%= activity.id %>" <%= "open" if @activity&.id == activity.id && params[:activity_id].present? %>>
               <summary class="flex items-center gap-3 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden border-l-[3px] <%= activity.styles[:block] %>">
-                <span class="w-12 shrink-0 text-[11.5px] font-extrabold tabular-nums"><%= activity.starts_at.strftime("%H:%M") %></span>
+                <span class="w-12 shrink-0 text-label font-extrabold tabular-nums"><%= activity.starts_at.strftime("%H:%M") %></span>
                 <span class="min-w-0 flex-1">
-                  <span class="block text-[13px] font-bold"><%= activity.title %></span>
-                  <span class="block text-[11.5px] font-semibold text-ink-500">
+                  <span class="block text-body font-bold"><%= activity.title %></span>
+                  <span class="block text-label font-semibold text-ink-500">
                     <%= [ activity.location.presence, activity.time_range ].compact.join(" · ") %>
                   </span>
                 </span>
@@ -30,9 +30,9 @@
         </div>
       <% else %>
         <div class="px-6 py-8 text-center">
-          <p class="text-[13.5px] font-bold text-ink-900">Sin actividades este día</p>
+          <p class="text-body font-bold text-ink-900">Sin actividades este día</p>
           <% if can_manage_agenda? %>
-            <%= link_to "Agregar una actividad", new_activity_path(date: day), class: "mt-2 inline-block text-[13px] font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+            <%= link_to "Agregar una actividad", new_activity_path(date: day), class: "mt-2 inline-block text-body font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
           <% end %>
         </div>
       <% end %>

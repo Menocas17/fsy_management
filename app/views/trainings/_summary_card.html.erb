@@ -15,17 +15,17 @@
       <%= icon "graduation-cap", class: "w-[19px] h-[19px]" %>
     </span>
     <div class="min-w-0">
-      <p class="text-[14.5px] font-bold text-ink-900 truncate"><%= training.name %></p>
-      <p class="text-[11.5px] font-semibold text-ink-500"><%= SpanishDates.long(training.held_on) %></p>
+      <p class="text-title font-bold text-ink-900 truncate"><%= training.name %></p>
+      <p class="text-label font-semibold text-ink-500"><%= SpanishDates.long(training.held_on) %></p>
     </div>
   </div>
 
   <div class="flex items-baseline justify-between gap-2">
-    <p class="text-[22px] font-extrabold tabular-nums text-ink-900" data-training-attended>
+    <p class="text-display font-extrabold tabular-nums text-ink-900" data-training-attended>
       <%= training.past? || training.today? ? training.attended_count : "—" %>
-      <span class="text-[11.5px] font-bold text-ink-500">de <%= training.expected_count %></span>
+      <span class="text-label font-bold text-ink-500">de <%= training.expected_count %></span>
     </p>
-    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold <%= chip %>">
+    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-meta font-bold <%= chip %>">
       <% if training.today? %>
         en curso
       <% elsif training.past? %>
