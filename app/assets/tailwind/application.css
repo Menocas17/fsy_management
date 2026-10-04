@@ -502,16 +502,33 @@ turbo-frame[aria-busy='true'] {
   transition: opacity 150ms ease 120ms;
 }
 
-/* Menús desplegables (cuenta, campanita): se abren desde el botón, con el mismo tiempo que su chevron. */
+/* Menús desplegables (cuenta, campanita), a la manera de los menús de iOS/macOS: nacen del botón (esquina
+   de arriba a la derecha), crecen con un pequeño rebote y se cierran más rápido de lo que abren, encogiéndose
+   hacia el mismo punto. El cierre anima también el display (allow-discrete): donde el navegador no lo sabe,
+   se cierra de golpe como antes. Con «reducir movimiento» (del sistema o de Configuración) las reglas globales
+   dejan solo el fundido. */
 .dropdown-menu {
   transform-origin: top right;
   transition:
-    opacity 150ms var(--ease-fluid),
-    scale 150ms var(--ease-fluid);
+    opacity 180ms var(--ease-drawer),
+    scale 320ms cubic-bezier(0.34, 1.32, 0.64, 1),
+    translate 320ms cubic-bezier(0.34, 1.32, 0.64, 1),
+    display 320ms allow-discrete;
   @starting-style {
     opacity: 0;
-    scale: 0.97;
+    scale: 0.88;
+    translate: 0 -6px;
   }
+}
+.dropdown-menu.hidden {
+  opacity: 0;
+  scale: 0.94;
+  translate: 0 -4px;
+  transition:
+    opacity 140ms ease-in,
+    scale 140ms ease-in,
+    translate 140ms ease-in,
+    display 140ms allow-discrete;
 }
 
 /* Agenda en el teléfono: cada actividad se despliega en vez de aparecer de golpe. Mejora progresiva:
