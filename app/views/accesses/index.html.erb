@@ -67,16 +67,12 @@
   </section>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-attempts>
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <%= section_heading "Intentos de inicio de sesión", "log-in" %>
-      <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line -mt-4" aria-label="Filtrar intentos">
-        <% [ [ "Todos", nil ], [ "Solo fallidos", "fallidos" ] ].each do |label, value| %>
-          <% current = params[:solo] == value %>
-          <%= link_to label, accesses_path(solo: value), aria: { current: (current ? "page" : nil) },
-                class: "inline-flex items-center h-8 px-3 rounded-lg text-[12.5px] #{current ? "bg-surface shadow-sm font-bold text-ink-900" : "font-semibold text-ink-500 hover:text-ink-900"}" %>
-        <% end %>
-      </nav>
-    </div>
+    <%= section_heading "Intentos de inicio de sesión", "log-in" do %>
+      <%= render SegmentedToggleComponent.new(label: "Filtrar intentos", items: [
+            { text: "Todos", href: accesses_path, active: params[:solo].blank? },
+            { text: "Solo fallidos", href: accesses_path(solo: "fallidos"), active: params[:solo] == "fallidos" }
+          ]) %>
+    <% end %>
     <% if @attempts.any? %>
       <ul class="divide-y divide-line-soft">
         <% @attempts.each do |attempt| %>

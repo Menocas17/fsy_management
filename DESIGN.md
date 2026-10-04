@@ -69,6 +69,7 @@ typography:
     letterSpacing: "0.07em"
 rounded:
   avatar-sm: "7px"
+  inner: "7px"
   avatar: "10px"
   control: "11px"
   tile: "13px"
@@ -213,9 +214,9 @@ Un sistema de capas suaves: el lienzo gris claro al fondo, las tarjetas blancas 
 
 ## Shapes
 
-Esquinas generosas y consistentes por función: los controles (botones, campos, pestañas) a 11 px, los mosaicos y bloques internos a 13 px, las tarjetas a 18 px y los paneles grandes (el banner, la ficha) a 22 px. Los chips son píldoras. Los avatares son cuadrados con la proporción de la foto de la ficha: 10 px a 40 px y 7 px a 28 px.
+Esquinas generosas y consistentes por función: los controles (botones, campos, pestañas) a 11 px, los mosaicos y bloques internos a 13 px, las tarjetas a 18 px y los paneles grandes (el banner, la ficha) a 22 px. Las opciones dentro de un control con relleno (un conmutador) usan 7 px, para que la curva acompañe a la de afuera. Los chips son píldoras. Los avatares son cuadrados con la proporción de la foto de la ficha: 10 px a 40 px y 7 px a 28 px.
 
-**La regla de los tokens de esquina.** Toda esquina sale de un token (`rounded-control`, `rounded-tile`, `rounded-card`, `rounded-panel`, `rounded-avatar`, `rounded-full` para chips y puntos). `rounded-lg`, `rounded-xl` y valores sueltos como `rounded-[10px]` no se usan.
+**La regla de los tokens de esquina.** Toda esquina sale de un token (`rounded-control`, `rounded-inner`, `rounded-tile`, `rounded-card`, `rounded-panel`, `rounded-avatar`, `rounded-full` para chips y puntos). `rounded-lg`, `rounded-xl` y valores sueltos como `rounded-[10px]` no se usan.
 
 ## Components
 

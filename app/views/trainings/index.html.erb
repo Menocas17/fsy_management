@@ -1,22 +1,11 @@
 <% content_for :title, "Capacitaciones" %>
 <% content_for :eyebrow, "Agenda" %>
-<%
-  tab_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
-  tab_on = "#{tab_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900"
-  tab_off = "#{tab_base} font-semibold text-ink-500 hover:text-ink-900"
-%>
 <div class="px-4 md:px-8 pt-6 md:pt-8 pb-10">
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
-    <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-slate-700 w-fit" aria-label="Vista de la agenda">
-      <%= link_to agenda_path, class: tab_off do %>
-        <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
-        Agenda del evento
-      <% end %>
-      <%= link_to agenda_trainings_path, class: tab_on, aria: { current: "page" } do %>
-        <%= icon "graduation-cap", class: "w-3.5 h-3.5" %>
-        Capacitaciones
-      <% end %>
-    </nav>
+    <%= render SegmentedToggleComponent.new(label: "Vista de la agenda", items: [
+          { text: "Agenda del evento", icon: "calendar-days", href: agenda_path },
+          { text: "Capacitaciones", icon: "graduation-cap", href: agenda_trainings_path, active: true }
+        ]) %>
     <div class="flex flex-wrap items-center gap-2">
       <%= link_to trainings_reports_path, target: "_blank", rel: "noopener",
             class: button_classes(:secondary) do %>

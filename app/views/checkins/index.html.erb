@@ -173,7 +173,7 @@
     <% end %>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check" %>
+      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", bare: true %>
       <% if @recent.any? %>
         <ul class="divide-y divide-line-soft" data-recent-checkins>
           <% @recent.each do |record| %>

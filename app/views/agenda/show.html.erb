@@ -1,9 +1,6 @@
 <% content_for :title, "Agenda" %>
 <% content_for :eyebrow, "Gestión" %>
 <%
-  toggle_base = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[12.5px] whitespace-nowrap transition"
-  active_toggle = "#{toggle_base} bg-surface dark:bg-slate-700 shadow-sm font-bold text-ink-900"
-  idle_toggle = "#{toggle_base} font-semibold text-ink-500 hover:text-ink-900"
   nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-canvas dark:hover:bg-slate-700 transition"
   nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-slate-600 cursor-not-allowed"
 %>
@@ -43,23 +40,12 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <nav class="inline-flex p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-slate-700" aria-label="Vista de la agenda">
-        <%= link_to agenda_path(date: @selected_day, view: "semana"), class: @view == "semana" ? active_toggle : idle_toggle,
-              aria: { current: (@view == "semana" ? "page" : nil) }, data: { agenda_view: "semana" } do %>
-          <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
-          Semana
-        <% end %>
-        <%= link_to agenda_path(date: @selected_day, view: "dia"), class: @view == "dia" ? active_toggle : idle_toggle,
-              aria: { current: (@view == "dia" ? "page" : nil) }, data: { agenda_view: "dia" } do %>
-          <%= icon "list", class: "w-3.5 h-3.5" %>
-          Día
-        <% end %>
-        <%# Las capacitaciones son fechas del staff previas al evento: viven aquí, junto a la agenda. %>
-        <%= link_to agenda_trainings_path, class: idle_toggle, data: { agenda_view: "capacitaciones" } do %>
-          <%= icon "graduation-cap", class: "w-3.5 h-3.5" %>
-          Capacitaciones
-        <% end %>
-      </nav>
+      <%# Las capacitaciones son fechas del staff previas al evento: viven aquí, junto a la agenda. %>
+      <%= render SegmentedToggleComponent.new(label: "Vista de la agenda", items: [
+            { text: "Semana", icon: "calendar-days", href: agenda_path(date: @selected_day, view: "semana"), active: @view == "semana", data: { agenda_view: "semana" } },
+            { text: "Día", icon: "list", href: agenda_path(date: @selected_day, view: "dia"), active: @view == "dia", data: { agenda_view: "dia" } },
+            { text: "Capacitaciones", icon: "graduation-cap", href: agenda_trainings_path, data: { agenda_view: "capacitaciones" } }
+          ]) %>
       <% if can_manage_agenda? %>
         <%= link_to new_activity_path(date: @selected_day), class: button_classes do %>
           <%= icon "plus", class: "w-4 h-4" %>
