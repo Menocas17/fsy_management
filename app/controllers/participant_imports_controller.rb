@@ -19,7 +19,7 @@ class ParticipantImportsController < ApplicationController
     end
 
     import = importer.import
-    record_audit!(category: :asignaciones, action: "imported", target: nil,
+    record_audit!(category: :participantes, action: "imported", target: nil,
                   summary: "Cargó «#{import.filename}»: #{import.entered_count} entraron, #{import.pending_count} por resolver")
     redirect_to participant_import_path(import), notice: import.pending_count.positive? ? "Carga lista: hay filas por resolver a mano." : "Carga lista."
   end

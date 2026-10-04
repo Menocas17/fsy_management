@@ -16,7 +16,7 @@ class ParticipantImportRowsController < ApplicationController
 
   def approve
     if @row.approve!(actor_name)
-      record_audit!(category: :asignaciones, action: "created", target: @row.participant,
+      record_audit!(category: :participantes, action: "created", target: @row.participant,
                     summary: "Aprobó a #{@row.participant.full_name} desde la carga «#{@import.filename}»")
       redirect_to back_to_report, notice: "#{@row.participant.full_name} entró a la base."
     else

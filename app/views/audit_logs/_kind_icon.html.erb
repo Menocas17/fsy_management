@@ -1,0 +1,5 @@
+<% kind = log.kind %>
+<span class="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center <%= kind[:tone] %>" title="<%= kind[:label] %>" data-audit-kind="<%= kind[:label] %>">
+  <%= icon kind[:icon], class: "w-3.5 h-3.5" %>
+  <span class="sr-only"><%= kind[:label] %></span>
+</span>

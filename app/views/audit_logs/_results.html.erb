@@ -1,3 +1,14 @@
+<%# Cuántos y, si hay filtros, cómo quitarlos: aquí dentro del frame para que se actualice con cada filtro. %>
+<div class="flex items-center justify-between gap-3 mb-3 px-1 min-h-6">
+  <p class="text-[12.5px] font-medium text-ink-500" data-audit-total>
+    <%= pagy.count.zero? ? "Sin registros" : pluralize(pagy.count, "registro", plural: "registros") %>
+  </p>
+  <% if filtered %>
+    <%= link_to "Quitar filtros", audit_logs_path, data: { turbo_frame: "_top", audit_clear: true },
+          class: "text-[12.5px] font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+  <% end %>
+</div>
+
 <% if audit_logs.load.any? %>
   <div class="hidden md:block">
     <div class="<%= card_classes("overflow-hidden") %>">
@@ -5,9 +16,9 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-line-soft text-[11px] font-bold tracking-[.06em] uppercase text-ink-500">
-              <th scope="col" class="pt-5 pb-3 pr-5">Usuario</th>
               <th scope="col" class="pt-5 pb-3 pr-5">Acción</th>
-              <th scope="col" class="pt-5 pb-3 pr-5">Categoría</th>
+              <th scope="col" class="pt-5 pb-3 pr-5">Usuario</th>
+              <th scope="col" class="pt-5 pb-3 pr-5 hidden xl:table-cell">Categoría</th>
               <th scope="col" class="pt-5 pb-3 pr-5 hidden lg:table-cell">Participante / entidad</th>
               <th scope="col" class="pt-5 pb-3">Fecha</th>
             </tr>
@@ -15,11 +26,16 @@
           <tbody class="divide-y divide-line-soft text-[13.5px] text-ink-700">
             <% audit_logs.each do |log| %>
               <tr class="hover:bg-primary-50/60 dark:hover:bg-slate-700/40 transition-colors" data-audit-log-id="<%= log.id %>">
-                <td class="py-3.5 pr-5"><%= render "audit_logs/actor", log: log %></td>
-                <td class="py-3.5 pr-5"><%= log.summary %></td>
-                <td class="py-3.5 pr-5"><%= render "audit_logs/category_pill", log: log %></td>
-                <td class="py-3.5 pr-5 hidden lg:table-cell"><%= log.target_name.presence || "—" %></td>
-                <td class="py-3.5 whitespace-nowrap text-ink-500"><%= log.created_at.strftime("%d/%m/%Y · %H:%M") %></td>
+                <td class="py-3.5 pr-5">
+                  <div class="flex items-start gap-3 min-w-64">
+                    <%= render "audit_logs/kind_icon", log: log %>
+                    <span class="pt-1 text-ink-900"><%= log.summary %></span>
+                  </div>
+                </td>
+                <td class="py-3.5 pr-5 max-w-52"><%= render "audit_logs/actor", log: log %></td>
+                <td class="py-3.5 pr-5 hidden xl:table-cell"><%= render "audit_logs/category_pill", log: log %></td>
+                <td class="py-3.5 pr-5 hidden lg:table-cell"><%= audit_target(log, targets, class: "font-medium") %></td>
+                <td class="py-3.5 whitespace-nowrap text-ink-500"><%= audit_time(log, year: true) %></td>
               </tr>
             <% end %>
           </tbody>
@@ -36,18 +52,25 @@
     </div>
   </div>
 
+  <%# Teléfono: una tarjeta por registro, todo a lo ancho y sin desplazamiento lateral; carga más al bajar. %>
   <div class="md:hidden">
     <%= turbo_frame_tag "audit_logs_page_#{pagy.page}" do %>
       <% audit_logs.each do |log| %>
-        <article class="<%= card_classes("p-3.5 mb-2.5") %>">
-          <div class="flex items-center justify-between gap-3">
-            <%= render "audit_logs/actor", log: log %>
-            <span class="shrink-0 text-[10.5px] font-semibold text-ink-500"><%= log.created_at.strftime("%d/%m · %H:%M") %></span>
-          </div>
-          <p class="mt-2 text-[12.5px] text-ink-700"><%= log.summary %></p>
-          <div class="mt-2.5 pt-2.5 border-t border-line-soft flex items-center justify-between gap-3">
-            <%= render "audit_logs/category_pill", log: log %>
-            <span class="text-[11.5px] font-semibold text-ink-700 truncate"><%= log.target_name %></span>
+        <article class="<%= card_classes("p-3.5 mb-2.5") %>" data-audit-log-card="<%= log.id %>">
+          <div class="flex items-start gap-3">
+            <%= render "audit_logs/kind_icon", log: log %>
+            <div class="min-w-0 flex-1">
+              <p class="text-[13px] font-semibold leading-snug text-ink-900 [overflow-wrap:anywhere]"><%= log.summary %></p>
+              <p class="mt-1 text-[11.5px] font-medium text-ink-500 [overflow-wrap:anywhere]">
+                <%= log.actor_name %> · <%= audit_time(log) %>
+              </p>
+              <div class="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                <%= render "audit_logs/category_pill", log: log %>
+                <% if log.target_name.present? %>
+                  <%= audit_target(log, targets, class: "min-w-0 text-[12px] font-semibold text-ink-700 [overflow-wrap:anywhere]") %>
+                <% end %>
+              </div>
+            </div>
           </div>
         </article>
       <% end %>
@@ -62,7 +85,8 @@
     <% end %>
   </div>
 <% else %>
-  <div class="<%= card_classes("p-10 text-center") %>">
-    <p class="text-ink-500">No hay actividad que coincida con los filtros.</p>
+  <div class="<%= card_classes("p-10 text-center") %>" data-empty-state="audit-logs">
+    <p class="text-[14px] font-bold text-ink-900"><%= filtered ? "Nada coincide con los filtros" : "Todavía no hay actividad" %></p>
+    <p class="mt-1 text-[12.5px] text-ink-500"><%= filtered ? "Prueba con otra búsqueda o quita los filtros." : "Aquí aparecerá quién cambió qué y cuándo." %></p>
   </div>
 <% end %>
