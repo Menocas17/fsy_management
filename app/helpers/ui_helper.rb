@@ -57,7 +57,7 @@ module UiHelper
     )
     # La declaración XML que antepone rqrcode no va dentro de un documento HTML.
     tag.div(svg.sub(/\A<\?xml.*?\?>/, "").html_safe,
-            class: [ "bg-white rounded-xl p-2.5 inline-block [&>svg]:block [&>svg]:w-full [&>svg]:h-auto", classes ].compact.join(" "),
+            class: [ "bg-white rounded-tile p-2.5 inline-block [&>svg]:block [&>svg]:w-full [&>svg]:h-auto", classes ].compact.join(" "),
             style: "width: #{size}px")
   end
 

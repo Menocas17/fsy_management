@@ -1,5 +1,5 @@
 <% content_for :title, "Inventario" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Logística" %>
 <%
   total_items = @inventories.sum { |inventory| inventory.items.size }
   low_total = @inventories.sum { |inventory| inventory.items.count { |item| item.low? || item.out? } }

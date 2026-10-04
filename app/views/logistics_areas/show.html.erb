@@ -31,7 +31,8 @@
           <%= button_to logistics_area_path(@area), method: :patch, params: { logistics_area: { flag => !on } },
                 role: "switch", aria: { checked: on, label: label }, data: { flag_switch: flag },
                 class: "group relative shrink-0 w-[46px] h-7 rounded-full cursor-pointer transition-colors #{on ? "bg-primary-700" : "bg-ink-300 dark:bg-line"}" do %>
-            <span class="absolute top-[3px] size-[22px] rounded-full bg-white shadow transition-[left] <%= on ? "left-[21px]" : "left-[3px]" %>"></span>
+            <%# Se mueve con transform (no left): no recalcula el layout en cada cuadro. %>
+            <span class="absolute top-[3px] left-[3px] size-[22px] rounded-full bg-white shadow-sm transition-transform <%= "translate-x-[18px]" if on %>"></span>
           <% end %>
         </div>
       <% end %>

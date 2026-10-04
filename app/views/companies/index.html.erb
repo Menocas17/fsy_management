@@ -1,5 +1,5 @@
 <% content_for :title, "Compañías" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Participantes" %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
     <%= form_with url: companies_path, method: :get, role: "search", class: "relative w-full lg:w-[320px] lg:shrink-0",

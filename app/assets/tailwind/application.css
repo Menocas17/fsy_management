@@ -125,6 +125,8 @@
   /* Curvas de movimiento: salida fuerte para lo que entra o responde, la de cajón para lo que se desliza. */
   --ease-fluid: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* La curva de toda clase transition sin curva propia: la de la app, no la genérica de Tailwind. */
+  --default-transition-timing-function: var(--ease-fluid);
 
 }
 
@@ -423,8 +425,8 @@ html.text-lg-mode { --type-scale: 1.12; }
 /* Avisos: la entrada confirma la acción, así que se nota; la salida es más corta que la entrada. */
 .toast {
   transition:
-    opacity 220ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+    opacity 220ms var(--ease-fluid),
+    transform 220ms var(--ease-fluid);
   @starting-style {
     opacity: 0;
     transform: translateY(-8px);
@@ -434,7 +436,7 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 0;
   transform: translateX(16px);
   transition-duration: 160ms;
-  transition-timing-function: ease-in;
+  transition-timing-function: var(--ease-fluid);
 }
 
 /* Diálogos modales: aparecen con un leve crecimiento en vez de saltar; el cierre es más corto. */
@@ -442,8 +444,8 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 0;
   transform: scale(0.96);
   transition:
-    opacity 120ms ease-in,
-    transform 120ms ease-in,
+    opacity 120ms var(--ease-fluid),
+    transform 120ms var(--ease-fluid),
     overlay 120ms allow-discrete,
     display 120ms allow-discrete;
 }
@@ -451,7 +453,7 @@ html.text-lg-mode { --type-scale: 1.12; }
   opacity: 1;
   transform: none;
   transition-duration: 180ms;
-  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  transition-timing-function: var(--ease-fluid);
   @starting-style {
     opacity: 0;
     transform: scale(0.96);
@@ -483,8 +485,8 @@ form[aria-busy='true'] [type='submit'],
 /* Capacitaciones: la persona que se acaba de marcar o quitar entra con un leve fundido en su nueva lista. */
 .roster-moved {
   transition:
-    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 200ms var(--ease-fluid),
+    transform 200ms var(--ease-fluid),
     background-color 900ms ease-out;
   @starting-style {
     opacity: 0;
@@ -504,8 +506,8 @@ turbo-frame[aria-busy='true'] {
 .dropdown-menu {
   transform-origin: top right;
   transition:
-    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    opacity 150ms var(--ease-fluid),
+    scale 150ms var(--ease-fluid);
   @starting-style {
     opacity: 0;
     scale: 0.97;
@@ -522,7 +524,7 @@ turbo-frame[aria-busy='true'] {
     height: 0;
     overflow: clip;
     transition:
-      height 200ms cubic-bezier(0.23, 1, 0.32, 1),
+      height 200ms var(--ease-fluid),
       content-visibility 200ms allow-discrete;
   }
   .agenda-details[open]::details-content {
@@ -539,7 +541,7 @@ turbo-frame[aria-busy='true'] {
   grid-template-rows: 1fr;
   opacity: 1;
   transition:
-    grid-template-rows 240ms cubic-bezier(0.23, 1, 0.32, 1),
+    grid-template-rows 240ms var(--ease-fluid),
     opacity 180ms ease-out;
 }
 .nav-group-panel > * {

@@ -1,5 +1,5 @@
 <% content_for :title, "Alertas" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Evento" %>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <p class="text-body font-medium text-ink-500"><%= pluralize(@pagy.count, "alerta enviada", plural: "alertas enviadas") %></p>

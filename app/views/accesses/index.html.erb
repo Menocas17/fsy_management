@@ -1,5 +1,5 @@
 <% content_for :title, "Accesos" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Seguimiento" %>
 <%= render PageComponent.new(width: :page) do %>
   <p class="text-body font-medium text-ink-500">
     Quién está usando la app, desde dónde, y quién intentó entrar. Las sesiones sin uso en <%= Session::IDLE_LIMIT.in_days.to_i %> días se cierran solas.

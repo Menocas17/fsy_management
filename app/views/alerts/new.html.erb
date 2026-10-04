@@ -1,5 +1,5 @@
 <% content_for :title, "Nueva alerta" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Alertas" %>
 <% back_to "Alertas", alerts_path %>
 <%= render PageComponent.new(width: :page) do %>
   <%= render "alerts/form", alert: @alert %>

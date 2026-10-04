@@ -1,5 +1,5 @@
 <% content_for :title, "Organigrama" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Participantes" %>
 <%# The chart fills the screen on desktop, so the page itself carries no padding there. %>
 <div class="md:h-full">
   <%= render(@view == "mi_compania" ? "organigrama/mine" : "organigrama/general") %>

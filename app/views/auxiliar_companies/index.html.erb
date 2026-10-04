@@ -1,5 +1,5 @@
 <% content_for :title, "Compañías auxiliares" %>
-<% content_for :eyebrow, "Gestión" %>
+<% content_for :eyebrow, "Compañías" %>
 <%
   secondary_link = button_classes(:secondary)
   company_total = @auxiliar_companies.sum { |auxiliar_company| auxiliar_company.companies.size }
