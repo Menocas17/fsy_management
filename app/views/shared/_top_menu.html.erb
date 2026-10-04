@@ -55,7 +55,7 @@
           <%= icon "chevron-down", class: "hidden md:block w-4 h-4 text-ink-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
         </button>
 
-        <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
+        <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-56 max-h-[calc(100dvh-80px)] overflow-y-auto z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
              data-dropdown-target="menu">
           <%# En el teléfono la barra no dice quién es la cuenta: el menú lo dice antes de las opciones. %>
           <div class="md:hidden flex items-center gap-2.5 mx-1.5 px-3 pt-1.5 pb-3 mb-1.5 border-b border-line-soft">
@@ -80,6 +80,27 @@
               <%= icon "shield-check", class: "w-4 h-4" %>
               Accesos
             <% end %>
+          <% end %>
+          <%# «Ver como» (ViewAsController): el superadmin prueba el menú y los permisos de cada rol. %>
+          <% if Current.real_user.superadmin? %>
+            <div class="border-t border-line-soft my-1.5"></div>
+            <% if Current.viewing_as? %>
+              <%= button_to view_as_path, method: :delete, form_class: "mx-1.5",
+                    class: "w-full flex items-center gap-2.5 px-3 py-2 rounded-inner text-left text-body font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900 cursor-pointer transition" do %>
+                <%= icon "undo-2", class: "w-4 h-4" %>
+                Volver a superadmin
+              <% end %>
+            <% end %>
+            <p class="mx-1.5 px-3 pt-1.5 pb-1 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Ver como</p>
+            <div data-view-as-roles>
+              <% Participant::VIEW_AS_ROLES.each do |rol| %>
+                <%= button_to view_as_path, params: { rol: rol }, form_class: "mx-1.5",
+                      class: "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-inner text-left text-body font-medium cursor-pointer transition #{Current.user.rol.to_s == rol ? "bg-primary-50 text-primary-700 dark:bg-muted dark:text-ink-900" : "text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900"}" do %>
+                  <%= icon "eye", class: "w-4 h-4" %>
+                  <%= Participant.role_label(rol) %>
+                <% end %>
+              <% end %>
+            </div>
           <% end %>
           <div class="border-t border-line-soft my-1.5"></div>
           <%= button_to session_path, method: :delete, form_class: "mx-1.5",

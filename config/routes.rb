@@ -22,6 +22,8 @@ Rails.application.routes.draw do
   resources :audit_logs, only: [ :index ], path: "historial"
   # Quién está en línea, sus sesiones abiertas y los intentos de entrar: solo para el superadmin.
   resources :accesses, only: [ :index ], path: "accesos"
+  # «Ver como» otra persona (su menú y sus permisos): solo el superadmin.
+  resource :view_as, only: %i[create destroy], controller: "view_as", path: "ver-como"
   delete "accesos/sesiones/:id" => "accesses#destroy_session", as: :access_session
   # Finanzas: el panel y su configuración, las categorías y los gastos con sus tres etapas (docs/finanzas.md).
   resource :finances, only: %i[show edit update], path: "finanzas", path_names: { edit: "configurar" }

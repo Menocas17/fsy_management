@@ -45,12 +45,13 @@
       navegador igual lo corría al enfocar algo fuera de vista, dejando la página cortada sin forma de volver. %>
   <body class="h-dvh overflow-clip bg-canvas text-ink-900">
     <%# Canal propio de cada persona: por aquí llega la campanita al instante, sin recargar. %>
-    <%= turbo_stream_from Current.user if Current.user %>
+    <%= turbo_stream_from Current.user if Current.user&.persisted? %>
     <%= render "shared/toast"%>
     <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
     <div class="flex h-full">
       <%= render "shared/aside"%>
       <div class="relative flex flex-col flex-1 min-w-0 min-h-0" data-controller="pull-refresh">
+        <%= render "shared/view_as_banner" %>
         <%= render "shared/top_menu"%>
         <%# Jalar para recargar (pull_refresh_controller): baja desde el borde de <main>, bajo la barra superior. %>
         <div class="relative z-20 h-0">
