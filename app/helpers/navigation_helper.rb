@@ -45,6 +45,8 @@ module NavigationHelper
            { text: "Reportes", lucide_icon: "file-text", disabled: true, hint: "Solo para dirección y el director de logística" }
          end),
         night_attendance_nav_item,
+        ({ text: "Enfermería", url: infirmary_visits_path, lucide_icon: "heart-pulse",
+           active_paths: [ infirmary_visits_path ] } if Current.user&.infirmary_viewer?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]

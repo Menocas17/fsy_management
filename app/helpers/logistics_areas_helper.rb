@@ -1,7 +1,9 @@
 module LogisticsAreasHelper
-  # Cada bandera tiene su ícono y su tono (DESIGN.md): Registro verde, Finanzas azul, Alimentación ámbar. Lo usan
+  # Cada bandera tiene su ícono y su tono (DESIGN.md): Registro verde, Finanzas azul, Alimentación ámbar,
+  # Enfermería rosa. Lo usan
   # el chip de la bandera, el mosaico de cada tarjeta de área y la explicación de arriba, para que coincidan.
-  FLAG_STYLES = { checkin: [ "scan-line", :green ], finance: [ "wallet", :blue ], food: [ "utensils", :amber ] }.freeze
+  FLAG_STYLES = { checkin: [ "scan-line", :green ], finance: [ "wallet", :blue ], food: [ "utensils", :amber ],
+                  nursing: [ "heart-pulse", :rose ] }.freeze
 
   def flag_style(flag)
     FLAG_STYLES.fetch(flag.to_sym)

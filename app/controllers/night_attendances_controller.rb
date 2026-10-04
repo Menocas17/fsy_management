@@ -21,6 +21,7 @@ class NightAttendancesController < ApplicationController
     @attendance = NightAttendance.includes(marks: :participant).find_by(company: @company, night_on: @night, gender: @gender)
     @jovenes = NightAttendance.expected(@company, @gender).to_a
     @editable = editable?
+    set_in_infirmary
   end
 
   def update
@@ -34,6 +35,7 @@ class NightAttendancesController < ApplicationController
     else
       @jovenes = NightAttendance.expected(@company, @gender).to_a
       @editable = true
+      set_in_infirmary
       render :show, status: :unprocessable_entity
     end
   end
@@ -62,6 +64,12 @@ class NightAttendancesController < ApplicationController
       Date.iso8601(params[:noche].to_s)
     rescue Date::Error
       NightAttendance.current_night
+    end
+
+    # Quién de la lista sigue en enfermería (o va en camino): su fila llega marcada «ausente · Enfermería»
+    # mientras nadie la haya marcado de otra forma. El consejero la confirma con el resto.
+    def set_in_infirmary
+      @in_infirmary = InfirmaryVisit.ongoing.where(participant_id: @jovenes.map(&:id)).pluck(:participant_id).to_set
     end
 
     def editable?

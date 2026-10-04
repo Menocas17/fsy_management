@@ -9,7 +9,8 @@ class LogisticsArea < ApplicationRecord
   FLAGS = {
     checkin: [ "Registro", "Escanea llegadas y capacitaciones, y anula registros." ],
     finance: [ "Finanzas", "Presenta y aprueba gastos." ],
-    food: [ "Alimentación", "Acceso al módulo de alimentación (próximamente)." ]
+    food: [ "Alimentación", "Acceso al módulo de alimentación (próximamente)." ],
+    nursing: [ "Enfermería", "Ingresa y da de alta jóvenes en enfermería y escribe su ficha clínica." ]
   }.freeze
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }

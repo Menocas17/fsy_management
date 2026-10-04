@@ -12,7 +12,9 @@ module Authorization
                   :can_view_finances?, :can_operate_finances?, :can_configure_finances?,
                   :can_manage_accounts?, :can_create_account_for?, :can_reset_account_of?,
                   :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
-                  :can_take_night_attendance?
+                  :can_take_night_attendance?,
+                  :can_view_infirmary?, :can_operate_infirmary?, :can_announce_infirmary?, :can_read_infirmary_notes?,
+                  :can_cancel_infirmary_visit?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -178,6 +180,54 @@ module Authorization
     night_attendance_gender_for(company) == gender.to_s
   end
 
+  # Enfermería ----------------------------------------------------------------
+  # El tablero lo ve todo el staff. Ingresar, confirmar la entrada, dar de alta y escribir la ficha es de
+  # enfermería (el área con la bandera nursing); el consejero o el auxiliar del joven solo avisan que lo llevan.
+  def can_view_infirmary?
+    Current.user&.infirmary_viewer? || false
+  end
+
+  def can_operate_infirmary?
+    Current.user&.infirmary_operator? || false
+  end
+
+  def can_announce_infirmary?(joven)
+    joven&.joven? && infirmary_care_team?(joven) || false
+  end
+
+  # Las notas clínicas son información médica de un menor: las leen enfermería, el matrimonio director y quienes
+  # lo cuidan (sus consejeros y los auxiliares de su rama). El resto del staff ve quién está y por qué motivo.
+  def can_read_infirmary_notes?(joven)
+    return false if Current.user.nil? || joven.nil?
+    return true if can_operate_infirmary? || Current.user.participant&.director?
+
+    infirmary_care_team?(joven)
+  end
+
+  # Un aviso que todavía no llega se puede retirar: quien lo dio o enfermería.
+  def can_cancel_infirmary_visit?(visit)
+    return false unless visit&.en_camino?
+
+    can_operate_infirmary? || (visit.announced_by_id.present? && visit.announced_by_id == Current.user&.participant_id)
+  end
+
+  # Si quien entra cuida a este joven: es consejero de su compañía o auxiliar de su rama. El tablero lo
+  # pregunta por cada tarjeta, así que las compañías a su cargo se buscan una vez por página.
+  def infirmary_care_team?(joven)
+    return false if joven&.company_id.nil?
+
+    @infirmary_care_company_ids ||= begin
+      actor = Current.user&.participant
+      case actor&.rol.to_s
+      when "consejero" then actor.counselor_scope.map(&:id)
+      when "auxiliar"  then actor.auxiliar_scope[:companies].map(&:id)
+      else []
+      end
+    end
+    @infirmary_care_company_ids.include?(joven.company_id)
+  end
+  private :infirmary_care_team?
+
   # Finanzas ------------------------------------------------------------------
   def can_view_finances?
     Current.user&.finance_viewer? || false
@@ -282,6 +332,14 @@ module Authorization
 
     def require_finance_configurator!
       redirect_to finances_path, alert: "El presupuesto lo define el director de logística" unless can_configure_finances?
+    end
+
+    def require_infirmary_viewer!
+      redirect_to dashboard_path, alert: "Enfermería es solo para el staff" unless can_view_infirmary?
+    end
+
+    def require_infirmary_operator!
+      redirect_to infirmary_visits_path, alert: "Solo enfermería ingresa, da de alta y escribe la ficha clínica" unless can_operate_infirmary?
     end
 
     def require_logistics_areas_access!
