@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -93,9 +93,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
     t.uuid "activity_id"
     t.uuid "recipient_id"
     t.string "link_path"
+    t.uuid "recipient_ids", default: [], null: false, array: true
     t.index ["activity_id"], name: "index_alerts_on_activity_id"
     t.index ["created_at"], name: "index_alerts_on_created_at"
     t.index ["recipient_id"], name: "index_alerts_on_recipient_id"
+    t.index ["recipient_ids"], name: "index_alerts_on_recipient_ids", using: :gin
     t.index ["sender_id"], name: "index_alerts_on_sender_id"
     t.index ["target_roles"], name: "index_alerts_on_target_roles", using: :gin
   end
@@ -232,6 +234,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
     t.index ["status"], name: "index_expenses_on_status"
   end
 
+  create_table "infirmary_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "infirmary_visit_id", null: false
+    t.uuid "author_id"
+    t.string "author_name", null: false
+    t.text "body"
+    t.boolean "medication", default: false, null: false
+    t.jsonb "vitals", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_infirmary_notes_on_author_id"
+    t.index ["infirmary_visit_id"], name: "index_infirmary_notes_on_infirmary_visit_id"
+  end
+
+  create_table "infirmary_visits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "participant_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "reason", null: false
+    t.text "reason_detail"
+    t.datetime "announced_at"
+    t.uuid "announced_by_id"
+    t.string "announced_by_name"
+    t.datetime "admitted_at"
+    t.uuid "admitted_by_id"
+    t.string "admitted_by_name"
+    t.datetime "discharged_at"
+    t.uuid "discharged_by_id"
+    t.string "discharged_by_name"
+    t.integer "disposition"
+    t.text "discharge_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admitted_by_id"], name: "index_infirmary_visits_on_admitted_by_id"
+    t.index ["announced_by_id"], name: "index_infirmary_visits_on_announced_by_id"
+    t.index ["discharged_at"], name: "index_infirmary_visits_on_discharged_at"
+    t.index ["discharged_by_id"], name: "index_infirmary_visits_on_discharged_by_id"
+    t.index ["participant_id"], name: "index_infirmary_visits_on_participant_id"
+    t.index ["participant_id"], name: "index_infirmary_visits_one_open_per_participant", unique: true, where: "(discharged_at IS NULL)"
+  end
+
   create_table "inventories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "description"
@@ -240,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
     t.string "code_prefix", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "infirmary", default: false, null: false
     t.index ["code_prefix"], name: "index_inventories_on_code_prefix", unique: true
     t.index ["name"], name: "index_inventories_on_name", unique: true
   end
@@ -270,6 +312,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
     t.string "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "infirmary_note_id"
+    t.index ["infirmary_note_id"], name: "index_inventory_movements_on_infirmary_note_id"
     t.index ["inventory_item_id", "created_at"], name: "index_inventory_movements_on_inventory_item_id_and_created_at"
     t.index ["inventory_item_id"], name: "index_inventory_movements_on_inventory_item_id"
     t.index ["participant_id"], name: "index_inventory_movements_on_participant_id"
@@ -294,6 +338,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
     t.boolean "checkin", default: false, null: false
     t.boolean "finance", default: false, null: false
     t.boolean "food", default: false, null: false
+    t.boolean "nursing", default: false, null: false
     t.index ["name"], name: "index_logistics_areas_on_name", unique: true
   end
 
@@ -477,7 +522,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_150000) do
   add_foreign_key "expenses", "participants", column: "justified_by_id"
   add_foreign_key "expenses", "participants", column: "presented_by_id"
   add_foreign_key "expenses", "participants", column: "rejected_by_id"
+  add_foreign_key "infirmary_notes", "infirmary_visits"
+  add_foreign_key "infirmary_notes", "participants", column: "author_id", on_delete: :nullify
+  add_foreign_key "infirmary_visits", "participants"
+  add_foreign_key "infirmary_visits", "participants", column: "admitted_by_id", on_delete: :nullify
+  add_foreign_key "infirmary_visits", "participants", column: "announced_by_id", on_delete: :nullify
+  add_foreign_key "infirmary_visits", "participants", column: "discharged_by_id", on_delete: :nullify
   add_foreign_key "inventory_items", "inventories"
+  add_foreign_key "inventory_movements", "infirmary_notes", on_delete: :nullify
   add_foreign_key "inventory_movements", "inventory_items"
   add_foreign_key "inventory_movements", "participants"
   add_foreign_key "login_attempts", "users", on_delete: :nullify

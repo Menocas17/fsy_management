@@ -15,7 +15,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     @coordinator = person("Cora", "coordinador", "M")
     @logistics_director = person("Lalo", "director_logistica", "H")
     @registrar = person("Rita", "registrador", "M")
-    @nurse = person("Patricia", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
+    @nurse = person("Patricia", "logistica", "M", logistics_area: LogisticsArea.create!(name: "Enfermería", nursing: true))
     # Solo algunas tienen cuenta: las demás se ven con una cuenta de mentira que no se guarda.
     User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: @registrar)
   end
@@ -71,7 +71,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     post view_as_path, params: { participant_id: @nurse.id }
     follow_redirect!
     assert_select "[data-view-as-banner]", text: /Patricia/
-    assert_select "nav", text: /Registro/
+    assert_select "nav", text: /Enfermería/
 
     delete view_as_path
     follow_redirect!

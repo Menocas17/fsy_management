@@ -16,6 +16,8 @@ class InventoryItem < ApplicationRecord
           q: "%#{sanitize_sql_like(query.to_s.strip)}%")
   }
   scope :low, -> { where("quantity <= minimum") }
+  # Lo que enfermería puede dar: los artículos de los inventarios de enfermería.
+  scope :medicines, -> { joins(:inventory).merge(Inventory.for_infirmary).order(:name) }
 
   def out?
     quantity.zero?
@@ -43,9 +45,8 @@ class InventoryItem < ApplicationRecord
   end
 
   # Un ajuste es siempre un movimiento: la existencia se recalcula desde el historial, nunca a mano.
-  def adjust!(delta:, participant:, reason:, note: nil, source: :manual)
-    movement = movements.create!(delta: delta, participant: participant, reason: reason, note: note, source: source)
-    movement
+  def adjust!(delta:, participant:, reason:, note: nil, source: :manual, infirmary_note: nil)
+    movements.create!(delta: delta, participant: participant, reason: reason, note: note, source: source, infirmary_note: infirmary_note)
   end
 
   def recalculate_quantity!

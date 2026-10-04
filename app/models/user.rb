@@ -126,6 +126,21 @@ class User < ApplicationRecord
     participant&.logistica? && participant.logistics_area&.food? || false
   end
 
+  # Enfermería: el doctor y quien lo acompañe son de logística, en un área con la bandera nursing. Ellos (y el
+  # superadmin) ingresan, dan de alta y escriben la ficha clínica; un consejero solo avisa que lleva a un joven.
+  def nursing_member?
+    participant&.logistica? && participant.logistics_area&.nursing? || false
+  end
+
+  def infirmary_operator?
+    superadmin? || nursing_member?
+  end
+
+  # El tablero de enfermería lo ve todo el staff; los jóvenes no.
+  def infirmary_viewer?
+    superadmin? || participant&.staff_member? || false
+  end
+
   # Quién administra las áreas de logística (crearlas, sus banderas y sus miembros).
   def logistics_areas_manager?
     full_access? || participant&.director_logistica? || false

@@ -1,5 +1,5 @@
 # An alert shown in the app's bell. Global alerts reach everybody; role alerts reach the roles listed in
-# target_roles. Only critical alerts may also go out by email, and only to people who have an account.
+# target_roles; «personas» alerts reach the few participants in recipient_ids (enfermería: a joven's carers). Only critical alerts may also go out by email, and only to people who have an account.
 class Alert < ApplicationRecord
   belongs_to :sender, class_name: "Participant", optional: true
   belongs_to :activity, optional: true
@@ -8,9 +8,9 @@ class Alert < ApplicationRecord
   has_many_attached :images
   has_many :dismissals, class_name: "AlertDismissal", dependent: :delete_all
 
-  enum :audience, { todos: 0, por_roles: 1, individual: 2 }, prefix: true
+  enum :audience, { todos: 0, por_roles: 1, individual: 2, personas: 3 }, prefix: true
   enum :priority, { informativa: 0, importante: 1, critica: 2 }, prefix: true
-  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4 }, prefix: true
+  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4, enfermeria: 5 }, prefix: true
 
   PRIORITY_LABELS = { "informativa" => "Informativa", "importante" => "Importante", "critica" => "Crítica" }.freeze
   PRIORITY_STYLES = {
@@ -23,6 +23,7 @@ class Alert < ApplicationRecord
   validates :title, length: { maximum: 120 }
   validate :roles_listed_for_role_alerts
   validate :recipient_named_for_individual_alerts
+  validate :recipients_listed_for_people_alerts
   validate :email_only_for_critical
 
   # Every alert leaves its own trace in Historial, whether a person sent it or the agenda did.
@@ -41,6 +42,7 @@ class Alert < ApplicationRecord
     where(audience: :todos)
       .or(where("alerts.target_roles && ARRAY[?]::varchar[]", [ participant.rol.to_s ]))
       .or(where(recipient_id: participant.id))
+      .or(where("alerts.recipient_ids @> ARRAY[?]::uuid[]", [ participant.id ]))
   }
 
   # What a person's bell shows: what they can see, minus what they deleted one by one or cleared all at once.
@@ -110,6 +112,7 @@ class Alert < ApplicationRecord
   def audience_label
     return "Todos los participantes" if audience_todos?
     return recipient&.full_name.presence || "Una persona" if audience_individual?
+    return Participant.where(id: recipient_ids).map(&:full_name).sort.to_sentence(two_words_connector: " y ", last_word_connector: " y ") if audience_personas?
 
     target_roles.map { |role| Participant.role_label(role) }.to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
@@ -118,6 +121,7 @@ class Alert < ApplicationRecord
   def push_recipients
     return User.all if audience_todos?
     return User.where(participant_id: recipient_id) if audience_individual?
+    return User.where(participant_id: recipient_ids) if audience_personas?
 
     User.joins(:participant).where(participants: { rol: target_roles })
   end
@@ -127,6 +131,7 @@ class Alert < ApplicationRecord
     return User.none unless send_email? && priority_critica?
     return User.where.not(participant_id: nil) if audience_todos?
     return User.where(participant_id: recipient_id) if audience_individual?
+    return User.where(participant_id: recipient_ids) if audience_personas?
 
     User.joins(:participant).where(participants: { rol: target_roles })
   end
@@ -142,7 +147,7 @@ class Alert < ApplicationRecord
         actor_name: sender_name,
         action: "created",
         category: :alertas,
-        summary: "Envió la alerta «#{title}» a #{audience_individual? ? audience_label : audience_label.downcase}",
+        summary: "Envió la alerta «#{title}» a #{audience_individual? || audience_personas? ? audience_label : audience_label.downcase}",
         target_type: self.class.name,
         target_id: id,
         target_name: title
@@ -163,6 +168,10 @@ class Alert < ApplicationRecord
 
     def recipient_named_for_individual_alerts
       errors.add(:recipient, "elige a quién va dirigida") if audience_individual? && recipient_id.blank?
+    end
+
+    def recipients_listed_for_people_alerts
+      errors.add(:recipient_ids, "elige a quiénes va dirigida") if audience_personas? && recipient_ids.blank?
     end
 
     def email_only_for_critical

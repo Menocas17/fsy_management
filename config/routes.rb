@@ -127,6 +127,16 @@ Rails.application.routes.draw do
     # La lista de la noche de esta compañía (?genero=H|M): la pasa su consejero, la ven los del panel.
     resource :night_attendance, only: %i[show update], path: "asistencia-nocturna"
   end
+  # Enfermería: el tablero en vivo, ingresar (o avisar que lo llevan), confirmar la entrada, dar de alta,
+  # las notas de la ficha clínica y la ficha de cada joven con todas sus visitas.
+  resources :infirmary_visits, only: %i[index new create destroy], path: "enfermeria", path_names: { new: "ingresar" } do
+    member do
+      patch :admit, path: "confirmar"
+      patch :discharge, path: "alta"
+    end
+    resources :notes, only: :create, controller: "infirmary_notes", path: "notas"
+  end
+  get "enfermeria/fichas/:participant_id" => "infirmary_charts#show", as: :infirmary_chart
   # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
   resources :night_attendances, only: :index, path: "asistencia-nocturna"
   resources :assignments, only: [ :update, :destroy ], path: "asignaciones"

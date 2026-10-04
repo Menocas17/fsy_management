@@ -452,12 +452,23 @@ module Demo
         d.nav_to("Reportes")
         d.tour_page(steps: 2)
       end
-      scene "Superadmin · Seguimiento", say: "Asistencia nocturna, el tablero de enfermería en vivo y el historial de todo lo que se cambia." do |d|
+      scene "Superadmin · Seguimiento", say: "La asistencia nocturna de todas las compañías y el historial de todo lo que se cambia, con quién y cuándo." do |d|
         d.nav_to("Asistencia nocturna")
         d.tour_page(steps: 1)
-        d.nav_to("Enfermería")
-        d.tour_page(steps: 1)
         d.nav_to("Historial")
+        d.tour_page(steps: 2)
+      end
+      scene "Enfermería · Tablero en vivo", say: "Enfermería: un tablero en vivo de quién va en camino, quién está adentro y quién ya salió, con sus alergias a la vista." do |d|
+        d.nav_to("Enfermería")
+        d.tour_page(steps: 2)
+      end
+      scene "Enfermería · Ficha clínica", say: "La ficha clínica: notas, signos vitales y medicamentos, que se descuentan solos del inventario de enfermería. Nada se borra." do |d|
+        d.open_first(record("enfermeria/fichas"), "una ficha clínica")
+        d.tour_page(steps: 3)
+      end
+      scene "Enfermería · Ingresar a un joven", say: "Enfermería ingresa a un joven con el motivo; a sus consejeros y a su auxiliar les llega una alerta, sin el detalle médico." do |d|
+        d.nav_to("Enfermería")
+        d.click_text("Ingresar joven")
         d.tour_page(steps: 2)
       end
       scene "Superadmin · Menú de cuenta", say: "Desde la cuenta: configuración, mi perfil, accesos (quién está en línea) y «Ver como»." do |d|
@@ -536,10 +547,10 @@ module Demo
 
     def logistica
       as "logistica" do
-        scene "Logística · Su menú", say: "Un miembro de logística ve solo lo suyo: inventario y, según su área, registro, finanzas o enfermería." do |d|
+        scene "Logística · Su menú", say: "Un miembro de logística ve solo lo suyo: el inventario y lo de su área (registro, finanzas o enfermería)." do |d|
           d.nav_to("Inventario")
           d.tour_page(steps: 1)
-          d.nav_to("Enfermería")
+          d.nav_to("Registro") || d.nav_to("Finanzas") || d.nav_to("Enfermería")
           d.tour_page(steps: 1)
         end
       end
@@ -578,9 +589,10 @@ module Demo
           d.nav_to("Asistencia nocturna")
           d.tour_page(steps: 2)
         end
-        scene "Consejero · Enfermería", say: "Si lleva a un joven a enfermería, lo avisa aquí y le llega la alerta a quien corresponde." do |d|
+        scene "Consejero · Lleva a un joven a enfermería", say: "Si un joven se siente mal, el consejero avisa «lo llevo»: enfermería lo ve venir en el tablero y confirma cuando llega." do |d|
           d.nav_to("Enfermería")
-          d.tour_page(steps: 1)
+          d.click_text("Llevar a enfermería")
+          d.tour_page(steps: 2)
         end
       end
     end

@@ -14,6 +14,27 @@
     <%= info_row "Dieta", "leaf", participant.diet %>
   </div>
 
+  <%# Sus visitas a enfermería: si está adentro ahora salta a la vista; si no, cuántas lleva. %>
+  <% if participant.joven? && can_view_infirmary? %>
+    <% visits = participant.infirmary_visits.to_a %>
+    <% ongoing = visits.find { |visit| visit.discharged_at.nil? } %>
+    <%= link_to infirmary_chart_path(participant), data: { profile_infirmary: ongoing&.status || "ninguna" },
+          class: "mt-4 flex items-center gap-3 rounded-tile border border-line-soft px-4 py-3 hover:bg-canvas transition-colors" do %>
+      <%= render IconTileComponent.new(icon: "heart-pulse", tone: ongoing ? :rose : :neutral) %>
+      <span class="min-w-0 flex-1">
+        <span class="block text-body font-bold text-ink-900">Ficha de enfermería</span>
+        <span class="block text-label font-semibold <%= ongoing ? "text-cat-rose-ink" : "text-ink-500" %>">
+          <%= if ongoing
+                ongoing.en_camino? ? "Va en camino a enfermería" : "En enfermería desde las #{ongoing.started_at.strftime("%H:%M")}"
+              else
+                visits.any? ? pluralize(visits.size, "visita") : "No ha pasado por enfermería"
+              end %>
+        </span>
+      </span>
+      <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
+    <% end %>
+  <% end %>
+
   <div class="mt-5 rounded-tile bg-sunken border border-line-soft px-5 py-4">
     <p class="text-body font-bold text-ink-700">Notas adicionales</p>
     <% if participant.additional_instructions.present? %>

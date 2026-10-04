@@ -16,6 +16,8 @@ class Inventory < ApplicationRecord
   before_validation :derive_code_prefix, on: :create
 
   scope :by_name, -> { order(:name) }
+  # Los inventarios de enfermería: sus artículos son los medicamentos que se pueden dar desde la ficha clínica.
+  scope :for_infirmary, -> { where(infirmary: true) }
 
   def low_stock_items
     items.select(&:low?)

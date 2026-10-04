@@ -32,6 +32,8 @@ module NavigationHelper
         ({ text: "Reportes", url: reports_path, lucide_icon: "file-text",
            active_paths: [ reports_path, participant_imports_path ] } if Current.user&.reports_viewer?),
         night_attendance_nav_item,
+        ({ text: "Enfermería", url: infirmary_visits_path, lucide_icon: "heart-pulse",
+           active_paths: [ infirmary_visits_path ] } if Current.user&.infirmary_viewer?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]
