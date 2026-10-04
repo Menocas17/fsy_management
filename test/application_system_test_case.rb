@@ -9,6 +9,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     options.binary = ENV["CHROME_BIN"] if ENV["CHROME_BIN"].present?
     # Chrome no arranca su sandbox como root (contenedores); fuera de ellos esto no aplica.
     options.add_argument("--no-sandbox") if Process.uid.zero?
+    # Escritorio de verdad: con mouse. El Chrome sin pantalla de Linux (el del CI) se declara sin él (hover: none),
+    # y lo que solo existe con mouse, como la X de las alertas ([@media(hover:none)]:hidden), desaparecía.
+    # Las pruebas del teléfono siguen emulando el toque por CDP. SYSTEM_TEST_BLINK lo cambia para reproducir otro equipo.
+    options.add_argument("--blink-settings=#{ENV.fetch("SYSTEM_TEST_BLINK", "primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4")}")
   end
 
   # Entra por el formulario real, no por la cookie: así la prueba también cubre el inicio de sesión.
