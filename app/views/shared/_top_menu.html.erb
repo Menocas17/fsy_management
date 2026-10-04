@@ -27,17 +27,18 @@
 
       <%= render "shared/notifications_bell" %>
 
-      <%# En el teléfono la foto sola no parecía botón: va dentro de una píldora con borde y la flecha hacia abajo. %>
+      <%# En el teléfono la foto sola no parecía botón: va en un botón gemelo de la campanita (32 px, mismo borde,
+          fondo y esquinas) con la flecha hacia abajo; la foto baja a 26 px con su curva chica, paralela a la de afuera. %>
       <div data-controller="dropdown" class="relative">
-        <button type="button" aria-haspopup="true" aria-label="Menú de cuenta"
-                class="flex items-center gap-1 md:gap-2.5 rounded-full md:rounded-tile p-0.5 pr-1.5 md:py-1.5 md:pl-1.5 md:pr-3 border border-line md:border-transparent hover:bg-muted cursor-pointer transition"
+        <button type="button" aria-haspopup="true" aria-expanded="false" aria-label="Menú de cuenta"
+                class="flex items-center gap-0.5 md:gap-2.5 h-8 md:h-auto pl-0.5 pr-1 md:py-1.5 md:pl-1.5 md:pr-3 rounded-control md:rounded-tile border border-line md:border-transparent bg-canvas md:bg-transparent hover:bg-muted aria-expanded:bg-muted cursor-pointer transition"
                 data-action="click->dropdown#toggle click@window->dropdown#hide keydown.esc@window->dropdown#close">
-          <%= current_user_avatar_tag(class: "w-8 h-8 md:w-9 md:h-9 text-label md:text-body") %>
+          <%= current_user_avatar_tag(class: "w-[26px] h-[26px] md:w-9 md:h-9 text-meta md:text-body", radius: "rounded-avatar-sm md:rounded-avatar") %>
           <span class="hidden md:block text-left leading-tight">
             <span class="block text-body font-bold text-ink-900"><%= Current.user.full_name %></span>
             <span class="block text-label font-medium text-ink-500"><%= Current.user.role_label %></span>
           </span>
-          <%= icon "chevron-down", class: "w-4 h-4 text-ink-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
+          <%= icon "chevron-down", class: "w-3.5 h-3.5 md:w-4 md:h-4 text-ink-500 transition-transform duration-200", data: { dropdown_target: "chevron" } %>
         </button>
 
         <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-56 z-50 py-1.5 bg-surface border border-line-soft rounded-tile shadow-lg"
