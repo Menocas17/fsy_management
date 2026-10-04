@@ -23,16 +23,23 @@
             data: { night_gender: gender } } }) %>
   </div>
 
-  <div class="mb-5 flex items-center gap-2.5 rounded-tile border border-line-soft bg-canvas px-4 py-3" data-night-status>
-    <% if @attendance&.persisted? %>
-      <%= icon "circle-check", class: "w-5 h-5 shrink-0 text-cat-green-ink" %>
-      <p class="text-body text-ink-700">
-        Confirmada por <strong class="text-ink-900"><%= @attendance.taken_by_name %></strong> a las <%= @attendance.confirmed_at.strftime("%H:%M") %>.
-      </p>
-    <% else %>
-      <%= icon "clock", class: "w-5 h-5 shrink-0 text-cat-amber-ink" %>
-      <p class="text-body text-ink-700">Todavía no se ha pasado la asistencia de los <%= NightAttendance.gender_label(@gender).downcase %> esta noche.</p>
-    <% end %>
+  <%# Sobre el lienzo gris va en superficie, con el borde y el mosaico en el color del estado: si fuera del
+      mismo gris que el fondo no se notaría. %>
+  <% confirmed = @attendance&.persisted? %>
+  <div class="mb-5 flex items-center gap-3 rounded-tile border bg-surface px-4 py-3 shadow-sm <%= confirmed ? "border-cat-green/45" : "border-cat-amber/55" %>"
+       data-night-status="<%= confirmed ? "confirmada" : "pendiente" %>">
+    <%= render IconTileComponent.new(icon: confirmed ? "circle-check" : "clock", tone: confirmed ? :green : :amber) %>
+    <div class="min-w-0">
+      <% if confirmed %>
+        <p class="text-body font-bold text-ink-900">Asistencia confirmada</p>
+        <p class="text-label font-semibold text-ink-700">
+          La pasó <%= @attendance.taken_by_name %> a las <%= @attendance.confirmed_at.strftime("%H:%M") %>.
+        </p>
+      <% else %>
+        <p class="text-body font-bold text-ink-900">Todavía no se ha pasado</p>
+        <p class="text-label font-semibold text-ink-700">La lista de los <%= NightAttendance.gender_label(@gender).downcase %> de esta noche está pendiente.</p>
+      <% end %>
+    </div>
   </div>
 
   <div class="<%= card_classes("p-5 md:p-6") %>">

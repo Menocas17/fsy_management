@@ -19,6 +19,7 @@ class NightAttendanceTest < ApplicationSystemTestCase
     click_on "Pasar asistencia"
 
     assert_button "Confirmar asistencia", disabled: true
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-pendiente.png")) if ENV["SCREENSHOTS"]
     find("[data-night-joven='#{@juan.id}'] [data-night-toggle]").click
     find("[data-night-joven='#{@luis.id}'] [data-night-toggle]").click
     within("[data-night-joven='#{@juan.id}']") { assert_text "Presente" }
@@ -38,7 +39,8 @@ class NightAttendanceTest < ApplicationSystemTestCase
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-escritorio.png")) if ENV["SCREENSHOTS"]
 
     click_on "Confirmar asistencia"
-    assert_selector "[data-night-status]", text: "Confirmada por Carlos Prueba"
+    assert_selector "[data-night-status=confirmada]", text: "La pasó Carlos Prueba"
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-confirmada.png")) if ENV["SCREENSHOTS"]
     list = NightAttendance.last
     assert_equal %w[presente presente], [ list.mark_for(@juan).status, list.mark_for(@luis).status ]
     assert_equal "Con sus papás", list.mark_for(@pedro).reason_label
