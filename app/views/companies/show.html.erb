@@ -2,7 +2,7 @@
 <% content_for :eyebrow, "Compañías" %>
 <% content_for :heading, "Perfil de la compañía" %>
 <% content_for :page_h1, "true" %>
-<% back_to "Compañías", safe_return_to(companies_path) %>
+<% back_to_origin "Compañías", companies_path %>
 <% counselor_names = @company.counselor_names %>
 <%= render PageComponent.new(width: :page) do %>
   <%= render "shared/event_banner" %>

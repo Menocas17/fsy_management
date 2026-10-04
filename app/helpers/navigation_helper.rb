@@ -90,6 +90,24 @@ module NavigationHelper
     end
   end
 
+  # Volver a donde se vino (return_to), con el nombre de esa página: desde el organigrama dice «Organigrama»,
+  # no «Compañías». Sin return_to, o si no se reconoce la página, quedan el destino y el nombre de siempre.
+  def back_to_origin(label, fallback)
+    url = safe_return_to(fallback)
+    back_to(url == fallback ? label : (page_label_for(url) || label), url)
+  end
+
+  # El nombre de una página de la app por su dirección: los del menú y las pocas que no están en él.
+  def page_label_for(url)
+    path = URI.parse(url).path.chomp("/")
+    named = nav_items.filter_map { |item| [ URI.parse(item[:url]).path, item[:text] ] if item[:url] }
+    extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ] ]
+    # La dirección más larga que coincida gana: /companies/overview antes que /companies.
+    (extra + named).sort_by { |route, _| -route.length }.find { |route, _| path == route || path.start_with?("#{route}/") }&.last
+  rescue URI::InvalidURIError
+    nil
+  end
+
   # La ficha de un participante vuelve a donde se abrió: la lista de jóvenes o de staff, o el escáner
   # (registro o lector del panel), con return_to diciendo exactamente cuál.
   def participants_back
