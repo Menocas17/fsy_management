@@ -14,12 +14,6 @@
           class: "hidden lg:block absolute top-10 right-12 xl:top-10 xl:right-12 w-[220px] xl:w-[270px] opacity-50 pointer-events-none select-none" %>
     <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 max-sm:flex-1">
       <div class="max-w-xl">
-        <%# En los teléfonos altos sobra aire en el banner: lo encabeza el triángulo de la marca, en su mosaico como
-            en el menú lateral (el lockup con letras repetía lo que ya dice la píldora). Solo desde 800px de alto
-            visible; por debajo no cabe sin empujar los KPI a la vista. %>
-        <span class="hidden max-sm:[@media(min-height:800px)]:flex w-16 h-16 mb-5 rounded-card bg-brand-tile p-2.5 shadow-md" aria-hidden="true">
-          <%= image_tag "fsy-mark.png", alt: "", class: "w-full h-full object-contain" %>
-        </span>
         <span class="lg:hidden inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %></span>
         <% countdown = event_countdown %>
         <%# El título de la página es estable; la cuenta regresiva cambia cada segundo y no debe ser el h1. %>
@@ -57,6 +51,34 @@
         shortcut_base = "inline-flex items-center justify-center gap-2 w-full sm:w-auto rounded-control px-5 py-2.5 text-sm font-semibold transition"
         shortcut_primary = "#{shortcut_base} bg-white text-primary-800 shadow-sm hover:bg-primary-50"
       %>
+      <%# En los teléfonos altos sobra aire en el banner: lo llena «Lo que sigue», la próxima fecha (la misma de
+          «Próximas fechas», más abajo), y una segunda y una tercera mientras sobre aire. Por alto de pantalla: por
+          debajo de cada umbral no caben sin empujar los KPI a la vista. %>
+      <% hero_next = next_up_items(@dashboard.next_activities) %>
+      <% row_visibility = [ "flex", "hidden [@media(min-height:860px)]:flex", "hidden [@media(min-height:920px)]:flex" ] %>
+      <% if hero_next.any? %>
+        <div class="hidden max-sm:[@media(min-height:780px)]:block rounded-tile bg-white/10 border border-white/15 px-4 py-3.5" data-hero-next>
+          <div class="flex items-center justify-between gap-3 mb-2.5">
+            <span class="text-[11px] font-bold tracking-[.08em] uppercase text-white/70">Lo que sigue</span>
+            <%= link_to "Ver agenda ›", agenda_path, class: "text-label font-bold text-sun hover:underline" %>
+          </div>
+          <% hero_next.each_with_index do |item, index| %>
+            <%= link_to item[:url], data: { hero_next_item: item[:key] },
+                  class: "#{row_visibility[index]} #{"mt-2.5 pt-2.5 border-t border-white/10" unless index.zero?} items-center gap-3 rounded-inner" do %>
+              <span class="w-[38px] h-[38px] shrink-0 rounded-tile flex items-center justify-center <%= item[:tone] == :amber ? "bg-sun/20 text-sun" : "bg-white/15 text-white" %>">
+                <%= icon item[:icon], class: "w-[18px] h-[18px]" %>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-bold leading-tight text-white truncate"><%= item[:title] %></span>
+                <span class="block text-[12px] font-medium text-white/70 truncate"><%= item[:meta] %></span>
+              </span>
+              <% if (label = countdown_label(item[:days])) %>
+                <span class="shrink-0 px-2 py-0.5 rounded-full bg-sun/20 text-[11px] font-bold text-sun whitespace-nowrap"><%= label.sub(/\AFaltan? /, "") %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
       <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0 max-sm:mt-auto">
         <% if can_create_participants? %>
           <%= link_to new_participant_path, class: shortcut_primary do %>
