@@ -90,6 +90,8 @@ module NavigationHelper
   # Cada vista de detalle dice a dónde vuelve y la barra superior lo pinta siempre en el mismo lugar,
   # así nadie depende de las flechas del navegador.
   def back_to(label, url)
+    # En el teléfono el volver no es este botón: la barra superior cambia el menú por «‹ label» (page_back).
+    @page_back = { label: label, url: url }
     content_for :back do
       link_to url, title: "Volver a #{label}", data: { scroll_restore: true }, class: "shrink-0 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 sm:pr-3 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted transition" do
         safe_join([
@@ -153,6 +155,11 @@ module NavigationHelper
     else
       back_to_origin "Jóvenes", participants_path
     end
+  end
+
+  # A dónde vuelve la página ({ label:, url: }), si es una de las que se abren desde otra (back_to).
+  def page_back
+    @page_back
   end
 
   def page_eyebrow

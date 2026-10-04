@@ -2,14 +2,17 @@
 <% content_for :eyebrow, "Panel general" %>
 <% content_for :heading, "Bienvenido de nuevo" %>
 <% content_for :page_h1, true %>
-<%= render PageComponent.new(width: :page) do %>
+<%= render PageComponent.new(width: :page, banner: true) do %>
   <%# El banner de la cuenta regresiva queda tal cual: es la única pieza fuera de la guía, a propósito. %>
-  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9">
+  <%# En el teléfono el banner llena la primera pantalla (la altura visible menos la barra de 60px, el relleno de
+      arriba de la página, 12px, y 16px de aire): según el teléfono se asomaban solo los iconos de los KPI, que parecían
+      un menú inferior. Así los KPI empiezan siempre bajo el borde, y los atajos quedan abajo, a mano del pulgar. %>
+  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9 max-sm:flex max-sm:flex-col max-sm:min-h-[calc(100dvh-88px)]">
     <%# El lockup oficial ocupa el aire de la derecha; donde no cabe, el mismo texto queda en la píldora. %>
     <%= image_tag "fsy-lettering.png", alt: "#{Rails.configuration.x.event_name} · Nicaragua #{Rails.configuration.x.event_region}", aria: { hidden: true },
           data: { hero_lettering: true },
           class: "hidden lg:block absolute top-10 right-12 xl:top-10 xl:right-12 w-[220px] xl:w-[270px] opacity-50 pointer-events-none select-none" %>
-    <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+    <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 max-sm:flex-1">
       <div class="max-w-xl">
         <span class="lg:hidden inline-flex items-center px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-[11px] font-bold tracking-[.06em] uppercase"><%= Rails.configuration.x.event_name %> · <%= Rails.configuration.x.event_region %></span>
         <% countdown = event_countdown %>
@@ -48,7 +51,35 @@
         shortcut_base = "inline-flex items-center justify-center gap-2 w-full sm:w-auto rounded-control px-5 py-2.5 text-sm font-semibold transition"
         shortcut_primary = "#{shortcut_base} bg-white text-primary-800 shadow-sm hover:bg-primary-50"
       %>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0">
+      <%# En los teléfonos altos sobra aire en el banner: lo llena «Lo que sigue», la próxima fecha (la misma de
+          «Próximas fechas», más abajo), y una segunda y una tercera mientras sobre aire. Por alto de pantalla: por
+          debajo de cada umbral no caben sin empujar los KPI a la vista. %>
+      <% hero_next = next_up_items(@dashboard.next_activities) %>
+      <% row_visibility = [ "flex", "hidden [@media(min-height:830px)]:flex", "hidden [@media(min-height:890px)]:flex" ] %>
+      <% if hero_next.any? %>
+        <div class="hidden max-sm:[@media(min-height:770px)]:block max-sm:-mt-2 rounded-tile bg-white/10 border border-white/15 px-4 py-3.5" data-hero-next>
+          <div class="flex items-center justify-between gap-3 mb-2.5">
+            <span class="text-[11px] font-bold tracking-[.08em] uppercase text-white/70">Lo que sigue</span>
+            <%= link_to "Ver agenda ›", agenda_path, class: "text-label font-bold text-sun hover:underline" %>
+          </div>
+          <% hero_next.each_with_index do |item, index| %>
+            <%= link_to item[:url], data: { hero_next_item: item[:key] },
+                  class: "#{row_visibility[index]} #{"mt-2.5 pt-2.5 border-t border-white/10" unless index.zero?} items-center gap-3 rounded-inner" do %>
+              <span class="w-[38px] h-[38px] shrink-0 rounded-tile flex items-center justify-center <%= item[:tone] == :amber ? "bg-sun/20 text-sun" : "bg-white/15 text-white" %>">
+                <%= icon item[:icon], class: "w-[18px] h-[18px]" %>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-bold leading-tight text-white truncate"><%= item[:title] %></span>
+                <span class="block text-[12px] font-medium text-white/70 truncate"><%= item[:meta] %></span>
+              </span>
+              <% if (label = countdown_label(item[:days])) %>
+                <span class="shrink-0 px-2 py-0.5 rounded-full bg-sun/20 text-[11px] font-bold text-sun whitespace-nowrap"><%= label.sub(/\AFaltan? /, "") %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0 max-sm:mt-auto">
         <% if can_create_participants? %>
           <%= link_to new_participant_path, class: shortcut_primary do %>
             <%= icon "plus", class: "w-4 h-4" %>

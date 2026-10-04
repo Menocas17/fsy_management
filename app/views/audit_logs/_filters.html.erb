@@ -1,11 +1,13 @@
 <%
-  # Igual que los filtros de Jóvenes y Staff: la búsqueda cede ancho y los selects, si no caben, se deslizan
-  # de lado con la barra discreta (scroll-reveal), en vez de desbordar la página en el teléfono.
-  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
+  # Igual que los filtros de Jóvenes y Staff: desde lg, la búsqueda cede ancho y los selects, si no caben, se
+  # deslizan de lado con la barra discreta (scroll-reveal); por debajo, el botón «Filtros» los sube en una hoja
+  # (shared/filter_sheet).
+  active_count = [ :category, :kind, :period ].count { |key| params[key].present? }
+  chip_classes = "max-lg:w-full h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
 %>
-<%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance", controller: "auto-submit" },
-      class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-4" do |f| %>
-  <div class="relative w-full lg:w-auto lg:flex-[1_100_20rem] lg:min-w-44 lg:max-w-96">
+<%= form_with url: audit_logs_path, method: :get, data: filter_sheet_form_data("audit_logs_table"),
+      class: "flex items-start gap-2 lg:gap-3 mb-4" do |f| %>
+  <div class="relative flex-1 min-w-0 lg:flex-[1_100_20rem] lg:min-w-44 lg:max-w-96">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
     <%= f.search_field :query,
           value: params[:query],
@@ -14,16 +16,24 @@
           class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           data: { action: "input->auto-submit#typed" } %>
   </div>
-  <div data-controller="scroll-reveal" data-audit-filters
-       class="scroll-reveal-x flex items-start gap-2 overflow-x-auto p-0.5 -m-0.5 pb-1.5 lg:flex-none">
-    <%= f.select :category,
-          options_for_select(AuditLog::CATEGORY_LABELS.map { |key, label| [ label, key ] }, params[:category]),
-          { include_blank: "Categoría" }, class: chip_classes, aria: { label: "Filtrar por categoría" }, data: { action: "change->auto-submit#changed" } %>
-    <%= f.select :kind,
-          options_for_select(AuditLog::ACTION_KINDS.map { |key, meta| [ meta[:label], key ] }, params[:kind]),
-          { include_blank: "Acción" }, class: chip_classes, aria: { label: "Filtrar por acción" }, data: { action: "change->auto-submit#changed" } %>
-    <%= f.select :period,
-          options_for_select(AuditLog::PERIODS.map { |key, label| [ label, key ] }, params[:period]),
-          { include_blank: "Cualquier fecha" }, class: chip_classes, aria: { label: "Filtrar por fecha" }, data: { action: "change->auto-submit#changed" } %>
-  </div>
+  <%= render layout: "shared/filter_sheet", locals: {
+        sheet_id: "audit-filters", clear_path: audit_logs_path, active_count: active_count, row_data: { audit_filters: true },
+        sheet_class: "lg:flex-none lg:min-w-0",
+        row_class: "lg:flex lg:items-start lg:gap-2 lg:overflow-x-auto lg:p-0.5 lg:-m-0.5 lg:pb-1.5" } do %>
+    <%= filter_field "Categoría", "category" do %>
+      <%= f.select :category,
+            options_for_select(AuditLog::CATEGORY_LABELS.map { |key, label| [ label, key ] }, params[:category]),
+            { include_blank: "Categoría" }, class: chip_classes, aria: { label: "Filtrar por categoría" }, data: { action: "change->auto-submit#changed" } %>
+    <% end %>
+    <%= filter_field "Acción", "kind" do %>
+      <%= f.select :kind,
+            options_for_select(AuditLog::ACTION_KINDS.map { |key, meta| [ meta[:label], key ] }, params[:kind]),
+            { include_blank: "Acción" }, class: chip_classes, aria: { label: "Filtrar por acción" }, data: { action: "change->auto-submit#changed" } %>
+    <% end %>
+    <%= filter_field "Fecha", "period" do %>
+      <%= f.select :period,
+            options_for_select(AuditLog::PERIODS.map { |key, label| [ label, key ] }, params[:period]),
+            { include_blank: "Cualquier fecha" }, class: chip_classes, aria: { label: "Filtrar por fecha" }, data: { action: "change->auto-submit#changed" } %>
+    <% end %>
+  <% end %>
 <% end %>

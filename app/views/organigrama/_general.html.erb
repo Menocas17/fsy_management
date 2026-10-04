@@ -15,7 +15,7 @@
 <% if branches || @directors.any? %>
   <%# Desktop: the canvas is the page — no card, no margins, controls floating on top. %>
   <div class="hidden md:block h-full">
-    <div class="org-chart relative h-full" data-controller="org-chart">
+    <div id="org-chart-<%= @view %>" class="org-chart relative h-full" data-controller="org-chart">
       <div data-org-chart-target="viewport" tabindex="0" role="region"
            aria-label="Organigrama. Arrastra para moverte; usa Ctrl y la rueda del ratón, o las teclas más y menos, para acercar o alejar."
            class="relative h-full w-full overflow-hidden bg-canvas cursor-grab data-[dragging]:cursor-grabbing touch-none select-none focus:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
@@ -119,8 +119,16 @@
     </div>
   </div>
 
-  <div class="md:hidden px-4 pt-6 pb-10 space-y-5">
+  <%# Teléfono: la misma regla que el lienzo, las compañías empiezan cerradas y cada rama abre las suyas. %>
+  <div class="md:hidden px-4 pt-6 pb-10 space-y-5" data-controller="org-branches">
     <%= render "organigrama/view_switch" %>
+    <% if @show_companies && @auxiliar_companies.any? %>
+      <button type="button" data-action="org-branches#toggleAll" data-org-branches-target="toggleAllButton" aria-pressed="false"
+              class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-control border border-line bg-surface text-label font-bold text-ink-700 hover:bg-muted cursor-pointer transition">
+        <%= icon "list-tree", class: "w-4 h-4" %>
+        <span data-org-branches-target="toggleAllLabel">Mostrar compañías</span>
+      </button>
+    <% end %>
     <div class="space-y-4">
       <%= render "organigrama/director_node", directors: @directors %>
       <% if branches %>
@@ -130,10 +138,11 @@
               <%= render "organigrama/coordination_node", coordinators: @coordinators %>
               <div class="ml-3 pl-3.5 border-l-2 border-line-soft space-y-4">
                 <% @auxiliar_companies.each do |auxiliar_company| %>
+                  <% mobile_branch_id = "branch-mobile-#{auxiliar_company.id}" %>
                   <div>
-                    <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company %>
+                    <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company, branch_id: mobile_branch_id, toggle_controller: "org-branches" %>
                     <% if auxiliar_company.companies.any? %>
-                      <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft space-y-2">
+                      <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft space-y-2" id="<%= mobile_branch_id %>" data-org-branches-target="branch" hidden>
                         <% by_number.(auxiliar_company.companies).each do |company| %>
                           <%= company_node.(company) %>
                         <% end %>
