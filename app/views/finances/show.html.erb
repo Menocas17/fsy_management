@@ -46,8 +46,8 @@
     <% [ [ "Ejecutado", total.executed, "Consolidado con factura o justificación", "circle-check", :green ],
          [ "Comprometido", total.committed, "Aprobado, falta consolidar", "clock", :blue ],
          [ "Por aprobar", total.presented, "Presentado, sin aprobar", "hourglass", :amber ],
-         [ "Asignado a categorías", @summary.assigned_cents, "Suma de los presupuestos propios", "layout-grid", :indigo ] ].each do |label, value, hint, icon_name, tone| %>
-      <%= render StatTileComponent.new(value: money(value), label: label, hint: hint, icon: icon_name, tone: tone, value_data: { finance_figure: label.parameterize }) %>
+         [ "Asignado a categorías", @summary.assigned_cents, "Suma de los presupuestos propios", "layout-grid", :indigo, "Asignado" ] ].each do |label, value, hint, icon_name, tone, short| %>
+      <%= render StatTileComponent.new(value: money(value), label: label, short_label: short, hint: hint, icon: icon_name, tone: tone, value_data: { finance_figure: label.parameterize }) %>
     <% end %>
   </section>
 

@@ -10,10 +10,10 @@
   <% end %>
 
   <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen">
-    <%= render StatTileComponent.new(value: @committee_count, label: "Miembros de logística", icon: "users", tone: :indigo) %>
+    <%= render StatTileComponent.new(value: @committee_count, label: "Miembros de logística", short_label: "Miembros", icon: "users", tone: :indigo) %>
     <%= render StatTileComponent.new(value: @areas.size, label: "Áreas", icon: "layout-grid", tone: :blue) %>
     <% if @unassigned.any? %>
-      <%= render StatTileComponent.new(value: @unassigned.size, icon: "triangle-alert", tone: :amber, data: { unassigned: true },
+      <%= render StatTileComponent.new(value: @unassigned.size, icon: "triangle-alert", tone: :amber, data: { unassigned: true }, short_label: "Sin área",
             label: "Sin área: #{@unassigned.first(3).map(&:full_name).to_sentence(two_words_connector: " y ", last_word_connector: " y ")}#{" y #{@unassigned.size - 3} más" if @unassigned.size > 3}",
             hint: "Sin área no tienen ningún permiso extra.") %>
     <% else %>
@@ -59,9 +59,9 @@
                 <p class="mt-0.5 text-body text-ink-700"><%= area.description %></p>
               <% end %>
             </div>
-            <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, size: :sm, extra: "hidden md:inline-flex shrink-0") %>
+            <%= link_to "Administrar", logistics_area_path(area), class: button_classes(:secondary, size: :sm, extra: "max-md:hidden shrink-0") %>
           </div>
-          <div class="flex items-center justify-between gap-3 pt-3.5 border-t border-line-soft">
+          <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3.5 border-t border-line-soft">
             <div class="flex items-center gap-2.5 min-w-0">
               <% members = area.members.sort_by(&:full_name) %>
               <span class="flex">
@@ -78,7 +78,7 @@
                 <%= render "logistics_areas/flag_chip", flag: flag %>
               <% end %>
               <% if area.flags.empty? %>
-                <%= render ChipComponent.new(label: "Sin permisos extra · solo ve") %>
+                <span title="Sin permisos extra: solo ve"><%= render ChipComponent.new(label: "Solo ve") %><span class="sr-only">. Sin permisos extra</span></span>
               <% end %>
             </div>
           </div>

@@ -6,10 +6,10 @@
   men = @companies.map { |company| @gender_counts.fetch([ company.id, "H" ], 0) }
   women = @companies.map { |company| @gender_counts.fetch([ company.id, "M" ], 0) }
   kpis = [
-    [ "Compañías auxiliares", @auxiliar_companies.size, "network", :indigo ],
-    [ "Compañías", @companies.size, "building-2", :blue ],
-    [ "Consejeros asignados", "#{counselor_total}/#{@companies.size * 2}", "user-check", :green ],
-    [ "Jóvenes en compañías", @jovenes_counts.values.sum, "users", :amber ]
+    [ "Compañías auxiliares", @auxiliar_companies.size, "network", :indigo, "Auxiliares" ],
+    [ "Compañías", @companies.size, "building-2", :blue, "Compañías" ],
+    [ "Consejeros asignados", "#{counselor_total}/#{@companies.size * 2}", "user-check", :green, "Consejeros" ],
+    [ "Jóvenes en compañías", @jovenes_counts.values.sum, "users", :amber, "Jóvenes" ]
   ]
   dining_colors = { "Salón Nicaragua" => ChartsHelper.hex("blue"), "Salón Las Américas" => ChartsHelper.hex("indigo") }
   groups = @auxiliar_companies.map { |auxiliar_company| [ auxiliar_company, @companies.select { |company| company.auxiliar_company_id == auxiliar_company.id } ] }
@@ -29,8 +29,8 @@
   </div>
 
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
-    <% kpis.each do |label, value, icon_name, tone| %>
-      <%= render StatTileComponent.new(value: value, label: label, icon: icon_name, tone: tone, value_data: { overview_kpi: label.parameterize }) %>
+    <% kpis.each do |label, value, icon_name, tone, short| %>
+      <%= render StatTileComponent.new(value: value, label: label, short_label: short, icon: icon_name, tone: tone, value_data: { overview_kpi: label.parameterize }) %>
     <% end %>
   </section>
 
