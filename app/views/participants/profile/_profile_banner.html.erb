@@ -22,6 +22,12 @@
           <p class="mt-1.5 sm:mt-1 text-body font-medium text-ink-500 text-pretty">
             <%= [ participant.stake&.titleize.then { |s| s && "Estaca #{s}" }, participant.ward&.titleize.then { |w| w && "Barrio #{w}" }, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
+          <%# Antes era la tarjeta «Registro»: dos fechas no piden una tarjeta propia, son datos de la ficha misma. %>
+          <% if participant.created_at %>
+            <p class="mt-1 text-meta font-semibold text-ink-500" data-profile-dates>
+              Ficha creada el <%= participant.created_at.strftime("%d/%m/%Y") %> · actualizada el <%= participant.updated_at.strftime("%d/%m/%Y") %>
+            </p>
+          <% end %>
         </div>
       </div>
       <% can_edit = can_edit_participant?(participant) %>
