@@ -20,6 +20,21 @@ module UiHelper
     [ BUTTON_BASE, BUTTON_SIZES.fetch(size), BUTTON_VARIANTS.fetch(variant), extra ].compact.join(" ")
   end
 
+  # Los filtros de una lista (shared/filter_sheet): el form los aplica solos y la hoja del teléfono lleva la
+  # cuenta de cuántos hay puestos y se cierra con Esc.
+  def filter_sheet_form_data(frame)
+    { turbo_frame: frame, turbo_action: "advance", controller: "auto-submit filter-sheet",
+      action: "change->filter-sheet#recount input->filter-sheet#recount keydown.esc@window->filter-sheet#close" }
+  end
+
+  # Un filtro dentro de la hoja: en el teléfono, su nombre encima; desde lg el envoltorio desaparece
+  # (contents) y el campo queda suelto en la fila, donde el select ya dice qué filtra.
+  def filter_field(label, id, &block)
+    tag.div(class: "lg:contents") do
+      label_tag(id, label, class: "lg:hidden mb-1 block text-label font-semibold text-ink-500") + capture(&block)
+    end
+  end
+
   # Unas iniciales en un mosaico, con el mismo algoritmo de color que los avatares: «C3» para la compañía 3,
   # la inicial de una compañía auxiliar. seed decide el color (el nombre), así cada una conserva el suyo.
   def initials_tile(text, seed:, size: :md)

@@ -37,6 +37,32 @@ class MobileTest < ApplicationSystemTestCase
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
   end
 
+  test "on a phone the list filters open in a sheet that counts what is applied" do
+    sign_in_as(@admin)
+    emulate_phone
+    visit staff_participants_path
+
+    assert_no_selector "select[aria-label='Filtrar por rol']", visible: true
+    assert_equal evaluate_script("window.innerWidth"), evaluate_script("document.documentElement.scrollWidth"), "la página no se desliza de lado"
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "staff-movil.png")) if ENV["SCREENSHOTS"]
+
+    find("[data-filter-sheet-trigger]").click
+    find("select[aria-label='Filtrar por rol']").select("Consejero")
+    assert_selector "[data-active-filter='rol']", visible: :all
+    within("[data-filter-sheet-trigger]") { assert_text "1" }
+    save_screenshot(File.join(ENV["SCREENSHOTS"], "staff-movil-filtros.png")) if ENV["SCREENSHOTS"]
+
+    click_button "Ver resultados"
+    assert_no_selector "select[aria-label='Filtrar por rol']", visible: true
+    assert_text "Andrea Chavarría Martínez"
+
+    # Limpiar vuelve a la lista sin que la copia guardada (con la hoja abierta) se asome.
+    click_link "Limpiar todo"
+    assert_no_selector "[data-active-filters]"
+    assert_no_selector "[data-filter-sheet-target][data-open]", visible: :all
+    within("[data-filter-sheet-trigger]") { assert_no_selector "[data-filter-sheet-target='count']" }
+  end
+
   test "on a wide screen the profile buttons stay in one row" do
     page.driver.browser.manage.window.resize_to(1400, 1000) # otras pruebas dejan la ventana angosta
     sign_in_as(@admin)
