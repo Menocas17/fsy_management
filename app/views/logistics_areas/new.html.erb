@@ -1,6 +1,6 @@
 <% content_for :title, "Nueva área" %>
 <% content_for :eyebrow, "Áreas de logística" %>
 <% back_to "Áreas", logistics_areas_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+<%= render PageComponent.new(width: :form) do %>
   <%= render "form", area: @area %>
-</div>
+<% end %>

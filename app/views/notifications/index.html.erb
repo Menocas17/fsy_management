@@ -1,8 +1,8 @@
 <% content_for :title, "Notificaciones" %>
 <% content_for :eyebrow, "Actividad" %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+<%= render PageComponent.new(width: :form) do %>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <p class="text-[13px] font-medium text-ink-500" data-alerts-total><%= alerts_total_label(@pagy.count) %></p>
+    <p class="text-body font-medium text-ink-500" data-alerts-total><%= alerts_total_label(@pagy.count) %></p>
     <div class="flex flex-wrap gap-2">
       <% if @alerts.any? %>
         <%= button_to clear_notifications_path, method: :delete,
@@ -34,7 +34,7 @@
       </div>
       <% if @pagy.last > 1 %>
         <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-line-soft" data-alerts-when-any>
-          <p class="text-[12.5px] font-medium text-ink-500">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
+          <p class="text-label font-medium text-ink-500">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
           <%== @pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %>
         </div>
       <% end %>
@@ -42,4 +42,4 @@
       <%= render "notifications/empty_state" %>
     <% end %>
   </div>
-</div>
+<% end %>

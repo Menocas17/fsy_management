@@ -5,7 +5,7 @@
 <% if @participant %>
   <%= render "participants/profile/profile", participant: @participant, edit_from: "myprofile" %>
 <% else %>
-  <div class="px-4 md:px-8 pt-10 pb-10 max-w-xl mx-auto">
+  <div class="px-4 md:px-8 pt-10 pb-10 mx-auto w-full max-w-form">
     <div class="<%= card_classes("p-8 text-center") %>">
       <span class="mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-primary-50 text-primary-600 dark:bg-primary-700/30 dark:text-primary-100">
         <%= icon "key-round", class: "w-5 h-5" %>

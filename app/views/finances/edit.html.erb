@@ -1,7 +1,7 @@
 <% content_for :title, "Presupuesto" %>
 <% content_for :eyebrow, "Finanzas" %>
 <% back_to "Finanzas", finances_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl space-y-5">
+<%= render PageComponent.new(width: :form) do %>
   <section class="<%= card_classes("p-5 md:p-6") %>">
     <%= section_heading "Presupuesto general y tipo de cambio", "wallet" %>
     <%= form_with url: finances_path, method: :patch, class: "grid grid-cols-1 sm:grid-cols-2 gap-4" do %>
@@ -52,4 +52,4 @@
       <p class="text-body text-ink-500">Todavía no hay categorías: todo cuenta contra el presupuesto general.</p>
     <% end %>
   </section>
-</div>
+<% end %>

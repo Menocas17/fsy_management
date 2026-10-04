@@ -12,7 +12,7 @@
      data-action="turbo:submit-start->alert-item#leave turbo:submit-end->alert-item#settle">
   <div class="absolute inset-y-0 right-0 flex" data-alert-item-target="actions" hidden>
     <%= button_to notification_path(alert), method: :delete, form_class: "flex",
-          class: "w-24 flex flex-col items-center justify-center gap-1 bg-danger text-white text-[12px] font-bold cursor-pointer",
+          class: "w-24 flex flex-col items-center justify-center gap-1 bg-danger text-white text-label font-bold cursor-pointer",
           data: { alert_swipe_delete: true } do %>
       <%= icon "trash-2", class: "w-5 h-5" %>
       Eliminar
@@ -27,7 +27,7 @@
     </span>
     <div class="min-w-0 flex-1">
       <div class="flex items-start justify-between gap-3">
-        <p class="text-[13.5px] font-bold text-ink-900">
+        <p class="text-body font-bold text-ink-900">
           <% if linked %>
             <%# after:inset-0 estira el enlace sobre toda la tarjeta: se toca en cualquier parte. %>
             <%= link_to alert.title, alert_destination_path(alert), class: "after:absolute after:inset-0 focus:outline-none",
@@ -38,51 +38,51 @@
         </p>
         <div class="shrink-0 flex items-center gap-1">
           <%# The es locale defines no date formats, so format here instead of going through I18n. %>
-          <time class="text-[11px] font-semibold text-ink-500" datetime="<%= alert.created_at.iso8601 %>">
+          <time class="text-meta font-semibold text-ink-500" datetime="<%= alert.created_at.iso8601 %>">
             <%= alert.created_at.strftime("%d/%m · %H:%M") %>
           </time>
           <% if dismissible %>
             <%# Sobre el enlace estirado (relative z-10). En pantallas táctiles no hay hover: ahí se desliza. %>
             <%= button_to notification_path(alert), method: :delete, form_class: "relative z-10 -my-1 -mr-1.5 [@media(hover:none)]:hidden",
                   aria: { label: "Quitar «#{alert.title}» de mis notificaciones" }, title: "Quitar",
-                  class: "w-7 h-7 rounded-lg flex items-center justify-center text-ink-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-line-soft hover:text-ink-900 cursor-pointer transition",
+                  class: "w-7 h-7 rounded-inner flex items-center justify-center text-ink-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-line-soft hover:text-ink-900 cursor-pointer transition",
                   data: { alert_dismiss: true } do %>
               <%= icon "x", class: "w-4 h-4" %>
             <% end %>
           <% end %>
         </div>
       </div>
-      <p class="mt-1 text-[12.5px] leading-relaxed text-ink-700 <%= "line-clamp-2" if compact %>"><%= alert.body %></p>
+      <p class="mt-1 text-label leading-relaxed text-ink-700 <%= "line-clamp-2" if compact %>"><%= alert.body %></p>
 
       <% if alert.images.attached? && !compact %>
         <div class="mt-3 flex flex-wrap gap-2">
           <% alert.images.each do |image| %>
-            <%= image_tag image, class: "h-24 w-auto rounded-xl border border-line-soft object-cover", alt: "Imagen de la alerta #{alert.title}" %>
+            <%= image_tag image, class: "h-24 w-auto rounded-tile border border-line-soft object-cover", alt: "Imagen de la alerta #{alert.title}" %>
           <% end %>
         </div>
       <% end %>
 
       <div class="mt-2 flex flex-wrap items-center gap-2">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold <%= alert.priority_styles %>"><%= alert.priority_label %></span>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-canvas dark:bg-slate-700 text-ink-500 dark:text-slate-300"><%= alert.audience_label %></span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-meta font-bold <%= alert.priority_styles %>"><%= alert.priority_label %></span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-meta font-semibold bg-canvas dark:bg-slate-700 text-ink-500 dark:text-slate-300"><%= alert.audience_label %></span>
         <% if alert.send_email? %>
-          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-500">
+          <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
             <%= icon "mail", class: "w-3.5 h-3.5" %>
             También por correo
           </span>
         <% end %>
         <% if alert.source_agenda? %>
-          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-500">
+          <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
             <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
             Cambio de agenda
           </span>
         <% elsif alert.source_asignacion? %>
-          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-500">
+          <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
             <%= icon "clipboard-list", class: "w-3.5 h-3.5" %>
             Asignación
           </span>
         <% end %>
-        <span class="text-[11px] font-semibold text-ink-500">· <%= alert.sender_name %></span>
+        <span class="text-meta font-semibold text-ink-500">· <%= alert.sender_name %></span>
       </div>
     </div>
   </div>

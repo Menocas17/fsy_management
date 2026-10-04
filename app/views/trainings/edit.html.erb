@@ -1,6 +1,6 @@
 <% content_for :title, "Editar capacitación" %>
 <% content_for :eyebrow, "Capacitaciones" %>
 <% back_to @training.name, agenda_training_path(@training) %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-3xl mx-auto">
+<%= render PageComponent.new(width: :form) do %>
   <%= render "trainings/form", training: @training %>
-</div>
+<% end %>

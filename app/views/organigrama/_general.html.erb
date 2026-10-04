@@ -173,8 +173,8 @@
     <div class="md:hidden px-4 pt-6"><%= render "organigrama/view_switch" %></div>
     <div class="hidden md:block absolute left-3 top-3 z-10"><%= render "organigrama/view_switch", floating: true %></div>
     <div class="px-4 md:px-8 pt-5 md:pt-20 pb-10">
-      <div class="<%= card_classes("p-10 text-center") %>">
-        <p class="text-ink-500">Aún no hay compañías ni personal registrados.</p>
+      <div class="<%= card_classes("p-5 md:p-6") %>">
+        <%= render EmptyStateComponent.new(title: "Aún no hay compañías ni personal registrados", icon: "network", name: "organigrama") %>
       </div>
     </div>
   </div>

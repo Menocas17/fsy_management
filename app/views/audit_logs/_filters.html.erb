@@ -1,7 +1,7 @@
 <%
   # Igual que los filtros de Jóvenes y Staff: la búsqueda cede ancho y los selects, si no caben, se deslizan
   # de lado con la barra discreta (scroll-reveal), en vez de desbordar la página en el teléfono.
-  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-[13px] font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
+  chip_classes = "h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
 %>
 <%= form_with url: audit_logs_path, method: :get, data: { turbo_frame: "audit_logs_table", turbo_action: "advance", controller: "auto-submit" },
       class: "flex flex-col lg:flex-row lg:items-start gap-3 mb-4" do |f| %>
@@ -11,7 +11,7 @@
           value: params[:query],
           placeholder: "Buscar persona o acción…",
           aria: { label: "Buscar por persona, registro o acción" },
-          class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-[13.5px] text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+          class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
           data: { action: "input->auto-submit#typed" } %>
   </div>
   <div data-controller="scroll-reveal" data-audit-filters

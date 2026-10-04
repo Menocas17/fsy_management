@@ -35,8 +35,9 @@
                  locals: { jovenes_counts: @jovenes_counts } %>
     </div>
   <% else %>
-    <div class="<%= card_classes("p-10 text-center") %>">
-      <p class="text-ink-500">Aún no hay compañías auxiliares registradas.</p>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Aún no hay compañías auxiliares", icon: "network", name: "auxiliar-companies",
+            text: "Cada una agrupa varias compañías bajo un coordinador.") %>
     </div>
   <% end %>
 <% end %>

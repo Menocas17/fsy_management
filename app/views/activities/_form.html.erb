@@ -1,11 +1,11 @@
 <%
-  hint = "mt-1.5 text-[11.5px] font-medium text-ink-500"
+  hint = "mt-1.5 text-label font-medium text-ink-500"
   chip_classes = "inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-control bg-canvas dark:bg-slate-900/60 border border-line-soft"
   selected = activity.responsibles.to_a
 %>
 <%= form_with model: activity, id: "activity-form" do |form| %>
   <% if activity.errors.any? %>
-    <div class="mb-5 rounded-xl border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-[13px] font-semibold text-cat-rose-ink" role="alert">
+    <div class="mb-5 rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-4 py-3 text-body font-semibold text-cat-rose-ink" role="alert">
       <% activity.errors.full_messages.each do |message| %>
         <p><%= message %></p>
       <% end %>
@@ -75,21 +75,21 @@
           <label class="flex items-start gap-3 px-4 py-3 rounded-tile border border-line cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
             <%= form.radio_button :audience, "todos", class: "mt-1 accent-primary-700" %>
             <span>
-              <span class="block text-[13.5px] font-bold text-ink-900">Todos los participantes</span>
-              <span class="block text-[12px] text-ink-500">La alerta del cambio llega a todo el evento.</span>
+              <span class="block text-body font-bold text-ink-900">Todos los participantes</span>
+              <span class="block text-label text-ink-500">La alerta del cambio llega a todo el evento.</span>
             </span>
           </label>
           <label class="flex items-start gap-3 px-4 py-3 rounded-tile border border-line cursor-pointer has-checked:border-primary-500 has-checked:bg-primary-50 dark:has-checked:bg-primary-700/20">
             <%= form.radio_button :audience, "por_roles", class: "mt-1 accent-primary-700" %>
             <span>
-              <span class="block text-[13.5px] font-bold text-ink-900">Solo ciertos roles</span>
-              <span class="block text-[12px] text-ink-500">Si es por compañías o por edades, escribe el detalle en las notas.</span>
+              <span class="block text-body font-bold text-ink-900">Solo ciertos roles</span>
+              <span class="block text-label text-ink-500">Si es por compañías o por edades, escribe el detalle en las notas.</span>
             </span>
           </label>
         </div>
         <div class="mt-4 grid grid-cols-2 gap-2">
           <% Participant.rols.keys.each do |role| %>
-            <label class="flex items-center gap-2 px-3 py-2 rounded-control border border-line text-[12.5px] font-semibold text-ink-700 cursor-pointer has-checked:border-primary-500 has-checked:text-primary-700 dark:has-checked:text-primary-300">
+            <label class="flex items-center gap-2 px-3 py-2 rounded-control border border-line text-label font-semibold text-ink-700 cursor-pointer has-checked:border-primary-500 has-checked:text-primary-700 dark:has-checked:text-primary-300">
               <%= check_box_tag "activity[target_roles][]", role, activity.target_roles.include?(role), id: "activity_target_roles_#{role}", class: "accent-primary-700" %>
               <%= Participant.role_label(role) %>
             </label>
@@ -120,26 +120,26 @@
               <button type="button" data-action="participant-picker#add"
                       data-id="<%= member.id %>" data-name="<%= member.full_name %>" data-role="<%= Participant.role_label(member.rol) %>"
                       class="w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left hover:bg-canvas dark:hover:bg-slate-700 cursor-pointer transition">
-                <span class="text-[13px] font-semibold text-ink-900"><%= member.full_name %></span>
-                <span class="text-[11.5px] font-semibold text-ink-500"><%= Participant.role_label(member.rol) %></span>
+                <span class="text-body font-semibold text-ink-900"><%= member.full_name %></span>
+                <span class="text-label font-semibold text-ink-500"><%= Participant.role_label(member.rol) %></span>
               </button>
             </li>
           <% end %>
         </ul>
 
         <div class="mt-2.5 rounded-tile border border-dashed border-line px-3 py-3">
-          <p class="text-[10.5px] font-bold tracking-[.07em] uppercase text-ink-500">Seleccionados</p>
-          <p class="mt-1.5 text-[12.5px] text-ink-500" data-participant-picker-target="empty" <%= "hidden" if selected.any? %>>
+          <p class="text-meta font-bold tracking-[.07em] uppercase text-ink-500">Seleccionados</p>
+          <p class="mt-1.5 text-label text-ink-500" data-participant-picker-target="empty" <%= "hidden" if selected.any? %>>
             Nadie seleccionado todavía.
           </p>
           <div class="mt-2 flex flex-wrap gap-2" data-participant-picker-target="selected">
             <% selected.each do |member| %>
               <span class="<%= chip_classes %>" data-picked data-id="<%= member.id %>">
-                <span class="text-[12.5px] font-bold text-ink-900" data-name><%= member.full_name %></span>
-                <span class="text-[11px] font-semibold text-ink-500" data-role><%= Participant.role_label(member.rol) %></span>
+                <span class="text-label font-bold text-ink-900" data-name><%= member.full_name %></span>
+                <span class="text-meta font-semibold text-ink-500" data-role><%= Participant.role_label(member.rol) %></span>
                 <%= hidden_field_tag "activity[responsible_ids][]", member.id, id: nil %>
                 <button type="button" data-action="participant-picker#remove" aria-label="Quitar a <%= member.full_name %>"
-                        class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-lg flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition">
+                        class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-inner flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition">
                   <%= icon "x", class: "w-3.5 h-3.5" %>
                 </button>
               </span>
@@ -147,7 +147,7 @@
           </div>
         </div>
 
-        <template data-participant-picker-target="template"><span class="<%= chip_classes %>" data-picked><span class="text-[12.5px] font-bold text-ink-900" data-name></span><span class="text-[11px] font-semibold text-ink-500" data-role></span><input type="hidden" name="activity[responsible_ids][]"><button type="button" data-action="participant-picker#remove" aria-label="Quitar" class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-lg flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition"><%= icon "x", class: "w-3.5 h-3.5" %></button></span></template>
+        <template data-participant-picker-target="template"><span class="<%= chip_classes %>" data-picked><span class="text-label font-bold text-ink-900" data-name></span><span class="text-meta font-semibold text-ink-500" data-role></span><input type="hidden" name="activity[responsible_ids][]"><button type="button" data-action="participant-picker#remove" aria-label="Quitar" class="relative w-6 h-6 after:absolute after:-inset-2.5 rounded-inner flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition"><%= icon "x", class: "w-3.5 h-3.5" %></button></span></template>
       </section>
 
       <%# Full-width buttons so "Crear y avisar" never gets cut off in this column. %>
@@ -159,7 +159,7 @@
         </button>
         <%= link_to "Cancelar", agenda_path(date: activity.persisted? ? activity.day : activity.date),
               class: button_classes(:secondary, size: :lg, extra: "mt-2.5 w-full") %>
-        <p class="mt-3 text-[11.5px] font-medium text-ink-500">Al guardar se envía una alerta automática a quienes participan.</p>
+        <p class="mt-3 text-label font-medium text-ink-500">Al guardar se envía una alerta automática a quienes participan.</p>
       </section>
     </div>
   </div>

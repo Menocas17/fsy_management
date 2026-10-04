@@ -2,21 +2,21 @@
 <% content_for :title, "Escanear QR" %>
 <% content_for :eyebrow, "Inicio" %>
 <% back_to "Inicio", dashboard_path %>
-<div class="px-4 md:px-8 pt-6 md:pt-8 pb-10 max-w-lg mx-auto space-y-4">
+<%= render PageComponent.new(width: :form) do %>
   <section class="<%= card_classes("overflow-hidden") %>"
            data-controller="qr-scanner" data-qr-scanner-url-value="<%= scan_lookup_path(code: "CODE") %>"
            data-qr-scanner-aim-value="Apunta al código del gafete" data-qr-scanner-found-value="Abriendo">
     <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
-      <h1 class="text-[14.5px] font-bold text-ink-900">Escanear QR</h1>
-      <p role="status" class="text-[11.5px] font-semibold text-ink-500" data-qr-scanner-target="status">Activa la cámara para empezar</p>
+      <h1 class="text-title font-bold text-ink-900">Escanear QR</h1>
+      <p role="status" class="text-label font-semibold text-ink-500" data-qr-scanner-target="status">Activa la cámara para empezar</p>
     </div>
 
     <div class="relative bg-slate-900 aspect-square max-h-[55dvh] w-full flex items-center justify-center">
       <video data-qr-scanner-target="video" data-no-pull-refresh class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
       <canvas data-qr-scanner-target="canvas" class="hidden"></canvas>
       <div class="relative w-44 h-44 pointer-events-none">
-        <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-xl", "top-0 right-0 border-l-0 border-b-0 rounded-tr-xl",
-             "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-xl", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-xl" ].each do |corner| %>
+        <% [ "top-0 left-0 border-r-0 border-b-0 rounded-tl-tile", "top-0 right-0 border-l-0 border-b-0 rounded-tr-tile",
+             "bottom-0 left-0 border-r-0 border-t-0 rounded-bl-tile", "bottom-0 right-0 border-l-0 border-t-0 rounded-br-tile" ].each do |corner| %>
           <span class="absolute w-9 h-9 border-[3px] border-white/90 <%= corner %>"></span>
         <% end %>
       </div>
@@ -28,7 +28,7 @@
     </div>
   </section>
 
-  <p class="px-1 text-[12.5px] font-medium text-ink-500">
+  <p class="px-1 text-label font-medium text-ink-500">
     Con el gafete de una persona se abre su ficha<%= can_view_inventory? ? "; con la etiqueta de una caja, el artículo del inventario" : "" %>.
   </p>
-</div>
+<% end %>
