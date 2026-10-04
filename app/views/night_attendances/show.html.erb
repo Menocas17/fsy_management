@@ -47,7 +47,8 @@
         <p class="-mt-2 mb-3 text-label text-ink-500">La pasa <%= @gender == "H" ? "el consejero" : "la consejera" %> de esta compañía; aquí solo se consulta.</p>
       <% end %>
       <ul class="divide-y divide-line-soft" data-night-roster>
-        <% @jovenes.each do |joven| %>
+        <%# Los ausentes primero, como al pasarla. %>
+        <% @jovenes.each_with_index.sort_by { |joven, index| [ @attendance&.mark_for(joven)&.ausente? ? 0 : 1, index ] }.each do |joven, _| %>
           <% mark = @attendance&.mark_for(joven) %>
           <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0" data-night-joven="<%= joven.id %>">
             <span class="min-w-0 flex-1">

@@ -38,8 +38,8 @@
             text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
     </div>
   <% else %>
-    <%# La misma cuadrícula de Compañías. Cada lista (hombres, mujeres) es un botón que abre esa lista, y quien
-        falta se ve ahí mismo con su motivo: no hace falta otra columna. %>
+    <%# La misma cuadrícula de Compañías. Cada lista (hombres, mujeres) es un botón que abre esa lista; quién falta
+        y por qué se ve adentro. %>
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
       <% lists.group_by(&:first).each do |company, company_lists| %>
         <article class="<%= card_classes("px-5 pt-[18px] pb-4 flex flex-col gap-3") %>" data-night-company="<%= company.number %>">
@@ -62,7 +62,7 @@
                  else [ "Sin pasar", :amber, "clock" ]
                  end %>
             <%= link_to company_night_attendance_path(company, genero: gender, noche: (@night.iso8601 unless current), return_to: panel_url),
-                  class: "flex flex-col gap-1 px-3 py-2.5 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors",
+                  class: "block px-3 py-2.5 rounded-control border border-line-soft bg-canvas hover:border-line hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 transition-colors",
                   data: { night_list: "#{company.number}-#{gender}", night_list_status: status } do %>
               <span class="flex items-center gap-2.5">
                 <span class="min-w-0 flex-1">
@@ -74,14 +74,6 @@
                 <%= render ChipComponent.new(label: label, tone: tone, icon: icon_name) %>
                 <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
               </span>
-              <% if attendance && missing.any? %>
-                <ul class="text-label font-semibold text-cat-rose-ink" data-night-missing>
-                  <% missing.each do |id| %>
-                    <% mark = attendance.marks.find { |m| m.participant_id == id } %>
-                    <li>· <%= mark ? "#{mark.participant.full_name} · #{mark.reason_label}" : "#{@unmarked[id]&.full_name} · sin marcar" %></li>
-                  <% end %>
-                </ul>
-              <% end %>
             <% end %>
           <% end %>
         </article>

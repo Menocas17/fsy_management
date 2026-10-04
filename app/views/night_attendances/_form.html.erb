@@ -3,6 +3,8 @@
     ocultos; confirmar se habilita cuando no queda nadie sin marcar (el servidor lo vuelve a revisar).
     night_attendance_controller lleva la cuenta y la hoja. %>
 <% marked = @jovenes.count { |joven| @attendance&.mark_for(joven)&.status.present? } %>
+<%# Los ausentes van primero (en el navegador suben con una animación al marcarlos); el resto, en orden alfabético. %>
+<% ordered = @jovenes.each_with_index.sort_by { |joven, index| [ @attendance&.mark_for(joven)&.ausente? ? 0 : 1, index ] } %>
 <%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), method: :patch,
       data: { controller: "night-attendance" } do %>
   <div class="flex items-center gap-3 mb-4">
@@ -21,12 +23,12 @@
     </div>
   <% end %>
 
-  <ul class="flex flex-col gap-2">
-    <% @jovenes.each do |joven| %>
+  <ul class="flex flex-col gap-2" data-night-attendance-target="list">
+    <% ordered.each do |joven, index| %>
       <% mark = @attendance&.mark_for(joven) %>
       <% field = "marks[#{joven.id}]" %>
       <li class="group flex items-stretch rounded-tile border border-line-soft bg-surface overflow-hidden transition-colors data-[state=ausente]:border-cat-rose/45 data-[state=presente]:border-cat-green/45"
-          data-night-attendance-target="row" data-night-joven="<%= joven.id %>" data-name="<%= joven.full_name %>"
+          data-night-attendance-target="row" data-night-joven="<%= joven.id %>" data-name="<%= joven.full_name %>" data-order="<%= index %>"
           <%= tag.attributes(data: { state: mark&.status }) %>>
         <%= hidden_field_tag "#{field}[status]", mark&.status, id: nil, data: { field: "status" } %>
         <%= hidden_field_tag "#{field}[absence_reason]", mark&.absence_reason, id: nil, data: { field: "reason" } %>
@@ -50,7 +52,7 @@
           </span>
         </button>
         <button type="button" data-action="night-attendance#openSheet" data-night-falta
-                class="shrink-0 px-4 border-l border-line-soft text-label font-bold text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500">
+                class="shrink-0 w-24 flex items-center justify-center border-l border-line-soft text-label font-bold text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500">
           <span class="group-data-[state=ausente]:hidden">Falta</span>
           <span class="hidden group-data-[state=ausente]:inline">Cambiar</span>
         </button>

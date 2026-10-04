@@ -78,7 +78,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-night-list='3-H'][data-night-list-status=ausentes]", text: /1 falta/
     assert_select "[data-night-list='3-M'][data-night-list-status=pendiente]", text: /Sin pasar/
-    assert_select "[data-night-list='3-H'] [data-night-missing]", text: /Juan Pérez · Con sus papás/
+    assert_select "[data-night-missing]", 0, "who is missing is inside the list, not on the card"
 
     get company_night_attendance_path(@company, genero: "H")
     assert_select "[data-night-joven='#{@juan.id}']", text: /Ausente · Con sus papás/

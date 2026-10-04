@@ -33,6 +33,7 @@ class NightAttendanceTest < ApplicationSystemTestCase
       click_on "Marcar ausente"
     end
     within("[data-night-joven='#{@pedro.id}']") { assert_text "Ausente · Con sus papás" }
+    assert_selector "li[data-night-joven]:first-child[data-night-joven='#{@pedro.id}']" # el ausente sube al principio
     assert_text "3 de 3"
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-escritorio.png")) if ENV["SCREENSHOTS"]
 
@@ -47,7 +48,6 @@ class NightAttendanceTest < ApplicationSystemTestCase
     sign_in_as(User.create!(email_address: "dir@fsy.com", password: "Prueba123!", participant: director), password: "Prueba123!")
     visit night_attendances_path
     assert_selector "[data-night-list='3-H']", text: "1 falta"
-    assert_selector "[data-night-list='3-H'] [data-night-missing]", text: "Pedro Prueba · Con sus papás"
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-panel.png")) if ENV["SCREENSHOTS"]
   end
 
