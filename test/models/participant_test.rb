@@ -66,4 +66,36 @@ class ParticipantTest < ActiveSupport::TestCase
     counselor = participants(:maria)
     refute counselor.update(rol: :coordinador, gender: "M"), "nor can an edit sneak in a third one"
   end
+
+  test "a counselor's company on the ficha and the company's staff stay the same from either side" do
+    first = Company.create!(number: 1)
+    second = Company.create!(number: 2)
+    maria = participants(:maria)
+
+    maria.update!(company: first)
+    assert_equal [ maria ], first.reload.counselors.to_a, "editing the ficha staffs the company"
+
+    maria.update!(company: second)
+    assert_empty first.reload.counselors
+    assert_equal [ maria ], second.reload.counselors.to_a
+
+    maria.update!(rol: :auxiliar)
+    assert_empty second.reload.counselors, "no longer a counselor, no longer staffed"
+
+    maria.update!(rol: :consejero, company: nil)
+    first.memberships.create!(participant: maria)
+    assert_equal first, maria.reload.company, "staffing from the company fills the ficha"
+    first.memberships.find_by!(participant: maria).destroy
+    assert_nil maria.reload.company
+  end
+
+  test "a company keeps one counselor per gender when the ficha is edited" do
+    company = Company.create!(number: 1)
+    participants(:maria).update!(company: company)
+    other = Participant.create!(first_name: "Rosa", last_name: "Díaz", age: 30, stake: "bello_horizonte", ward: "ducuali",
+                                shirt_number: "m", gender: "M", rol: "consejero")
+
+    assert_not other.update(company: company)
+    assert_match "Compañía 1 ya tiene consejera: María García", other.errors.full_messages.to_sentence
+  end
 end

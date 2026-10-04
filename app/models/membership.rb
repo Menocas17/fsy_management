@@ -7,7 +7,25 @@ class Membership < ApplicationRecord
   before_validation :derive_from_participant
   validate :within_staffing_limit
 
+  # El otro lado de Participant#sync_counselor_membership: asignar o quitar al consejero desde la compañía
+  # también cambia la «Compañía» de su ficha. update_all para no volver a disparar la sincronización.
+  after_create_commit :place_counselor, if: :counselor_of_company?
+  after_destroy_commit :unplace_counselor, if: :counselor_of_company?
+
   private
+    def counselor_of_company?
+      consejero? && associable_type == "Company"
+    end
+
+    def place_counselor
+      Participant.where(id: participant_id).update_all(company_id: associable_id)
+    end
+
+    # Solo si sigue siendo consejero de esta compañía: si lo movieron o cambió de rol, su ficha ya dice dónde está.
+    def unplace_counselor
+      Participant.where(id: participant_id, rol: :consejero, company_id: associable_id).update_all(company_id: nil)
+    end
+
     def within_staffing_limit
       return if participant? || associable.nil? || !formula_applies?
 

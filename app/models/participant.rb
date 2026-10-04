@@ -34,6 +34,13 @@ class Participant < ApplicationRecord
 
   after_save :sync_membership_gender
 
+  # Al consejero lo ubican dos cosas: la «Compañía» de su ficha y su lugar en el personal de la compañía
+  # (Membership), que es lo que leen la compañía, el organigrama y la asistencia nocturna. Se mantienen
+  # iguales desde los dos lados: aquí al editar la ficha, y en Membership al asignarlo desde la compañía.
+  validate :counselor_slot_free, if: -> { consejero? && company_id.present? &&
+                                          (will_save_change_to_company_id? || will_save_change_to_rol? || will_save_change_to_gender?) }
+  after_save :sync_counselor_membership, if: -> { saved_change_to_company_id? || saved_change_to_rol? }
+
   # Cédula: se guarda en mayúsculas y sin guiones ni espacios (001-010190-0001A → 0010101900001A), así
   # la misma cédula escrita de dos formas es la misma. formatted_identity_document le devuelve los guiones.
   normalizes :identity_document, with: ->(value) { value.to_s.upcase.gsub(/[^0-9A-Z]/, "").presence }
@@ -200,6 +207,26 @@ class Participant < ApplicationRecord
     def sync_membership_gender
       if saved_change_to_gender?
         memberships.update_all(gender: gender)
+      end
+    end
+
+    def counselor_slot_free
+      taken = Membership.includes(:participant)
+                        .where(associable_type: "Company", associable_id: company_id, role: :consejero, gender: Participant.genders[gender])
+                        .where.not(participant_id: id).first
+      return unless taken
+
+      errors.add(:base, "#{taken.associable.name} ya tiene #{gender == 'M' ? 'consejera' : 'consejero'}: #{taken.participant.full_name}. " \
+                        "Quítalo primero desde la compañía.")
+    end
+
+    def sync_counselor_membership
+      in_companies = memberships.where(associable_type: "Company", role: :consejero)
+      if consejero? && company_id.present?
+        in_companies.where.not(associable_id: company_id).destroy_all
+        memberships.find_or_create_by!(associable_type: "Company", associable_id: company_id)
+      else
+        in_companies.destroy_all
       end
     end
 
