@@ -40,6 +40,7 @@ class ImportRowEvaluator
     check_staffing
     check_lookalikes
     check_role_and_company
+    check_logistics_area
     self
   end
 
@@ -83,6 +84,7 @@ class ImportRowEvaluator
         room: values[:room]&.to_s,
         # La compañía de un joven es la suya; el staff se asigna a una compañía por su membresía.
         company_id: (company&.id unless staff?),
+        logistics_area_id: (logistics_area&.id if logistics_committee?),
         phone_number: values[:phone_number]&.to_s, email_address: values[:email_address],
         emergency_contact_name: values[:emergency_contact_name],
         emergency_contact_number: values[:emergency_contact_number]&.to_s,
@@ -205,6 +207,30 @@ class ImportRowEvaluator
       elsif !staff? && company.nil?
         add("La compañía #{values[:company_number]} no existe: quedaría sin compañía", blocking: false)
       end
+    end
+
+    # El área es del comité de logística; a otro rol no se le pone. Un área que no existe no se crea sola:
+    # sus banderas dan permisos, así que se crea a propósito en Áreas.
+    def check_logistics_area
+      return if values[:logistics_area].blank?
+
+      if !logistics_committee?
+        add("El área no aplica a su rol: se ignora", blocking: false)
+      elsif logistics_area.nil?
+        add("El área «#{values[:logistics_area]}» no existe: quedaría sin área (créala en Áreas)", blocking: false)
+      end
+    end
+
+    def logistics_committee?
+      %w[logistica director_logistica].include?(role_key)
+    end
+
+    # Por nombre, sin importar mayúsculas ni acentos.
+    def logistics_area
+      return @logistics_area if defined?(@logistics_area)
+
+      wanted = normalize(values[:logistics_area])
+      @logistics_area = wanted.presence && LogisticsArea.all.find { |area| normalize(area.name) == wanted }
     end
 
     def staff?

@@ -16,6 +16,7 @@ module ParticipantImportsHelper
     when :shirt_number then Participant.shirt_numbers.keys.map { |key| [ key.upcase, key ] }
     when :rol then Participant.rols.keys.map { |key| [ Participant.role_label(key), key ] }
     when :auxiliar_company then AuxiliarCompany.order(:name).map { |auxiliar| [ auxiliar.name, auxiliar.name ] }
+    when :logistics_area then LogisticsArea.alphabetical.map { |area| [ area.name, area.name ] }
     end
   end
 end

@@ -132,6 +132,20 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal [ "Auxiliar Beta ya tiene auxiliar hombre: Luis Uno", "La compañía auxiliar «Zeta» no existe" ], texts
   end
 
+  test "logística lands in its area by name; an area that doesn't exist or doesn't fit the role waits" do
+    finanzas = LogisticsArea.create!(name: "Finanzas", finance: true)
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol,Área",
+                          "Luis,Uno,30,H,Villa Flor,M,Logística,finanzas",
+                          "Ana,Dos,31,M,Villa Flor,S,Logística,Bodega",
+                          "Beto,Tres,32,H,Villa Flor,L,Consejero,Finanzas" ]
+
+    assert_equal finanzas, Participant.find_by(first_name: "Luis").logistics_area
+    texts = import.rows.pending.map { |row| row.issues.map { _1["text"] } }.flatten
+    assert_includes texts, "El área «Bodega» no existe: quedaría sin área (créala en Áreas)"
+    assert_includes texts, "El área no aplica a su rol: se ignora"
+    refute import.rows.pending.any?(&:blocking?)
+  end
+
   test "roles by their Spanish name and in feminine; an unknown one waits as joven" do
     import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Estaca,Talla,Rol,Compañía",
                           "Ana,Uno,40,M,Villa Flor,M,Directora de logística,",

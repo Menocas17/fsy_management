@@ -52,7 +52,7 @@
       <% columns, extras = case @tab
            when "companias" then [ [ "Número", "Compañía auxiliar", "Comedor" ], [] ]
            when "consejeros" then [ church_columns, [ "Compañía" ] ]
-           else [ church_columns, [ "Compañía", "Compañía auxiliar", "Cuarto", "Cédula", "Rol", "Notas" ] ]
+           else [ church_columns, [ "Compañía", "Compañía auxiliar", "Área", "Cuarto", "Cédula", "Rol", "Notas" ] ]
            end %>
       <div class="flex flex-wrap gap-1.5">
         <% columns.each do |column| %>
@@ -76,6 +76,7 @@
           <li>Pueden ser de una estaca que no participa: queda escrita tal cual.</li>
         <% else %>
           <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
+          <li>Logística con una columna <strong>Área</strong> (Finanzas, Registro…) entra ya en su área; el área tiene que existir en Áreas, porque sus banderas dan permisos.</li>
           <li>Los jóvenes tienen que ser de las estacas y barrios que participan («Estaca Managua Bello Horizonte» se reconoce como Bello Horizonte).</li>
           <li>Si el archivo trae una columna <strong>Compañía</strong> con el número, entran ya asignados; si no, se reparten después desde Compañías.</li>
           <li>Las filas sin problemas entran directo. Las que traen un problema o un aviso (duplicado, estaca que no participa, lugar ocupado, mismo teléfono…) <strong>quedan en espera, fuera de la base</strong>: en el informe de la carga se corrigen y se aprueban o descartan.</li>

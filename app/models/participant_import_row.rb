@@ -15,7 +15,7 @@ class ParticipantImportRow < ApplicationRecord
     first_name: "Nombres", last_name: "Apellidos", preferred_name: "Nombre que se prefiere",
     birth_date: "Fecha de nacimiento", age: "Edad", gender: "Sexo", stake: "Estaca / Distrito", ward: "Barrio / Rama",
     shirt_number: "Talla", rol: "Rol", identity_document: "Cédula", company_number: "Compañía",
-    auxiliar_company: "Compañía auxiliar", room: "Cuarto", phone_number: "Teléfono", email_address: "Correo",
+    auxiliar_company: "Compañía auxiliar", logistics_area: "Área de logística", room: "Cuarto", phone_number: "Teléfono", email_address: "Correo",
     emergency_contact_name: "Contacto de emergencia", emergency_contact_number: "Teléfono de emergencia",
     emergency_contact_relation: "Parentesco", emergency_contact_email: "Correo de emergencia",
     emergency_contact_2_name: "Segundo contacto", emergency_contact_2_number: "Teléfono del segundo contacto",
