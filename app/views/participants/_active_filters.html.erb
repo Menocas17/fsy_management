@@ -6,7 +6,7 @@
   # La búsqueda no lleva ficha: ya se ve lo escrito en la barra, y una etiqueta que aparece letra por letra estorba.
   active = []
   active << { key: "stake", label: "Estaca #{params[:stake].titleize}" } if params[:stake].present?
-  active << { key: "ward", label: "Barrio #{params[:ward].titleize}" } if params[:ward].present?
+  active << { key: "ward", label: Participant.ward_label(params[:ward]) } if params[:ward].present?
   active << { key: "gender", label: Participant::GENDER_LABELS[params[:gender]] } if Participant::GENDER_LABELS.key?(params[:gender])
   active << { key: "rol", label: Participant.role_label(params[:rol]) } if params[:rol].present?
   active << { key: "company", label: "Compañía #{params[:company]}" } if params[:company].present?

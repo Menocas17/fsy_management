@@ -31,7 +31,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "next-page url keeps the active filters" do
-    create_participants(21, prefix: "Villa", stake: "villa_flor", ward: "primavera")
+    create_participants(21, prefix: "Villa", stake: "villa_flor", ward: "los_laureles")
 
     get participants_path(stake: "villa_flor")
 

@@ -311,7 +311,7 @@ class DemoSeed
     def create_owner
       @used_names << "Rodolfo Jose Menocal Castillo"
       @owner = Participant.create!(profile_attributes(rol: "consejero", gender: "H", age: 25, stake: "bello_horizonte")
-        .merge(first_name: "Rodolfo Jose", last_name: "Menocal Castillo", ward: "bello_horizonte_b", email_address: OWNER_EMAIL))
+        .merge(first_name: "Rodolfo Jose", last_name: "Menocal Castillo", ward: "bello_horizonte", email_address: OWNER_EMAIL))
     end
 
     def person(rol:, gender:, ages:, stake: nil, **attributes)

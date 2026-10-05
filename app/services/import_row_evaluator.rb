@@ -129,7 +129,7 @@ class ImportRowEvaluator
       if staff?
         add("El barrio «#{values[:ward]}» no está en la lista: quedaría sin barrio", blocking: false)
       else
-        add("El barrio «#{values[:ward]}» no es de los que participan", blocking: true)
+        add("El barrio «#{values[:ward]}» no es de la #{Participant::STAKE_LABELS[stake_key]}", blocking: true)
       end
     end
 
@@ -242,22 +242,31 @@ class ImportRowEvaluator
     end
 
     # «Estaca Managua Nicaragua Bello Horizonte» → bello_horizonte: la clave exacta, o la más larga que
-    # aparezca entera dentro del nombre (así «Barrio Bello Horizonte B» es bello_horizonte_b y no otra).
+    # aparezca entera dentro del nombre. El barrio se busca solo entre los de su estaca, así «Rama Loma Verde»
+    # es la de Puerto Cabezas o el barrio de Las Américas según la estaca de la fila.
     def stake_key
       @stake_key = contained_key(Participant.stakes, values[:stake]) unless defined?(@stake_key)
       @stake_key
     end
 
     def ward_key
-      @ward_key = contained_key(Participant.wards, values[:ward]) unless defined?(@ward_key)
+      unless defined?(@ward_key)
+        wards = Participant::WARDS_BY_STAKE.fetch(stake_key.to_s, []).index_with do |ward|
+          Participant.ward_label(ward).delete_prefix("Barrio ").delete_prefix("Rama ")
+        end
+        @ward_key = contained_key(wards, values[:ward])
+      end
       @ward_key
     end
 
+    # mapping: { clave => nombre opcional }. Cuenta la clave («la_maximo_jerez») o el nombre («La Máximo Jerez»).
     def contained_key(mapping, value)
-      enum_key(mapping, value) || begin
-        text = " #{normalize(value).gsub(/[^a-z0-9]+/, " ")} "
-        mapping.keys.select { |key| text.include?(" #{key.tr("_", " ")} ") }.max_by(&:length) if value.present?
-      end
+      return nil if value.blank?
+
+      words = ->(text) { " #{normalize(text).gsub(/[^a-z0-9]+/, " ").strip} " }
+      text = words.(value)
+      matches = mapping.keys.flat_map { |key| [ key.tr("_", " "), mapping[key].is_a?(String) ? mapping[key] : nil ].compact.map { [ key, words.(_1) ] } }
+      matches.select { |_, name| text.include?(name) }.max_by { |_, name| name.length }&.first
     end
 
     def birth_date

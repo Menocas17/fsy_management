@@ -1,7 +1,7 @@
 module ParticipantsHelper
-  # Los barrios de cada estaca para el selector: { "bello_horizonte" => [["Bello Horizonte B", "bello_horizonte_b"], …] }.
+  # Los barrios de cada estaca para el selector: { "bello_horizonte" => [["Barrio Ducuali", "ducuali"], …] }.
   def stake_ward_options
-    Participant::WARDS_BY_STAKE.transform_values { |wards| wards.map { |ward| [ ward.titleize, ward ] } }
+    Participant::WARDS_BY_STAKE.transform_values { |wards| wards.map { |ward| [ Participant.ward_label(ward), ward ] } }
   end
 
   # Lo mismo que Participant.with_medical_note, para una ficha ya cargada: «Ninguna» no cuenta.

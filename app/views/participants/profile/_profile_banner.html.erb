@@ -22,10 +22,10 @@
           <% if participant.nickname %>
             <p class="mt-1 text-body font-semibold text-ink-700" data-profile-nickname>Le dicen «<%= participant.nickname %>»</p>
           <% end %>
-          <%# Una estaca escrita a mano (staff de otra estaca) ya trae su nombre completo: no se le antepone «Estaca». %>
+          <%# «Estaca Bello Horizonte · Rama Primavera»; la escrita a mano (staff de otra estaca) va tal cual. %>
           <p class="mt-1.5 sm:mt-1 text-body font-medium text-ink-500 text-pretty">
-            <%= [ participant.stake ? "Estaca #{participant.stake_name}" : participant.other_stake.presence,
-                  participant.ward ? "Barrio #{participant.ward_name}" : participant.other_ward.presence,
+            <%= [ participant.stake ? Participant::STAKE_LABELS[participant.stake] : participant.other_stake.presence,
+                  participant.ward_name,
                   participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
           <%# Con tres columnas la tarjeta «Registro» se esconde y sus dos fechas quedan aquí. %>

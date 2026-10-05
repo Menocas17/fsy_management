@@ -32,7 +32,7 @@
     <% end %>
     <%= filter_field "Barrio", "ward" do %>
       <%= f.select :ward,
-            options_for_select(Participant.wards.keys.map { |key| [ key.titleize, key ] }, params[:ward]),
+            grouped_options_for_select(Participant::WARDS_BY_STAKE.map { |stake, wards| [ Participant::STAKE_LABELS[stake], wards.map { |ward| [ Participant.ward_label(ward), ward ] } ] }, params[:ward]),
             { include_blank: "Barrio" }, class: chip_classes, aria: { label: "Filtrar por barrio" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <%= filter_field "Género", "gender" do %>

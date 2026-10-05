@@ -21,7 +21,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     ParticipantImporter.new(FIXTURE).call
     ana = Participant.find_by(first_name: "Ana", last_name: "Ruiz")
 
-    assert_equal [ 15, "M", "las_americas", "ciudad_jardin", "s", "joven", "101" ],
+    assert_equal [ 15, "M", "las_americas", "las_mercedes", "s", "joven", "101" ],
                  [ ana.age, ana.gender, ana.stake, ana.ward, ana.shirt_number, ana.rol, ana.room ]
     assert_equal @company, ana.company
     assert_equal "8888-1111", ana.phone_number
@@ -166,6 +166,9 @@ class ParticipantImporterTest < ActiveSupport::TestCase
                    sofia.emergency_contact_2_name, sofia.emergency_contact_2_number, sofia.emergency_contact_2_email ]
     assert_equal [ "Carlos Mendoza", "obispo@example.com" ], [ sofia.bishop_name, sofia.bishop_email ]
     assert_equal 3, import.rows.first.row_number, "the row numbers are the spreadsheet's"
+    ana = Participant.find_by!(last_name: "Kingsman")
+    assert_equal [ "puerto_cabezas", "loma_verde_puerto_cabezas", "Rama Loma Verde" ], [ ana.stake, ana.ward, ana.ward_name ],
+                 "the ward is looked up inside its own stake"
 
     luis = import.rows.pending.sole
     assert_equal "Luis", luis.values["first_name"]
@@ -189,7 +192,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     import = import_csv [ "Nombres,Apellidos,Cumpleaños,Sexo,Estaca,Barrio,Talla",
                           "Rosa,Uno,14/03/2010,Femenino,Villa Flor,Altamira,S" ]
 
-    assert_equal [ "El barrio «Altamira» no es de los que participan" ], import.rows.pending.sole.issues.map { |i| i["text"] }
+    assert_equal [ "El barrio «Altamira» no es de la Estaca Villa Flor" ], import.rows.pending.sole.issues.map { |i| i["text"] }
   end
   private
     def import_csv(lines)

@@ -6,7 +6,7 @@ class MobileTest < ApplicationSystemTestCase
   setup do
     @admin = users(:one)
     @andrea = Participant.create!(first_name: "Andrea", last_name: "Chavarría Martínez", age: 14, stake: "puerto_cabezas",
-                                  ward: "waspan", shirt_number: "m", gender: "M", rol: "consejero")
+                                  ward: "bilwi", shirt_number: "m", gender: "M", rol: "consejero")
     User.create!(email_address: "andrea.chavarria.martinez@gmail.com", password: "Consejera1!", participant: @andrea)
   end
 

@@ -102,8 +102,8 @@ class ParticipantTest < ActiveSupport::TestCase
   test "each stake offers only its own wards" do
     juan = participants(:juan)
 
-    assert_not juan.update(ward: "ciudad_jardin")
-    assert_match "Ciudad Jardin no es de la estaca Bello Horizonte", juan.errors.full_messages.to_sentence
+    assert_not juan.update(ward: "villa_venezuela")
+    assert_match "Barrio Villa Venezuela no es de la Estaca Bello Horizonte", juan.errors.full_messages.to_sentence
   end
 
   test "staff may come from a stake that doesn't take part, written by hand; jóvenes may not" do
@@ -112,7 +112,7 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_equal [ nil, nil, "Estaca Managua Sur", "Barrio Altamira" ], [ maria.stake, maria.ward, maria.stake_name, maria.ward_name ]
     assert_equal Participant::OTHER_STAKE, maria.stake_choice
 
-    maria.update!(stake: "las_americas", ward: "ciudad_jardin")
+    maria.update!(stake: "las_americas", ward: "las_mercedes")
     assert_nil maria.reload.other_stake, "choosing a stake that takes part drops the written one"
 
     juan = participants(:juan)

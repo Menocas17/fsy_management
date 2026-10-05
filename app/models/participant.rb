@@ -19,15 +19,45 @@ class Participant < ApplicationRecord
     "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
   }.freeze
   enum :stake, { bello_horizonte: 0, las_americas: 1, villa_flor: 2, puerto_cabezas: 3 }
-  enum :ward, { bello_horizonte_b: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6 }
+  # Los nombres del barrio y de su estaca se repiten (Barrio Villa Flor en la Estaca Villa Flor), así que los
+  # métodos del barrio llevan prefijo: ward_villa_flor?. Los números ya guardados no se mueven.
+  enum :ward, {
+    bello_horizonte: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6,
+    catorce_de_septiembre: 7, los_laureles: 8, rene_polanco: 9, villa_flor: 10, villa_venezuela: 11,
+    bocana: 12, ciudadela: 13, las_americas: 14, las_mercedes: 15, loma_verde: 16, ruben_dario: 17, san_benito: 18, tipitapa: 19,
+    bilwi: 20, el_caminante: 21, lamlaya: 22, loma_verde_puerto_cabezas: 23, puerto_cabezas: 24
+  }, prefix: true
 
-  # Los barrios de cada estaca que participa: el formulario solo ofrece los de la estaca elegida.
-  WARDS_BY_STAKE = {
-    "bello_horizonte" => %w[bello_horizonte_b la_rotonda],
-    "las_americas" => %w[ciudad_jardin la_maximo_jerez],
-    "villa_flor" => %w[ducuali primavera],
-    "puerto_cabezas" => %w[waspan]
+  STAKE_LABELS = {
+    "bello_horizonte" => "Estaca Bello Horizonte", "villa_flor" => "Estaca Villa Flor",
+    "las_americas" => "Estaca Las Américas", "puerto_cabezas" => "Distrito Puerto Cabezas"
   }.freeze
+
+  # Barrio o rama, como se llama de verdad (dos «Loma Verde»: un barrio en Las Américas y una rama en Puerto Cabezas).
+  WARD_LABELS = {
+    "bello_horizonte" => "Barrio Bello Horizonte", "ciudad_jardin" => "Barrio Ciudad Jardín", "ducuali" => "Barrio Ducuali",
+    "la_maximo_jerez" => "Barrio La Máximo Jerez", "la_rotonda" => "Barrio La Rotonda", "primavera" => "Rama Primavera",
+    "waspan" => "Rama Waspán",
+    "catorce_de_septiembre" => "Barrio La Catorce de Septiembre", "los_laureles" => "Barrio Los Laureles",
+    "rene_polanco" => "Barrio René Polanco", "villa_flor" => "Barrio Villa Flor", "villa_venezuela" => "Barrio Villa Venezuela",
+    "bocana" => "Rama Bocana", "ciudadela" => "Barrio Ciudadela", "las_americas" => "Barrio Las Américas",
+    "las_mercedes" => "Barrio Las Mercedes", "loma_verde" => "Barrio Loma Verde", "ruben_dario" => "Barrio Rubén Darío",
+    "san_benito" => "Rama San Benito", "tipitapa" => "Rama Tipitapa",
+    "bilwi" => "Rama Bilwi", "el_caminante" => "Rama El Caminante", "lamlaya" => "Rama Lamlaya",
+    "loma_verde_puerto_cabezas" => "Rama Loma Verde", "puerto_cabezas" => "Rama Puerto Cabezas"
+  }.freeze
+
+  # Los barrios y ramas de cada estaca: el formulario solo ofrece los de la estaca elegida.
+  WARDS_BY_STAKE = {
+    "bello_horizonte" => %w[bello_horizonte ciudad_jardin ducuali la_maximo_jerez la_rotonda primavera waspan],
+    "villa_flor" => %w[catorce_de_septiembre los_laureles rene_polanco villa_flor villa_venezuela],
+    "las_americas" => %w[bocana ciudadela las_americas las_mercedes loma_verde ruben_dario san_benito tipitapa],
+    "puerto_cabezas" => %w[bilwi el_caminante lamlaya loma_verde_puerto_cabezas puerto_cabezas]
+  }.freeze
+
+  def self.ward_label(ward)
+    WARD_LABELS.fetch(ward.to_s, ward.to_s.titleize)
+  end
 
   # El staff puede venir de una estaca que no participa: se elige «Otra» y se escriben a mano.
   OTHER_STAKE = "otra".freeze
@@ -188,7 +218,7 @@ class Participant < ApplicationRecord
   end
 
   def ward_name
-    ward&.titleize || other_ward.presence
+    ward ? self.class.ward_label(ward) : other_ward.presence
   end
 
   # La de la inscripción oficial (archivo de la Iglesia); sin ella, el día en que se creó la ficha.
@@ -325,8 +355,9 @@ class Participant < ApplicationRecord
         elsif other_stake.blank?
           errors.add(:stake, "no puede estar en blanco")
         end
-      elsif ward.present? && !WARDS_BY_STAKE.fetch(stake, []).include?(ward)
-        errors.add(:ward, "#{ward.titleize} no es de la estaca #{stake.titleize}")
+      # Solo al cambiar la estaca o el barrio: una ficha vieja con una pareja que ya no cuadra no traba otros cambios.
+      elsif ward.present? && (will_save_change_to_stake? || will_save_change_to_ward?) && !WARDS_BY_STAKE.fetch(stake, []).include?(ward)
+        errors.add(:base, "#{self.class.ward_label(ward)} no es de la #{STAKE_LABELS[stake]}")
       end
     end
 
