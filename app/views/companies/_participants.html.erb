@@ -4,7 +4,7 @@
       <thead>
         <tr class="text-meta tracking-[.06em] uppercase text-ink-500">
           <th scope="col" class="pb-2.5 pr-4 font-bold">Nombre</th>
-          <th scope="col" class="pb-2.5 pr-4 font-bold">Estaca</th>
+          <th scope="col" class="pb-2.5 pr-4 font-bold">Estaca / Distrito</th>
           <th scope="col" class="pb-2.5 pr-4 font-bold">Edad</th>
           <th scope="col" class="pb-2.5 font-bold">Cuarto</th>
         </tr>
@@ -19,7 +19,7 @@
                 <span class="truncate text-body font-semibold text-ink-900 group-hover:underline"><%= participant.full_name %></span>
               <% end %>
             </td>
-            <td class="py-2.5 pr-4"><%= render(StakeSpanComponent.new(stake: participant.stake)) %></td>
+            <td class="py-2.5 pr-4"><%= render(StakeSpanComponent.new(stake: participant.stake, name: participant.stake_name)) %></td>
             <td class="py-2.5 pr-4 text-body text-ink-700 tabular-nums"><%= participant.age %></td>
             <td class="py-2.5 text-body font-bold text-ink-900"><%= participant.room.presence || "—" %></td>
           </tr>
@@ -37,7 +37,7 @@
           <span class="min-w-0 flex-1">
             <span class="block truncate text-body font-bold text-ink-900"><%= participant.full_name %></span>
             <span class="block text-label font-semibold text-ink-500">
-              <%= [ participant.stake&.titleize, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
+              <%= [ participant.stake_name, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
             </span>
           </span>
           <span class="text-body font-bold text-ink-900"><%= participant.room.presence || "—" %></span>

@@ -34,6 +34,8 @@ class ImportRowEvaluator
     @issues = []
     @participant = Participant.new(attributes)
     check_duplicate
+    check_dates
+    check_ward
     check_validity
     check_staffing
     check_lookalikes
@@ -68,10 +70,13 @@ class ImportRowEvaluator
   private
     def attributes
       {
-        first_name: values[:first_name], last_name: values[:last_name],
-        age: whole_number(values[:age]), gender: GENDERS[normalize(values[:gender])],
-        stake: enum_key(Participant.stakes, values[:stake]),
-        ward: enum_key(Participant.wards, values[:ward]),
+        first_name: values[:first_name], last_name: values[:last_name], preferred_name: values[:preferred_name],
+        age: whole_number(values[:age]), birth_date: birth_date, date_of_inscription: date(values[:date_of_inscription]),
+        gender: GENDERS[normalize(values[:gender])],
+        stake: stake_key, ward: (ward_key if stake_key),
+        # El staff puede venir de una estaca que no participa: queda escrita tal cual.
+        other_stake: (values[:stake]&.to_s if stake_key.nil?), other_ward: (values[:ward]&.to_s if stake_key.nil?),
+        bishop_name: values[:bishop_name], bishop_email: values[:bishop_email],
         shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
         rol: role_key || "joven",
         identity_document: values[:identity_document]&.to_s,
@@ -82,7 +87,12 @@ class ImportRowEvaluator
         emergency_contact_name: values[:emergency_contact_name],
         emergency_contact_number: values[:emergency_contact_number]&.to_s,
         emergency_contact_relation: values[:emergency_contact_relation],
-        allergies: values[:allergies], medicines: values[:medicines], diet: values[:diet],
+        emergency_contact_email: values[:emergency_contact_email],
+        emergency_contact_2_name: values[:emergency_contact_2_name],
+        emergency_contact_2_number: values[:emergency_contact_2_number]&.to_s,
+        emergency_contact_2_email: values[:emergency_contact_2_email],
+        medical_information: medical_information, emotional_information: values[:emotional_information],
+        diet: values[:diet],
         additional_instructions: values[:additional_instructions]
       }.compact
     end
@@ -92,16 +102,35 @@ class ImportRowEvaluator
     end
 
     # La cédula manda cuando viene (escrita como sea). Sin ella, es la misma persona si coinciden el nombre
-    # completo, la edad y la estaca; solo el nombre no basta: dos «María López» pueden existir.
+    # completo y la fecha de nacimiento, o (sin fecha) la edad y la estaca; solo el nombre no basta: dos
+    # «María López» pueden existir.
     def check_duplicate
       document = participant.identity_document
       existing = if document
         Participant.find_by(identity_document: document)
+      elsif values[:first_name].present? && participant.birth_date
+        Participant.find_by(first_name: participant.first_name, last_name: participant.last_name, birth_date: participant.birth_date)
       elsif values[:first_name].present?
         Participant.find_by(first_name: participant.first_name, last_name: participant.last_name,
                             age: participant.age, stake: participant.stake)
       end
       add("Duplicado: esta persona ya existe", blocking: true, match: existing) if existing
+    end
+
+    def check_dates
+      add("La fecha de nacimiento «#{values[:birth_date]}» no se entiende (usa día/mes/año)", blocking: true) if values[:birth_date].present? && birth_date.nil?
+      add("La fecha de inscripción «#{values[:date_of_inscription]}» no se entiende: se ignora", blocking: false) if values[:date_of_inscription].present? && date(values[:date_of_inscription]).nil?
+    end
+
+    # Un barrio que no está en la lista: el joven tiene que ser de uno de los que participan; al staff se le deja sin barrio.
+    def check_ward
+      return if values[:ward].blank? || stake_key.nil? || ward_key
+
+      if staff?
+        add("El barrio «#{values[:ward]}» no está en la lista: quedaría sin barrio", blocking: false)
+      else
+        add("El barrio «#{values[:ward]}» no es de la #{Participant::STAKE_LABELS[stake_key]}", blocking: true)
+      end
     end
 
     def check_validity
@@ -210,6 +239,69 @@ class ImportRowEvaluator
         else
           :missing
         end
+    end
+
+    # «Estaca Managua Nicaragua Bello Horizonte» → bello_horizonte: la clave exacta, o la más larga que
+    # aparezca entera dentro del nombre. El barrio se busca solo entre los de su estaca, así «Rama Loma Verde»
+    # es la de Puerto Cabezas o el barrio de Las Américas según la estaca de la fila.
+    def stake_key
+      @stake_key = contained_key(Participant.stakes, values[:stake]) unless defined?(@stake_key)
+      @stake_key
+    end
+
+    def ward_key
+      unless defined?(@ward_key)
+        wards = Participant::WARDS_BY_STAKE.fetch(stake_key.to_s, []).index_with do |ward|
+          Participant.ward_label(ward).delete_prefix("Barrio ").delete_prefix("Rama ")
+        end
+        @ward_key = contained_key(wards, values[:ward])
+      end
+      @ward_key
+    end
+
+    # mapping: { clave => nombre opcional }. Cuenta la clave («la_maximo_jerez») o el nombre («La Máximo Jerez»).
+    def contained_key(mapping, value)
+      return nil if value.blank?
+
+      words = ->(text) { " #{normalize(text).gsub(/[^a-z0-9]+/, " ").strip} " }
+      text = words.(value)
+      matches = mapping.keys.flat_map { |key| [ key.tr("_", " "), mapping[key].is_a?(String) ? mapping[key] : nil ].compact.map { [ key, words.(_1) ] } }
+      matches.select { |_, name| text.include?(name) }.max_by { |_, name| name.length }&.first
+    end
+
+    def birth_date
+      @birth_date = date(values[:birth_date]) unless defined?(@birth_date)
+      @birth_date
+    end
+
+    # La información médica tal cual; las planillas viejas traen alergias y medicinas aparte y se juntan.
+    def medical_information
+      parts = [ values[:medical_information] ]
+      parts << "Alergias: #{values[:allergies]}" if medical_value?(values[:allergies])
+      parts << "Medicinas: #{values[:medicines]}" if medical_value?(values[:medicines])
+      parts.compact_blank.map(&:to_s).join("\n").presence
+    end
+
+    def medical_value?(value)
+      value.present? && !Participant::MEDICAL_NONE.include?(normalize(value))
+    end
+
+    # 2010-03-14 (Excel, ya convertida), 14/03/2010 o 14-03-2010 (día primero, como se escribe aquí).
+    def date(value)
+      return value.to_date if value.respond_to?(:to_date) && !value.is_a?(String)
+
+      text = value.to_s.strip
+      return nil if text.empty?
+
+      if (match = text.match(/\A(\d{4})-(\d{1,2})-(\d{1,2})/))
+        Date.new(match[1].to_i, match[2].to_i, match[3].to_i)
+      elsif (match = text.match(%r{\A(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\z}))
+        year = match[3].to_i
+        year += year < 30 ? 2000 : 1900 if year < 100
+        Date.new(year, match[2].to_i, match[1].to_i)
+      end
+    rescue Date::Error
+      nil
     end
 
     # «15», 15 o 15.0 → 15. Lo que no es número se deja tal cual, para que el error diga «debe ser un número».

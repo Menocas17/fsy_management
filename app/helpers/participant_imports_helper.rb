@@ -12,7 +12,7 @@ module ParticipantImportsHelper
     case field
     when :gender then [ [ "Hombre", "H" ], [ "Mujer", "M" ] ]
     when :stake then Participant.stakes.keys.map { |key| [ key.titleize, key ] }
-    when :ward then Participant.wards.keys.map { |key| [ key.titleize, key ] }
+    when :ward then Participant.wards.keys.map { |key| [ Participant.ward_label(key), key ] }
     when :shirt_number then Participant.shirt_numbers.keys.map { |key| [ key.upcase, key ] }
     when :rol then Participant.rols.keys.map { |key| [ Participant.role_label(key), key ] }
     when :auxiliar_company then AuxiliarCompany.order(:name).map { |auxiliar| [ auxiliar.name, auxiliar.name ] }

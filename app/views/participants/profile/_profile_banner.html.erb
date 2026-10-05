@@ -19,13 +19,19 @@
             <h1 class="text-display font-extrabold leading-tight tracking-tight text-ink-900 text-balance break-words"><%= participant.full_name %></h1>
             <%= render(RoleSpanComponent.new(role: participant.rol)) %>
           </div>
+          <% if participant.nickname %>
+            <p class="mt-1 text-body font-semibold text-ink-700" data-profile-nickname>Le dicen «<%= participant.nickname %>»</p>
+          <% end %>
+          <%# «Estaca Bello Horizonte · Rama Primavera»; la escrita a mano (staff de otra estaca) va tal cual. %>
           <p class="mt-1.5 sm:mt-1 text-body font-medium text-ink-500 text-pretty">
-            <%= [ participant.stake&.titleize.then { |s| s && "Estaca #{s}" }, participant.ward&.titleize.then { |w| w && "Barrio #{w}" }, participant.age && "#{participant.age} años" ].compact.join(" · ") %>
+            <%= [ participant.stake ? Participant::STAKE_LABELS[participant.stake] : participant.other_stake.presence,
+                  participant.ward_name,
+                  participant.age && "#{participant.age} años" ].compact.join(" · ") %>
           </p>
           <%# Con tres columnas la tarjeta «Registro» se esconde y sus dos fechas quedan aquí. %>
           <% if participant.created_at %>
             <p class="hidden 2xl:block mt-1 text-meta font-semibold text-ink-500" data-profile-dates>
-              Ficha creada el <%= participant.created_at.strftime("%d/%m/%Y") %> · actualizada el <%= participant.updated_at.strftime("%d/%m/%Y") %>
+              Inscrito el <%= participant.inscription_date.strftime("%d/%m/%Y") %> · actualizada el <%= participant.updated_at.strftime("%d/%m/%Y") %>
             </p>
           <% end %>
         </div>

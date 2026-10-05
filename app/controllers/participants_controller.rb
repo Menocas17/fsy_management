@@ -85,15 +85,20 @@ class ParticipantsController < ApplicationController
 
   private
   FIELD_LABELS = {
-    "first_name" => "nombre", "last_name" => "apellido", "age" => "edad", "rol" => "rol", "stake" => "estaca",
-    "ward" => "barrio", "gender" => "género", "shirt_number" => "talla", "identity_document" => "identificación",
+    "first_name" => "nombre", "last_name" => "apellido", "preferred_name" => "nombre que se prefiere",
+    "birth_date" => "fecha de nacimiento", "rol" => "rol", "stake" => "estaca", "other_stake" => "estaca",
+    "ward" => "barrio", "other_ward" => "barrio", "gender" => "género", "shirt_number" => "talla", "identity_document" => "identificación",
     "room" => "cuarto", "company_id" => "compañía", "additional_instructions" => "notas", "logistics_area_id" => "área de logística",
     "contact_info" => {
       "phone_number" => "teléfono", "email_address" => "correo", "emergency_contact_number" => "contacto de emergencia",
-      "emergency_contact_name" => "contacto de emergencia", "emergency_contact_relation" => "contacto de emergencia"
+      "emergency_contact_name" => "contacto de emergencia", "emergency_contact_relation" => "contacto de emergencia",
+      "emergency_contact_email" => "contacto de emergencia", "emergency_contact_2_number" => "segundo contacto de emergencia",
+      "emergency_contact_2_name" => "segundo contacto de emergencia", "emergency_contact_2_relation" => "segundo contacto de emergencia",
+      "emergency_contact_2_email" => "segundo contacto de emergencia", "bishop_name" => "obispo", "bishop_email" => "obispo"
     },
     "medical_info" => {
-      "allergies" => "alergias", "medicines" => "medicinas", "diet" => "dieta", "additional_medical_notes" => "notas médicas"
+      "medical_information" => "información médica", "emotional_information" => "información emocional",
+      "diet" => "dieta", "additional_medical_notes" => "notas médicas"
     },
     "person_in_charge" => { "m_person_in_charge" => "consejeros", "h_person_in_charge" => "consejeros" }
   }.freeze

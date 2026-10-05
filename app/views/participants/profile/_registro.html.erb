@@ -1,7 +1,7 @@
 <section class="<%= card_classes("p-6 2xl:hidden") %>">
   <%= section_heading "Registro", "calendar", tone: :indigo %>
   <div>
-    <%= info_row "Fecha de registro", "calendar", participant.created_at&.strftime("%d/%m/%Y") %>
+    <%= info_row "Fecha de inscripción", "calendar", participant.inscription_date&.strftime("%d/%m/%Y") %>
     <%= info_row "Última actualización", "clock", participant.updated_at&.strftime("%d/%m/%Y") %>
   </div>
 </section>

@@ -4,8 +4,8 @@
       <thead>
         <tr class="border-b border-line-soft">
           <th scope="col" class="<%= header_cell_classes %>">Nombre completo</th>
-          <th scope="col" class="<%= header_cell_classes %>">Estaca</th>
-          <th scope="col" class="<%= header_cell_classes %> hidden lg:table-cell">Barrio</th>
+          <th scope="col" class="<%= header_cell_classes %>">Estaca / Distrito</th>
+          <th scope="col" class="<%= header_cell_classes %> hidden lg:table-cell">Barrio / Rama</th>
           <% if @is_staff %>
             <th scope="col" class="<%= header_cell_classes %>">Rol</th>
           <% end %>
@@ -29,9 +29,9 @@
               </div>
             </td>
             <td class="<%= cell_classes %>">
-              <%= render(StakeSpanComponent.new(stake: participant.stake)) %>
+              <%= render(StakeSpanComponent.new(stake: participant.stake, name: participant.stake_name)) %>
             </td>
-            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.ward&.titleize || "—" %></td>
+            <td class="<%= cell_classes %> hidden lg:table-cell"><%= participant.ward_name || "—" %></td>
             <% if @is_staff %>
               <td class="<%= cell_classes %>">
                 <%= render(RoleSpanComponent.new(role: participant.rol)) %>

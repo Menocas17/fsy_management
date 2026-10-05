@@ -25,15 +25,15 @@
         sheet_id: "participant-filters", clear_path: form_url, active_count: active_count, row_data: { participant_filters: true },
         sheet_class: "lg:flex-none lg:min-w-0 lg:max-w-[calc(100%-11rem-0.75rem)]",
         row_class: "lg:flex lg:items-start lg:gap-2 lg:overflow-x-auto lg:p-0.5 lg:-m-0.5 lg:pb-1.5" } do %>
-    <%= filter_field "Estaca", "stake" do %>
+    <%= filter_field "Estaca / Distrito", "stake" do %>
       <%= f.select :stake,
             options_for_select(Participant.stakes.keys.map { |key| [ key.titleize, key ] }, params[:stake]),
-            { include_blank: "Estaca" }, class: chip_classes, aria: { label: "Filtrar por estaca" }, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Estaca / Distrito" }, class: chip_classes, aria: { label: "Filtrar por estaca o distrito" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
-    <%= filter_field "Barrio", "ward" do %>
+    <%= filter_field "Barrio / Rama", "ward" do %>
       <%= f.select :ward,
-            options_for_select(Participant.wards.keys.map { |key| [ key.titleize, key ] }, params[:ward]),
-            { include_blank: "Barrio" }, class: chip_classes, aria: { label: "Filtrar por barrio" }, data: { action: "change->auto-submit#changed" } %>
+            grouped_options_for_select(Participant::WARDS_BY_STAKE.map { |stake, wards| [ Participant::STAKE_LABELS[stake], wards.map { |ward| [ Participant.ward_label(ward), ward ] } ] }, params[:ward]),
+            { include_blank: "Barrio / Rama" }, class: chip_classes, aria: { label: "Filtrar por barrio o rama" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <%= filter_field "Género", "gender" do %>
       <%= f.select :gender,

@@ -3,16 +3,23 @@
   <div class="space-y-4">
     <div>
       <%# Los ejemplos no parecen un valor ya escrito (antes «Ninguna» se leía como respuesta), y vacío es «nada que atender». %>
-      <%= form.label :allergies, "Alergias", class: field_label_classes %>
-      <%= form.text_area :allergies, rows: 2, class: field_textarea_classes, placeholder: "Ej. penicilina, maní. Déjalo vacío si no tiene." %>
-    </div>
-    <div>
-      <%= form.label :medicines, "Medicinas", class: field_label_classes %>
-      <%= form.text_area :medicines, rows: 2, class: field_textarea_classes, placeholder: "Ej. inhalador para el asma. Déjalo vacío si no toma." %>
+      <%= form.label :medical_information, "Información médica", class: field_label_classes %>
+      <%= form.text_area :medical_information, rows: 3, class: field_textarea_classes,
+            placeholder: "Alergias, medicinas, condiciones. Ej. alérgica a la penicilina; usa inhalador. Déjalo vacío si no tiene." %>
     </div>
     <div>
       <%= form.label :diet, "Dieta", class: field_label_classes %>
       <%= form.text_area :diet, rows: 2, class: field_textarea_classes, placeholder: "Ej. vegetariana, sin gluten. Déjalo vacío si no tiene." %>
     </div>
+    <% if can_read_emotional_information?(form.object) %>
+      <div>
+        <%= form.label :emotional_information, class: "mb-1.5 flex items-center gap-1.5 text-label font-bold text-ink-700" do %>
+          Información emocional
+          <span class="inline-flex items-center gap-1 text-meta font-bold text-cat-indigo-ink"><%= icon "lock", class: "size-3" %>Privada</span>
+        <% end %>
+        <%= form.text_area :emotional_information, rows: 2, class: field_textarea_classes,
+              placeholder: "Lo que la familia compartió para cuidarle mejor. Solo lo ven enfermería, la dirección y sus líderes." %>
+      </div>
+    <% end %>
   </div>
 </section>

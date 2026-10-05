@@ -1,4 +1,9 @@
 module ParticipantsHelper
+  # Los barrios de cada estaca para el selector: { "bello_horizonte" => [["Barrio Ducuali", "ducuali"], …] }.
+  def stake_ward_options
+    Participant::WARDS_BY_STAKE.transform_values { |wards| wards.map { |ward| [ Participant.ward_label(ward), ward ] } }
+  end
+
   # Lo mismo que Participant.with_medical_note, para una ficha ya cargada: «Ninguna» no cuenta.
   def medical_note?(value)
     value.to_s.strip.present? && !Participant::MEDICAL_NONE.include?(value.to_s.strip.downcase)

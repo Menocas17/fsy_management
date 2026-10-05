@@ -3,7 +3,8 @@ class DashboardFacade
     @total_participants ||= Participant.count
   end
 
-  # Age and gender charts describe the jóvenes only; staff (directors, counselors…) are left out.
+  # Las gráficas de edad, género y estaca describen solo a los jóvenes: el staff (que además puede venir de
+  # una estaca que no participa) queda fuera.
   def participants_by_age
     @participants_by_age ||= Participant.jovenes.data_by_age
   end
@@ -17,7 +18,7 @@ class DashboardFacade
   end
 
   def count_by_stake
-    @count_by_stake ||= Participant.stake_count
+    @count_by_stake ||= Participant.jovenes.stake_count
   end
 
   def count_by_role
@@ -39,9 +40,8 @@ class DashboardFacade
   # Cocina y enfermería: lo que cada ficha trae y que, si no se suma aquí, hay que ir a buscar de a una.
   def special_care
     @special_care ||= {
-      allergies: Participant.jovenes.with_medical_note(:allergies).count,
-      diet: Participant.jovenes.with_medical_note(:diet).count,
-      medicines: Participant.jovenes.with_medical_note(:medicines).count
+      medical_information: Participant.jovenes.with_medical_note(:medical_information).count,
+      diet: Participant.jovenes.with_medical_note(:diet).count
     }
   end
 

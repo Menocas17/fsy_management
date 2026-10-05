@@ -46,6 +46,8 @@ export default class extends Controller {
     // Se lee antes de esperar la librería: turbo:load ya habrá apagado la bandera cuando llegue.
     this.restored = restoring;
     const ApexCharts = await loadApexCharts();
+    // Crece cuando se ve, no al cargar: bajo el borde del panel la animación pasaba sin que nadie la viera.
+    if (!this.restored) await this.untilVisible();
     // Turbo pudo haber salido de la página mientras llegaba.
     if (!this.element.isConnected || this.chart) return;
 
@@ -61,7 +63,25 @@ export default class extends Controller {
     });
   }
 
+  // Se resuelve cuando un tercio de la gráfica entra a la pantalla (en el acto si ya está a la vista).
+  untilVisible() {
+    if (!('IntersectionObserver' in window)) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      this.visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          this.visibilityObserver.disconnect();
+          resolve();
+        },
+        { threshold: 0.3 },
+      );
+      this.visibilityObserver.observe(this.element);
+    });
+  }
+
   disconnect() {
+    this.visibilityObserver?.disconnect();
     this.themeObserver?.disconnect();
     this.chart?.destroy();
     this.chart = null;

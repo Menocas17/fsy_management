@@ -1,16 +1,15 @@
 <%
-  # Alergias, dietas y medicinas viven en cada ficha; sumadas aquí, la cocina y la enfermería las ven de un vistazo.
+  # La información médica y la dieta viven en cada ficha; sumadas aquí, la cocina y la enfermería las ven de un vistazo.
   cells = [
-    { key: "allergies", value: special_care[:allergies], label: "con alergias", icon: "heart-pulse", tone: :rose },
-    { key: "diet", value: special_care[:diet], label: "con dieta especial", icon: "salad", tone: :green },
-    { key: "medicines", value: special_care[:medicines], label: "toman medicinas", icon: "pill", tone: :blue }
+    { key: "medical_information", value: special_care[:medical_information], label: "con información médica", icon: "heart-pulse", tone: :rose },
+    { key: "diet", value: special_care[:diet], label: "con dieta especial", icon: "salad", tone: :green }
   ]
 %>
 <section class="<%= card_classes("p-5 md:p-6") %>" data-care>
   <%= section_heading "Atenciones especiales", "heart-pulse", tone: :rose %>
 
   <%# Cada número abre la lista de jóvenes ya filtrada: de la cifra a los nombres en un clic. %>
-  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+  <div class="grid grid-cols-2 gap-3">
     <% cells.each do |cell| %>
       <%= render StatTileComponent.new(value: cell[:value], label: cell[:label], icon: cell[:icon], tone: cell[:tone], size: :sm,
             href: participants_path(care: cell[:key]), data: { care_link: cell[:key] }, value_data: { care_count: cell[:key] }) %>

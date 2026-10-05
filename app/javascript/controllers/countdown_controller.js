@@ -26,8 +26,16 @@ export default class extends Controller {
     if (remaining === 0) clearInterval(this.timer);
   }
 
+  // Un número que cambia sube en su ventana (.countdown-tick en application.css); el que no cambia, quieto.
   write(name, value) {
     const target = this[`${name}Target`];
-    if (target) target.textContent = name === 'days' ? String(value) : String(value).padStart(2, '0');
+    if (!target) return;
+
+    const text = name === 'days' ? String(value) : String(value).padStart(2, '0');
+    if (target.textContent === text) return;
+    target.textContent = text;
+    target.classList.remove('countdown-tick');
+    void target.offsetWidth;
+    target.classList.add('countdown-tick');
   }
 }

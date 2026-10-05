@@ -4,7 +4,11 @@ require "application_system_test_case"
 class LazyLibrariesTest < ApplicationSystemTestCase
   setup { sign_in_as users(:one) }
 
-  test "the dashboard charts still draw once apexcharts arrives" do
+  test "the dashboard charts draw (and grow) once they come into view" do
+    chart = find("[data-controller~='chart']", match: :first)
+    assert_no_selector "[data-controller~='chart'] .apexcharts-canvas", wait: 1
+
+    scroll_to chart, align: :center
     assert_selector "[data-controller~='chart'] .apexcharts-canvas", minimum: 1
   end
 

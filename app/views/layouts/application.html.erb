@@ -18,6 +18,13 @@
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
             document.documentElement.classList.add('reduce-motion');
           }
+          // La entrada del panel (dashboard_entrance_controller.js) se arma antes del primer cuadro, una vez por
+          // sesión. Con movimiento reducido, nunca.
+          var calm = document.documentElement.classList.contains('reduce-motion') ||
+                     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (!calm && !sessionStorage.getItem('fsy:entrance-seen')) {
+            document.documentElement.classList.add('entrance-pending');
+          }
           // El teléfono ya viene con la letra grande por CSS; esto es el escalón extra que se elige.
           if (localStorage.getItem('fsy:text-size') === 'large') {
             document.documentElement.classList.add('text-lg-mode');

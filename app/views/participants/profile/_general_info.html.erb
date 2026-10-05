@@ -12,7 +12,16 @@
             links: counselors.map { |counselor| [ counselor.full_name, participant_path(counselor, return_to: return_here) ] } %>
     <% end %>
     <%= info_row "Identificación", "id-card", participant.formatted_identity_document %>
+    <%= info_row "Fecha de nacimiento", "cake", participant.birth_date && "#{SpanishDates.full(participant.birth_date)} · #{participant.age} años" %>
     <%= info_row "Género", "venus-and-mars", Participant::GENDER_LABELS[participant.gender] %>
     <%= info_row "Talla de camisa", "shirt", participant.shirt_number&.upcase %>
+  </div>
+
+  <div class="mt-5 pt-4 border-t border-line-soft">
+    <h3 class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-cat-teal-ink">Obispo o presidente de rama</h3>
+    <div>
+      <%= info_row "Nombre", "church", participant.bishop_name %>
+      <%= info_row "Correo", "mail", participant.bishop_email, href: participant.bishop_email.presence && "mailto:#{participant.bishop_email}" %>
+    </div>
   </div>
 </section>

@@ -42,11 +42,15 @@
             <%= form.label :last_name, "Apellido", class: field_label_classes %>
             <%= form.text_field :last_name, class: field_input_classes, autocomplete: "family-name" %>
           </div>
+          <div>
+            <%= form.label :preferred_name, "Nombre que se prefiere", class: field_label_classes %>
+            <%= form.text_field :preferred_name, class: field_input_classes, autocomplete: "nickname", placeholder: "Cómo le gusta que le digan" %>
+          </div>
           <div class="sm:max-w-xs">
             <%= form.label :rol, "Rol", class: field_label_classes %>
             <%= form.select :rol, Participant.rols.keys.map { |key| [ Participant.role_label(key), key ] },
                   { prompt: "Selecciona un rol" }, class: field_select_classes,
-                  data: { role_fields_target: "role", action: "role-fields#toggle" } %>
+                  data: { role_fields_target: "role", stake_ward_target: "role", action: "role-fields#toggle stake-ward#refresh" } %>
           </div>
         </div>
       <% else %>

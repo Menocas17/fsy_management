@@ -21,28 +21,53 @@
       <%= form.text_field :room, class: field_input_classes, placeholder: "Ej. 204" %>
     </div>
     <% if admin %>
+      <%# Cada estaca ofrece solo sus barrios (stake-ward). «Otra» es para el staff de una estaca que no participa. %>
+      <% wards = stake_ward_options.fetch(form.object.stake.to_s, []) %>
       <div>
-        <%= form.label :stake, "Estaca", class: field_label_classes %>
-        <%= form.select :stake, Participant.stakes.keys.map { |key| [ key.titleize, key ] },
-              { prompt: "Selecciona una estaca" }, class: field_select_classes %>
+        <%= form.label :stake, "Estaca / Distrito", class: field_label_classes %>
+        <%= form.select :stake, options_for_select(Participant.stakes.keys.map { |key| [ key.titleize, key ] }, form.object.stake_choice) +
+                                  tag.option("Otra (escribirla)", value: Participant::OTHER_STAKE, selected: form.object.stake_choice == Participant::OTHER_STAKE,
+                                             data: { stake_ward_target: "otherOption" }),
+              { prompt: "Selecciona una estaca o distrito" }, class: field_select_classes,
+              data: { stake_ward_target: "stake", action: "stake-ward#refresh" } %>
       </div>
-      <div>
-        <%= form.label :ward, "Barrio", class: field_label_classes %>
-        <%= form.select :ward, Participant.wards.keys.map { |key| [ key.titleize, key ] },
-              { prompt: "Selecciona un barrio" }, class: field_select_classes %>
-      </div>
+      <%= tag.div data: { stake_ward_target: "wardField" } do %>
+        <%= form.label :ward, "Barrio / Rama", class: field_label_classes %>
+        <%= form.select :ward, wards, { prompt: "Selecciona un barrio o rama" }, class: field_select_classes,
+              disabled: wards.empty?, data: { stake_ward_target: "ward" } %>
+      <% end %>
+      <% other = form.object.stake_choice == Participant::OTHER_STAKE %>
+      <%= tag.div hidden: !other, data: { stake_ward_target: "other" } do %>
+        <%= form.label :other_stake, "Nombre de la estaca o distrito", class: field_label_classes %>
+        <%= form.text_field :other_stake, class: field_input_classes, disabled: !other, placeholder: "Ej. Estaca Managua Sur" %>
+      <% end %>
+      <%= tag.div hidden: !other, data: { stake_ward_target: "other" } do %>
+        <%= form.label :other_ward, "Nombre del barrio o rama", class: field_label_classes %>
+        <%= form.text_field :other_ward, class: field_input_classes, disabled: !other, placeholder: "Ej. Barrio Altamira" %>
+      <% end %>
       <div>
         <%= form.label :gender, "Género", class: field_label_classes %>
         <%= form.select :gender, Participant::GENDER_LABELS.map { |key, label| [ label, key ] },
               { prompt: "Selecciona uno" }, class: field_select_classes %>
       </div>
       <div>
-        <%= form.label :age, "Edad", class: field_label_classes %>
-        <%= form.number_field :age, class: field_input_classes, min: 1, max: 79 %>
+        <%= form.label :birth_date, "Fecha de nacimiento", class: field_label_classes %>
+        <%= form.date_field :birth_date, class: field_input_classes, max: Date.current %>
+        <% if form.object.birth_date.nil? && form.object.age %>
+          <p class="mt-1.5 text-label font-medium text-ink-500">Hoy dice <%= form.object.age %> años; con la fecha, la edad se calcula sola.</p>
+        <% end %>
       </div>
       <div class="sm:col-span-2">
         <%= form.label :identity_document, "Documento de identidad", class: field_label_classes %>
         <%= form.text_field :identity_document, value: form.object.formatted_identity_document, placeholder: "001-010190-0001A", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :bishop_name, "Obispo o presidente de rama", class: field_label_classes %>
+        <%= form.text_field :bishop_name, class: field_input_classes, placeholder: "Nombre completo" %>
+      </div>
+      <div>
+        <%= form.label :bishop_email, "Correo del obispo", class: field_label_classes %>
+        <%= form.email_field :bishop_email, class: field_input_classes, placeholder: "correo@ejemplo.com" %>
       </div>
     <% end %>
     <div>

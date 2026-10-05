@@ -31,7 +31,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "next-page url keeps the active filters" do
-    create_participants(21, prefix: "Villa", stake: "villa_flor")
+    create_participants(21, prefix: "Villa", stake: "villa_flor", ward: "los_laureles")
 
     get participants_path(stake: "villa_flor")
 
@@ -223,25 +223,25 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the kitchen filter narrows the list and says so" do
-    participants(:juan).update!(allergies: "Maní")
+    participants(:juan).update!(medical_information: "Alérgico al maní")
     Participant.create!(first_name: "Sin", last_name: "Alergias", age: 15, stake: "las_americas",
-                        shirt_number: "m", gender: "M", rol: :joven, allergies: "Ninguna")
+                        shirt_number: "m", gender: "M", rol: :joven, medical_information: "Ninguna")
 
-    get participants_path(care: "allergies")
+    get participants_path(care: "medical_information")
 
     assert_response :success
-    assert_select "[data-active-filters] [data-active-filter='care']", text: /Con alergias/
+    assert_select "[data-active-filters] [data-active-filter='care']", text: /Con información médica/
     assert_select "tbody tr", 1
     assert_includes response.body, "Juan"
     refute_includes response.body, "Sin Alergias"
   end
 
   test "each active filter can be dropped on its own, keeping the rest" do
-    get participants_path(care: "allergies", gender: "M", query: "jua")
+    get participants_path(care: "medical_information", gender: "M", query: "jua")
 
     assert_select "[data-active-filter='care'][href*='gender=M']"
     assert_select "[data-active-filter='care'][href*='care=']", 0, "el enlace quita justo ese filtro"
-    assert_select "[data-active-filter='gender'][href*='care=allergies']"
+    assert_select "[data-active-filter='gender'][href*='care=medical_information']"
   end
 
   test "with no filters there is no filter bar to clear" do
@@ -316,7 +316,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     juan = participants(:juan)
     juan.update!(contact_info: { "phone_number" => "8888 1111" }, medical_info: { "diet" => "Sin gluten" })
     untouched = { phone_number: "8888 1111", email_address: "", emergency_contact_number: "", emergency_contact_name: "",
-                  emergency_contact_relation: "", allergies: "", medicines: "", diet: "Sin gluten", additional_medical_notes: "",
+                  emergency_contact_relation: "", medical_information: "", diet: "Sin gluten", additional_medical_notes: "",
                   additional_instructions: "" }
 
     assert_no_difference -> { AuditLog.count } do
@@ -327,9 +327,9 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
   test "an edit inside contact or medical info names what changed" do
     juan = participants(:juan)
 
-    patch participant_path(juan), params: { participant: { phone_number: "8888 2222", allergies: "Maní", email_address: "" } }
+    patch participant_path(juan), params: { participant: { phone_number: "8888 2222", medical_information: "Alérgico al maní", email_address: "" } }
 
-    assert_equal "Actualizó teléfono y alergias de Juan Pérez", AuditLog.recent.first.summary
+    assert_equal "Actualizó teléfono y información médica de Juan Pérez", AuditLog.recent.first.summary
   end
 
   test "destroy records the deleted participant by name" do

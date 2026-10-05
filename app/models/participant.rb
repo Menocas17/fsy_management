@@ -19,19 +19,71 @@ class Participant < ApplicationRecord
     "logistica" => "Logística", "director_logistica" => "Director de logística", "joven" => "Joven"
   }.freeze
   enum :stake, { bello_horizonte: 0, las_americas: 1, villa_flor: 2, puerto_cabezas: 3 }
-  enum :ward, { bello_horizonte_b: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6 }
+  # Los nombres del barrio y de su estaca se repiten (Barrio Villa Flor en la Estaca Villa Flor), así que los
+  # métodos del barrio llevan prefijo: ward_villa_flor?. Los números ya guardados no se mueven.
+  enum :ward, {
+    bello_horizonte: 0, ciudad_jardin: 1, ducuali: 2, la_maximo_jerez: 3, la_rotonda: 4, primavera: 5, waspan: 6,
+    catorce_de_septiembre: 7, los_laureles: 8, rene_polanco: 9, villa_flor: 10, villa_venezuela: 11,
+    bocana: 12, ciudadela: 13, las_americas: 14, las_mercedes: 15, loma_verde: 16, ruben_dario: 17, san_benito: 18, tipitapa: 19,
+    bilwi: 20, el_caminante: 21, lamlaya: 22, loma_verde_puerto_cabezas: 23, puerto_cabezas: 24
+  }, prefix: true
+
+  STAKE_LABELS = {
+    "bello_horizonte" => "Estaca Bello Horizonte", "villa_flor" => "Estaca Villa Flor",
+    "las_americas" => "Estaca Las Américas", "puerto_cabezas" => "Distrito Puerto Cabezas"
+  }.freeze
+
+  # Barrio o rama, como se llama de verdad (dos «Loma Verde»: un barrio en Las Américas y una rama en Puerto Cabezas).
+  WARD_LABELS = {
+    "bello_horizonte" => "Barrio Bello Horizonte", "ciudad_jardin" => "Barrio Ciudad Jardín", "ducuali" => "Barrio Ducuali",
+    "la_maximo_jerez" => "Barrio La Máximo Jerez", "la_rotonda" => "Barrio La Rotonda", "primavera" => "Rama Primavera",
+    "waspan" => "Rama Waspán",
+    "catorce_de_septiembre" => "Barrio La Catorce de Septiembre", "los_laureles" => "Barrio Los Laureles",
+    "rene_polanco" => "Barrio René Polanco", "villa_flor" => "Barrio Villa Flor", "villa_venezuela" => "Barrio Villa Venezuela",
+    "bocana" => "Rama Bocana", "ciudadela" => "Barrio Ciudadela", "las_americas" => "Barrio Las Américas",
+    "las_mercedes" => "Barrio Las Mercedes", "loma_verde" => "Barrio Loma Verde", "ruben_dario" => "Barrio Rubén Darío",
+    "san_benito" => "Rama San Benito", "tipitapa" => "Rama Tipitapa",
+    "bilwi" => "Rama Bilwi", "el_caminante" => "Rama El Caminante", "lamlaya" => "Rama Lamlaya",
+    "loma_verde_puerto_cabezas" => "Rama Loma Verde", "puerto_cabezas" => "Rama Puerto Cabezas"
+  }.freeze
+
+  # Los barrios y ramas de cada estaca: el formulario solo ofrece los de la estaca elegida.
+  WARDS_BY_STAKE = {
+    "bello_horizonte" => %w[bello_horizonte ciudad_jardin ducuali la_maximo_jerez la_rotonda primavera waspan],
+    "villa_flor" => %w[catorce_de_septiembre los_laureles rene_polanco villa_flor villa_venezuela],
+    "las_americas" => %w[bocana ciudadela las_americas las_mercedes loma_verde ruben_dario san_benito tipitapa],
+    "puerto_cabezas" => %w[bilwi el_caminante lamlaya loma_verde_puerto_cabezas puerto_cabezas]
+  }.freeze
+
+  def self.ward_label(ward)
+    WARD_LABELS.fetch(ward.to_s, ward.to_s.titleize)
+  end
+
+  # El staff puede venir de una estaca que no participa: se elige «Otra» y se escriben a mano.
+  OTHER_STAKE = "otra".freeze
   enum :shirt_number, { xs: 0, s: 1, m: 2, l: 3, xl: 4 }
   enum :gender, { M: 0, H: 1 }
 
   GENDER_LABELS = { "H" => "Hombre", "M" => "Mujer" }.freeze
 
   # With this you can access to the structure of the jsonb columns and treat them as they were actual columns
-  store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation
+  store_accessor :contact_info, :phone_number, :email_address, :emergency_contact_number, :emergency_contact_name, :emergency_contact_relation,
+                 :emergency_contact_email, :emergency_contact_2_number, :emergency_contact_2_name, :emergency_contact_2_relation,
+                 :emergency_contact_2_email, :bishop_name, :bishop_email
   store_accessor :person_in_charge, :m_person_in_charge, :h_person_in_charge
-  store_accessor :medical_info, :allergies, :medicines, :diet, :additional_medical_notes
+  # emotional_information es privada: la leen solo quienes leen las notas de enfermería (Authorization).
+  store_accessor :medical_info, :medical_information, :emotional_information, :diet, :additional_medical_notes
 
-  validates :first_name, :last_name, :age, :stake, :shirt_number, :gender, presence: true
-  validates :age, presence: true, numericality: { greater_than: 0, less_than: 80, allow_nil: true }
+  validates :first_name, :last_name, :shirt_number, :gender, presence: true
+  validates :age, numericality: { greater_than: 0, less_than: 80, allow_nil: true }
+  validate :birth_date_or_age
+  validate :stake_and_ward
+
+  # La edad sale de la fecha de nacimiento cuando la hay (la que tendrá al empezar el evento, como cuenta FSY);
+  # sin ella (fichas viejas), se queda la que tenía.
+  before_validation -> { self.age = age_on(Rails.configuration.x.event_start_on || Date.current) }, if: -> { birth_date.present? }
+  # Con una estaca de las que participan no quedan los nombres escritos a mano, y sin estaca no hay barrio.
+  before_validation :tidy_stake_and_ward
 
   after_save :sync_membership_gender
 
@@ -115,7 +167,7 @@ class Participant < ApplicationRecord
   MEDICAL_NONE = [ "ninguna", "ninguno", "ninguna.", "sin restricciones", "sin restriccion", "sin alergias",
                    "sin dieta", "n/a", "na", "no", "-", "--" ].freeze
 
-  CARE_FILTERS = { "allergies" => "Con alergias", "diet" => "Con dieta especial", "medicines" => "Toman medicinas" }.freeze
+  CARE_FILTERS = { "medical_information" => "Con información médica", "diet" => "Con dieta especial" }.freeze
 
   # El filtro que llega desde el panel de cocina y salud.
   scope :by_care, ->(field) { with_medical_note(field) if CARE_FILTERS.key?(field.to_s) }
@@ -142,6 +194,42 @@ class Participant < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  # Como le gusta que le digan, si no es su mismo nombre.
+  def nickname
+    preferred = preferred_name.to_s.strip
+    preferred if preferred.present? && ImportRowEvaluator.normalize(preferred) != ImportRowEvaluator.normalize(first_name)
+  end
+
+  # «Otra» llega del formulario como una estaca más: deja la estaca vacía y cuenta la escrita a mano.
+  def stake=(value)
+    @other_stake_chosen = value.to_s == OTHER_STAKE
+    super(@other_stake_chosen ? nil : value)
+  end
+
+  # Lo que muestra el selector: la estaca, u «Otra» si es una escrita a mano.
+  def stake_choice
+    stake || (OTHER_STAKE if other_stake.present? || @other_stake_chosen)
+  end
+
+  def stake_name
+    stake&.titleize || other_stake.presence
+  end
+
+  def ward_name
+    ward ? self.class.ward_label(ward) : other_ward.presence
+  end
+
+  # La de la inscripción oficial (archivo de la Iglesia); sin ella, el día en que se creó la ficha.
+  def inscription_date
+    date_of_inscription || created_at&.to_date
+  end
+
+  def age_on(date)
+    return if birth_date.nil?
+
+    date.year - birth_date.year - ((date.month > birth_date.month || (date.month == birth_date.month && date.day >= birth_date.day)) ? 0 : 1)
   end
 
   # Los roles que el superadmin puede probar con «Ver como» (el joven todavía no tiene su propia vista).
@@ -191,7 +279,7 @@ class Participant < ApplicationRecord
   end
 
   def self.stake_count
-    group(:stake).count.transform_keys(&:titleize)
+    group(:stake).count.transform_keys { |stake| stake&.titleize || "Otras estacas" }
   end
 
   def self.role_count
@@ -243,6 +331,36 @@ class Participant < ApplicationRecord
 
 
   private
+    def birth_date_or_age
+      if birth_date.nil? && age.blank?
+        errors.add(:birth_date, "no puede estar en blanco")
+      elsif birth_date && birth_date > Date.current
+        errors.add(:birth_date, "no puede ser en el futuro")
+      end
+    end
+
+    def tidy_stake_and_ward
+      if stake.present?
+        self.other_stake = self.other_ward = nil
+      else
+        self.ward = nil
+      end
+    end
+
+    # Los jóvenes vienen de las estacas que participan; el staff puede venir de otra, escrita a mano.
+    def stake_and_ward
+      if stake.blank?
+        if joven? && other_stake.present?
+          errors.add(:stake, "tiene que ser una de las que participan: «#{other_stake}» solo se acepta para el staff")
+        elsif other_stake.blank?
+          errors.add(:stake, "no puede estar en blanco")
+        end
+      # Solo al cambiar la estaca o el barrio: una ficha vieja con una pareja que ya no cuadra no traba otros cambios.
+      elsif ward.present? && (will_save_change_to_stake? || will_save_change_to_ward?) && !WARDS_BY_STAKE.fetch(stake, []).include?(ward)
+        errors.add(:base, "#{self.class.ward_label(ward)} no es de la #{STAKE_LABELS[stake]}")
+      end
+    end
+
     def sync_membership_gender
       if saved_change_to_gender?
         memberships.update_all(gender: gender)

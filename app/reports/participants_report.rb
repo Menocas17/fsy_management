@@ -42,7 +42,7 @@ class ParticipantsReport < ApplicationReport
       end
     end
 
-    HEADERS = [ "Nombre", "Edad", "Género", "Rol", "Estaca", "Barrio", "Camisa", "Cuarto", "Teléfono" ].freeze
+    HEADERS = [ "Nombre", "Edad", "Género", "Rol", "Estaca / Distrito", "Barrio / Rama", "Camisa", "Cuarto", "Teléfono" ].freeze
     COLUMN_WIDTHS = { 0 => 170, 1 => 36, 2 => 52, 3 => 74, 5 => 95, 6 => 44, 7 => 52 }.freeze
 
     def row_for(participant)
@@ -51,8 +51,8 @@ class ParticipantsReport < ApplicationReport
         participant.age.to_s,
         Participant::GENDER_LABELS.fetch(participant.gender, "—"),
         participant.role_label,
-        blank(participant.stake&.titleize),
-        blank(participant.ward&.titleize),
+        blank(participant.stake_name),
+        blank(participant.ward_name),
         blank(participant.shirt_number&.upcase),
         blank(participant.room),
         blank(participant.phone_number)

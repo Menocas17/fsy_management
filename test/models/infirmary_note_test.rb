@@ -4,7 +4,7 @@ class InfirmaryNoteTest < ActiveSupport::TestCase
   setup do
     @joven = participants(:juan)
     @visit = InfirmaryVisit.admit_directly(@joven, by: nil, reason: "fiebre").tap(&:start)
-    @nurse = Participant.create!(first_name: "Patricia", last_name: "Lacayo", age: 40, stake: "bello_horizonte", ward: "ducuali",
+    @nurse = Participant.create!(first_name: "Patricia", last_name: "Lacayo", age: 40, stake: "bello_horizonte", ward: "la_rotonda",
                                  shirt_number: "m", gender: "M", rol: "logistica")
     pharmacy = Inventory.create!(name: "Medicamentos", infirmary: true, icon: "package", color: "primary")
     @paracetamol = pharmacy.items.create!(name: "Acetaminofén 500 mg", unit: "tabletas")

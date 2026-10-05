@@ -50,12 +50,17 @@
     </div>
   <% end %>
 
-  <div class="mt-5 pt-4 border-t border-line-soft">
-    <h3 class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-cat-amber-ink">Contacto de emergencia</h3>
-    <div>
-      <%= info_row "Número", "phone", participant.emergency_contact_number, href: tel_href(participant.emergency_contact_number) %>
-      <%= info_row "Nombre", "user-round", participant.emergency_contact_name %>
-      <%= info_row "Parentesco", "heart-handshake", participant.emergency_contact_relation %>
+  <% [ [ "Contacto de emergencia", "" ], [ "Segundo contacto de emergencia", "2_" ] ].each do |title, n| %>
+    <div class="mt-5 pt-4 border-t border-line-soft" data-emergency-contact="<%= n.presence&.delete("_") || "1" %>">
+      <h3 class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-cat-amber-ink"><%= title %></h3>
+      <div>
+        <% number = participant.public_send("emergency_contact_#{n}number") %>
+        <% email = participant.public_send("emergency_contact_#{n}email") %>
+        <%= info_row "Número", "phone", number, href: tel_href(number) %>
+        <%= info_row "Nombre", "user-round", participant.public_send("emergency_contact_#{n}name") %>
+        <%= info_row "Parentesco", "heart-handshake", participant.public_send("emergency_contact_#{n}relation") %>
+        <%= info_row "Correo", "mail", email, href: email.presence && "mailto:#{email}" %>
+      </div>
     </div>
-  </div>
+  <% end %>
 </section>

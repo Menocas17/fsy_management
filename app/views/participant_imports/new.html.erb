@@ -1,48 +1,100 @@
 <% content_for :title, "Carga de participantes" %>
 <% content_for :eyebrow, "Participantes" %>
 <% back_to "Reportes", reports_path %>
+<%
+  tabs = {
+    "companias" => { label: "1 · Compañías", icon: "building-2", button: "Cargar compañías", url: company_imports_path, tone: :green },
+    "consejeros" => { label: "2 · Consejeros", icon: "user-check", button: "Cargar consejeros", url: participant_imports_path, tone: :indigo },
+    "jovenes" => { label: "3 · Jóvenes", icon: "users", button: "Cargar jóvenes", url: participant_imports_path, tone: :primary }
+  }
+  tab = tabs.fetch(@tab)
+  church_columns = [ "Nombre", "Apellido", "Nombre que se prefiere", "Cumpleaños", "Edad", "Sexo", "Teléfono", "Correo electrónico",
+                     "Información médica", "Información alimentaria", "Información emocional", "Talla de camiseta",
+                     "Contacto 1 y 2 (nombre, correo, teléfono)", "Nombre de la estaca o distrito", "Nombre del barrio o rama", "Obispo (nombre y correo)" ]
+%>
 <%= render PageComponent.new(width: :page) do %>
+  <%# Compañías y consejeros arman el personal: esas pestañas solo las ve quien tiene acceso total. %>
+  <% if can_import_staffing? %>
+    <div class="flex flex-col gap-2">
+      <%= render SegmentedToggleComponent.new(label: "Qué cargar", items: tabs.map { |key, meta|
+            { text: meta[:label], icon: meta[:icon], href: new_participant_import_path(tipo: key), active: key == @tab, data: { import_tab: key } } }) %>
+      <p class="text-label font-medium text-ink-500">En este orden: las compañías primero, luego los consejeros (que se sientan en su compañía) y al final los jóvenes.</p>
+    </div>
+  <% end %>
+
   <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5 items-start">
-    <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading "Subir archivo", "upload" %>
-      <%# Subir redirige al informe de la carga, que queda guardado. %>
-      <%= form_with url: participant_imports_path, multipart: true, class: "space-y-4" do |form| %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-import-form="<%= @tab %>">
+      <%= section_heading tab[:button].sub("Cargar", "Subir"), "upload", tone: tab[:tone] %>
+      <%# Subir redirige al informe de la carga, que queda guardado (las compañías vuelven aquí con su resumen). %>
+      <%= form_with url: tab[:url], multipart: true, class: "space-y-4" do |form| %>
+        <%= hidden_field_tag :tipo, @tab %>
         <div>
-          <%= form.label :file, "Archivo de Excel (.xlsx) o .csv", class: field_label_classes %>
+          <%= form.label :file, @tab == "companias" ? "Archivo de Excel (.xlsx) o .csv, una fila por compañía" : "El archivo tal como lo baja el sitio de FSY (.xlsx o .csv)", class: field_label_classes %>
           <%= form.file_field :file, accept: ".xlsx,.xls,.csv", required: true,
                 class: "w-full text-body text-ink-700 file:mr-3 file:h-10 file:px-4 file:rounded-control file:border-0 file:bg-primary-50 dark:file:bg-primary-700/30 file:text-body file:font-semibold file:text-primary-700 dark:file:text-primary-100 file:cursor-pointer" %>
           <p class="mt-1.5 text-label font-medium text-ink-500">
-            La primera fila tiene que ser la de los títulos de columna.
+            La fila de los títulos se busca sola, aunque arriba venga una fila vacía.
           </p>
         </div>
-        <%= tag.button type: "submit", data: { turbo_submits_with: "Cargando participantes…" }, class: button_classes do %>
+        <%= tag.button type: "submit", data: { turbo_submits_with: "Cargando…" }, class: button_classes do %>
           <%= icon "upload", class: "w-4 h-4" %>
-          Cargar participantes
+          <%= tab[:button] %>
         <% end %>
       <% end %>
     </section>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading "Columnas que reconoce", "table" %>
+      <%= section_heading "Columnas que reconoce", "table", tone: tab[:tone] %>
       <p class="-mt-2 mb-4 text-label leading-relaxed text-ink-500">
         No importan mayúsculas, acentos ni el orden. Las columnas que no aparezcan aquí se ignoran, y lo que falte
         se puede completar después desde la ficha.
       </p>
+      <% columns, extras = case @tab
+           when "companias" then [ [ "Número", "Compañía auxiliar", "Comedor" ], [] ]
+           when "consejeros" then [ church_columns, [ "Compañía" ] ]
+           else [ church_columns, [ "Compañía", "Compañía auxiliar", "Cuarto", "Cédula", "Rol", "Notas" ] ]
+           end %>
       <div class="flex flex-wrap gap-1.5">
-        <% %w[Nombre Apellido Edad Género Estaca Barrio Camisa Rol Cédula Cuarto Compañía Compañía\ auxiliar Teléfono Correo
-              Contacto\ de\ emergencia Teléfono\ de\ emergencia Parentesco Alergias Medicinas Dieta Notas].each do |column| %>
+        <% columns.each do |column| %>
           <span class="px-2.5 py-1 rounded-inner bg-sunken border border-line-soft text-label font-semibold text-ink-700"><%= column %></span>
+        <% end %>
+        <% extras.each do |column| %>
+          <span class="px-2.5 py-1 rounded-inner bg-cat-amber/15 border border-cat-amber/40 text-label font-semibold text-cat-amber-ink">+ <%= column %></span>
         <% end %>
       </div>
       <ul class="mt-4 space-y-1.5 text-label leading-relaxed text-ink-500 list-disc list-inside">
-        <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
-        <li><strong>Compañía</strong> se busca por número: la del joven, o la del consejero que la acompaña.</li>
-        <li><strong>Compañía auxiliar</strong> (Alfa, «Auxiliar Beta»…) es la del auxiliar; sin ella, se toma la de su compañía.</li>
-        <li>Las filas sin problemas entran directo. Las que traen un problema o un aviso (duplicado, lugar ocupado, sin compañía, mismo teléfono…) <strong>quedan en espera, fuera de la base</strong>: en el informe de la carga se corrigen y se aprueban o descartan.</li>
-        <li>Duplicado: manda la cédula y, si no viene, el nombre completo con la edad y la estaca.</li>
+        <% case @tab %>
+        <% when "companias" %>
+          <li>Solo <strong>Número</strong> es obligatorio. El nombre sale solo («Compañía 7»); el que eligen lo ponen ellos durante la semana.</li>
+          <li><strong>Compañía auxiliar</strong> (Alfa, «Auxiliar Beta»…): si no existe, se crea.</li>
+          <li><strong>Comedor</strong>: Salón Nicaragua o Salón Las Américas.</li>
+          <li>Si el número ya existe, se actualizan su auxiliar y su comedor; no se duplica.</li>
+        <% when "consejeros" %>
+          <li>Es el mismo archivo de la Iglesia: todas las filas entran como <strong>consejero</strong>.</li>
+          <li>Agrégale una columna <strong>Compañía</strong> con el número y cada consejero queda sentado en ella de una vez: un hombre y una mujer por compañía.</li>
+          <li>Si la compañía no existe o el lugar ya está ocupado, la fila <strong>queda en espera</strong> para resolverla en el informe. Sin compañía quedan en espera con un aviso: se aprueban igual y se sientan después desde la compañía.</li>
+          <li>Pueden ser de una estaca que no participa: queda escrita tal cual.</li>
+        <% else %>
+          <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
+          <li>Los jóvenes tienen que ser de las estacas y barrios que participan («Estaca Managua Bello Horizonte» se reconoce como Bello Horizonte).</li>
+          <li>Si el archivo trae una columna <strong>Compañía</strong> con el número, entran ya asignados; si no, se reparten después desde Compañías.</li>
+          <li>Las filas sin problemas entran directo. Las que traen un problema o un aviso (duplicado, estaca que no participa, lugar ocupado, mismo teléfono…) <strong>quedan en espera, fuera de la base</strong>: en el informe de la carga se corrigen y se aprueban o descartan.</li>
+          <li>Duplicado: manda la cédula y, si no viene, el nombre completo con la fecha de nacimiento.</li>
+        <% end %>
       </ul>
     </section>
   </div>
+
+  <% if @result&.errors.present? %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-company-import-errors>
+      <%= section_heading "Filas que no entraron", "triangle-alert", tone: :rose %>
+      <ul class="divide-y divide-line-soft">
+        <% @result.errors.each do |line, message| %>
+          <li class="py-2.5 text-body text-ink-700"><span class="font-bold text-ink-900">Fila <%= line %>:</span> <%= message %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-imports>
     <%= section_heading "Cargas anteriores", "folder-clock" %>

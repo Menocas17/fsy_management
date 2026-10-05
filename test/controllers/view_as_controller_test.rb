@@ -122,7 +122,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
 
   private
     def person(name, rol, gender, **attrs)
-      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "ducuali",
+      Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "la_rotonda",
                           shirt_number: "m", gender: gender, rol: rol, **attrs)
     end
 end
