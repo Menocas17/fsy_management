@@ -42,7 +42,7 @@ class ParticipantsReport < ApplicationReport
       end
     end
 
-    HEADERS = [ "Nombre", "Edad", "Género", "Rol", "Estaca", "Barrio", "Camisa", "Cuarto", "Teléfono" ].freeze
+    HEADERS = [ "Nombre", "Edad", "Género", "Rol", "Estaca / Distrito", "Barrio / Rama", "Camisa", "Cuarto", "Teléfono" ].freeze
     COLUMN_WIDTHS = { 0 => 170, 1 => 36, 2 => 52, 3 => 74, 5 => 95, 6 => 44, 7 => 52 }.freeze
 
     def row_for(participant)
