@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_220000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -504,7 +504,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_responsibles", "activities"
-  add_foreign_key "activity_responsibles", "participants"
+  add_foreign_key "activity_responsibles", "participants", on_delete: :cascade
   add_foreign_key "alert_dismissals", "alerts", on_delete: :cascade
   add_foreign_key "alert_dismissals", "users", on_delete: :cascade
   add_foreign_key "alerts", "activities", on_delete: :nullify
@@ -514,18 +514,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
   add_foreign_key "assignments", "participants"
   add_foreign_key "assignments", "participants", column: "assigned_by_id", on_delete: :nullify
   add_foreign_key "audit_logs", "participants", column: "actor_id", on_delete: :nullify
-  add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id"
-  add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id"
+  add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id", on_delete: :nullify
+  add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id", on_delete: :nullify
   add_foreign_key "checkins", "participants"
-  add_foreign_key "checkins", "participants", column: "recorded_by_id"
+  add_foreign_key "checkins", "participants", column: "recorded_by_id", on_delete: :nullify
   add_foreign_key "companies", "auxiliar_companies"
   add_foreign_key "expenses", "expense_categories"
   add_foreign_key "expenses", "logistics_areas"
-  add_foreign_key "expenses", "participants", column: "approved_by_id"
-  add_foreign_key "expenses", "participants", column: "consolidated_by_id"
-  add_foreign_key "expenses", "participants", column: "justified_by_id"
-  add_foreign_key "expenses", "participants", column: "presented_by_id"
-  add_foreign_key "expenses", "participants", column: "rejected_by_id"
+  add_foreign_key "expenses", "participants", column: "approved_by_id", on_delete: :nullify
+  add_foreign_key "expenses", "participants", column: "consolidated_by_id", on_delete: :nullify
+  add_foreign_key "expenses", "participants", column: "justified_by_id", on_delete: :nullify
+  add_foreign_key "expenses", "participants", column: "presented_by_id", on_delete: :nullify
+  add_foreign_key "expenses", "participants", column: "rejected_by_id", on_delete: :nullify
   add_foreign_key "infirmary_notes", "infirmary_visits"
   add_foreign_key "infirmary_notes", "participants", column: "author_id", on_delete: :nullify
   add_foreign_key "infirmary_visits", "participants"
@@ -535,7 +535,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
   add_foreign_key "inventory_items", "inventories"
   add_foreign_key "inventory_movements", "infirmary_notes", on_delete: :nullify
   add_foreign_key "inventory_movements", "inventory_items"
-  add_foreign_key "inventory_movements", "participants"
+  add_foreign_key "inventory_movements", "participants", on_delete: :nullify
   add_foreign_key "login_attempts", "users", on_delete: :nullify
   add_foreign_key "memberships", "participants"
   add_foreign_key "night_attendance_marks", "night_attendances", on_delete: :cascade
@@ -550,7 +550,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_203001) do
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "training_attendances", "participants"
-  add_foreign_key "training_attendances", "participants", column: "recorded_by_id"
+  add_foreign_key "training_attendances", "participants", column: "recorded_by_id", on_delete: :nullify
   add_foreign_key "training_attendances", "trainings"
   add_foreign_key "users", "participants"
 end

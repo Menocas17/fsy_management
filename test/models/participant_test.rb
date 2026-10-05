@@ -140,4 +140,26 @@ class ParticipantTest < ActiveSupport::TestCase
     juan.preferred_name = "Juancho"
     assert_equal "Juancho", juan.nickname
   end
+
+  test "deleting a ficha that someone's records point to releases them instead of failing" do
+    staff = Participant.create!(first_name: "Lía", last_name: "Rocha", age: 30, shirt_number: "m", gender: "M", rol: "logistica",
+                                stake: "villa_flor")
+    joven = participants(:juan)
+    activity = Activity.create!(title: "Devocional", category: :devocional, date: "2027-01-12", start_time: "08:30", end_time: "09:30")
+    activity.activity_responsibles.create!(participant: staff)
+    checkin, = Checkin.register(participant: joven, recorded_by: staff)
+    item = Inventory.create!(name: "Materiales").items.create!(name: "Manillas")
+    item.adjust!(delta: 5, participant: staff, reason: "compra")
+    expense = Expense.create!(concept: "Hielo", estimated_cents: 5_000, presented_by: staff, presented_by_name: staff.full_name)
+    auxiliar = AuxiliarCompany.create!(name: "Auxiliar Alfa", coordinator: staff)
+
+    assert staff.destroy
+
+    assert_empty activity.activity_responsibles.reload
+    assert_nil checkin.reload.recorded_by_id
+    assert_equal "Lía Rocha", checkin.recorded_by_name
+    assert_nil item.movements.first.participant_id
+    assert_nil expense.reload.presented_by_id
+    assert_nil auxiliar.reload.coordinator_id
+  end
 end
