@@ -1,9 +1,9 @@
 <%# Las tres cifras que abren el inicio (mosaico de cifra grande); las que llevan a su lista lo indican con la flecha. %>
-<section class="grid grid-cols-3 gap-3 md:gap-5">
+<section class="grid grid-cols-3 gap-3 md:gap-5" data-entrance="kpis">
   <%= render StatTileComponent.new(value: total_jovenes, label: "Jóvenes", icon: "user", tone: :green, href: participants_path,
-        data: { kpi_link: "total_jovenes" }, value_data: { kpi: "total_jovenes" }) %>
+        data: { kpi_link: "total_jovenes" }, value_data: { kpi: "total_jovenes", dashboard_entrance_target: "count" }) %>
   <%= render StatTileComponent.new(value: total_participants, label: "Personas en total", short_label: "Personas", icon: "users", tone: :indigo,
-        value_data: { kpi: "total_participants" }) %>
+        value_data: { kpi: "total_participants", dashboard_entrance_target: "count" }) %>
   <%= render StatTileComponent.new(value: total_staff, label: "Staff", icon: "user-star", tone: :amber, href: staff_participants_path,
-        data: { kpi_link: "total_staff" }, value_data: { kpi: "total_staff" }) %>
+        data: { kpi_link: "total_staff" }, value_data: { kpi: "total_staff", dashboard_entrance_target: "count" }) %>
 </section>

@@ -342,6 +342,95 @@
   height: 100%;
 }
 
+/* Entrada del panel, «Amanecer» (dashboard_entrance_controller.js): el sol de la marca es «lo que pasa ahora»,
+   así que al abrir el panel sube su luz detrás del hero, la cuenta regresiva entra rodando y las cifras suben.
+   Corre completa una vez por sesión (o siempre con ?lento=N, que la hace N veces más lenta para revisarla).
+   html.entrance-pending la arma antes del primer cuadro (script del <head>) y el controlador la cambia a
+   .entrance-play: las mismas animaciones, así que no se reinician. Todo está visible si nada de esto corre.
+   Solo transform, opacity, clip-path y un blur acotado al hero. */
+:root {
+  --entrance-slow: 1;
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes entrance-materialize {
+  from { opacity: 0; transform: scale(0.985); filter: blur(8px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes entrance-sunrise {
+  0% { opacity: 0; transform: translateY(30%) scale(0.9); }
+  60% { opacity: 1; }
+  100% { opacity: 0.55; transform: none; }
+}
+@keyframes entrance-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes entrance-roll {
+  from { transform: translateY(105%); }
+  to { transform: none; }
+}
+@keyframes entrance-rise {
+  from { opacity: 0; transform: translateY(var(--entrance-rise, 10px)); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes entrance-pop {
+  from { transform: scale(0.86); }
+  to { transform: none; }
+}
+/* El segundo que pasa: el número nuevo sube. El único movimiento que se repite, porque el tiempo corre. */
+@keyframes countdown-tick {
+  from { opacity: 0; transform: translateY(70%); }
+  to { opacity: 1; transform: none; }
+}
+
+/* La luz del sol detrás de la cuenta regresiva: quieta (0.55) cuando no hay entrada. */
+.hero-sunglow {
+  position: absolute;
+  left: 4%;
+  top: -45%;
+  width: min(46%, 520px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(circle, oklch(78% 0.14 78 / 0.22), transparent 62%);
+  opacity: 0.55;
+}
+@media (max-width: 639px) {
+  .hero-sunglow { width: 90%; top: -25%; }
+}
+
+:is(html.entrance-pending, html.entrance-play) {
+  [data-entrance="hero"] {
+    animation: entrance-materialize calc(560ms * var(--entrance-slow)) var(--ease-arrive) both;
+  }
+  [data-entrance="sunglow"] {
+    animation: entrance-sunrise calc(1100ms * var(--entrance-slow)) var(--ease-arrive) both;
+  }
+  [data-entrance="kicker"] {
+    animation: entrance-wipe calc(380ms * var(--entrance-slow)) var(--ease-arrive) calc(140ms * var(--entrance-slow)) both;
+  }
+  [data-entrance="digits"] {
+    animation: entrance-roll calc(520ms * var(--entrance-slow)) var(--ease-arrive) calc(var(--entrance-at) * var(--entrance-slow)) both;
+  }
+  [data-entrance="rise"] {
+    animation: entrance-rise calc(360ms * var(--entrance-slow)) var(--ease-arrive) calc(var(--entrance-at) * var(--entrance-slow)) both;
+  }
+  [data-entrance="kpis"] > * {
+    --entrance-rise: 14px;
+    animation: entrance-rise calc(440ms * var(--entrance-slow)) var(--ease-arrive) calc(var(--entrance-at) * var(--entrance-slow)) both;
+  }
+  [data-entrance="kpis"] > * > :first-child {
+    animation: entrance-pop calc(440ms * var(--entrance-slow)) var(--ease-arrive) calc(var(--entrance-at) * var(--entrance-slow)) both;
+  }
+  [data-entrance="kpis"] > :nth-child(1) { --entrance-at: 460ms; }
+  [data-entrance="kpis"] > :nth-child(2) { --entrance-at: 520ms; }
+  [data-entrance="kpis"] > :nth-child(3) { --entrance-at: 580ms; }
+}
+/* Durante la entrada manda el rodar; después, cada segundo que cambia. */
+html:not(.entrance-pending, .entrance-play) .countdown-tick {
+  animation: countdown-tick calc(180ms * var(--entrance-slow)) var(--ease-arrive) both;
+}
+
 /* Accesibilidad: reducir movimiento. Vale igual la preferencia del sistema que el interruptor de
    Configuración. Solo se animan fundidos y cambios de color, cortos, porque son la señal de que algo
    pasó y no marean a nadie; lo que se desplaza o cambia de tamaño llega a su lugar sin recorrido.
