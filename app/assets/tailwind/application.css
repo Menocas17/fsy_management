@@ -344,12 +344,13 @@
 
 /* Entrada del panel, «Amanecer» (dashboard_entrance_controller.js): el sol de la marca es «lo que pasa ahora»,
    así que al abrir el panel sube su luz detrás del hero, la cuenta regresiva entra rodando y las cifras suben.
-   Corre completa una vez por sesión (o siempre con ?lento=N, que la hace N veces más lenta para revisarla).
+   Corre completa una vez por sesión. --entrance-slow estira toda la partitura (1.5, elegido a ojo con el
+   comité); si cambia, cambia también SLOW en el controlador, que cuenta las cifras con el mismo ritmo.
    html.entrance-pending la arma antes del primer cuadro (script del <head>) y el controlador la cambia a
    .entrance-play: las mismas animaciones, así que no se reinician. Todo está visible si nada de esto corre.
    Solo transform, opacity, clip-path y un blur acotado al hero. */
 :root {
-  --entrance-slow: 1;
+  --entrance-slow: 1.5;
   --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes entrance-materialize {

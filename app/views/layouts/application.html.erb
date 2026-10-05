@@ -18,14 +18,12 @@
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
             document.documentElement.classList.add('reduce-motion');
           }
-          // La entrada del panel (dashboard_entrance_controller.js) se arma antes del primer cuadro: una vez por
-          // sesión, o siempre con ?lento=N para revisarla N veces más lenta. Con movimiento reducido, nunca.
-          var slow = parseFloat(new URLSearchParams(location.search).get('lento'));
+          // La entrada del panel (dashboard_entrance_controller.js) se arma antes del primer cuadro, una vez por
+          // sesión. Con movimiento reducido, nunca.
           var calm = document.documentElement.classList.contains('reduce-motion') ||
                      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          if (!calm && (slow > 0 || !sessionStorage.getItem('fsy:entrance-seen'))) {
+          if (!calm && !sessionStorage.getItem('fsy:entrance-seen')) {
             document.documentElement.classList.add('entrance-pending');
-            if (slow > 0) document.documentElement.style.setProperty('--entrance-slow', slow);
           }
           // El teléfono ya viene con la letra grande por CSS; esto es el escalón extra que se elige.
           if (localStorage.getItem('fsy:text-size') === 'large') {

@@ -2,10 +2,12 @@ import { Controller } from '@hotwired/stimulus';
 
 // La entrada del panel, «Amanecer» (estilos en application.css): el hero se materializa con la luz del sol
 // detrás, la cuenta regresiva entra rodando y las tres cifras suben y cuentan desde cero. Una vez por sesión:
-// el panel se abre muchas veces al día y nadie tiene que esperarla dos veces. ?lento=N la repite siempre,
-// N veces más lenta, para revisarla. Con movimiento reducido no corre: todo está en su lugar desde el inicio.
+// el panel se abre muchas veces al día y nadie tiene que esperarla dos veces. Con movimiento reducido no corre:
+// todo está en su lugar desde el inicio.
 const SEEN = 'fsy:entrance-seen';
-// Lo que dura la entrada completa a velocidad normal (la última cifra termina de contar).
+// Cuánto se estira la partitura: el mismo --entrance-slow de application.css.
+const SLOW = 1.5;
+// Lo que dura la partitura sin estirar (la última cifra termina de contar).
 const TOTAL_MS = 1350;
 const COUNT_MS = 700;
 const COUNT_AT_MS = [460, 520, 580];
@@ -15,7 +17,6 @@ export default class extends Controller {
 
   connect() {
     const html = document.documentElement;
-    const slow = parseFloat(new URLSearchParams(window.location.search).get('lento'));
     const pending = html.classList.contains('entrance-pending');
     let seen = false;
     try {
@@ -26,10 +27,8 @@ export default class extends Controller {
 
     html.classList.remove('entrance-pending');
     // Una visita de Turbo no vuelve a correr el script del <head>: aquí se decide igual que allá.
-    if (this.reduceMotion || !(pending || slow > 0 || !seen)) return;
+    if (this.reduceMotion || !(pending || !seen)) return;
 
-    this.slow = slow > 0 ? slow : 1;
-    html.style.setProperty('--entrance-slow', this.slow);
     html.classList.add('entrance-play');
     try {
       sessionStorage.setItem(SEEN, '1');
@@ -38,7 +37,7 @@ export default class extends Controller {
     }
 
     this.countUp();
-    this.timer = setTimeout(() => this.finish(), TOTAL_MS * this.slow + 100);
+    this.timer = setTimeout(() => this.finish(), TOTAL_MS * SLOW + 100);
   }
 
   disconnect() {
@@ -51,7 +50,6 @@ export default class extends Controller {
   finish() {
     const html = document.documentElement;
     html.classList.remove('entrance-play');
-    html.style.removeProperty('--entrance-slow');
     this.countTargets.forEach((target) => (target.textContent = target.dataset.entranceValue ?? target.textContent));
   }
 
@@ -63,12 +61,12 @@ export default class extends Controller {
         if (Number.isNaN(value)) return null;
         target.dataset.entranceValue = target.textContent;
         target.textContent = '0';
-        return { target, value, at: (COUNT_AT_MS[index] ?? COUNT_AT_MS.at(-1)) * this.slow };
+        return { target, value, at: (COUNT_AT_MS[index] ?? COUNT_AT_MS.at(-1)) * SLOW };
       })
       .filter(Boolean);
     if (counters.length === 0) return;
 
-    const duration = COUNT_MS * this.slow;
+    const duration = COUNT_MS * SLOW;
     const start = performance.now();
     const step = (now) => {
       let running = false;
