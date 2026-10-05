@@ -79,7 +79,7 @@ export default class extends Controller {
     this.registration().then((registration) =>
       registration.showNotification("Notificaciones activadas", {
         body: "Así vas a ver las alertas del FSY en este dispositivo.",
-        icon: "/icon.png",
+        icon: "/icon-192.png",
         badge: "/icon.png",
         vibrate: this.soundEnabled ? [90, 60, 90] : undefined,
         silent: !this.soundEnabled

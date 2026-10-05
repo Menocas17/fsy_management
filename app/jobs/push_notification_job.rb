@@ -39,7 +39,7 @@ class PushNotificationJob < ApplicationJob
         title: "#{PRIORITY_PREFIX[alert.priority.to_s]}#{alert.title}",
         options: {
           body: alert.body.to_s.truncate(160),
-          icon: "/icon.png",
+          icon: "/icon-192.png",
           badge: "/icon.png",
           tag: "alert-#{alert.id}",
           renotify: alert.priority_critica?,
