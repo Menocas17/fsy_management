@@ -131,6 +131,19 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the stake, age and gender charts count only the jóvenes" do
+    participants(:maria).update!(stake: Participant::OTHER_STAKE, other_stake: "Estaca Managua Sur")
+
+    get dashboard_path
+
+    assert_includes response.body, "Jóvenes por estaca"
+    refute_includes response.body, "Otras estacas", "a counselor from another stake is not in the stake chart"
+    facade = DashboardFacade.new
+    assert_equal({ "Bello Horizonte" => 1 }, facade.count_by_stake)
+    assert_equal({ 20 => 1 }, facade.participants_by_age)
+    assert_equal [ 1, 0 ], [ facade.male_count, facade.female_count ]
+  end
+
   test "kitchen and infirmary see what each ficha needs, ignoring the ninguna answers" do
     participants(:juan).update!(medical_information: "Alérgico al maní", diet: "Sin restricciones")
     participants(:maria).update!(rol: :joven, medical_information: "Ninguna", diet: "Vegetariana")

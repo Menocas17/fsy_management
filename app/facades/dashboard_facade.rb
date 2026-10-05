@@ -3,7 +3,8 @@ class DashboardFacade
     @total_participants ||= Participant.count
   end
 
-  # Age and gender charts describe the jóvenes only; staff (directors, counselors…) are left out.
+  # Las gráficas de edad, género y estaca describen solo a los jóvenes: el staff (que además puede venir de
+  # una estaca que no participa) queda fuera.
   def participants_by_age
     @participants_by_age ||= Participant.jovenes.data_by_age
   end
@@ -17,7 +18,7 @@ class DashboardFacade
   end
 
   def count_by_stake
-    @count_by_stake ||= Participant.stake_count
+    @count_by_stake ||= Participant.jovenes.stake_count
   end
 
   def count_by_role
