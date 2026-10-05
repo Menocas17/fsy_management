@@ -185,6 +185,22 @@ pg_dump 'postgresql://...la de Neon...' > backup-$(date +%F).sql
 `pg_dump` tiene que ser de la misma versión mayor que la Postgres de Neon (o más nueva). Los
 archivos de R2 no tienen respaldo automático; se pueden bajar desde el panel de Cloudflare.
 
+### Borrar los datos de prueba antes del evento
+
+Para pasar de los datos de prueba a los reales, desde tu máquina y después del `pg_dump`:
+
+```bash
+RAILS_ENV=production R2_BUCKET=fsy-management CONFIRMAR=1 \
+DATABASE_URL='postgresql://...la de Neon...' \
+bin/rails datos:reiniciar
+```
+
+Muestra a qué base está conectada y cuánto va a borrar, y solo sigue si escribes `BORRAR`
+(`lib/event_reset.rb`). Borra todas las fichas (con sus cuentas y fotos), compañías, registros, enfermería,
+asistencia, alertas, gastos, inventarios, cargas masivas y el historial. Se quedan las cuentas de superadmin
+(sin ficha), la configuración, las categorías de gasto, las áreas de logística (vacías), las capacitaciones
+y la agenda. Las fotos y facturas se borran de R2 en segundo plano la próxima vez que la app esté despierta.
+
 ## 9. Límites del plan gratis y el campamento
 
 - **Se duerme.** Tras 15 minutos sin visitas, la primera petición tarda ~1 minuto. Durante las

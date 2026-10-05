@@ -30,6 +30,7 @@ class ParticipantImporter
     "cuarto" => :room, "habitacion" => :room,
     "compania" => :company_number, "numero de compania" => :company_number,
     "compania auxiliar" => :auxiliar_company, "auxiliar asignada" => :auxiliar_company,
+    "area" => :logistics_area, "area de logistica" => :logistics_area,
     "telefono" => :phone_number, "celular" => :phone_number,
     "correo" => :email_address, "email" => :email_address, "correo electronico" => :email_address,
     "contacto de emergencia" => :emergency_contact_name, "nombre del contacto 1" => :emergency_contact_name,
