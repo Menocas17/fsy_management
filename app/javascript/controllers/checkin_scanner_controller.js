@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { CAMERA, readyToRead, readCenter } from "lib/qr_frame"
+import { CAMERA, QrReader } from "lib/qr_frame"
 
 // jsQR (~50 KB) solo sirve con la cámara: se pide al abrir esta pantalla y no en cada carga de la app.
 // Mientras llega, tick() se salta los cuadros; si falló (sin señal), encender la cámara lo vuelve a pedir.
@@ -64,6 +64,8 @@ export default class extends Controller {
 
   disconnect() {
     this.stop()
+    this.reader?.close()
+    this.reader = null
     clearTimeout(this.hideTimer)
     document.removeEventListener("turbo:before-cache", this.onBeforeCache)
     document.removeEventListener("visibilitychange", this.onVisibility)
@@ -94,6 +96,7 @@ export default class extends Controller {
       this.starting = false
     }
 
+    this.reader ||= await QrReader.create(() => jsQR)
     this.say("Apunta al código del gafete")
     this.scanning = true
     this.tick()
@@ -131,11 +134,11 @@ export default class extends Controller {
   tick() {
     if (!this.scanning) return
 
-    // Cada cuadro se mira, pero se lee solo cuando toca (lib/qr_frame): el resto del tiempo es del teléfono.
-    this.reading ||= {}
-    if (jsQR && readyToRead(this.reading, this.videoTarget)) {
-      const payload = readCenter(jsQR, this.videoTarget, this.canvasTarget, this.reading)
-      if (payload) this.handle(payload)
+    // Una lectura a la vez, fuera del hilo de la pantalla (lib/qr_frame): apenas termina una, empieza la otra.
+    if (this.reader?.ready(this.videoTarget)) {
+      this.reader.read(this.videoTarget, this.canvasTarget).then((payload) => {
+        if (payload && this.scanning) this.handle(payload)
+      })
     }
 
     this.frame = requestAnimationFrame(() => this.tick())
