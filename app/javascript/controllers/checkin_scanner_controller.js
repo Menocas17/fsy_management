@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { CAMERA, QrReader } from "lib/qr_frame"
+import { QrReader, openCamera, closeCamera } from "lib/qr_frame"
 
 // jsQR (~50 KB) solo sirve con la cámara: se pide al abrir esta pantalla y no en cada carga de la app.
 // Mientras llega, tick() se salta los cuadros; si falló (sin señal), encender la cámara lo vuelve a pedir.
@@ -57,6 +57,8 @@ export default class extends Controller {
     document.addEventListener("turbo:before-cache", this.onBeforeCache)
     document.addEventListener("visibilitychange", this.onVisibility)
     window.addEventListener("pageshow", this.onPageShow)
+    this.onPageHide = () => this.stop()
+    window.addEventListener("pagehide", this.onPageHide)
     this.element.addEventListener("pointerdown", this.onFirstTouch, { once: true })
 
     this.resume()
@@ -70,6 +72,7 @@ export default class extends Controller {
     document.removeEventListener("turbo:before-cache", this.onBeforeCache)
     document.removeEventListener("visibilitychange", this.onVisibility)
     window.removeEventListener("pageshow", this.onPageShow)
+    window.removeEventListener("pagehide", this.onPageHide)
     this.element.removeEventListener("pointerdown", this.onFirstTouch)
     window.removeEventListener("online", this.onOnline)
     clearInterval(this.timer)
@@ -79,15 +82,23 @@ export default class extends Controller {
   async start() {
     loadJsQR()
     if (this.starting || this.scanning) return
+    // Cada encendido es un turno: stop() lo cierra, y lo que llegue tarde de un turno cerrado se suelta.
+    // Se enciende sola al entrar: si se sale antes de que termine, la cámara no queda prendida atrás.
+    const run = (this.run = (this.run || 0) + 1)
+    const stillWanted = () => run === this.run && this.element.isConnected && !document.hidden
     this.starting = true
     this.startTarget.hidden = true
     this.unlockAudio()
     this.say("Abriendo la cámara…")
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ video: CAMERA, audio: false })
-      this.videoTarget.srcObject = this.stream
-      this.videoTarget.setAttribute("playsinline", true)
-      await this.videoTarget.play()
+      const reader = this.reader || await QrReader.create(() => jsQR)
+      if (!stillWanted()) {
+        if (reader !== this.reader) reader.close()
+        return
+      }
+      this.reader = reader
+      this.stream = await openCamera(this.videoTarget, stillWanted)
+      if (!this.stream) return
     } catch (error) {
       this.stop()
       this.startTarget.hidden = false
@@ -96,17 +107,16 @@ export default class extends Controller {
       this.starting = false
     }
 
-    this.reader ||= await QrReader.create(() => jsQR)
     this.say("Apunta al código del gafete")
     this.scanning = true
     this.tick()
   }
 
   stop() {
+    this.run = (this.run || 0) + 1
     this.scanning = false
     if (this.frame) cancelAnimationFrame(this.frame)
-    this.stream?.getTracks().forEach((track) => track.stop())
-    this.stream = null
+    this.stream = closeCamera(this.stream, this.videoTarget)
   }
 
   // Pantalla como recién abierta: botón visible, sin video ni tarjeta encima.

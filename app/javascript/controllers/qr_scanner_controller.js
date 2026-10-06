@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { CAMERA, QrReader } from "lib/qr_frame"
+import { QrReader, openCamera, closeCamera } from "lib/qr_frame"
 
 // jsQR (~50 KB) solo sirve con la cámara: se pide al abrir esta pantalla y no en cada carga de la app.
 // Mientras llega, tick() se salta los cuadros; si falló (sin señal), encender la cámara lo vuelve a pedir.
@@ -23,42 +23,66 @@ export default class extends Controller {
 
   connect() {
     loadJsQR()
+    // La cámara se apaga al esconder la app o salir de la página; se vuelve a encender con el botón.
+    this.onVisibility = () => { if (document.hidden) this.pause() }
+    this.onLeave = () => this.pause()
+    document.addEventListener("visibilitychange", this.onVisibility)
+    document.addEventListener("turbo:before-cache", this.onLeave)
+    window.addEventListener("pagehide", this.onLeave)
   }
 
   disconnect() {
     this.stop()
     this.reader?.close()
     this.reader = null
+    document.removeEventListener("visibilitychange", this.onVisibility)
+    document.removeEventListener("turbo:before-cache", this.onLeave)
+    window.removeEventListener("pagehide", this.onLeave)
   }
 
   async start() {
     loadJsQR()
+    // Cada encendido es un turno: stop() lo cierra, y lo que llegue tarde de un turno cerrado se suelta.
+    const run = (this.run = (this.run || 0) + 1)
+    const stillWanted = () => run === this.run && this.element.isConnected
     this.startTarget.hidden = true
     this.status("Pidiendo permiso a la cámara…")
 
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: CAMERA, audio: false
-      })
+      const reader = this.reader || await QrReader.create(() => jsQR)
+      if (!stillWanted()) {
+        if (reader !== this.reader) reader.close()
+        return
+      }
+      this.reader = reader
+      this.stream = await openCamera(this.videoTarget, stillWanted)
+      if (!this.stream) return
     } catch (error) {
       this.startTarget.hidden = false
       this.status("No se pudo abrir la cámara. Escribe el código a mano.", true)
       return
     }
 
-    this.videoTarget.srcObject = this.stream
-    this.videoTarget.setAttribute("playsinline", true)
-    await this.videoTarget.play()
-    this.reader ||= await QrReader.create(() => jsQR)
     this.status(this.aimValue)
     this.scanning = true
     this.tick()
   }
 
   stop() {
+    this.run = (this.run || 0) + 1
     this.scanning = false
     if (this.frame) cancelAnimationFrame(this.frame)
-    this.stream?.getTracks().forEach((track) => track.stop())
+    this.stream = closeCamera(this.stream, this.videoTarget)
+  }
+
+  // Apagada mientras no se ve: al volver, el botón para encenderla otra vez.
+  pause() {
+    const on = this.scanning || this.startTarget.hidden // encendida o encendiéndose
+    this.stop()
+    if (!on) return
+
+    this.startTarget.hidden = false
+    this.status("Toca para volver a encender la cámara")
   }
 
   tick() {

@@ -14,6 +14,31 @@ const READ_SIDE = 1080
 // Solo en el hilo principal: entre lecturas, al menos esto y el doble de lo que tardó la última.
 const MIN_GAP_MS = 120
 
+// Abre la cámara en el video. Encenderla tarda: `stillWanted()` se pregunta después de cada espera y, si
+// entretanto se salió de la pantalla o se pidió apagarla, la cámara se suelta en el acto y devuelve null.
+// Sin esto, salir mientras se encendía la dejaba prendida en segundo plano, sin pantalla que la apagara.
+export async function openCamera(video, stillWanted) {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: CAMERA, audio: false })
+  if (!stillWanted()) return closeCamera(stream)
+
+  video.srcObject = stream
+  video.setAttribute("playsinline", true)
+  try {
+    await video.play()
+  } catch (error) {
+    closeCamera(stream, video)
+    throw error
+  }
+  return stillWanted() ? stream : closeCamera(stream, video)
+}
+
+// Apaga la cámara de verdad (el foquito del teléfono se apaga) y suelta el video.
+export function closeCamera(stream, video) {
+  stream?.getTracks().forEach((track) => track.stop())
+  if (video) video.srcObject = null
+  return null
+}
+
 export class QrReader {
   // getJsQR: devuelve jsQR cuando ya llegó (solo lo usa «hilo»; el worker lo carga por su cuenta).
   static async create(getJsQR, { engine } = {}) {
