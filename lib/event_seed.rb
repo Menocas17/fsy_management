@@ -3,7 +3,9 @@ require "roo"
 # Deja la base como si el evento ya estuviera armado, con las personas de los archivos de prueba
 # (docs/cargas_de_prueba): primero hace lo mismo que `datos:reiniciar` (EventReset) y luego crea las 25
 # compañías en sus 5 compañías auxiliares, la dirección, la logística en sus áreas, los 50 consejeros en su
-# compañía y los 512 jóvenes repartidos en las compañías y en sus cuartos. Lo corre `bin/rails datos:sembrar`.
+# compañía y los 512 jóvenes repartidos en las compañías y en sus cuartos. Después llena los demás módulos
+# (EventSeed::Operations): agenda, inventarios, capacitaciones, finanzas y asignaciones. Lo corre
+# `bin/rails datos:sembrar`.
 #
 # No crea superadmins, cuentas ni áreas de logística: los superadmins se quedan (sin ficha) y la logística
 # entra en las áreas que ya existen, buscadas por nombre como en la carga masiva (Finanzas, Registro,
@@ -38,6 +40,7 @@ class EventSeed
       create_leadership
       counselors = create_counselors(companies)
       create_jovenes(companies, counselors)
+      Operations.new(log: method(:log)).run
       AuditLog.create!(actor_name: "Administrador del sistema", action: "created", category: :participantes,
                        summary: "Cargó los datos de prueba: #{Participant.count} fichas en #{Company.count} compañías")
     end

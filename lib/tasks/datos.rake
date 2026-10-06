@@ -31,7 +31,8 @@ namespace :datos do
     EventReset.counts.each { |label, count| puts format("  %-36s %6d", label, count) }
     puts "", "Se queda:"
     EventReset.kept.each { |label, count| puts format("  %-36s %6d", label, count) }
-    puts "", "Y se cargan 25 compañías, la dirección, la logística, 50 consejeros y 512 jóvenes ya repartidos."
+    puts "", "Y se cargan 25 compañías, la dirección, la logística, 50 consejeros y 512 jóvenes ya repartidos,",
+         "la agenda (reemplaza la que haya), inventarios, capacitaciones, gastos y algunas asignaciones."
     if (missing = EventSeed.missing_areas).any?
       puts "", "Ojo: no existen las áreas #{missing.to_sentence(two_words_connector: " y ", last_word_connector: " y ")}: " \
                "su logística quedaría sin área. Créalas antes en Logística › Áreas."

@@ -29,5 +29,16 @@ class EventSeedTest < ActiveSupport::TestCase
     assert_equal 0, Participant.joven.where(room: nil).count
     assert Participant.consejero.all? { |counselor| counselor.room.present? }
     assert Participant.joven.with_medical_note(:emotional_information).exists?
+
+    assert_equal [ Rails.configuration.x.event_start_on, Rails.configuration.x.event_end_on ],
+                 [ Activity.chronological.first.day, Activity.chronological.last.day ]
+    assert_equal "07:00", Activity.chronological.first.starts_at.strftime("%H:%M")
+    assert_equal "Devocional con consejeros", Activity.for_day(Rails.configuration.x.event_start_on).last.title
+    assert InventoryItem.medicines.exists?, "nursing has medicines to give"
+    assert Inventory.exists?(name: "Utensilios")
+    assert TrainingAttendance.exists?, "the training that already happened has its attendance"
+    assert_equal %w[approved consolidated justification_pending presented rejected], Expense.distinct.pluck(:status).sort
+    assert Assignment.where.not(activity_id: nil).exists?
+    assert Assignment.where(activity_id: nil).exists?
   end
 end
