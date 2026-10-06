@@ -6,7 +6,7 @@ class NavigationHighlightTest < ActionDispatch::IntegrationTest
     sign_in_as(users(:one))
     @participant = participants(:juan)
     @company = Company.create!(number: 1)
-    @activity = Activity.create!(title: "Servicio comunitario", category: :servicio,
+    @activity = Activity.create!(title: "Servicio comunitario", category: :actividad,
                                  date: Rails.configuration.x.event_start_on.to_s, start_time: "10:00", end_time: "12:30")
     @alert = Alert.create!(title: "Aviso", body: "Texto", sender_name: "Marta", audience: :todos)
   end
@@ -39,6 +39,22 @@ class NavigationHighlightTest < ActionDispatch::IntegrationTest
       highlighted = css_select("aside a[aria-current='page']").map { |link| link.text.strip }
       assert_equal [ expected ], highlighted, "#{path} should highlight #{expected}"
     end
+  end
+
+  test "a staff member's pages highlight Staff, even without coming from its list" do
+    counselor = Participant.create!(first_name: "Carlos", last_name: "Prueba", age: 25, stake: "bello_horizonte",
+                                    shirt_number: "m", gender: "H", rol: "consejero")
+
+    [ participant_path(counselor), edit_participant_path(counselor), new_participant_assignment_path(counselor) ].each do |path|
+      get path
+
+      assert_response :success, path
+      assert_equal [ "Staff" ], css_select("aside a[aria-current='page']").map { |link| link.text.strip }, path
+    end
+    get participant_path(counselor)
+    assert_select "[data-page-back] a[href='#{staff_participants_path}']", text: /Staff/
+    get new_participant_assignment_path(@participant)
+    assert_equal [ "Jóvenes" ], css_select("aside a[aria-current='page']").map { |link| link.text.strip }
   end
 
   test "a company opened from another page goes back there, named after it" do

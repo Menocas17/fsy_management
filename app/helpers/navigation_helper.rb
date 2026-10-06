@@ -67,6 +67,8 @@ module NavigationHelper
     return false if disabled || url.nil?
     # A ?from= param says which list the person came from, and that wins over path matching.
     return section.present? && params[:from] == section if params[:from].present?
+    # Lo que cuelga de una ficha (la ficha, editarla, su nueva asignación) es de Jóvenes o de Staff según su rol.
+    return section.present? && participant_nav_section == section if participant_nav_section
     return true if current_page?(url)
     return false if except_paths.any? { |path| request.path.start_with?(path) }
 
@@ -140,11 +142,20 @@ module NavigationHelper
   def participants_back
     if params[:from] == "escaner"
       back_to "Escáner", safe_return_to(checkins_path)
-    elsif params[:from] == "staff"
+    elsif params[:from] == "staff" || (params[:from].blank? && participant_nav_section == "staff")
       back_to_origin "Staff", staff_participants_path
     else
       back_to_origin "Jóvenes", participants_path
     end
+  end
+
+  # "jovenes" o "staff" en las páginas de una ficha (/participants/:id/…), según el rol de esa persona; nil fuera de ellas.
+  def participant_nav_section
+    return @participant_nav_section if defined?(@participant_nav_section)
+
+    id = request.path[%r{\A/participants/(\h{8}-\h{4}-\h{4}-\h{4}-\h{12})(/|\z)}, 1]
+    rol = id && Participant.where(id: id).pick(:rol)
+    @participant_nav_section = rol && (rol == "joven" ? "jovenes" : "staff")
   end
 
   # A dónde vuelve la página ({ label:, url: }), si es una de las que se abren desde otra (back_to).
