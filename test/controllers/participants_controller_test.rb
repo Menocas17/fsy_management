@@ -236,6 +236,29 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Sin Alergias"
   end
 
+  test "only full access filters by emotional information" do
+    participants(:juan).update!(emotional_information: "Ansiedad; a veces necesita un momento a solas.")
+
+    get participants_path(care: "emotional_information")
+    assert_select "select[name=care] option[value=emotional_information]", text: "Con información emocional"
+    assert_select "[data-active-filter='care']", text: /Con información emocional/
+    assert_select "tbody tr", 1
+
+    coordinator = Participant.create!(first_name: "Coor", last_name: "Dinador", age: 40, stake: "villa_flor", shirt_number: "l",
+                                      gender: "H", rol: :coordinador)
+    sign_in_as(User.create!(email_address: "coor@fsy.com", password: "Coordina1!", participant: coordinator))
+    get participants_path(care: "emotional_information")
+    assert_select "select[name=care] option[value=emotional_information]"
+
+    counselor = Participant.create!(first_name: "Con", last_name: "Sejero", age: 25, stake: "villa_flor", shirt_number: "m",
+                                    gender: "H", rol: :consejero)
+    sign_in_as(User.create!(email_address: "consejero@fsy.com", password: "Consejo1!", participant: counselor))
+    get participants_path(care: "emotional_information")
+    assert_select "select[name=care] option[value=emotional_information]", 0
+    assert_select "[data-active-filter='care']", 0, "the filter is ignored, not applied in secret"
+    assert_select "tbody tr", Participant.joven.count
+  end
+
   test "each active filter can be dropped on its own, keeping the rest" do
     get participants_path(care: "medical_information", gender: "M", query: "jua")
 

@@ -44,6 +44,11 @@ class ImportRowEvaluator
     self
   end
 
+  # La ficha que saldría de la fila, sin revisarla contra la base: la siembra de datos de prueba (EventSeed).
+  def build
+    @participant = Participant.new(attributes)
+  end
+
   def clean?
     issues.empty?
   end

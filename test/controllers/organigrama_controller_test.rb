@@ -6,7 +6,7 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
     @director = create_participant("Roberto", "director", "H")
     @coordinator = create_participant("Marta", "coordinador", "M")
     @second_coordinator = create_participant("Iván", "coordinador", "H")
-    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa", coordinator: @coordinator, second_coordinator: @second_coordinator)
+    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa")
     @company = Company.create!(name: "Alfa 3", auxiliar_company: @auxiliar_company)
     @company.memberships.create!(participant: participants(:maria))
     participants(:juan).update!(company: @company)

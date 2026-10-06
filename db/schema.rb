@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_220000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -146,12 +146,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_220000) do
 
   create_table "auxiliar_companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
-    t.uuid "coordinator_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "second_coordinator_id"
-    t.index ["coordinator_id"], name: "index_auxiliar_companies_on_coordinator_id"
-    t.index ["second_coordinator_id"], name: "index_auxiliar_companies_on_second_coordinator_id"
   end
 
   create_table "checkins", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -514,8 +510,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_220000) do
   add_foreign_key "assignments", "participants"
   add_foreign_key "assignments", "participants", column: "assigned_by_id", on_delete: :nullify
   add_foreign_key "audit_logs", "participants", column: "actor_id", on_delete: :nullify
-  add_foreign_key "auxiliar_companies", "participants", column: "coordinator_id", on_delete: :nullify
-  add_foreign_key "auxiliar_companies", "participants", column: "second_coordinator_id", on_delete: :nullify
   add_foreign_key "checkins", "participants"
   add_foreign_key "checkins", "participants", column: "recorded_by_id", on_delete: :nullify
   add_foreign_key "companies", "auxiliar_companies"

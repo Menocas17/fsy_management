@@ -3,30 +3,12 @@
 <%# Cambiar de día, de vista o de actividad se mezcla en la página (enlaces con turbo_action replace):
     sin copia en caché que parpadee arriba, sin perder el lugar ni mover el menú lateral. %>
 <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
-<%
-  nav_button = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted transition"
-  nav_disabled = "inline-flex items-center justify-center w-9 h-9 rounded-control border border-line-soft text-ink-500 dark:text-ink-300 cursor-not-allowed"
-%>
 <%= render PageComponent.new(width: :page) do %>
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">
       <% if @view == "dia" %>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <% if @previous_day %>
-            <%= link_to agenda_path(date: @previous_day, view: "dia"), class: nav_button, data: { turbo_action: "replace" }, aria: { label: "Día anterior" } do %>
-              <%= icon "chevron-left", class: "w-4 h-4" %>
-            <% end %>
-          <% else %>
-            <span class="<%= nav_disabled %>" aria-hidden="true"><%= icon "chevron-left", class: "w-4 h-4" %></span>
-          <% end %>
-          <% if @next_day %>
-            <%= link_to agenda_path(date: @next_day, view: "dia"), class: nav_button, data: { turbo_action: "replace" }, aria: { label: "Día siguiente" } do %>
-              <%= icon "chevron-right", class: "w-4 h-4" %>
-            <% end %>
-          <% else %>
-            <span class="<%= nav_disabled %>" aria-hidden="true"><%= icon "chevron-right", class: "w-4 h-4" %></span>
-          <% end %>
-        </div>
+        <%= render DayPagerComponent.new(previous_href: (agenda_path(date: @previous_day, view: "dia") if @previous_day),
+                                         next_href: (agenda_path(date: @next_day, view: "dia") if @next_day)) %>
       <% end %>
       <div class="min-w-0">
         <p class="text-title md:text-base font-extrabold text-ink-900 truncate">

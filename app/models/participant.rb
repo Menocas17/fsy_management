@@ -168,9 +168,15 @@ class Participant < ApplicationRecord
                    "sin dieta", "n/a", "na", "no", "-", "--" ].freeze
 
   CARE_FILTERS = { "medical_information" => "Con información médica", "diet" => "Con dieta especial" }.freeze
+  # La información emocional es privada: este filtro solo lo tiene quien tiene acceso total (Authorization#can_filter_emotional_information?).
+  EMOTIONAL_FILTER = { "emotional_information" => "Con información emocional" }.freeze
+
+  def self.care_filters(emotional: false)
+    emotional ? CARE_FILTERS.merge(EMOTIONAL_FILTER) : CARE_FILTERS
+  end
 
   # El filtro que llega desde el panel de cocina y salud.
-  scope :by_care, ->(field) { with_medical_note(field) if CARE_FILTERS.key?(field.to_s) }
+  scope :by_care, ->(field, emotional: false) { with_medical_note(field) if care_filters(emotional: emotional).key?(field.to_s) }
 
   # Quiénes necesitan atención especial en cocina o enfermería.
   scope :with_medical_note, ->(field) {

@@ -3,7 +3,8 @@ require "test_helper"
 class AuxiliarCompaniesControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as(users(:one))
-    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa", coordinator: create_staff("Marta", "coordinador", "M"))
+    create_staff("Marta", "coordinador", "M")
+    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa")
     @company = Company.create!(number: 1, nickname: "Luz del Mundo", auxiliar_company: @auxiliar_company)
     @company.memberships.create!(participant: participants(:maria))
     participants(:juan).update!(company: @company)
@@ -48,16 +49,14 @@ class AuxiliarCompaniesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Asignó a Ana Prueba en la compañía auxiliar Auxiliar Alfa", AuditLog.recent.first.summary
   end
 
-  test "updating sets the second coordinator and rejects repeating the first" do
-    second = create_staff("Iván", "coordinador", "H")
+  test "the form doesn't ask for coordinators: both look after every auxiliary company" do
+    create_staff("Iván", "coordinador", "H")
 
-    patch auxiliar_company_path(@auxiliar_company), params: { auxiliar_company: { second_coordinator_id: second.id } }
-    assert_redirected_to @auxiliar_company
-    assert_equal second, @auxiliar_company.reload.second_coordinator
-    assert_equal "Actualizó segundo coordinador de la compañía auxiliar Auxiliar Alfa", AuditLog.recent.first.summary
+    get edit_auxiliar_company_path(@auxiliar_company)
+    assert_select "select[name*=coordinator]", 0
 
-    patch auxiliar_company_path(@auxiliar_company), params: { auxiliar_company: { second_coordinator_id: @auxiliar_company.coordinator_id } }
-    assert_response :unprocessable_entity
+    get auxiliar_company_path(@auxiliar_company)
+    assert_includes response.body, "Iván Prueba"
   end
 
   test "deleting keeps its companies, now without an auxiliary company" do

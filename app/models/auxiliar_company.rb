@@ -1,8 +1,4 @@
 class AuxiliarCompany < ApplicationRecord
-  # Two coordinators oversee the auxiliary companies; they aren't a couple, so each has their own slot.
-  belongs_to :coordinator, class_name: "Participant", optional: true
-  belongs_to :second_coordinator, class_name: "Participant", optional: true
-
   has_many :companies, dependent: :nullify
   has_many :memberships, as: :associable, dependent: :destroy
   has_many :auxiliars,  -> { where(rol: :auxiliar) },   through: :memberships, source: :participant
@@ -11,14 +7,15 @@ class AuxiliarCompany < ApplicationRecord
   has_many :jovenes, through: :companies, source: :participants
 
   validates :name, presence: { message: "no puede estar en blanco" }
-  validate :coordinators_are_different
 
-  scope :coordinated_by, ->(participant) { where(coordinator: participant).or(where(second_coordinator: participant)) }
+  # Los dos coordinadores cuidan de todas las compañías auxiliares: no se eligen por rama.
+  scope :coordinated_by, ->(participant) { participant&.coordinador? ? all : none }
   scope :for_coordinator, ->(participant) { coordinated_by(participant).includes(memberships: :participant) }
-  scope :with_staff, -> { includes(:coordinator, :second_coordinator, :companies, :auxiliars, :counselors) }
+  scope :with_staff, -> { includes(:companies, :auxiliars, :counselors) }
 
+  # Él primero y luego ella, como en el resto de la app.
   def coordinators
-    [ coordinator, second_coordinator ].compact
+    @coordinators ||= Participant.coordinador.order(gender: :desc, first_name: :asc).to_a
   end
 
   def coordinator_name
@@ -58,11 +55,4 @@ class AuxiliarCompany < ApplicationRecord
   def counselor_count
     counselors.count
   end
-
-  private
-    def coordinators_are_different
-      if coordinator_id.present? && coordinator_id == second_coordinator_id
-        errors.add :second_coordinator, "no puede ser la misma persona que el primer coordinador"
-      end
-    end
 end

@@ -47,6 +47,15 @@ class NightAttendance < ApplicationRecord
     nights.include?(tonight) ? tonight : (nights.select { |night| night <= tonight }.last || nights.first)
   end
 
+  # Si las listas de esa noche se pueden pasar: :abierta (esta noche), :cerrada (ya pasó, solo se consulta)
+  # o :por_venir (se abre esa noche a las 6 pm).
+  def self.window(night, time = Time.current)
+    tonight = current_night(time)
+    return :abierta if night == tonight
+
+    night < tonight ? :cerrada : :por_venir
+  end
+
   def self.gender_label(gender)
     GENDER_LABELS.fetch(gender.to_s)
   end

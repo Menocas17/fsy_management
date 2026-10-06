@@ -3,7 +3,7 @@ require "test_helper"
 class AssignmentsControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as(users(:one))
-    @activity = Activity.create!(title: "Servicio comunitario", category: :servicio, location: "La Rotonda",
+    @activity = Activity.create!(title: "Servicio comunitario", category: :actividad, location: "La Rotonda",
                                  date: (Rails.configuration.x.event_start_on + 1).to_s, start_time: "10:00", end_time: "12:30")
     @joven = participants(:juan)
   end

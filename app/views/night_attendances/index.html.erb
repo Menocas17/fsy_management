@@ -14,14 +14,25 @@
   current = @night == NightAttendance.current_night
   test_night = current && NightAttendance.testing?
   panel_url = night_attendances_path(noche: @night.iso8601)
+  position = @nights.index(@night)
+  previous_night = @nights[position - 1] if position.positive?
+  next_night = @nights[position + 1]
 %>
 <%= render PageComponent.new(width: :page) do |page| %>
   <% page.with_intro { "Noche del #{SpanishDates.long(@night, capitalize: false)}#{" · prueba" if test_night}#{" · esta noche" if current && !test_night}" } %>
   <% page.with_actions do %>
-    <%= render SegmentedToggleComponent.new(label: "Noche", items: @nights.map { |night|
-          { text: night < Rails.configuration.x.event_start_on ? "Hoy · prueba" : "#{SpanishDates.abbr(night)} #{night.day}",
-            href: night_attendances_path(noche: night.iso8601), active: night == @night, data: { night_option: night.iso8601 } } }) %>
+    <%# Flechas como en la agenda: un riel con todas las noches no cabe en el teléfono. %>
+    <div class="flex items-center gap-3">
+      <%= render DayPagerComponent.new(previous_label: "Noche anterior", next_label: "Noche siguiente", data: { night_pager: @night.iso8601 },
+            previous_href: (night_attendances_path(noche: previous_night.iso8601) if previous_night),
+            next_href: (night_attendances_path(noche: next_night.iso8601) if next_night)) %>
+      <span class="text-label font-semibold text-ink-500 whitespace-nowrap">
+        <%= @night < Rails.configuration.x.event_start_on ? "Noche de prueba" : "Noche #{NightAttendance.event_nights.index(@night).to_i + 1} de #{NightAttendance.event_nights.size}" %>
+      </span>
+    </div>
   <% end %>
+
+  <%= render "night_attendances/window_notice", night: @night %>
 
   <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
     <%= render StatTileComponent.new(value: "#{confirmed}/#{lists.size}", label: "Listas confirmadas", short_label: "Confirmadas",

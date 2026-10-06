@@ -18,3 +18,7 @@ Súbelos en este orden, desde **Carga masiva**:
 
 Con la base vacía, las 618 filas entran directo, sin ninguna en espera. Subir un archivo dos veces deja
 todas sus filas en espera como duplicados.
+
+Para no subirlos a mano, `bin/rails datos:generar` borra los datos y carga estos cuatro archivos de una vez,
+con los jóvenes ya repartidos en compañías y cuartos. `bin/rails datos:sembrar` carga en cambio la foto
+`db/seed_data/evento.json`, que es lo mismo con los ajustes hechos a mano (ver `docs/deploy_render.md`).

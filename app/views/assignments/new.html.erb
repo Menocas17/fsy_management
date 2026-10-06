@@ -1,5 +1,6 @@
 <% content_for :title, "Nueva asignación" %>
 <% content_for :eyebrow, "Participantes" %>
+<% back_to @participant.first_name, participant_path(@participant) %>
 <%= render PageComponent.new(width: :form) do %>
   <p class="mb-4 text-body font-medium text-ink-500">
     Para <span class="font-bold text-ink-900"><%= @participant.full_name %></span> ·

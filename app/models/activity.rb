@@ -3,7 +3,7 @@
 class Activity < ApplicationRecord
   CATEGORY_LABELS = {
     "devocional" => "Devocional", "comida" => "Comida", "clase" => "Clase o taller",
-    "actividad" => "Actividad", "servicio" => "Servicio", "especial" => "Especial"
+    "actividad" => "Actividad", "especial" => "Especial"
   }.freeze
 
   CATEGORY_STYLES = {
@@ -11,7 +11,6 @@ class Activity < ApplicationRecord
     "comida" => { block: "bg-cat-amber/20 border-cat-amber text-amber-700 dark:text-cat-amber", dot: "bg-cat-amber", pill: "bg-cat-amber/20 text-amber-700 dark:text-cat-amber" },
     "clase" => { block: "bg-cat-indigo/15 border-cat-indigo text-cat-indigo", dot: "bg-cat-indigo", pill: "bg-cat-indigo/15 text-cat-indigo" },
     "actividad" => { block: "bg-cat-green/15 border-cat-green text-green-700 dark:text-cat-green", dot: "bg-cat-green", pill: "bg-cat-green/15 text-green-700 dark:text-cat-green" },
-    "servicio" => { block: "bg-cat-blue/15 border-cat-blue text-cat-blue", dot: "bg-cat-blue", pill: "bg-cat-blue/15 text-cat-blue" },
     "especial" => { block: "bg-cat-rose/15 border-cat-rose text-cat-rose", dot: "bg-cat-rose", pill: "bg-cat-rose/15 text-cat-rose" }
   }.freeze
 
@@ -26,7 +25,8 @@ class Activity < ApplicationRecord
   has_many :responsibles, through: :activity_responsibles, source: :participant
   has_many :alerts, dependent: :nullify
 
-  enum :category, { devocional: 0, comida: 1, clase: 2, actividad: 3, servicio: 4, especial: 5 }, prefix: true
+  # El 4 era «Servicio», retirado: en FSY no hay servicio comunitario.
+  enum :category, { devocional: 0, comida: 1, clase: 2, actividad: 3, especial: 5 }, prefix: true
   enum :audience, { todos: 0, por_roles: 1 }, prefix: true
 
   # The form splits the schedule into a date and two times.

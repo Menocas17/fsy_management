@@ -7,13 +7,14 @@
 # página declara turbo_refreshes_with morph, Turbo la mezcla en su lugar, sin pintar antes la copia en
 # caché (el parpadeo arriba de todo) ni reiniciar el desplazamiento de la página y del menú lateral.
 class SegmentedToggleComponent < ViewComponent::Base
-  BASE = "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-inner text-label whitespace-nowrap transition-colors"
+  BASE = "inline-flex shrink-0 items-center gap-1.5 h-9 px-3.5 rounded-inner text-label whitespace-nowrap transition-colors"
   ACTIVE = "#{BASE} bg-surface dark:bg-muted shadow-sm font-bold text-ink-900".freeze
   IDLE = "#{BASE} font-semibold text-ink-500 hover:text-ink-900".freeze
 
+  # Si las opciones no caben (el teléfono), el riel se desplaza de lado en vez de salirse de la pantalla.
   # floating: sobre un lienzo (el organigrama), el riel va en superficie con sombra en vez de hundido.
-  RAIL = "inline-flex w-fit p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft"
-  FLOATING_RAIL = "inline-flex w-fit p-1 gap-0.5 rounded-control bg-surface/95 border border-line-soft shadow-md"
+  RAIL = "inline-flex w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft"
+  FLOATING_RAIL = "inline-flex w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-surface/95 border border-line-soft shadow-md"
 
   def initialize(label:, items:, floating: false)
     @label = label

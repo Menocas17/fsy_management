@@ -201,6 +201,35 @@ asistencia, alertas, gastos, inventarios, cargas masivas y el historial. Se qued
 (sin ficha), la configuración, las categorías de gasto, las áreas de logística (vacías), las capacitaciones
 y la agenda. Las fotos y facturas se borran de R2 en segundo plano la próxima vez que la app esté despierta.
 
+### Cargar los datos de prueba completos
+
+Para dejar la base como un evento ya armado (para probar o hacer una demo):
+
+```bash
+RAILS_ENV=production R2_BUCKET=fsy-management CONFIRMAR=1 \
+DATABASE_URL='postgresql://...la de Neon...' \
+bin/rails datos:sembrar
+```
+
+Primero borra lo mismo que `datos:reiniciar` y luego carga **la foto** `db/seed_data/evento.json`
+(`lib/event_snapshot.rb`) tal cual, con los mismos ids: 25 compañías en 5 compañías auxiliares, la dirección,
+auxiliares y logística en sus áreas, 50 consejeros, 512 jóvenes en sus compañías y cuartos (algunos con
+información médica, alimentaria y emocional), la agenda de los seis días (reemplaza la que haya), inventarios
+(Medicamentos y Material de curación son los de enfermería), capacitaciones con asistencia, gastos y
+asignaciones. No copia cuentas, sesiones, historial, alertas ni fotos. Las áreas de logística, las categorías
+de gasto y las capacitaciones se buscan por nombre (o fecha): se usan las que ya existen y se crean las que
+falten (te dice cuáles antes de confirmar). Solo sigue si escribes `SEMBRAR`.
+
+**Cambiar la foto.** Ajusta los datos a mano en tu base local y, cuando queden como quieres:
+
+```bash
+bin/rails datos:exportar   # reescribe db/seed_data/evento.json desde la base local
+```
+
+Revisa el diff y haz commit. Nunca se exporta desde producción (el repo es público): la tarea se niega.
+`bin/rails datos:generar` vuelve a armar todo desde cero con los Excel de `docs/cargas_de_prueba`
+(`lib/event_seed.rb`), sin la foto.
+
 ## 9. Límites del plan gratis y el campamento
 
 - **Se duerme.** Tras 15 minutos sin visitas, la primera petición tarda ~1 minuto. Durante las

@@ -1,0 +1,16 @@
+<%# Por qué las listas de esa noche no se pueden pasar: solo se pasa la de esta noche. Nada si está abierta. %>
+<% window = NightAttendance.window(night) %>
+<% unless window == :abierta %>
+  <div class="mb-5 flex items-center gap-3 rounded-tile border border-line bg-surface px-4 py-3 shadow-sm" data-night-window="<%= window %>">
+    <%= render IconTileComponent.new(icon: window == :cerrada ? "lock" : "calendar-clock", tone: :neutral) %>
+    <div class="min-w-0">
+      <% if window == :cerrada %>
+        <p class="text-body font-bold text-ink-900">Esta noche ya cerró</p>
+        <p class="text-label font-semibold text-ink-700">Sus listas solo se consultan: la asistencia se pasa únicamente la noche que toca.</p>
+      <% else %>
+        <p class="text-body font-bold text-ink-900">Esta noche todavía no llega</p>
+        <p class="text-label font-semibold text-ink-700">Sus listas se abren el <%= SpanishDates.long(night, capitalize: false) %> a las 6 de la tarde.</p>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -90,8 +90,10 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
 
     get night_attendances_path
-    assert_select "[data-night-option='2026-10-05']", text: "Hoy · prueba"
-    assert_select "[data-night-option='2027-01-11']"
+    assert_select "[data-night-pager='2026-10-05']"
+    assert_select "[data-day-pager=previous]", 0
+    assert_select "a[data-day-pager=next][href='#{night_attendances_path(noche: "2027-01-11")}']"
+    assert_select "[data-night-window]", 0, "tonight's lists are open"
 
     patch company_night_attendance_path(@company, genero: "M"), params: { marks: { @ana.id => { status: "presente" } } }
     assert_equal "Administrador del sistema", NightAttendance.find_by!(company: @company, gender: "M").taken_by_name
@@ -102,8 +104,10 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-night-toggle]", 0, "during the event only the counselors take it"
     get night_attendances_path
-    assert_select "[data-night-option='2027-01-12']"
-    assert_select "[data-night-option]", 5
+    assert_select "[data-night-pager='2027-01-12']"
+    get night_attendances_path(noche: "2027-01-15")
+    assert_select "[data-day-pager=next]", 0, "the last night of the event"
+    assert_select "[data-night-window=por_venir]", text: /se abren el viernes 15 de enero/
   end
 
   test "opened from the panel, the company's profile and its list go back to the panel" do
@@ -124,6 +128,12 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
 
     get company_night_attendance_path(@company, noche: "2027-01-10")
     assert_select "[data-night-toggle]", 0
+    assert_select "[data-night-window=cerrada]", text: /ya cerró/
+
+    get company_night_attendance_path(@company, noche: "2027-01-12")
+    assert_select "[data-night-toggle]", 0, "nor can tomorrow's be taken ahead"
+    assert_select "[data-night-window=por_venir]"
+    assert_select "[data-night-status]", 0
   end
 
   private

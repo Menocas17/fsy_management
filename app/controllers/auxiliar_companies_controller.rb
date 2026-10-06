@@ -4,7 +4,7 @@ class AuxiliarCompaniesController < ApplicationController
   before_action :require_company_edit!, only: %i[edit update assign_staff remove_staff]
   before_action :require_company_staffing!, only: %i[assign_staff remove_staff]
 
-  FIELD_LABELS = { "name" => "nombre", "coordinator_id" => "coordinador", "second_coordinator_id" => "segundo coordinador" }.freeze
+  FIELD_LABELS = { "name" => "nombre" }.freeze
 
   def index
     @auxiliar_companies = AuxiliarCompany.includes(auxiliars: Participant::AVATAR_PRELOAD, companies: :counselors)
@@ -100,11 +100,9 @@ class AuxiliarCompaniesController < ApplicationController
                                         .order(:first_name, :last_name)
     end
 
-    # Los coordinadores de la rama solo los cambia quien tiene acceso total; el auxiliar apenas la renombra.
+    # Solo el nombre: los coordinadores son los mismos para todas las ramas (los del rol coordinador).
     def auxiliar_company_params
-      level = action_name == "create" ? :full : auxiliar_company_edit_level(@auxiliar_company)
-      fields = level == :full ? [ :name, :coordinator_id, :second_coordinator_id ] : [ :name ]
-      params.expect(auxiliar_company: fields)
+      params.expect(auxiliar_company: [ :name ])
     end
 
     def membership_params
