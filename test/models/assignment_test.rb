@@ -3,7 +3,7 @@ require "test_helper"
 class AssignmentTest < ActiveSupport::TestCase
   setup do
     @first_day = Rails.configuration.x.event_start_on
-    @activity = Activity.create!(title: "Servicio comunitario", category: :servicio, location: "La Rotonda",
+    @activity = Activity.create!(title: "Servicio comunitario", category: :actividad, location: "La Rotonda",
                                  date: (@first_day + 1).to_s, start_time: "10:00", end_time: "12:30")
   end
 

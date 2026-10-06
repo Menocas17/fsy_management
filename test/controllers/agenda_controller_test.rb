@@ -6,7 +6,7 @@ class AgendaControllerTest < ActionDispatch::IntegrationTest
     @first_day = Rails.configuration.x.event_start_on
     @last_day = Rails.configuration.x.event_end_on
     @day = @first_day + 1
-    @activity = Activity.create!(title: "Servicio comunitario", category: :servicio, location: "La Rotonda",
+    @activity = Activity.create!(title: "Servicio comunitario", category: :actividad, location: "La Rotonda",
                                  date: @day.to_s, start_time: "10:00", end_time: "12:30",
                                  logistics_notes: "30 galones de pintura", youth_notes: "Llevar gorra")
   end

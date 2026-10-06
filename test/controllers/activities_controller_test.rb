@@ -102,7 +102,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
 
   private
     def activity_params(**overrides)
-      { title: "Servicio comunitario", category: "servicio", date: (Rails.configuration.x.event_start_on + 1).to_s,
+      { title: "Servicio comunitario", category: "actividad", date: (Rails.configuration.x.event_start_on + 1).to_s,
         start_time: "10:00", end_time: "12:30", location: "La Rotonda", audience: "todos" }.merge(overrides)
     end
 
