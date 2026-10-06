@@ -49,7 +49,7 @@
     <% else %>
       <%= filter_field "Cocina y salud", "care" do %>
         <%= f.select :care,
-              options_for_select(Participant::CARE_FILTERS.map { |key, label| [ label, key ] }, params[:care]),
+              options_for_select(Participant.care_filters(emotional: can_filter_emotional_information?).map { |key, label| [ label, key ] }, params[:care]),
               { include_blank: "Cocina y salud" }, class: chip_classes, aria: { label: "Filtrar por cocina y salud" }, data: { action: "change->auto-submit#changed" } %>
       <% end %>
     <% end %>

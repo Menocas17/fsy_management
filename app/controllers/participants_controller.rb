@@ -12,7 +12,7 @@ class ParticipantsController < ApplicationController
                                            .by_ward(params[:ward])
                                            .by_gender(params[:gender])
                                            .by_company(params[:company])
-                                           .by_care(params[:care])
+                                           .by_care(params[:care], emotional: can_filter_emotional_information?)
                                            .order(:first_name, :last_name, :id))
   end
 

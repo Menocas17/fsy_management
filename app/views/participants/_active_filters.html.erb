@@ -10,7 +10,8 @@
   active << { key: "gender", label: Participant::GENDER_LABELS[params[:gender]] } if Participant::GENDER_LABELS.key?(params[:gender])
   active << { key: "rol", label: Participant.role_label(params[:rol]) } if params[:rol].present?
   active << { key: "company", label: "Compañía #{params[:company]}" } if params[:company].present?
-  active << { key: "care", label: Participant::CARE_FILTERS[params[:care]] } if Participant::CARE_FILTERS.key?(params[:care])
+  care_filters = Participant.care_filters(emotional: can_filter_emotional_information?)
+  active << { key: "care", label: care_filters[params[:care]] } if care_filters.key?(params[:care])
 
   without = ->(key) do
     rest = request.query_parameters.except(key, "page")

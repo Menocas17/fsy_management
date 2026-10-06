@@ -14,7 +14,8 @@ module Authorization
                   :can_view_night_attendance?, :night_attendance_gender_for, :can_open_night_attendance?,
                   :can_take_night_attendance?,
                   :can_view_infirmary?, :can_operate_infirmary?, :can_announce_infirmary?, :can_read_infirmary_notes?,
-                  :can_cancel_infirmary_visit?, :can_read_emotional_information?, :can_import_staffing?
+                  :can_cancel_infirmary_visit?, :can_read_emotional_information?, :can_filter_emotional_information?,
+                  :can_import_staffing?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -212,6 +213,12 @@ module Authorization
     return can_operate_infirmary? || Current.user.participant&.director? || false if participant.nil? || participant.new_record?
 
     Current.user.participant_id == participant.id || can_read_infirmary_notes?(participant)
+  end
+
+  # Buscar a todos los jóvenes con información emocional: solo el matrimonio director, los coordinadores y el
+  # superadmin, que cuidan de todos. Los demás la leen ficha por ficha, si les toca.
+  def can_filter_emotional_information?
+    Current.user&.full_access? || false
   end
 
   # Un aviso que todavía no llega se puede retirar: quien lo dio o enfermería.
