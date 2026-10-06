@@ -4,13 +4,16 @@
   show_role = local_assigns.fetch(:show_role, false)
   staff_roles = Participant.rols.keys.reject { |key| key == "joven" }
   active_count = [ :stake, :ward, :gender, (show_role ? :rol : :care), :company ].count { |key| params[key].present? }
-  chip_classes = "max-lg:w-full h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0"
+  # Cada filtro mide lo mismo siempre (su ancho va al lado, en lg:w-*): el selector nativo mediría lo que su
+  # opción más larga («Barrio La Catorce de Septiembre») y empujaba la fila hasta desbordarla. Lo que no cabe
+  # termina en «…» (lo elegido se lee entero en la ficha de abajo) y en pantallas medianas se encogen un poco.
+  chip_classes = "max-lg:w-full h-10 pl-3 pr-8 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 truncate lg:min-w-24 lg:shrink"
 %>
 <%= form_with url: form_url, method: :get, data: filter_sheet_form_data("participants_table"),
       class: "flex items-start gap-2 lg:gap-3" do |f| %>
   <%# Desde lg, todo en una sola fila. La búsqueda toma el ancho que sobra y es la que cede (hasta 11rem); los
-      filtros no ceden y miden como mucho lo que queda, y si aun así no caben se deslizan de lado en vez de
-      bajar el último a una segunda fila. Por debajo, junto a la búsqueda queda el botón «Filtros» y los
+      filtros tienen ancho fijo y, si no caben, se encogen hasta un mínimo con «…»; solo en el último caso se
+      deslizan de lado en vez de bajar el último a una segunda fila. Por debajo, junto a la búsqueda queda el botón «Filtros» y los
       filtros suben en una hoja (shared/filter_sheet). %>
   <div class="relative flex-1 min-w-0 lg:flex-[1_100_18rem] lg:min-w-44 lg:max-w-80">
     <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
@@ -28,29 +31,29 @@
     <%= filter_field "Estaca / Distrito", "stake" do %>
       <%= f.select :stake,
             options_for_select(Participant.stakes.keys.map { |key| [ key.titleize, key ] }, params[:stake]),
-            { include_blank: "Estaca / Distrito" }, class: chip_classes, aria: { label: "Filtrar por estaca o distrito" }, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Estaca / Distrito" }, class: "#{chip_classes} lg:w-40", aria: { label: "Filtrar por estaca o distrito" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <%= filter_field "Barrio / Rama", "ward" do %>
       <%= f.select :ward,
             grouped_options_for_select(Participant::WARDS_BY_STAKE.map { |stake, wards| [ Participant::STAKE_LABELS[stake], wards.map { |ward| [ Participant.ward_label(ward), ward ] } ] }, params[:ward]),
-            { include_blank: "Barrio / Rama" }, class: chip_classes, aria: { label: "Filtrar por barrio o rama" }, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Barrio / Rama" }, class: "#{chip_classes} lg:w-40", aria: { label: "Filtrar por barrio o rama" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <%= filter_field "Género", "gender" do %>
       <%= f.select :gender,
             options_for_select(Participant::GENDER_LABELS.map { |key, label| [ label, key ] }, params[:gender]),
-            { include_blank: "Género" }, class: chip_classes, aria: { label: "Filtrar por género" }, data: { action: "change->auto-submit#changed" } %>
+            { include_blank: "Género" }, class: "#{chip_classes} lg:w-28", aria: { label: "Filtrar por género" }, data: { action: "change->auto-submit#changed" } %>
     <% end %>
     <% if show_role %>
       <%= filter_field "Rol", "rol" do %>
         <%= f.select :rol,
               options_for_select(staff_roles.map { |key| [ Participant.role_label(key), key ] }, params[:rol]),
-              { include_blank: "Rol" }, class: chip_classes, aria: { label: "Filtrar por rol" }, data: { action: "change->auto-submit#changed" } %>
+              { include_blank: "Rol" }, class: "#{chip_classes} lg:w-40", aria: { label: "Filtrar por rol" }, data: { action: "change->auto-submit#changed" } %>
       <% end %>
     <% else %>
       <%= filter_field "Cocina y salud", "care" do %>
         <%= f.select :care,
               options_for_select(Participant.care_filters(emotional: can_filter_emotional_information?).map { |key, label| [ label, key ] }, params[:care]),
-              { include_blank: "Cocina y salud" }, class: chip_classes, aria: { label: "Filtrar por cocina y salud" }, data: { action: "change->auto-submit#changed" } %>
+              { include_blank: "Cocina y salud" }, class: "#{chip_classes} lg:w-40", aria: { label: "Filtrar por cocina y salud" }, data: { action: "change->auto-submit#changed" } %>
       <% end %>
     <% end %>
     <%# Ahora que «Limpiar» bajó con las fichas de filtros, este campo puede decir qué es y respirar. %>
@@ -60,7 +63,7 @@
             placeholder: "Compañía o número",
             aria: { label: "Filtrar por compañía" },
             title: "Número o nombre de la compañía",
-            class: "w-full lg:w-40 h-10 px-3 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 placeholder:text-ink-300 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 shrink-0",
+            class: "w-full lg:w-40 lg:min-w-28 lg:shrink h-10 px-3 rounded-control bg-surface border border-line text-body font-semibold text-ink-700 placeholder:text-ink-300 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-ellipsis",
             data: { action: "input->auto-submit#typed" } %>
     <% end %>
   <% end %>
