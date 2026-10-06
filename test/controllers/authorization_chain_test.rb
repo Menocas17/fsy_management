@@ -90,14 +90,11 @@ class AuthorizationChainTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "an auxiliar renames their auxiliar company but does not name its coordinators" do
+  test "an auxiliar renames their auxiliar company" do
     sign_in_as_participant(@auxiliar)
-    coordinator = create_participant(rol: :coordinador, gender: "H")
 
-    patch auxiliar_company_path(@auxiliar_company), params: { auxiliar_company: { name: "Rama Alfa", coordinator_id: coordinator.id } }
-    @auxiliar_company.reload
-    assert_equal "Rama Alfa", @auxiliar_company.name
-    assert_nil @auxiliar_company.coordinator_id
+    patch auxiliar_company_path(@auxiliar_company), params: { auxiliar_company: { name: "Rama Alfa" } }
+    assert_equal "Rama Alfa", @auxiliar_company.reload.name
   end
 
   # Logística ------------------------------------------------------------------

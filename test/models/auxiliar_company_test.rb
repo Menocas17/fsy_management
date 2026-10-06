@@ -4,17 +4,19 @@ class AuxiliarCompanyTest < ActiveSupport::TestCase
   setup do
     @first = create_coordinator("Marta", "M")
     @second = create_coordinator("Iván", "H")
-    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa", coordinator: @first, second_coordinator: @second)
+    @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa")
   end
 
-  test "lists and names both coordinators" do
-    assert_equal [ @first, @second ], @auxiliar_company.coordinators
-    assert_equal "Marta Prueba y Iván Prueba", @auxiliar_company.coordinator_name
-  end
+  test "both coordinators look after every auxiliary company, him first" do
+    other = AuxiliarCompany.create!(name: "Auxiliar Beta")
 
-  test "is found for either coordinator" do
-    assert_includes AuxiliarCompany.for_coordinator(@first), @auxiliar_company
-    assert_includes AuxiliarCompany.for_coordinator(@second), @auxiliar_company
+    [ @auxiliar_company, other ].each do |auxiliar_company|
+      assert_equal [ @second, @first ], auxiliar_company.coordinators
+      assert_equal "Iván Prueba y Marta Prueba", auxiliar_company.coordinator_name
+    end
+    assert_equal [ @auxiliar_company, other ].sort_by(&:id), AuxiliarCompany.for_coordinator(@first).sort_by(&:id)
+    assert_equal [ @auxiliar_company, other ].sort_by(&:id), AuxiliarCompany.for_coordinator(@second).sort_by(&:id)
+    assert_empty AuxiliarCompany.coordinated_by(participants(:maria))
   end
 
   test "sees the counselors and jóvenes of its companies" do
@@ -44,13 +46,8 @@ class AuxiliarCompanyTest < ActiveSupport::TestCase
     assert_equal "A", @auxiliar_company.initial
   end
 
-  test "both coordinator slots can't hold the same person" do
-    @auxiliar_company.second_coordinator = @first
-
-    assert_not @auxiliar_company.valid?
-  end
-
   test "names the gap when nobody coordinates it" do
+    Participant.coordinador.destroy_all
     assert_equal "Sin coordinador", AuxiliarCompany.new(name: "Auxiliar Beta").coordinator_name
   end
 

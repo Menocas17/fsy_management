@@ -65,12 +65,6 @@ class EventSeed
       people = rows(LEADERSHIP_FILE).map { |values| [ build(values), values ] }
       people.each { |participant, _| participant.save! }
 
-      by_role = people.map(&:first).group_by(&:rol)
-      coordinators = by_role.fetch("coordinador", []).sort_by { |coordinator| coordinator.gender == "H" ? 0 : 1 }
-      AuxiliarCompany.find_each do |auxiliar_company|
-        auxiliar_company.update!(coordinator: coordinators.first, second_coordinator: coordinators.second)
-      end
-
       people.each do |participant, values|
         next unless participant.auxiliar?
 

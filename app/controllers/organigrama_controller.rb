@@ -9,7 +9,7 @@ class OrganigramaController < ApplicationController
     if @view == "mi_compania"
       @my_companies = Company.where(id: my_company_ids)
                              .includes(counselors: Participant::AVATAR_PRELOAD,
-                                       auxiliar_company: { coordinator: Participant::AVATAR_PRELOAD, second_coordinator: Participant::AVATAR_PRELOAD, auxiliars: Participant::AVATAR_PRELOAD })
+                                       auxiliar_company: { auxiliars: Participant::AVATAR_PRELOAD })
                              .by_number
     else
       # Both branches hang from the director couple; the logistica view narrows to that branch.

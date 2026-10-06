@@ -151,7 +151,6 @@ class ParticipantTest < ActiveSupport::TestCase
     item = Inventory.create!(name: "Materiales").items.create!(name: "Manillas")
     item.adjust!(delta: 5, participant: staff, reason: "compra")
     expense = Expense.create!(concept: "Hielo", estimated_cents: 5_000, presented_by: staff, presented_by_name: staff.full_name)
-    auxiliar = AuxiliarCompany.create!(name: "Auxiliar Alfa", coordinator: staff)
 
     assert staff.destroy
 
@@ -160,6 +159,5 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_equal "Lía Rocha", checkin.recorded_by_name
     assert_nil item.movements.first.participant_id
     assert_nil expense.reload.presented_by_id
-    assert_nil auxiliar.reload.coordinator_id
   end
 end

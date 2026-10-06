@@ -79,9 +79,9 @@ class DemoSeed
     ActiveRecord::Base.transaction do
       wipe!
       create_directors
-      coordinators = create_coordinators
+      create_coordinators
       create_logistics
-      create_companies(coordinators)
+      create_companies
       create_agenda
       create_assignments
       create_inventories
@@ -141,9 +141,9 @@ class DemoSeed
       end
     end
 
-    def create_companies(coordinators)
+    def create_companies
       AUXILIAR_COMPANIES.each do |name, numbers|
-        auxiliar_company = AuxiliarCompany.create!(name: name, coordinator: coordinators.first, second_coordinator: coordinators.last)
+        auxiliar_company = AuxiliarCompany.create!(name: name)
         %w[H M].each do |gender|
           auxiliar = person(rol: "auxiliar", gender: gender, ages: 22..35)
           auxiliar_company.memberships.create!(participant: auxiliar)
