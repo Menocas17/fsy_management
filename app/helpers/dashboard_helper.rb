@@ -38,7 +38,7 @@ module DashboardHelper
     end
   end
 
-  # Lo que sigue, para «Próximas fechas» y para el banner del teléfono. Durante la semana del FSY manda la
+  # Lo que sigue, para «Próximas fechas». Durante la semana del FSY manda la
   # agenda: las próximas actividades. Antes, las capacitaciones que faltan y el arranque del evento.
   def next_up_items(next_activities)
     items = if event_in_progress?

@@ -93,10 +93,9 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-next-item='training-2026-10-17']", text: /17 de octubre/
     assert_select "[data-next-item='training-2026-11-17']", text: /17 de noviembre/
     assert_select "[data-next-item='event']", text: /Comienza el evento/
-    # El banner del teléfono lleva las mismas fechas en «Lo que sigue», en el mismo orden.
-    assert_select "[data-hero-next] [data-hero-next-item]", 3 do |rows|
-      assert_equal %w[training-2026-10-17 training-2026-11-17 event], rows.map { |row| row["data-hero-next-item"] }
-    end
+    # Las fechas viven solo en «Próximas fechas»: el banner ya no las repite ni ocupa la pantalla entera.
+    assert_select "[data-hero-next]", 0
+    assert_select "[data-entrance='hero'][class*='min-h']", 0
     assert_select "[data-next-item='training-2026-12-17']", 0, "solo las dos próximas capacitaciones"
   end
 
