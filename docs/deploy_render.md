@@ -201,6 +201,25 @@ asistencia, alertas, gastos, inventarios, cargas masivas y el historial. Se qued
 (sin ficha), la configuración, las categorías de gasto, las áreas de logística (vacías), las capacitaciones
 y la agenda. Las fotos y facturas se borran de R2 en segundo plano la próxima vez que la app esté despierta.
 
+### Cargar los datos de prueba completos
+
+Para dejar la base como un evento ya armado (para probar o hacer una demo), con los archivos de
+`docs/cargas_de_prueba` ya repartidos:
+
+```bash
+RAILS_ENV=production R2_BUCKET=fsy-management CONFIRMAR=1 \
+DATABASE_URL='postgresql://...la de Neon...' \
+bin/rails datos:sembrar
+```
+
+Primero borra lo mismo que `datos:reiniciar` y luego crea (`lib/event_seed.rb`): 25 compañías en 5 compañías
+auxiliares (con los dos coordinadores), la dirección, 10 auxiliares en su compañía auxiliar, 15 de logística
+en su área, 50 consejeros (un hombre y una mujer por compañía) y 512 jóvenes repartidos en las compañías
+(20 o 21, mezclando estacas y edades) y en cuartos de hasta cinco; algunos traen información médica,
+alimentaria y emocional. No crea cuentas ni superadmins ni áreas: la logística entra en las áreas que
+ya existan (Finanzas, Registro, Alimentación, Enfermería) y avisa antes si falta alguna. Solo sigue si
+escribes `SEMBRAR`.
+
 ## 9. Límites del plan gratis y el campamento
 
 - **Se duerme.** Tras 15 minutos sin visitas, la primera petición tarda ~1 minuto. Durante las

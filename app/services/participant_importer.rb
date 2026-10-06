@@ -61,17 +61,28 @@ class ParticipantImporter
   end
 
   def call
-    sheet = open_sheet
-    header_row, headers = find_headers(sheet)
-    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisa la fila de los títulos)." if headers.nil?
-
+    rows = self.rows
     @import = ParticipantImport.create!(filename: filename, uploaded_by: @uploaded_by,
                                         uploaded_by_name: @uploaded_by&.full_name || "Administrador del sistema")
-    ((header_row + 1)..sheet.last_row.to_i).each { |number| process(sheet.row(number), headers, number) }
+    rows.each { |number, values| process(values, number) }
     self
   rescue UnreadableFile => error
     @fatal = error.message
     self
+  end
+
+  # Las filas con algo, como las entiende la carga: [[número de fila, { first_name: "Ana", … }], …].
+  # La siembra de datos de prueba (EventSeed) las lee sin pasar por la carga.
+  def rows
+    sheet = open_sheet
+    header_row, headers = find_headers(sheet)
+    raise UnreadableFile, "El archivo no tiene ninguna columna reconocible (revisa la fila de los títulos)." if headers.nil?
+
+    ((header_row + 1)..sheet.last_row.to_i).filter_map do |number|
+      row = sheet.row(number)
+      values = headers.transform_values { |index| clean(row[index]) }
+      [ number, values ] unless values.values.all?(&:blank?)
+    end
   end
 
   private
@@ -112,10 +123,7 @@ class ParticipantImporter
       end
     end
 
-    def process(row, headers, number)
-      values = headers.transform_values { |index| clean(row[index]) }
-      return if values.values.all?(&:blank?)
-
+    def process(values, number)
       values[:rol] = @role if @role
       evaluation = ImportRowEvaluator.new(values).evaluate
       participant = evaluation.clean? && evaluation.apply!
