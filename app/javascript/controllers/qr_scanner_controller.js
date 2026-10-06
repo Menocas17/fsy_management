@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { CAMERA, readyToRead, readCenter } from "lib/qr_frame"
 
 // jsQR (~50 KB) solo sirve con la cámara: se pide al abrir esta pantalla y no en cada carga de la app.
 // Mientras llega, tick() se salta los cuadros; si falló (sin señal), encender la cámara lo vuelve a pedir.
@@ -9,10 +10,6 @@ const loadJsQR = () =>
     .then((module) => (jsQR = module.default))
     .catch(() => (loadingJsQR = null)))
 
-const SCAN_INTERVAL_MS = 120
-// La cámara a su resolución máxima, y cada lectura con el cuadro completo: gasta más batería, pero un QR
-// chico o lejano se lee. Sin pedirla, muchos teléfonos abren la cámara a 640×480.
-const CAMERA = { facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 } }
 
 // Lee un QR con la cámara del teléfono y salta a donde lleva: la caja del inventario o, desde el panel,
 // el gafete de una persona. jsQR va incluido en vendor/javascript porque Safari no trae lector propio.
@@ -64,20 +61,11 @@ export default class extends Controller {
   tick() {
     if (!this.scanning) return
 
-    const video = this.videoTarget
-    const now = performance.now()
-    // Unas ocho lecturas por segundo, a resolución completa.
-    if (jsQR && video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
-      this.lastRead = now
-      const canvas = this.canvasTarget
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      const context = canvas.getContext("2d", { willReadFrequently: true })
-      context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-      const image = context.getImageData(0, 0, canvas.width, canvas.height)
-      const found = jsQR(image.data, image.width, image.height, { inversionAttempts: "dontInvert" })
-      if (found?.data) return this.found(found.data)
+    // Cada cuadro se mira, pero se lee solo cuando toca (lib/qr_frame): el resto del tiempo es del teléfono.
+    this.reading ||= {}
+    if (jsQR && readyToRead(this.reading, this.videoTarget)) {
+      const payload = readCenter(jsQR, this.videoTarget, this.canvasTarget, this.reading)
+      if (payload) return this.found(payload)
     }
 
     this.frame = requestAnimationFrame(() => this.tick())

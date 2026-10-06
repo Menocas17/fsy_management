@@ -9,3 +9,4 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "apexcharts", preload: false # @7.3.0
 pin "apexcharts/core", to: "apexcharts--core.js", preload: false # @7.3.0
 pin "jsqr", preload: false # @1.4.0
+pin_all_from "app/javascript/lib", under: "lib"
