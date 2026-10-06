@@ -10,7 +10,9 @@ const loadJsQR = () =>
     .catch(() => (loadingJsQR = null)))
 
 const SCAN_INTERVAL_MS = 120
-const SCAN_MAX_SIDE = 640
+// La cámara a su resolución máxima, y cada lectura con el cuadro completo: gasta más batería, pero un QR
+// chico o lejano se lee. Sin pedirla, muchos teléfonos abren la cámara a 640×480.
+const CAMERA = { facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 } }
 
 // Registro de llegadas del día del evento: la cámara no se cierra entre persona y persona.
 // Trabaja sin señal a propósito — el padrón queda en el dispositivo y los escaneos se encolan
@@ -83,7 +85,7 @@ export default class extends Controller {
     this.unlockAudio()
     this.say("Abriendo la cámara…")
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+      this.stream = await navigator.mediaDevices.getUserMedia({ video: CAMERA, audio: false })
       this.videoTarget.srcObject = this.stream
       this.videoTarget.setAttribute("playsinline", true)
       await this.videoTarget.play()
@@ -134,14 +136,12 @@ export default class extends Controller {
 
     const video = this.videoTarget
     const now = performance.now()
-    // Unas ocho lecturas por segundo a 640px sobran para un QR, y no calientan el teléfono en horas de
-    // registro como leer cada cuadro a resolución completa.
+    // Unas ocho lecturas por segundo, a resolución completa.
     if (jsQR && video.readyState === video.HAVE_ENOUGH_DATA && now - (this.lastRead || 0) >= SCAN_INTERVAL_MS) {
       this.lastRead = now
       const canvas = this.canvasTarget
-      const ratio = Math.min(1, SCAN_MAX_SIDE / Math.max(video.videoWidth, video.videoHeight))
-      canvas.width = Math.round(video.videoWidth * ratio)
-      canvas.height = Math.round(video.videoHeight * ratio)
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
       const context = canvas.getContext("2d", { willReadFrequently: true })
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
