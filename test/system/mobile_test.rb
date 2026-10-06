@@ -34,9 +34,9 @@ class MobileTest < ApplicationSystemTestCase
     assert_no_selector "[data-account-status]"
     within("[data-contact-account]") { assert_text "Todavía no entra" }
 
-    # Como en iPhone: la barra cambia el menú por «‹ Jóvenes», y no hay otro volver sobre el contenido.
+    # Como en iPhone: la barra cambia el menú por «‹ Staff» (Andrea es consejera), y no hay otro volver sobre el contenido.
     assert_no_selector "[data-mobile-menu-target='trigger']", visible: true
-    assert_selector "a[data-page-back-mobile]", text: "Jóvenes", count: 1
+    assert_selector "a[data-page-back-mobile]", text: "Staff", count: 1
     assert_no_selector "[data-page-back] a", visible: true
 
     save_screenshot(File.join(ENV["SCREENSHOTS"], "ficha-movil.png")) if ENV["SCREENSHOTS"]
@@ -50,7 +50,7 @@ class MobileTest < ApplicationSystemTestCase
     JS
     assert_equal "true", under_title
     find("a[data-page-back-mobile]").click
-    assert_current_path participants_path
+    assert_current_path staff_participants_path
     assert_selector "[data-mobile-menu-target='trigger']", visible: true
   end
 
