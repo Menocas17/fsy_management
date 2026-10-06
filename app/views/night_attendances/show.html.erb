@@ -25,9 +25,13 @@
             data: { night_gender: gender } } }) %>
   </div>
 
+  <%= render "night_attendances/window_notice", night: @night %>
+
   <%# Sobre el lienzo gris va en superficie, con el borde y el mosaico en el color del estado: si fuera del
       mismo gris que el fondo no se notaría. %>
   <% confirmed = @attendance&.persisted? %>
+  <% window = NightAttendance.window(@night) %>
+  <% unless window == :por_venir %>
   <div class="mb-5 flex items-center gap-3 rounded-tile border bg-surface px-4 py-3 shadow-sm <%= confirmed ? "border-cat-green/45" : "border-cat-amber/55" %>"
        data-night-status="<%= confirmed ? "confirmada" : "pendiente" %>">
     <%= render IconTileComponent.new(icon: confirmed ? "circle-check" : "clock", tone: confirmed ? :green : :amber) %>
@@ -37,12 +41,16 @@
         <p class="text-label font-semibold text-ink-700">
           La pasó <%= @attendance.taken_by_name %> a las <%= @attendance.confirmed_at.strftime("%H:%M") %>.
         </p>
+      <% elsif window == :cerrada %>
+        <p class="text-body font-bold text-ink-900">No se pasó</p>
+        <p class="text-label font-semibold text-ink-700">Nadie pasó la lista de los <%= NightAttendance.gender_label(@gender).downcase %> esa noche.</p>
       <% else %>
         <p class="text-body font-bold text-ink-900">Todavía no se ha pasado</p>
         <p class="text-label font-semibold text-ink-700">La lista de los <%= NightAttendance.gender_label(@gender).downcase %> de esta noche está pendiente.</p>
       <% end %>
     </div>
   </div>
+  <% end %>
 
   <div class="<%= card_classes("p-5 md:p-6") %>">
     <% if @jovenes.empty? %>
