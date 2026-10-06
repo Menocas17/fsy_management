@@ -216,7 +216,10 @@ Primero borra lo mismo que `datos:reiniciar` y luego crea (`lib/event_seed.rb`):
 auxiliares (con los dos coordinadores), la dirección, 10 auxiliares en su compañía auxiliar, 15 de logística
 en su área, 50 consejeros (un hombre y una mujer por compañía) y 512 jóvenes repartidos en las compañías
 (20 o 21, mezclando estacas y edades) y en cuartos de hasta cinco; algunos traen información médica,
-alimentaria y emocional. No crea cuentas ni superadmins ni áreas: la logística entra en las áreas que
+alimentaria y emocional. También deja la agenda de los seis días (reemplaza la que haya), ocho inventarios
+(Medicamentos y Material de curación son los de enfermería), las capacitaciones (la que ya pasó con su
+asistencia), gastos en todas sus etapas y algunas asignaciones. Llegadas, enfermería, asistencia nocturna y
+alertas quedan vacías: son del evento. No crea cuentas ni superadmins ni áreas: la logística entra en las áreas que
 ya existan (Finanzas, Registro, Alimentación, Enfermería) y avisa antes si falta alguna. Solo sigue si
 escribes `SEMBRAR`.
 
