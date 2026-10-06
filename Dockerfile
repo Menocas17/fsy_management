@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Render builds it (render.yaml), or build'n'run by hand:
+# This Dockerfile is designed for production, not development. Kamal builds it (config/deploy.yml) and so does
+# Render (render.yaml), or build'n'run by hand:
 # docker build -t fsy_management .
 # docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name fsy_management fsy_management
 
@@ -59,6 +60,9 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
+
+# Enlaza la imagen de ghcr.io con el repositorio: así el GITHUB_TOKEN de Actions puede subirla y bajarla.
+LABEL org.opencontainers.image.source="https://github.com/Menocas17/fsy_management"
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
