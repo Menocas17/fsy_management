@@ -30,6 +30,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
       agenda_reports_path => "agenda",
       badges_reports_path => "gafetes",
       birthdays_reports_path => "cumpleaneros",
+      birthdays_reports_path(scope: "jovenes") => "cumpleaneros-jovenes",
       badges_reports_path(scope: "staff") => "gafetes-staff",
       badges_reports_path(company: @company.id) => "gafetes-compania-3" }.each do |path, stem|
       get path

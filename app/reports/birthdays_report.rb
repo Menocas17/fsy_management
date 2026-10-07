@@ -1,11 +1,18 @@
 # Los cumpleañeros del mes del FSY (enero) y, aparte, los que cumplen durante la semana del evento, para
-# celebrarlos ese día. Jóvenes y staff, con la edad que cumplen.
+# celebrarlos ese día. Todos (jóvenes y staff) o solo los jóvenes, con la edad que cumplen.
 class BirthdaysReport < ApplicationReport
   filename_stem "cumpleaneros"
 
-  def initialize(start_on: Rails.configuration.x.event_start_on, end_on: Rails.configuration.x.event_end_on)
+  SCOPES = { "todos" => "Jóvenes y staff", "jovenes" => "Solo jóvenes" }.freeze
+
+  def initialize(scope: "todos", start_on: Rails.configuration.x.event_start_on, end_on: Rails.configuration.x.event_end_on)
+    @scope = SCOPES.key?(scope.to_s) ? scope.to_s : "todos"
     @start_on = start_on
     @end_on = end_on
+  end
+
+  def filename
+    [ self.class.filename_stem, (@scope unless @scope == "todos"), Date.current.strftime("%Y-%m-%d") ].compact.join("-") + ".pdf"
   end
 
   private
@@ -14,7 +21,7 @@ class BirthdaysReport < ApplicationReport
     end
 
     def subtitle
-      "#{month_people.size} en #{SpanishDates.month(@start_on)} · #{week_people.size} durante el FSY"
+      "#{SCOPES.fetch(@scope)} · #{month_people.size} en #{SpanishDates.month(@start_on)} · #{week_people.size} durante el FSY"
     end
 
     def build(pdf)
@@ -49,7 +56,8 @@ class BirthdaysReport < ApplicationReport
 
     # [persona, su cumpleaños en el año del evento], del día 1 al último del mes.
     def month_people
-      @month_people ||= Participant.includes(:company, :logistics_area, :auxiliar_companies)
+      people = @scope == "jovenes" ? Participant.jovenes : Participant.all
+      @month_people ||= people.includes(:company, :logistics_area, :auxiliar_companies)
                                    .where("EXTRACT(MONTH FROM birth_date) = ?", @start_on.month)
                                    .map { |person| [ person, birthday_in(person, @start_on.year) ] }
                                    .sort_by { |person, birthday| [ birthday, person.full_name ] }

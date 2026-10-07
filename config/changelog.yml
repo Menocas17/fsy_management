@@ -12,7 +12,7 @@
   title: Reporte de cumpleañeros
   summary: En Reportes ya se imprime la lista de quienes cumplen años en enero y durante la semana del FSY.
   changes:
-    - Reportes → Cumpleañeros: primero los que cumplen durante el FSY, con el día de la semana, y luego todo enero.
+    - Reportes → Cumpleañeros: primero los que cumplen durante el FSY, con el día de la semana, y luego todo enero; de todos o solo de los jóvenes.
     - Cada uno con su rol, su compañía (o área) y la edad que cumple.
   roles: [ director, coordinador ]
 - id: 2026-10-08-edad-de-hoy
