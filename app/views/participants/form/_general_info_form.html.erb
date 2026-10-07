@@ -52,7 +52,7 @@
       </div>
       <div>
         <%= form.label :birth_date, "Fecha de nacimiento", class: field_label_classes %>
-        <%= form.date_field :birth_date, class: field_input_classes, max: Date.current %>
+        <%= date_input form.field_name(:birth_date), form.object.birth_date || form.object.birth_date_before_type_cast, id: form.field_id(:birth_date), max: Date.current %>
         <% if form.object.birth_date.nil? && form.object.age %>
           <p class="mt-1.5 text-label font-medium text-ink-500">Hoy dice <%= form.object.age %> años; con la fecha, la edad se calcula sola.</p>
         <% end %>

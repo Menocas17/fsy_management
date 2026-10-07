@@ -6,7 +6,7 @@
 </div>
 <div>
   <%= label_tag "#{prefix}_spent_on", "Fecha de la compra", class: field_label_classes %>
-  <%= date_field_tag :spent_on, Date.current, id: "#{prefix}_spent_on", class: field_input_classes %>
+  <%= date_input :spent_on, Date.current, id: "#{prefix}_spent_on" %>
 </div>
 <div>
   <%= label_tag "#{prefix}_payment_method", "Forma de pago", class: field_label_classes %>

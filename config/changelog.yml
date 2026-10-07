@@ -7,6 +7,15 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-fechas-y-telefonos-angostos
+  date: 2026-10-08
+  title: Fechas día/mes/año y teléfonos angostos
+  summary: Las fechas se escriben y se leen siempre día/mes/año, y las pantallas ya no se rompen en teléfonos angostos.
+  changes:
+    - Los campos de fecha (nacimiento, actividades, capacitaciones, gastos) son día/mes/año aunque el teléfono esté en inglés; las barras se ponen solas y el botón del calendario sigue ahí.
+    - En teléfonos angostos las cifras de tres en fila van una debajo de otra, sin partir palabras («Pendientes», «Confirmadas»).
+    - La vista general de compañías muestra cada compañía en una tarjeta en el teléfono, sin tabla que se salga de la pantalla.
+    - Ya no se cortan el selector de la agenda, los nombres en «Lo que sigue» ni la lista de asistencia nocturna.
 - id: 2026-10-08-reporte-cumpleaneros
   date: 2026-10-08
   title: Reporte de cumpleañeros
