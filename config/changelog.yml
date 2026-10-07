@@ -7,6 +7,14 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-07-ajustes-modo-simple
+  date: 2026-10-07
+  title: Ajustes al modo simple y al escáner
+  summary: La cifra de enfermería del inicio es más corta y el escáner de capacitaciones vuelve a donde lo abriste.
+  changes:
+    - En el inicio del teléfono la cifra dice «Enfermería», con «Ahora» en gris junto al icono.
+    - Al escanear la asistencia desde una capacitación, «Volver» te lleva a esa capacitación (o a la lista de capacitaciones), no al inicio.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
 - id: 2026-10-07-modo-simple
   date: 2026-10-07
   title: Modo simple en el teléfono
