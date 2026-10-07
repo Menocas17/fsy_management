@@ -27,7 +27,7 @@ class ReportsController < ApplicationController
   end
 
   def birthdays
-    send_report BirthdaysReport.new
+    send_report BirthdaysReport.new(scope: params[:scope])
   end
 
   def trainings

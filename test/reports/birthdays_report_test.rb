@@ -19,4 +19,14 @@ class BirthdaysReportTest < ActiveSupport::TestCase
     assert_equal [ "Jueves 14 de enero", "Juan Pérez", "Joven", "—", "17 años" ], report.send(:rows, week, with_weekday: true).first
     assert report.render.start_with?("%PDF-")
   end
+
+  test "only jóvenes leaves the staff out" do
+    participants(:juan).update!(birth_date: Date.new(2010, 1, 14))
+    participants(:maria).update!(birth_date: Date.new(2001, 1, 3))
+
+    jovenes = BirthdaysReport.new(scope: "jovenes", start_on: Date.new(2027, 1, 11), end_on: Date.new(2027, 1, 16))
+    assert_equal [ participants(:juan) ], jovenes.send(:month_people).map(&:first)
+    assert_match(/\Acumpleaneros-jovenes-\d{4}-\d{2}-\d{2}\.pdf\z/, jovenes.filename)
+    assert_match(/\Acumpleaneros-\d{4}/, report.filename)
+  end
 end
