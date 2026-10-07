@@ -7,6 +7,13 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-edad-de-hoy
+  date: 2026-10-08
+  title: La edad es la de hoy
+  summary: Las fichas muestran la edad que cada persona tiene hoy, y sube sola el día de su cumpleaños.
+  changes:
+    - Antes se mostraba la edad que tendría el primer día del FSY; ahora es la de hoy, con año, mes y día.
+    - Se actualiza sola en fichas, listas, enfermería, reportes y la gráfica por edad del inicio, sin tocar nada.
 - id: 2026-10-07-ajustes-modo-simple
   date: 2026-10-07
   title: Ajustes al modo simple y al escáner
