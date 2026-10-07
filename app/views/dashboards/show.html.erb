@@ -128,8 +128,8 @@
     </div>
   </section>
 
-  <%# Modo simple en el teléfono: las cifras del rol y solo dos gráficas; lo demás queda en «Ver todas las
-      estadísticas» y en la computadora, donde el panel sigue completo. %>
+  <%# Modo simple en el teléfono: las cifras del rol y solo dos gráficas; lo demás queda en la computadora,
+      donde el panel sigue completo (o apagando el modo simple en Configuración). %>
   <% only_full = @simple ? "max-md:hidden md:contents" : "contents" %>
   <%= render "simple_kpis", kpis: @dashboard.simple_kpis if @simple %>
   <%= tag.div class: only_full do %>
@@ -141,12 +141,6 @@
     <% end %>
   <% end %>
   <%= render "main_charts", count_by_stake: @dashboard.count_by_stake, count_by_role: @dashboard.count_by_role %>
-  <% if @simple %>
-    <%= link_to dashboard_path(completo: 1), data: { full_stats: true }, class: button_classes(:secondary, extra: "md:hidden w-full min-h-12") do %>
-      Ver todas las estadísticas
-      <%= icon "arrow-right", class: "w-4 h-4" %>
-    <% end %>
-  <% end %>
   <%= tag.div class: only_full do %>
     <%= render "secondary_charts", data_by_age: @dashboard.participants_by_age, shirt_counts: @dashboard.shirt_count, male_count: @dashboard.male_count, female_count: @dashboard.female_count %>
   <% end %>

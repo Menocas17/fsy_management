@@ -29,7 +29,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     assert_select "button[aria-label='Abrir menú']", false
   end
 
-  test "the counselor's home shows their own figures, two charts and the way to the full dashboard" do
+  test "the counselor's home shows their own figures, and two charts, without a way to the full dashboard" do
     sign_in_as(@counselor)
     get dashboard_path
 
@@ -38,16 +38,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[data-simple-kpi='En enfermería'][href='#{infirmary_visits_path}']", text: /0/
       assert_select "[data-simple-kpi='Asistencia']", text: /Sin pasar/
     end
-    assert_select "a[data-full-stats][href='#{dashboard_path(completo: 1)}']"
-  end
-
-  test "the full dashboard is one tap away and drops the simple figures" do
-    sign_in_as(@counselor)
-    get dashboard_path(completo: 1)
-
-    assert_select "[data-simple-kpis]", false
     assert_select "a[data-full-stats]", false
-    assert_select "nav[data-bottom-nav]"
   end
 
   test "direction gets the search in the center and its QR inside Más" do
