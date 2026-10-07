@@ -7,14 +7,16 @@
 # página declara turbo_refreshes_with morph, Turbo la mezcla en su lugar, sin pintar antes la copia en
 # caché (el parpadeo arriba de todo) ni reiniciar el desplazamiento de la página y del menú lateral.
 class SegmentedToggleComponent < ViewComponent::Base
-  BASE = "inline-flex shrink-0 items-center gap-1.5 h-9 px-3.5 rounded-inner text-label whitespace-nowrap transition-colors"
+  # En el teléfono las opciones se reparten el ancho (flex-1) y sin icono, con menos relleno: «Agenda del evento /
+  # Capacitaciones» cabe entero en 320 px en vez de quedar cortado en un riel que se desplaza.
+  BASE = "inline-flex shrink-0 max-sm:flex-1 justify-center items-center gap-1.5 h-9 px-2 sm:px-3.5 rounded-inner text-label whitespace-nowrap transition-colors"
   ACTIVE = "#{BASE} bg-surface dark:bg-muted shadow-sm font-bold text-ink-900".freeze
   IDLE = "#{BASE} font-semibold text-ink-500 hover:text-ink-900".freeze
 
   # Si las opciones no caben (el teléfono), el riel se desplaza de lado en vez de salirse de la pantalla.
   # floating: sobre un lienzo (el organigrama), el riel va en superficie con sombra en vez de hundido.
-  RAIL = "inline-flex w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft"
-  FLOATING_RAIL = "inline-flex w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-surface/95 border border-line-soft shadow-md"
+  RAIL = "flex sm:inline-flex w-full sm:w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-canvas border border-line dark:border-line-soft"
+  FLOATING_RAIL = "flex sm:inline-flex w-full sm:w-fit max-w-full overflow-x-auto p-1 gap-0.5 rounded-control bg-surface/95 border border-line-soft shadow-md"
 
   def initialize(label:, items:, floating: false)
     @label = label
@@ -32,7 +34,7 @@ class SegmentedToggleComponent < ViewComponent::Base
     def link_for(item)
       helpers.link_to(item[:href], class: item[:active] ? ACTIVE : IDLE,
                                    aria: { current: ("page" if item[:active]) }, data: data_for(item)) do
-        safe_join([ (helpers.icon(item[:icon], class: "size-3.5") if item[:icon]), item[:text] ].compact)
+        safe_join([ (helpers.icon(item[:icon], class: "max-sm:hidden size-3.5") if item[:icon]), item[:text] ].compact)
       end
     end
 

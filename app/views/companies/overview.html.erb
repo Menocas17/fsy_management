@@ -81,7 +81,42 @@
 
   <section class="<%= card_classes("p-5 md:p-6") %>">
     <%= section_heading "Estado por compañía", "list-checks", tone: :indigo %>
-    <div class="overflow-x-auto">
+    <%# En el teléfono la tabla (760 px) obligaba a desplazarse de lado y partía los nombres: va como lista, cada
+        compañía en una tarjeta con sus datos en una línea que se acomoda sola. %>
+    <div class="md:hidden flex flex-col gap-4" data-overview-list>
+      <% groups.each do |auxiliar_company, companies| %>
+        <div>
+          <p class="px-3 py-2 rounded-inner bg-sunken text-label font-bold text-ink-700">
+            <% if auxiliar_company %>
+              <%= link_to auxiliar_company.name, auxiliar_company, class: "hover:underline" %>
+              <span class="block font-semibold text-ink-500">Auxiliares: <%= auxiliar_company.auxiliars.map(&:full_name).join(", ").presence || "sin asignar" %></span>
+            <% else %>
+              Sin compañía auxiliar
+            <% end %>
+          </p>
+          <ul class="divide-y divide-line-soft">
+            <% companies.each do |company| %>
+              <li>
+                <%= link_to company_path(company, return_to: return_here), class: "flex items-start gap-3 px-1 py-3", data: { overview_card: company.number } do %>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-body font-bold text-ink-900"><%= company.name %></span>
+                    <span class="block text-label font-semibold text-ink-500 truncate"><%= company.nickname.presence || "Sin nombre elegido" %></span>
+                    <span class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-label text-ink-700 tabular-nums">
+                      <span class="whitespace-nowrap"><%= company.counselors.size %>/2 consejeros</span>
+                      <span class="whitespace-nowrap"><b class="text-ink-900"><%= @jovenes_counts.fetch(company.id, 0) %></b> jóvenes (<%= @gender_counts.fetch([ company.id, "H" ], 0) %> H · <%= @gender_counts.fetch([ company.id, "M" ], 0) %> M)</span>
+                      <span class="whitespace-nowrap"><%= pluralize(@room_counts.fetch(company.id, 0), "cuarto") %></span>
+                      <% if company.dining_hall_label %><span class="whitespace-nowrap"><%= company.dining_hall_label %></span><% end %>
+                    </span>
+                  </span>
+                  <%= render "companies/staff_status", company: company %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+    <div class="max-md:hidden overflow-x-auto">
       <table class="w-full min-w-[760px] text-left">
         <thead>
           <tr class="text-meta tracking-[.06em] uppercase text-ink-500">

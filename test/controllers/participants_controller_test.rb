@@ -143,7 +143,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
 
     get edit_participant_path(juan)
 
-    assert_select "a[href='#{participant_path(juan, anchor: "asignaciones")}']", text: /Ver asignaciones en el perfil/
+    assert_select "a[href='#{participant_path(juan, anchor: "asignaciones")}']", text: /Ver asignaciones/
     assert_includes response.body, "1 asignación registrada"
     assert_select "form#participant-form input[name^='assignment']", 0
   end

@@ -28,7 +28,7 @@
       </div>
       <div>
         <%= form.label :planned_on, "Fecha prevista", class: field_label_classes %>
-        <%= form.date_field :planned_on, class: field_input_classes %>
+        <%= date_input form.field_name(:planned_on), form.object.planned_on || form.object.planned_on_before_type_cast, id: form.field_id(:planned_on) %>
       </div>
     </div>
   </section>

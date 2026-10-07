@@ -507,6 +507,19 @@ html.text-lg-mode { --type-scale: 1.12; }
   }
 }
 
+/* Teléfonos de menos de 414 px (casi todos: 320, 360, 375, 390): tres cifras en fila quedan de 70–85 px y partían
+   las palabras largas a la mitad («Pendien-tes», «Confirma-das»). Ahí van una debajo de otra, en renglón: icono,
+   cifra y etiqueta. Aplica a toda fila de tres mosaicos (StatTileComponent) sin que cada vista lo repita. */
+@media (max-width: 413px) {
+  .grid-cols-3:has(> [data-stat-tile]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .grid-cols-3 > [data-stat-tile] {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
 /* El destello gris que pinta el navegador al tocar ignora los bordes redondeados. */
 * {
   -webkit-tap-highlight-color: transparent;

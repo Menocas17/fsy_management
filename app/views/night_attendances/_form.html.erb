@@ -46,7 +46,8 @@
           </span>
           <span class="min-w-0 flex-1">
             <span class="block text-body font-bold text-ink-900 truncate"><%= joven.full_name %></span>
-            <span class="block text-label font-semibold text-ink-500 truncate">
+            <%# Sin truncate: a 320 px «Toca para marcar presente» quedaba cortado; mejor que baje de línea. %>
+            <span class="block text-label font-semibold leading-snug text-ink-500">
               <%= joven.room.present? ? "Cuarto #{joven.room}" : "Sin cuarto" %> ·
               <span class="group-data-[state=presente]:text-cat-green-ink group-data-[state=ausente]:text-cat-rose-ink" data-night-attendance-target="label"
                     data-night-label><%= mark&.presente? ? "Presente" : mark&.ausente? ? "Ausente · #{mark.reason_label}" : "Toca para marcar presente" %></span>
