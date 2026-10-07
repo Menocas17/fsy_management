@@ -113,6 +113,7 @@ Rails.application.routes.draw do
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
+  get "novedades" => "changelog#index", as: :changelog
   resource :settings, only: [ :show ] do
     patch :scan_windows
     patch :simple_mode

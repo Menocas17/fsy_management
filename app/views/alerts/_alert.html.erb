@@ -82,6 +82,11 @@
             <%= icon "calendar-days", class: "w-3.5 h-3.5" %>
             Cambio de agenda
           </span>
+        <% elsif alert.source_novedades? %>
+          <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
+            <%= icon "sparkles", class: "w-3.5 h-3.5" %>
+            Novedades de la app
+          </span>
         <% elsif alert.source_asignacion? %>
           <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500">
             <%= icon "clipboard-list", class: "w-3.5 h-3.5" %>

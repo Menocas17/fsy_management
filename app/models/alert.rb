@@ -10,7 +10,7 @@ class Alert < ApplicationRecord
 
   enum :audience, { todos: 0, por_roles: 1, individual: 2, personas: 3 }, prefix: true
   enum :priority, { informativa: 0, importante: 1, critica: 2 }, prefix: true
-  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4, enfermeria: 5 }, prefix: true
+  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4, enfermeria: 5, novedades: 6 }, prefix: true
 
   PRIORITY_LABELS = { "informativa" => "Informativa", "importante" => "Importante", "critica" => "Crítica" }.freeze
   PRIORITY_STYLES = {
@@ -28,8 +28,8 @@ class Alert < ApplicationRecord
 
   # Every alert leaves its own trace in Historial, whether a person sent it or the agenda did.
   after_create :record_in_history
-  # …suena en los dispositivos suscritos aunque la app esté cerrada…
-  after_create_commit :push_to_devices
+  # …suena en los dispositivos suscritos aunque la app esté cerrada (las novedades de la app no: esperan en la campanita)…
+  after_create_commit :push_to_devices, unless: :source_novedades?
   # …y refresca la campanita de quien la tenga abierta ahora mismo.
   after_create_commit :refresh_open_bells
 

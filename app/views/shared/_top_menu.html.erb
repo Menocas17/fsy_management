@@ -75,6 +75,10 @@
             <%= icon "user-round", class: "w-4 h-4" %>
             Mi perfil
           <% end %>
+          <%= link_to changelog_path, data: { account_menu: "changelog" }, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-inner text-body font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900 transition" do %>
+            <%= icon "sparkles", class: "w-4 h-4" %>
+            Novedades
+          <% end %>
           <%# Accesos es cosa de la cuenta del sistema, no del trabajo del evento: vive aquí y no en el menú lateral. %>
           <% if Current.user.superadmin? %>
             <%= link_to accesses_path, data: { account_menu: "accesses" },
