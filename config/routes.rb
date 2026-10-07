@@ -48,6 +48,8 @@ Rails.application.routes.draw do
   end
 
   # Lector general del panel: un gafete abre la ficha de la persona; un artículo, su ficha de inventario.
+  # La búsqueda de toda la app (botón central de la barra inferior del modo simple).
+  get "buscar" => "searches#show", as: :search
   get "escanear" => "scans#show", as: :scan
   get "escanear/buscar" => "scans#lookup", as: :scan_lookup
 
@@ -111,8 +113,10 @@ Rails.application.routes.draw do
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
+  get "novedades" => "changelog#index", as: :changelog
   resource :settings, only: [ :show ] do
     patch :scan_windows
+    patch :simple_mode
   end
   resources :auxiliar_companies do
     member do

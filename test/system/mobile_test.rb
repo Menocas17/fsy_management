@@ -18,6 +18,8 @@ class MobileTest < ApplicationSystemTestCase
   end
 
   test "the profile header stacks cleanly on a phone" do
+    # El volver de la barra reemplaza al botón del cajón, que solo existe con el modo simple apagado.
+    @admin.update!(simple_mode: false)
     sign_in_as(@admin)
     emulate_phone
     visit participant_path(@andrea)
