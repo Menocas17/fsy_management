@@ -59,7 +59,8 @@ class DashboardFacade
     @next_activities ||= Activity.where(starts_at: Time.current..).order(:starts_at).limit(limit).to_a
   end
 
-  # Modo simple: las tres cifras del inicio de cada rol. Cada una es { label:, value:, sub:, icon:, tone:, link: };
+  # Modo simple: las tres cifras del inicio de cada rol. Cada una es { label:, value:, sub:, badge:, icon:, tone:, link: };
+  # badge es el momento de la cifra («Ahora», «Hoy»), que va en gris junto al icono;
   # link es la página que abre (DashboardHelper#simple_kpi_url), nil si no lleva a ninguna.
   def simple_kpis
     @simple_kpis ||= case @user&.participant&.rol
@@ -73,8 +74,8 @@ class DashboardFacade
   end
 
   private
-    def kpi(label, value, icon, tone, sub: nil, link: nil)
-      { label: label, value: value, sub: sub, icon: icon, tone: tone, link: link }
+    def kpi(label, value, icon, tone, sub: nil, badge: nil, link: nil)
+      { label: label, value: value, sub: sub, badge: badge, icon: icon, tone: tone, link: link }
     end
 
     def counselor_jovenes
@@ -90,8 +91,8 @@ class DashboardFacade
       present, night = night_attendance_present(jovenes)
       [
         kpi(label, jovenes.count, "users", :green, link: link),
-        kpi("En enfermería", InfirmaryVisit.adentro.where(participant_id: jovenes.select(:id)).count, "heart-pulse", :rose,
-            sub: "Ahora", link: :infirmary),
+        kpi("Enfermería", InfirmaryVisit.adentro.where(participant_id: jovenes.select(:id)).count, "heart-pulse", :rose,
+            badge: "Ahora", link: :infirmary),
         kpi("Asistencia", present || "—", "moon-star", :indigo,
             sub: present ? "de #{jovenes.count} · #{night}" : "Sin pasar", link: :night_attendance)
       ]
@@ -114,7 +115,7 @@ class DashboardFacade
       [
         kpi("Jóvenes", total_jovenes, "users", :green, link: :participants),
         kpi("Staff", total_staff, "user-star", :amber, link: :staff),
-        kpi("En enfermería", InfirmaryVisit.adentro.count, "heart-pulse", :rose, sub: "Ahora", link: :infirmary)
+        kpi("Enfermería", InfirmaryVisit.adentro.count, "heart-pulse", :rose, badge: "Ahora", link: :infirmary)
       ]
     end
 
@@ -135,9 +136,9 @@ class DashboardFacade
         [ arrivals_kpi, kpi("Por llegar", total_jovenes - arrived, "clock", :amber, link: :checkins), team ]
       elsif area&.nursing?
         [
-          kpi("Adentro", InfirmaryVisit.adentro.count, "heart-pulse", :rose, sub: "Ahora", link: :infirmary),
+          kpi("Adentro", InfirmaryVisit.adentro.count, "heart-pulse", :rose, badge: "Ahora", link: :infirmary),
           kpi("En camino", InfirmaryVisit.en_camino.count, "footprints", :amber, link: :infirmary),
-          kpi("Atendidos", InfirmaryVisit.admitted_on(Date.current).count, "clipboard-check", :green, sub: "Hoy", link: :infirmary)
+          kpi("Atendidos", InfirmaryVisit.admitted_on(Date.current).count, "clipboard-check", :green, badge: "Hoy", link: :infirmary)
         ]
       elsif area&.finance?
         [

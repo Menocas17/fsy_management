@@ -252,4 +252,27 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Checkin.count, "the arrival is a different registry"
     assert_match(/Anuló la asistencia a Primeros auxilios/, AuditLog.registro.sole.summary)
   end
+
+  test "opened from a training, the scanner goes back to it, also after a scanned ficha" do
+    training = Training.create!(name: "Primeros auxilios", held_on: Date.current)
+    ScanWindow.activate!(ScanWindow.for(training))
+    origin = agenda_training_path(training)
+
+    get checkins_path(training_id: training.id, return_to: origin)
+    assert_select "a[data-page-back-mobile][href='#{origin}']", text: "Primeros auxilios"
+
+    get checkins_roster_path(training_id: training.id, return_to: origin), headers: { "Accept" => "application/json" }
+    card_url = response.parsed_body["people"].first["url"]
+    assert_includes card_url, CGI.escape(checkins_path(training_id: training.id, return_to: origin))
+  end
+
+  test "from the list of trainings the way back is called Capacitaciones" do
+    training = Training.create!(name: "Primeros auxilios", held_on: Date.current)
+    ScanWindow.activate!(ScanWindow.for(training))
+
+    get checkins_path(return_to: agenda_trainings_path)
+    assert_redirected_to checkins_path(training_id: training.id, return_to: agenda_trainings_path)
+    follow_redirect!
+    assert_select "a[data-page-back-mobile][href='#{agenda_trainings_path}']", text: "Capacitaciones"
+  end
 end

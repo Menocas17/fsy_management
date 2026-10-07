@@ -14,7 +14,7 @@
       <% end %>
       <%# Como en Inventario: escanear es secundario y crear, el botón navy, al final. %>
       <% if can_check_in? && (next_training = @trainings.find { |training| training.scan_window.open? }) %>
-        <%= link_to checkins_path(training_id: next_training.id),
+        <%= link_to checkins_path(training_id: next_training.id, return_to: request.fullpath),
               class: button_classes(:secondary) do %>
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Escanear asistencia
