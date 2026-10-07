@@ -7,6 +7,15 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-entrar-con-huella
+  date: 2026-10-08
+  title: Entra con tu huella
+  summary: Ya puedes entrar con la huella, la cara o el PIN de tu teléfono, sin escribir tu correo ni tu contraseña.
+  changes:
+    - Después de entrar con tu contraseña, la app te ofrece usar tu huella la próxima vez.
+    - En la pantalla de inicio de sesión, toca «Entrar con huella» (o el campo del correo, y el teléfono la sugiere).
+    - Si se te cierra la sesión, vuelves a entrar con la huella en un momento.
+    - En tus otros dispositivos con la misma cuenta de Apple o Google también funciona; y en Configuración → Entrar con huella ves y quitas los dispositivos.
 - id: 2026-10-07-ajustes-modo-simple
   date: 2026-10-07
   title: Ajustes al modo simple y al escáner

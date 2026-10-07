@@ -3,6 +3,8 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :push_subscriptions, dependent: :destroy
   has_many :alert_dismissals, dependent: :delete_all
+  # Entrar con la huella (PasskeysController, Passkeys::SessionsController): una por dispositivo o llavero.
+  has_many :passkeys, dependent: :delete_all
   belongs_to :participant, optional: true
 
   # Cuánto vale el enlace con el que alguien elige su contraseña: al crearle la cuenta o al restablecerla.
@@ -43,6 +45,8 @@ class User < ApplicationRecord
     transaction do
       update!(password: self.class.random_password)
       sessions.destroy_all
+      # Restablecer es para quien perdió el acceso (o lo perdió con el teléfono): sus huellas tampoco entran más.
+      passkeys.delete_all
     end
   end
 
@@ -74,6 +78,13 @@ class User < ApplicationRecord
   def full_access?
     return true if superadmin?
     participant&.coordinador? || participant&.director? || false
+  end
+
+  # El identificador de la cuenta que guarda cada passkey (user handle): se crea la primera vez que hace falta.
+  # No es el id de la tabla ni el correo: WebAuthn pide un valor opaco que no diga quién es.
+  def webauthn_handle!
+    update_column(:webauthn_id, WebAuthn.generate_user_id) if webauthn_id.blank?
+    webauthn_id
   end
 
   # Modo simple (solo en el teléfono): barra inferior en vez del menú lateral y un inicio con las cifras de

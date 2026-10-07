@@ -26,6 +26,51 @@
       </div>
     </section>
 
+    <%# Entrar con huella (passkeys): una por dispositivo o llavero; se activa aquí, en el dispositivo donde se está. %>
+    <% passkeys = Current.user.persisted? ? Current.user.passkeys.recent_first : Passkey.none %>
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-passkeys" aria-labelledby="settings-passkeys-title"
+             data-controller="passkey" data-passkey-options-url-value="<%= options_passkeys_path %>" data-passkey-url-value="<%= passkeys_path %>">
+      <h2 id="settings-passkeys-title" class="<%= card_heading %>">
+        <%= icon "fingerprint-pattern", class: "w-[17px] h-[17px]" %>
+        Entrar con huella
+      </h2>
+      <p class="-mt-2 text-label leading-relaxed text-ink-500">
+        Entra sin escribir tu correo ni tu contraseña: el dispositivo te pide la huella, la cara o su PIN. Tu huella nunca sale de él.
+        En los otros dispositivos de tu misma cuenta de Apple o Google también sirve.
+      </p>
+      <% if passkeys.any? %>
+        <ul class="mt-4 divide-y divide-line-soft border-y border-line-soft" data-passkey-list>
+          <% passkeys.each do |passkey| %>
+            <li class="flex items-center gap-3 py-3">
+              <%= render IconTileComponent.new(icon: "fingerprint-pattern", tone: :blue) %>
+              <div class="min-w-0 flex-1">
+                <p class="text-body font-semibold text-ink-900 truncate"><%= passkey.name %></p>
+                <p class="text-label text-ink-500">
+                  <%= passkey.last_used_at ? "Último uso #{ago_label(passkey.last_used_at)}" : "Activada #{ago_label(passkey.created_at)}" %>
+                </p>
+              </div>
+              <%= button_to passkey_path(passkey), method: :delete, aria: { label: "Quitar la huella de #{passkey.name}" },
+                    form: { data: { turbo_confirm: "¿Quitar la huella de #{passkey.name}?",
+                                    turbo_confirm_detail: "Desde ese dispositivo vas a entrar con tu correo y contraseña.",
+                                    turbo_confirm_button: "Sí, quitar" } },
+                    class: "shrink-0 size-9 inline-flex items-center justify-center rounded-inner text-ink-500 hover:bg-cat-rose/10 hover:text-cat-rose-ink cursor-pointer transition" do %>
+                <%= icon "trash-2", class: "w-4 h-4" %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <div class="mt-4" hidden data-passkey-target="supported">
+        <button type="button" data-action="passkey#register" data-passkey-target="button" data-passkey-register
+                class="<%= button_classes(passkeys.any? ? :secondary : :primary, extra: "disabled:opacity-60") %>">
+          <%= icon "fingerprint-pattern", class: "w-4 h-4" %>
+          <%= passkeys.any? ? "Activar en este dispositivo" : "Activar la huella" %>
+        </button>
+        <p hidden data-passkey-target="error" role="alert" class="mt-2 text-label font-semibold text-cat-rose-ink"></p>
+      </div>
+      <p class="mt-4 text-label text-ink-500" hidden data-passkey-target="unsupported">Este dispositivo o navegador no permite entrar con huella.</p>
+    </section>
+
     <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-appearance">
       <h2 id="settings-appearance" class="<%= card_heading %>">
         <%= icon "sun", class: "w-[17px] h-[17px]" %>

@@ -1,6 +1,14 @@
 Rails.application.routes.draw do
   mount RailsIcons::Engine, at: "/rails_icons"
   resource :session
+  # Entrar con la huella (passkeys): las opciones que firma el dispositivo y la firma de vuelta.
+  resource :passkey_session, only: :create, path: "sesion/huella" do
+    post :options, path: "opciones"
+  end
+  # Activar o quitar la huella de la propia cuenta, desde Configuración.
+  resources :passkeys, only: %i[create destroy], path: "huella" do
+    post :options, path: "opciones", on: :collection
+  end
   resources :passwords, param: :token
   # Cambiar la contraseña ya adentro, con la actual: no depende del correo.
   resource :password_change, only: %i[edit update], path: "contrasena", path_names: { edit: "cambiar" }

@@ -16,6 +16,8 @@ class SessionsController < ApplicationController
       LoginAttempt.record!(email: params[:email_address], result: :success, request: request, user: user)
       user.signed_in!
       start_new_session_for user
+      # Entró con la contraseña: la primera pantalla le ofrece entrar con la huella la próxima vez (passkeys/_offer).
+      session[:offer_passkey] = true
       redirect_to after_authentication_url
     else
       LoginAttempt.record!(email: params[:email_address], result: :failed, request: request,

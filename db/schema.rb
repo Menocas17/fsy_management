@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -434,6 +434,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
   end
 
+  create_table "passkeys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "external_id", null: false
+    t.text "public_key", null: false
+    t.bigint "sign_count", default: 0, null: false
+    t.string "name", null: false
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_passkeys_on_external_id", unique: true
+    t.index ["user_id"], name: "index_passkeys_on_user_id"
+  end
+
   create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.string "endpoint", null: false
@@ -494,8 +507,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.datetime "first_signed_in_at"
     t.datetime "alerts_cleared_at"
     t.boolean "simple_mode", default: true, null: false
+    t.string "webauthn_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["participant_id"], name: "index_users_on_participant_id", unique: true
+    t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -542,6 +557,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
   add_foreign_key "participant_imports", "participants", column: "uploaded_by_id", on_delete: :nullify
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify
+  add_foreign_key "passkeys", "users"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "training_attendances", "participants"

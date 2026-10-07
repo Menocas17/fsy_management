@@ -5,31 +5,48 @@
   <h1 class="text-display font-extrabold tracking-tight text-ink-900">Iniciar sesión</h1>
   <p class="mt-1.5 text-body leading-snug text-ink-500">Entra con el correo que registraste para el evento.</p>
 
-  <%= form_with url: session_url, class: "mt-6 space-y-4" do |form| %>
-    <div>
-      <%= form.label :email_address, "Correo electrónico", class: field_label_classes %>
-      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username",
-            placeholder: "tucorreo@ejemplo.com", value: params[:email_address], class: auth_input_classes %>
-    </div>
+  <%# La huella (passkey): el botón de abajo, y en el teléfono también la sugerencia al tocar el correo
+      (autocomplete «webauthn» + conditional). Donde el navegador no tiene passkeys, nada de esto aparece. %>
+  <div data-controller="passkey" data-passkey-conditional-value="true"
+       data-passkey-options-url-value="<%= options_passkey_session_path %>" data-passkey-url-value="<%= passkey_session_path %>">
+    <%= form_with url: session_url, class: "mt-6 space-y-4" do |form| %>
+      <div>
+        <%= form.label :email_address, "Correo electrónico", class: field_label_classes %>
+        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username webauthn",
+              placeholder: "tucorreo@ejemplo.com", value: params[:email_address], class: auth_input_classes %>
+      </div>
 
-    <%= render "shared/password_field", form: form, attribute: :password, label: "Contraseña",
-               autocomplete: "current-password", placeholder: "Tu contraseña" %>
+      <%= render "shared/password_field", form: form, attribute: :password, label: "Contraseña",
+                 autocomplete: "current-password", placeholder: "Tu contraseña" %>
 
-    <%# Sin correo configurado no hay enlace que mandar: la restablece la coordinación. %>
-    <div class="flex justify-end">
-      <% if password_reset_emails? %>
-        <%= link_to "¿Olvidaste tu contraseña?", new_password_path,
-              class: "text-label font-bold text-primary-600 hover:underline" %>
-      <% else %>
-        <p class="text-label text-ink-500">¿Olvidaste tu contraseña? Pídele a tu coordinación que la restablezca.</p>
+      <%# Sin correo configurado no hay enlace que mandar: la restablece la coordinación. %>
+      <div class="flex justify-end">
+        <% if password_reset_emails? %>
+          <%= link_to "¿Olvidaste tu contraseña?", new_password_path,
+                class: "text-label font-bold text-primary-600 hover:underline" %>
+        <% else %>
+          <p class="text-label text-ink-500">¿Olvidaste tu contraseña? Pídele a tu coordinación que la restablezca.</p>
+        <% end %>
+      </div>
+
+      <%= tag.button type: "submit", class: auth_button_classes do %>
+        <%= icon "log-in", class: "w-4 h-4" %>
+        Entrar
       <% end %>
-    </div>
-
-    <%= tag.button type: "submit", class: auth_button_classes do %>
-      <%= icon "log-in", class: "w-4 h-4" %>
-      Entrar
     <% end %>
-  <% end %>
+
+    <div hidden data-passkey-target="supported" class="mt-4">
+      <div class="flex items-center gap-3 mb-4 text-label font-semibold text-ink-500" aria-hidden="true">
+        <span class="flex-1 h-px bg-line-soft"></span>o<span class="flex-1 h-px bg-line-soft"></span>
+      </div>
+      <button type="button" data-action="passkey#signIn" data-passkey-target="button" data-passkey-sign-in
+              class="w-full inline-flex items-center justify-center gap-2 h-11 rounded-control border border-line bg-surface text-sm font-semibold text-ink-900 hover:bg-muted transition cursor-pointer disabled:opacity-60">
+        <%= icon "fingerprint-pattern", class: "w-[18px] h-[18px]" %>
+        Entrar con huella
+      </button>
+      <p hidden data-passkey-target="error" role="alert" class="mt-2 text-label font-semibold text-cat-rose-ink"></p>
+    </div>
+  </div>
 
   <p class="mt-6 pt-4 border-t border-line-soft text-label leading-snug text-ink-500">
     ¿No tienes cuenta? La crea tu coordinación cuando te registran en el evento.
