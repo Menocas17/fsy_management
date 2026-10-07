@@ -7,6 +7,14 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-reporte-cumpleaneros
+  date: 2026-10-08
+  title: Reporte de cumpleañeros
+  summary: En Reportes ya se imprime la lista de quienes cumplen años en enero y durante la semana del FSY.
+  changes:
+    - Reportes → Cumpleañeros: primero los que cumplen durante el FSY, con el día de la semana, y luego todo enero.
+    - Cada uno con su rol, su compañía (o área) y la edad que cumple.
+  roles: [ director, coordinador ]
 - id: 2026-10-08-edad-de-hoy
   date: 2026-10-08
   title: La edad es la de hoy
