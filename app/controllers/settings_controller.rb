@@ -16,6 +16,17 @@ class SettingsController < ApplicationController
     redirect_to settings_path(anchor: "settings-scan"), notice: notice
   end
 
+  # Encender o apagar el modo simple de la propia cuenta. Viendo como otro no se guarda: la cuenta es de esa persona.
+  def simple_mode
+    if Current.viewing_as?
+      redirect_to settings_path, alert: "Viendo como otra persona no se cambia su modo simple."
+    else
+      Current.user.update!(simple_mode: params[:simple_mode] == "1")
+      notice = Current.user.simple_mode? ? "Modo simple encendido." : "Modo simple apagado: ves el menú completo."
+      redirect_to settings_path(anchor: "settings-simple"), notice: notice
+    end
+  end
+
   private
     def require_scan_manager!
       redirect_to settings_path, alert: "Solo el director de logística o el administrador activan los registros." unless Current.user.scan_manager?

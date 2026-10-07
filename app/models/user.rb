@@ -76,6 +76,18 @@ class User < ApplicationRecord
     participant&.coordinador? || participant&.director? || false
   end
 
+  # Modo simple (solo en el teléfono): barra inferior en vez del menú lateral y un inicio con las cifras de
+  # cada rol. Encendido por defecto; cada quien lo apaga en Configuración. Los jóvenes todavía no lo tienen.
+  def simple_mode?
+    simple_mode && !participant&.joven?
+  end
+
+  # La búsqueda global ocupa el botón central de la barra inferior (en vez de «Mi QR») para quien ve todo
+  # el evento: dirección, coordinadores y el director de logística.
+  def global_searcher?
+    full_access? || participant&.director_logistica? || false
+  end
+
   # Paneles de gestión (historial, columnas de acciones): el acceso total más el director de logística,
   # que administra su propio comité. Un miembro raso de logística no administra a nadie.
   def admin_or_staff_manager?

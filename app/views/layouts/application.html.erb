@@ -75,6 +75,8 @@
         <main data-controller="scroll-memory" data-pull-refresh-target="scroller" class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-canvas">
           <%= yield %>
         </main>
+        <%# Modo simple: en el teléfono el menú vive abajo, a mano del pulgar (NavigationHelper#simple_bar_items). %>
+        <%= render "shared/bottom_nav" if simple_mode? %>
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>

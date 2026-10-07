@@ -45,6 +45,57 @@ module NavigationHelper
     end
   end
 
+  # Modo simple (User#simple_mode?): en el teléfono la barra inferior reemplaza al menú lateral.
+  def simple_mode?
+    Current.user&.simple_mode? || false
+  end
+
+  # Las cuatro opciones de la barra inferior alrededor del botón central: Inicio, lo propio de cada rol y
+  # Agenda; la cuarta es «Más» (simple_more_items).
+  def simple_bar_items
+    [
+      { text: "Inicio", url: dashboard_path, icon: "house" },
+      simple_own_item,
+      { text: "Agenda", url: agenda_path, icon: "calendar-days", active_paths: [ agenda_path, activities_path ] }
+    ].map { |item| item.merge(active: nav_item_active?(url: item[:url], active_paths: item.fetch(:active_paths, []))) }
+  end
+
+  # Lo de cada rol: su compañía, las de su rama, las de todos o el módulo de su área de logística.
+  def simple_own_item
+    participant = Current.user.participant
+    case participant&.rol
+    when "consejero"
+      company = participant.counselor_scope.first
+      return { text: "Mi compañía", url: company_path(company), icon: "building-2" } if company
+    when "auxiliar"
+      auxiliar_company = participant.auxiliar_scope[:auxiliar_company]
+      return { text: "Compañías", url: auxiliar_company_path(auxiliar_company), icon: "building-2" } if auxiliar_company
+    when "director_logistica"
+      return { text: "Logística", url: logistics_areas_path, icon: "layout-grid", active_paths: [ logistics_areas_path ] }
+    when "logistica"
+      return simple_area_item(participant.logistics_area)
+    end
+    { text: "Compañías", url: companies_path, icon: "building-2", active_paths: [ companies_path, auxiliar_companies_path ] }
+  end
+
+  # Logística entra al módulo que su área trabaja; sin bandera, al inventario (que mueve toda logística).
+  def simple_area_item(area)
+    if area&.checkin? then { text: "Registro", url: checkins_path, icon: "scan-line", active_paths: [ checkins_path ] }
+    elsif area&.nursing? then { text: "Enfermería", url: infirmary_visits_path, icon: "heart-pulse", active_paths: [ infirmary_visits_path ] }
+    elsif area&.finance? then { text: "Finanzas", url: finances_path, icon: "wallet", active_paths: [ finances_path ] }
+    else { text: "Inventario", url: inventories_path, icon: "boxes", active_paths: [ inventories_path, "/articulos" ] }
+    end
+  end
+
+  # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
+  # escáner de gafetes. Configuración, Mi perfil y Cerrar sesión siguen en el menú de la foto.
+  def simple_more_items
+    in_bar = simple_bar_items.map { |item| URI.parse(item[:url]).path }
+    items = nav_items.reject { |item| in_bar.include?(URI.parse(item[:url]).path) }
+                     .map { |item| { text: item[:text], url: item[:url], icon: item[:lucide_icon] } }
+    [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
+  end
+
   # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.
   def night_attendance_nav_item
     if Current.user&.night_attendance_viewer?

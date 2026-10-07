@@ -4,12 +4,14 @@
     <div class="flex items-center gap-2 min-w-0">
       <%# En el teléfono, una página que se abre desde otra (page_back) cambia el menú por el volver, como en iPhone:
           la flecha ‹ y, en el lugar de la sección, a dónde vuelve; la flecha y los dos textos se tocan para volver.
-          El menú lateral queda en las páginas principales. %>
-      <button type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-target="trigger"
-              class="<%= "max-sm:hidden" if page_back %> md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer"
-              data-action="click->mobile-menu#toggle">
-        <%= icon "menu", class: "w-[22px] h-[22px]" %>
-      </button>
+          El menú lateral queda en las páginas principales; en el modo simple no hay menú lateral: lo reemplaza la barra inferior. %>
+      <% unless simple_mode? %>
+        <button type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-target="trigger"
+                class="<%= "max-sm:hidden" if page_back %> md:hidden -ml-2.5 size-11 inline-flex items-center justify-center rounded-inner text-ink-700 hover:bg-muted cursor-pointer"
+                data-action="click->mobile-menu#toggle">
+          <%= icon "menu", class: "w-[22px] h-[22px]" %>
+        </button>
+      <% end %>
       <% if content_for?(:back) %>
         <div data-page-back class="hidden sm:block mr-0.5"><%= yield :back %></div>
       <% end %>
