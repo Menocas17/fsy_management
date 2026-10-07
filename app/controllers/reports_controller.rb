@@ -1,6 +1,6 @@
 class ReportsController < ApplicationController
   before_action :require_reports_access!
-  before_action :require_participant_reports!, only: %i[participants rooms agenda badges]
+  before_action :require_participant_reports!, only: %i[participants rooms agenda badges birthdays]
   skip_before_action :require_reports_access!, only: %i[trainings expenses expenses_workbook]
   # La rendición la ven quienes ven Finanzas (el área, el director de logística y la dirección).
   before_action :require_finance_viewer!, only: %i[expenses expenses_workbook]
@@ -24,6 +24,10 @@ class ReportsController < ApplicationController
   def badges
     send_report BadgeLabelsReport.new(scope: params[:scope], company: Company.find_by(id: params[:company]),
                                       qr_url: ->(participant) { participant_url(participant) })
+  end
+
+  def birthdays
+    send_report BirthdaysReport.new
   end
 
   def trainings
