@@ -81,7 +81,8 @@ class Participant < ApplicationRecord
 
   # La edad sale de la fecha de nacimiento cuando la hay (la que tendrá al empezar el evento, como cuenta FSY);
   # sin ella (fichas viejas), se queda la que tenía.
-  before_validation -> { self.age = age_on(Rails.configuration.x.event_start_on || Date.current) }, if: -> { birth_date.present? }
+  # La columna guarda la edad de hoy al guardar la ficha, pero se lee siempre calculada (age): no envejece en la base.
+  before_validation -> { self[:age] = age_on(Date.current) }, if: -> { birth_date.present? }
   # Con una estaca de las que participan no quedan los nombres escritos a mano, y sin estaca no hay barrio.
   before_validation :tidy_stake_and_ward
 
@@ -232,6 +233,12 @@ class Participant < ApplicationRecord
     date_of_inscription || created_at&.to_date
   end
 
+  # La edad de hoy, con año, mes y día: cambia sola el día del cumpleaños. Sin fecha de nacimiento, la que se
+  # escribió a mano (o vino en el archivo).
+  def age
+    birth_date ? age_on(Date.current) : super
+  end
+
   def age_on(date)
     return if birth_date.nil?
 
@@ -272,8 +279,9 @@ class Participant < ApplicationRecord
     self.class.role_label(rol)
   end
 
+  # Por edad de hoy, como la ficha: con fecha de nacimiento se calcula en la consulta; sin ella, la escrita.
   def self.data_by_age
-    group(:age).count
+    group(Arel.sql(sanitize_sql_array([ "COALESCE(date_part('year', age(?::date, birth_date))::int, participants.age)", Date.current ]))).count
   end
 
   def self.jovenes_count

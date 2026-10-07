@@ -16,6 +16,13 @@
     - En la pantalla de inicio de sesión, toca «Entrar con huella» (o el campo del correo, y el teléfono la sugiere).
     - Si se te cierra la sesión, vuelves a entrar con la huella en un momento.
     - En tus otros dispositivos con la misma cuenta de Apple o Google también funciona; y en Configuración → Entrar con huella ves y quitas los dispositivos.
+- id: 2026-10-08-edad-de-hoy
+  date: 2026-10-08
+  title: La edad es la de hoy
+  summary: Las fichas muestran la edad que cada persona tiene hoy, y sube sola el día de su cumpleaños.
+  changes:
+    - Antes se mostraba la edad que tendría el primer día del FSY; ahora es la de hoy, con año, mes y día.
+    - Se actualiza sola en fichas, listas, enfermería, reportes y la gráfica por edad del inicio, sin tocar nada.
 - id: 2026-10-07-ajustes-modo-simple
   date: 2026-10-07
   title: Ajustes al modo simple y al escáner
