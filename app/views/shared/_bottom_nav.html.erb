@@ -4,9 +4,10 @@
 <% items = simple_bar_items %>
 <% me = Current.user.participant %>
 <% searcher = Current.user.global_searcher? %>
+<%# relative z-10: el disco central sube sobre <main>, y sin capa propia los charts (posicionados) lo tapaban. %>
 <div data-controller="dialog" class="contents">
   <nav aria-label="Menú principal" data-bottom-nav
-       class="md:hidden shrink-0 grid grid-cols-[1fr_1fr_64px_1fr_1fr] items-end bg-surface border-t border-line-soft pb-[max(env(safe-area-inset-bottom),10px)]">
+       class="md:hidden relative z-10 shrink-0 grid grid-cols-[1fr_1fr_64px_1fr_1fr] items-end bg-surface border-t border-line-soft pb-[max(env(safe-area-inset-bottom),10px)]">
     <%= render "shared/bottom_nav_item", item: items[0] %>
     <%= render "shared/bottom_nav_item", item: items[1] %>
 
