@@ -167,7 +167,8 @@ module NavigationHelper
     return record_label if record_label
 
     named = nav_items.filter_map { |item| [ URI.parse(item[:url]).path, item[:text] ] if item[:url] }
-    extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ] ]
+    extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ],
+              [ agenda_trainings_path, "Capacitaciones" ] ]
     # La dirección más larga que coincida gana: /companies/overview antes que /companies.
     (extra + named).sort_by { |route, _| -route.length }.find { |route, _| path == route || path.start_with?("#{route}/") }&.last
   rescue URI::InvalidURIError

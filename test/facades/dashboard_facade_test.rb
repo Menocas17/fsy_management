@@ -22,7 +22,7 @@ class DashboardFacadeTest < ActiveSupport::TestCase
 
       kpis = kpis_for(participants(:maria))
       assert_equal 1, kpis["Mis jóvenes"][:value]
-      assert_equal 1, kpis["En enfermería"][:value]
+      assert_equal 1, kpis["Enfermería"][:value]
       assert_equal 1, kpis["Asistencia"][:value]
       assert_equal "de 1 · anoche", kpis["Asistencia"][:sub]
     end
@@ -49,6 +49,6 @@ class DashboardFacadeTest < ActiveSupport::TestCase
   end
 
   test "direction and the superadmin see the whole event" do
-    assert_equal [ "Jóvenes", "Staff", "En enfermería" ], DashboardFacade.new(user: users(:one)).simple_kpis.map { |kpi| kpi[:label] }
+    assert_equal [ "Jóvenes", "Staff", "Enfermería" ], DashboardFacade.new(user: users(:one)).simple_kpis.map { |kpi| kpi[:label] }
   end
 end

@@ -9,7 +9,7 @@ class CheckinsController < ApplicationController
   def index
     # Sin nada elegido se entra directo al registro activo, si es una capacitación.
     if @training.nil? && (active = ScanWindow.active_training)
-      return redirect_to checkins_path(training_id: active.id)
+      return redirect_to checkins_path(training_id: active.id, return_to: helpers.safe_return_to(nil))
     end
 
     @expected = expected_scope.count
@@ -133,8 +133,10 @@ class CheckinsController < ApplicationController
         company: participant.company&.name || participant.logistics_area&.name || participant.role_label,
         stake: participant.stake_name,
         gender: Participant::GENDER_LABELS[participant.gender],
-        # Desde la ficha, «Volver» regresa a este mismo registro (llegada o la capacitación elegida).
-        url: participant_path(participant, from: "escaner", return_to: checkins_path(training_id: @training&.id))
+        # Desde la ficha, «Volver» regresa a este mismo registro (llegada o la capacitación elegida), que a su
+        # vez sigue sabiendo a dónde volver (return_to).
+        url: participant_path(participant, from: "escaner",
+                              return_to: checkins_path(training_id: @training&.id, return_to: helpers.safe_return_to(nil)))
       }
     end
 

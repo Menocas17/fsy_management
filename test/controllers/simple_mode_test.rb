@@ -35,7 +35,9 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
 
     assert_select "[data-simple-kpis]" do
       assert_select "a[data-simple-kpi='Mis jóvenes']", text: /1\s*Mis jóvenes/
-      assert_select "a[data-simple-kpi='En enfermería'][href='#{infirmary_visits_path}']", text: /0/
+      assert_select "a[data-simple-kpi='Enfermería'][href='#{infirmary_visits_path}']", text: /0/ do
+        assert_select "[data-kpi-badge]", text: "Ahora"
+      end
       assert_select "[data-simple-kpi='Asistencia']", text: /Sin pasar/
     end
     assert_select "a[data-full-stats]", false
