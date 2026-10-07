@@ -39,11 +39,8 @@ class ChangelogEntryTest < ActiveSupport::TestCase
     assert_equal "/novedades#novedad-e1", alert.link_path
   end
 
-  test "news of the app wait in the bell instead of buzzing the phones" do
-    assert_no_enqueued_jobs(only: PushNotificationJob) { entry("e1").announce! }
-    assert_enqueued_jobs(1, only: PushNotificationJob) do
-      Alert.create!(title: "Aviso", body: "Texto", sender_name: "Alguien", audience: :todos)
-    end
+  test "news of the app also reach the phones" do
+    assert_enqueued_jobs(1, only: PushNotificationJob) { entry("e1").announce! }
   end
 
   test "each person sees the entries for everybody and for their role" do

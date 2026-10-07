@@ -28,8 +28,8 @@ class Alert < ApplicationRecord
 
   # Every alert leaves its own trace in Historial, whether a person sent it or the agenda did.
   after_create :record_in_history
-  # …suena en los dispositivos suscritos aunque la app esté cerrada (las novedades de la app no: esperan en la campanita)…
-  after_create_commit :push_to_devices, unless: :source_novedades?
+  # …suena en los dispositivos suscritos aunque la app esté cerrada…
+  after_create_commit :push_to_devices
   # …y refresca la campanita de quien la tenga abierta ahora mismo.
   after_create_commit :refresh_open_bells
 

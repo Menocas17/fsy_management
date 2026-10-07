@@ -87,12 +87,19 @@ module NavigationHelper
     end
   end
 
+  # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Asistencia nocturna" ].freeze
+
   # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
-  # escáner de gafetes. Configuración, Mi perfil y Cerrar sesión siguen en el menú de la foto.
+  # escáner de gafetes; para acceso total, solo FULL_ACCESS_MORE_ITEMS. Configuración, Mi perfil y Cerrar sesión
+  # siguen en el menú de la foto.
   def simple_more_items
     in_bar = simple_bar_items.map { |item| URI.parse(item[:url]).path }
     items = nav_items.reject { |item| in_bar.include?(URI.parse(item[:url]).path) }
                      .map { |item| { text: item[:text], url: item[:url], icon: item[:lucide_icon] } }
+    if Current.user.full_access?
+      items = FULL_ACCESS_MORE_ITEMS.filter_map { |text| items.find { |item| item[:text] == text } }
+    end
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
   end
 
