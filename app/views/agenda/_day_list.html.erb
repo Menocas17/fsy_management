@@ -23,7 +23,10 @@
                 <%= icon "chevron-down", class: "w-4 h-4 shrink-0 transition-transform group-open:rotate-180" %>
               </summary>
               <div class="px-4 pb-4 pt-1 bg-surface">
-                <%= render "agenda/details", activity: activity %>
+                <%# Lazy: un frame dentro de un <details> cerrado no es visible, así que se pide al abrirlo. %>
+                <%= turbo_frame_tag dom_id(activity, :details), src: agenda_activity_path(activity), loading: :lazy do %>
+                  <p class="py-2 text-label font-semibold text-ink-500">Cargando…</p>
+                <% end %>
               </div>
             </details>
           <% end %>

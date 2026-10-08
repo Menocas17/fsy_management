@@ -9,4 +9,6 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "apexcharts", preload: false # @7.3.0
 pin "apexcharts/core", to: "apexcharts--core.js", preload: false # @7.3.0
 pin "jsqr", preload: false # @1.4.0
+# La subida directa de la foto de perfil (avatar_preview_controller.js); viene con Rails.
+pin "@rails/activestorage", to: "activestorage.esm.js", preload: false
 pin_all_from "app/javascript/lib", under: "lib"
