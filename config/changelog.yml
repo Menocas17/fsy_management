@@ -7,6 +7,30 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-rendimiento-detalle
+  date: 2026-10-08
+  title: Fotos más livianas y menos carga en el servidor
+  summary: Las fotos de perfil llegan ya achicadas desde el teléfono y no pasan por el servidor.
+  changes:
+    - "Una foto de teléfono de 15 MB o más no es problema: el mismo teléfono la achica a 1600 px antes de subirla (queda en unos 300 a 700 KB)."
+    - La foto sube directo al almacenamiento al elegirla, sin pasar por el servidor, así la app no se pone lenta cuando todos los consejeros cargan fotos a la vez.
+    - Las cifras generales del inicio se calculan una vez cada 30 segundos para todos, en lugar de una vez por persona.
+  roles: [ director, coordinador ]
+- id: 2026-10-08-mas-rapida
+  date: 2026-10-08
+  title: La app responde más rápido
+  summary: Las páginas que más se abren tardan menos.
+  changes:
+    - En el teléfono, la agenda carga más rápido; el detalle de cada actividad aparece al abrirla.
+    - El inicio, las fichas y la página de tu compañía responden más rápido.
+- id: 2026-10-08-foto-subida-directa
+  date: 2026-10-08
+  title: La foto se sube al elegirla
+  summary: Al cambiar la foto de una ficha, empieza a subirse en ese momento y ves el avance; al guardar ya está lista.
+  changes:
+    - Al elegir una foto aparece «Subiendo foto…» con el porcentaje y luego «Foto lista».
+    - Puedes seguir llenando la ficha mientras sube; si guardas antes, espera a que termine.
+    - Si la conexión falla, la foto se manda igual al guardar, como antes.
 - id: 2026-10-07-ajustes-modo-simple
   date: 2026-10-07
   title: Ajustes al modo simple y al escáner

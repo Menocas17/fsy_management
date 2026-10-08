@@ -1,14 +1,17 @@
 import { Controller } from '@hotwired/stimulus';
+import { DirectUpload } from '@rails/activestorage';
 
-// Muestra la foto elegida y, antes de subirla, la achica en el teléfono a maxSize px por lado: una foto de
-// 12 MP procesada en el servidor pasa de los 512 MB del plan gratis de Render. Si el navegador no puede
-// achicarla, se sube la original (el servidor la procesa igual, más despacio).
+// Muestra la foto elegida, la achica en el teléfono a maxSize px por lado y la sube en ese momento, directo a
+// R2 (DirectUploadsController), mientras se llena el resto del formulario: al guardar solo viaja la referencia
+// firmada, y el servidor no recibe cientos de fotos la mañana en que se cargan todas. Si la subida directa
+// falla (sin conexión, CORS mal puesto en el bucket), la foto achicada se manda con el formulario como antes.
 export default class extends Controller {
-  static targets = ['input', 'image', 'placeholder'];
-  static values = { maxSize: { type: Number, default: 1600 } };
+  static targets = ['input', 'image', 'placeholder', 'status'];
+  static values = { maxSize: { type: Number, default: 1600 }, directUploadUrl: String };
 
   connect() {
     this.form = this.inputTarget.form;
+    this.fieldName = this.inputTarget.name;
     this.holdSubmit = this.#holdSubmit.bind(this);
     this.form?.addEventListener('submit', this.holdSubmit);
   }
@@ -28,12 +31,69 @@ export default class extends Controller {
     this.imageTarget.classList.remove('hidden');
     if (this.hasPlaceholderTarget) this.placeholderTarget.classList.add('hidden');
 
-    this.pending = this.#downscale(file).then((smaller) => {
-      if (smaller && this.inputTarget.files[0] === file) this.#replace(smaller);
-    }).finally(() => { this.pending = null; });
+    // Otra foto elegida antes de que termine la anterior: la anterior ya no cuenta.
+    const attempt = (this.attempt = {});
+    this.#useFileInput();
+
+    const pending = this.#prepare(file, attempt).finally(() => {
+      if (this.pending === pending) this.pending = null;
+    });
+    this.pending = pending;
   }
 
-  // Si mandan el formulario mientras la foto se achica (es menos de un segundo), espera y lo manda después.
+  async #prepare(file, attempt) {
+    const smaller = await this.#downscale(file);
+    if (attempt !== this.attempt) return;
+    const chosen = smaller || file;
+
+    if (this.directUploadUrlValue) {
+      try {
+        const signedId = await this.#upload(chosen, attempt);
+        if (attempt !== this.attempt) return;
+        this.#useSignedId(signedId);
+        this.#status('Foto lista');
+        return;
+      } catch {
+        if (attempt !== this.attempt) return;
+        this.#status('');
+      }
+    }
+
+    if (smaller && this.inputTarget.files[0] === file) this.#replace(smaller);
+  }
+
+  #upload(file, attempt) {
+    this.#status('Subiendo foto…');
+    const delegate = {
+      directUploadWillStoreFileWithXHR: (xhr) => {
+        xhr.upload.addEventListener('progress', ({ loaded, total }) => {
+          if (attempt === this.attempt && total) this.#status(`Subiendo foto… ${Math.round((loaded / total) * 100)} %`);
+        });
+      }
+    };
+
+    return new Promise((resolve, reject) => {
+      new DirectUpload(file, this.directUploadUrlValue, delegate).create((error, blob) => {
+        error ? reject(error) : resolve(blob.signed_id);
+      });
+    });
+  }
+
+  // La foto ya está en el bucket: el formulario manda su referencia y el campo de archivo no manda nada.
+  #useSignedId(signedId) {
+    this.hidden ||= Object.assign(document.createElement('input'), { type: 'hidden' });
+    this.hidden.name = this.fieldName;
+    this.hidden.value = signedId;
+    this.inputTarget.after(this.hidden);
+    this.inputTarget.removeAttribute('name');
+  }
+
+  #useFileInput() {
+    this.hidden?.remove();
+    this.inputTarget.name = this.fieldName;
+  }
+
+  // Si mandan el formulario mientras la foto se achica o se sube, espera y lo manda después.
   async #holdSubmit(event) {
     if (!this.pending) return;
 
@@ -74,6 +134,12 @@ export default class extends Controller {
     const transfer = new DataTransfer();
     transfer.items.add(file);
     this.inputTarget.files = transfer.files;
+  }
+
+  #status(text) {
+    if (!this.hasStatusTarget) return;
+    this.statusTarget.textContent = text;
+    this.statusTarget.classList.toggle('hidden', !text);
   }
 
   #revoke() {
