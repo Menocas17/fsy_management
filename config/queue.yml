@@ -6,7 +6,7 @@ default: &default
     # Las fotos tienen su propio carril: una alerta a todos (cientos de push) no atrasa las miniaturas.
     # Los hilos son las fotos que se procesan a la vez (config/initializers/image_processing.rb).
     - queues: images
-      threads: <%= ENV.fetch("IMAGE_JOB_CONCURRENCY", 1) %>
+      threads: <%= Rails.application.config.x.image_job_concurrency %>
       processes: 1
       polling_interval: 0.1
     - queues: "*"

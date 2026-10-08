@@ -13,7 +13,10 @@ class QrReadingTest < ApplicationSystemTestCase
 
     assert_equal "worker", result["engine"]
     assert_equal "P-0421", result["payload"]
-    assert_operator result["reads"], :>=, 10, "reads per second"
+    # Que no pare entre lecturas, no cuántas hace: eso depende de la CPU, y en el CI las pruebas de sistema corren
+    # en paralelo y otro Chrome se la quita (bajaba de 13 a 6 lecturas). El hilo principal espera 120 ms o más.
+    assert_operator result["reads"], :>=, 3, "reads again and again"
+    assert_operator result["longestGap"], :<, 100, "starts the next read without a pause (ms)"
     assert_operator result["longestFrame"], :<, 100, "the screen never stalls (ms between frames)"
   end
 
@@ -23,10 +26,12 @@ class QrReadingTest < ApplicationSystemTestCase
     assert_equal "hilo", result["engine"]
     assert_equal "P-0421", result["payload"]
     assert_operator result["reads"], :<=, 9, "at most one read every 120 ms"
+    assert_operator result["longestGap"], :>=, 100, "pauses between reads (ms)"
   end
 
   private
-    # Lee durante un segundo, una lectura tras otra como el escáner, y cuenta lecturas y el cuadro más largo.
+    # Lee durante un segundo, una lectura tras otra como el escáner, y cuenta lecturas, el cuadro más largo y la
+    # pausa más larga entre el fin de una lectura y el comienzo de la siguiente.
     def read_for_a_second(engine)
       png = Base64.strict_encode64(RQRCode::QRCode.new("P-0421").as_png(size: 240, border_modules: 2).to_s)
       evaluate_async_script(<<~JS, png, engine)
@@ -46,7 +51,7 @@ class QrReadingTest < ApplicationSystemTestCase
 
           const reader = await QrReader.create(() => jsQR, { engine })
           const canvas = document.createElement("canvas")
-          let reads = 0, payload = null, longestFrame = 0, last = performance.now()
+          let reads = 0, payload = null, longestFrame = 0, longestGap = 0, finished = null, last = performance.now()
           const end = last + 1000
           const tick = () => {
             const now = performance.now()
@@ -54,9 +59,12 @@ class QrReadingTest < ApplicationSystemTestCase
             last = now
             if (now >= end) {
               reader.close()
-              return done({ engine: reader.engine, reads, payload, longestFrame: Math.round(longestFrame) })
+              return done({ engine: reader.engine, reads, payload, longestFrame: Math.round(longestFrame), longestGap: Math.round(longestGap) })
             }
-            if (reader.ready(frame)) reader.read(frame, canvas).then((text) => { reads++; payload ||= text })
+            if (reader.ready(frame)) {
+              if (finished !== null) longestGap = Math.max(longestGap, now - finished)
+              reader.read(frame, canvas).then((text) => { reads++; payload ||= text; finished = performance.now() })
+            }
             requestAnimationFrame(tick)
           }
           requestAnimationFrame(tick)

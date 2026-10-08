@@ -9,17 +9,31 @@ formulario real y piden pantallas. Solo leen (GET), así que no cambian datos.
 ## Qué hace falta
 
 Tres cuentas de prueba (una de dirección o superadmin, una de consejero con compañía, una de joven) con la
-misma contraseña, y dos ids. En el servidor (`bin/kamal console`):
+misma contraseña, y dos ids. En una consola de Rails conectada a esa base (en el droplet, `bin/kamal console`):
 
 ```ruby
 c = User.find_by(email_address: "cuenta-del-consejero@…").participant
 puts "COMPANIA_ID=#{c.company_id} JOVEN_DE_LA_COMPANIA_ID=#{Participant.joven.where(company_id: c.company_id).first.id}"
 ```
 
+## Usar toda la máquina
+
+Por defecto la app corre como para Render gratis (512 MB): un solo proceso de Puma y una foto a la vez. En
+una máquina con más núcleos y memoria (tu laptop, un servidor propio), estas dos variables la aprovechan:
+
+```bash
+WEB_CONCURRENCY=auto        # un proceso de Puma por núcleo (Ruby usa un núcleo por proceso)
+IMAGE_JOB_CONCURRENCY=auto  # fotos procesadas a la vez: todos los núcleos menos uno
+```
+
+En desarrollo, `IMAGE_JOB_CONCURRENCY=auto bin/dev` ya acelera las miniaturas; el resto del modo desarrollo
+recarga el código en cada cambio y siempre será más lento que producción.
+
 ## Cómo correrlas
 
-Desde **otra máquina en la misma región** que el droplet (un droplet por horas sirve): desde la casa se
-mediría la subida del internet propio, no el servidor. Hace falta Ruby (`apt install ruby`).
+Contra un servidor remoto (el droplet), desde **otra máquina en la misma región** (una máquina virtual por horas sirve):
+desde la casa se mediría la subida del internet propio, no el servidor. Contra la app en tu propia máquina,
+`BASE_URL=http://127.0.0.1:3000`. Hace falta Ruby (`apt install ruby`).
 
 ```bash
 export BASE_URL=https://<APP_HOST> PASSWORD=… \
@@ -35,9 +49,10 @@ medir: los primeros minutos Ruby todavía está agrandando su memoria y las paus
 
 ## Referencia (octubre de 2026)
 
-Medido con los datos de prueba del evento (`datos:sembrar`: 593 fichas, todas con foto), en una máquina de 4
-vCPU y 15 GB con la configuración de `config/deploy.yml` (4 procesos de Puma detrás de Thruster), sin YJIT
-(el droplet sí lo tiene, así que debería rendir algo mejor), con el generador en la misma máquina:
+Medido con los datos de prueba del evento (`datos:sembrar`: 593 fichas, todas con foto), en modo producción
+en una máquina de 4 vCPU y 15 GB, con `WEB_CONCURRENCY=4 IMAGE_JOB_CONCURRENCY=3` (4 procesos de Puma detrás
+de Thruster, como en la imagen de Docker), sin YJIT (la imagen de Docker sí lo trae, así que ahí debería rendir
+algo mejor), con el generador en la misma máquina:
 
 | Escenario | Peticiones/s | Mediana | p95 | Errores |
 |-----------|--------------|---------|-----|---------|
