@@ -41,7 +41,7 @@ class InventoryLabelsReport < ApplicationReport
             pdf.stroke_bounds
             pdf.undash
 
-            pdf.image qr_for(item), at: [ 8, pdf.bounds.top - 8 ], fit: [ QR_SIZE, QR_SIZE ]
+            draw_qr pdf, item.qr_payload, at: [ 8, pdf.bounds.top - 8 ], size: QR_SIZE
             text_left = QR_SIZE + 16
             pdf.fill_color NAVY
             pdf.text_box item.name, at: [ text_left, pdf.bounds.top - 12 ],
@@ -55,11 +55,6 @@ class InventoryLabelsReport < ApplicationReport
           end
         end
       end
-    end
-
-    # rqrcode entrega el PNG en memoria; Prawn lo dibuja sin pasar por disco.
-    def qr_for(item)
-      StringIO.new(RQRCode::QRCode.new(item.qr_payload, level: :m).as_png(size: 240, border_modules: 0).to_s)
     end
 
     def items

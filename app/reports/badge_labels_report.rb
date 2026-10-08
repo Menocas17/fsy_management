@@ -86,7 +86,7 @@ class BadgeLabelsReport < ApplicationReport
 
     # Reverso: el QR de la ficha, con el nombre en chico para saber de quién es al pegarlo.
     def back(pdf, participant)
-      pdf.image qr_for(participant), at: [ 14, pdf.bounds.top - (LABEL_HEIGHT - QR_SIZE) / 2 ], fit: [ QR_SIZE, QR_SIZE ]
+      draw_qr pdf, @qr_url.call(participant), at: [ 14, pdf.bounds.top - (LABEL_HEIGHT - QR_SIZE) / 2 ], size: QR_SIZE
       text_left = QR_SIZE + 26
       # Un nombre largo empuja la compañía hacia abajo, pero nunca sale de la etiqueta.
       width = LABEL_WIDTH - text_left - 10
@@ -122,10 +122,6 @@ class BadgeLabelsReport < ApplicationReport
     # Solo el número: el nombre que elige la compañía se decide durante la semana.
     def company_name(company)
       company.number ? "Compañía #{company.number}" : company.name
-    end
-
-    def qr_for(participant)
-      StringIO.new(RQRCode::QRCode.new(@qr_url.call(participant), level: :m).as_png(size: 360, border_modules: 0).to_s)
     end
 
     def participants

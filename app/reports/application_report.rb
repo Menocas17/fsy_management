@@ -1,5 +1,6 @@
 require "prawn"
 require "prawn/table"
+require "rqrcode"
 
 # Base de los reportes imprimibles: membrete FSY, pie con paginado y una tabla con el mismo
 # lenguaje visual de la app. Cada reporte concreto solo implementa #build.
@@ -32,6 +33,31 @@ class ApplicationReport
     "#{self.class.filename_stem}-#{Date.current.strftime('%Y-%m-%d')}.pdf"
   end
 
+  # El QR como cuadrados del PDF y no como imagen: rqrcode arma el PNG píxel por píxel en Ruby (~55 ms cada
+  # uno, y los gafetes de todo el evento pasaban de los 30 s en que el proxy corta), y en vector además se
+  # imprime nítido a cualquier tamaño. at es la esquina superior izquierda, como en pdf.image; sin margen
+  # alrededor, como los PNG de antes (border_modules: 0).
+  def draw_qr(pdf, payload, at:, size:)
+    # Calcular la matriz es lo caro (~16 ms): con la caché, los gafetes de todos salen de nuevo en segundos.
+    modules = Rails.cache.fetch([ "qr-modules", 1, payload ]) { RQRCode::QRCode.new(payload, level: :m).modules }
+    cell = size.to_f / modules.size
+    left, top = at
+    previous = pdf.fill_color
+    pdf.fill_color "000000"
+    modules.each_with_index do |row, y|
+      x = 0
+      while x < row.size
+        next x += 1 unless row[x]
+
+        start = x
+        x += 1 while x < row.size && row[x]
+        # Un pelo más alto que la celda: dos filas seguidas no dejan una línea blanca al imprimir.
+        pdf.fill_rectangle [ left + start * cell, top - y * cell ], (x - start) * cell, cell + 0.05
+      end
+    end
+    pdf.fill_color previous
+  end
+
   def render
     document.tap do |pdf|
       build(pdf)
@@ -54,7 +80,8 @@ class ApplicationReport
     end
 
     def document
-      Prawn::Document.new(page_size: "A4", page_layout: self.class.page_layout,
+      # compress: los QR en vector son miles de rectángulos; comprimidos el PDF pesa varias veces menos.
+      Prawn::Document.new(page_size: "A4", page_layout: self.class.page_layout, compress: true,
                           margin: [ 96, 36, 54, 36 ], info: pdf_info).tap do |pdf|
         pdf.font_families.update("Onest" => FONT_FAMILY)
         pdf.font "Onest"

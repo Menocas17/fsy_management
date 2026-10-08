@@ -10,6 +10,10 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # La subida directa de Active Storage, pero con sesión y solo imágenes (DirectUploadsController). Va antes que
+  # la ruta de fábrica, que queda tapada.
+  post "rails/active_storage/direct_uploads" => "direct_uploads#create", as: :direct_uploads
+
   # PWA: el manifest permite instalar la app y el service worker recibe las notificaciones push.
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
@@ -112,6 +116,8 @@ Rails.application.routes.draw do
   end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
+  # El detalle de una actividad en el acordeón del teléfono: se pide al abrirlo (AgendaController#activity).
+  get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
   resource :settings, only: [ :show ] do

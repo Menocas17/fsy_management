@@ -69,6 +69,23 @@ Por qué así y no todo en Render:
    foto. Las llaves de los archivos son aleatorias y no se pueden adivinar, pero quien tenga un enlace
    puede abrir esa foto. Sin `R2_PUBLIC_URL` la app funciona igual, con enlaces firmados.
    R2.dev tiene límite de velocidad: para el evento conviene el dominio propio.
+6. **CORS**, para que las fotos de perfil se suban desde el teléfono directo al bucket, sin pasar por el
+   servidor (`avatar_preview_controller.js`, `DirectUploadsController`). En el bucket → **Settings → CORS
+   Policy → Edit**, con la dirección de la app:
+
+   ```json
+   [
+     {
+       "AllowedOrigins": ["https://<la-app>.onrender.com"],
+       "AllowedMethods": ["PUT"],
+       "AllowedHeaders": ["Content-Type", "Content-MD5", "Content-Disposition"],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+
+   Sin esta regla no se rompe nada: la subida directa falla y la foto viaja con el formulario como antes.
+   Para comprobarlo, al elegir una foto en una ficha debe aparecer «Subiendo foto… %» y luego «Foto lista».
 
 ## 3. Gmail por Apps Script (correo)
 
