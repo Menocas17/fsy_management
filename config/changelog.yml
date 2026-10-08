@@ -7,15 +7,6 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
-- id: 2026-10-09-paginas-livianas
-  date: 2026-10-09
-  title: Páginas más livianas
-  summary: Cada página hace menos trabajo en el servidor, así que responde antes, sobre todo cuando muchos la usan a la vez.
-  changes:
-    - La agenda, la página de tu compañía, Compañías, el organigrama y las listas de jóvenes y staff abren más rápido.
-    - La primera vez que abres la app carga antes: la letra ya viene con ella.
-    - La lista de la campanita y tu código QR se cargan al abrirlos; verás «Cargando…» un instante.
-    - Cuando llega una alerta, la campanita se actualiza sola en unos segundos, sin recargar la página.
 - id: 2026-10-08-rendimiento-detalle
   date: 2026-10-08
   title: Fotos más livianas y menos carga en el servidor
