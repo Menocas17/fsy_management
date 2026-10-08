@@ -7,6 +7,14 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-mas-rapida
+  date: 2026-10-08
+  title: La app responde más rápido
+  summary: Las páginas que más se abren tardan menos y los gafetes de todo el evento salen en segundos.
+  changes:
+    - En el teléfono, la agenda carga más rápido; el detalle de cada actividad aparece al abrirla.
+    - El inicio, las fichas y la página de tu compañía responden más rápido.
+    - El PDF de gafetes de todos sale en unos segundos y pesa menos; el QR se imprime más nítido.
 - id: 2026-10-08-foto-subida-directa
   date: 2026-10-08
   title: La foto se sube al elegirla

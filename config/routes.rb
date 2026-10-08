@@ -116,6 +116,8 @@ Rails.application.routes.draw do
   end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
+  # El detalle de una actividad en el acordeón del teléfono: se pide al abrirlo (AgendaController#activity).
+  get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
   resource :settings, only: [ :show ] do

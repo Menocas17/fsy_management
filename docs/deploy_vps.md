@@ -197,6 +197,13 @@ bin/kamal rollback <versión>        # volver a una imagen anterior (bin/kamal a
 Las tareas que con Render corrían desde tu máquina contra Neon (crear un superadmin, `datos:reiniciar`) ahora
 corren así, dentro del contenedor.
 
+## Prueba de carga
+
+`script/carga/` mide el droplet desde otra máquina: cada pantalla por separado y 650 usuarios a la vez. Cómo
+correrla y los números de referencia están en `script/carga/README.md`. Conviene hacerla con el droplet ya
+desplegado y antes del evento; y no desplegar el lunes en la mañana: un servidor recién arrancado responde
+más lento sus primeros minutos.
+
 ## Restaurar un respaldo
 
 ```bash

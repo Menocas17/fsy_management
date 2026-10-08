@@ -15,6 +15,13 @@ class AgendaController < ApplicationController
     @activity = selected_activity
   end
 
+  # En el teléfono cada actividad se abre en su lugar, y su detalle se pide recién al abrirla: dibujar el de
+  # las ~55 actividades de la semana en cada visita era la mitad del tiempo de la página.
+  def activity
+    activity = Activity.includes(responsibles: Participant::AVATAR_PRELOAD).find(params[:id])
+    render partial: "agenda/details_frame", locals: { activity: activity }
+  end
+
   private
     def event_days
       (Rails.configuration.x.event_start_on..Rails.configuration.x.event_end_on).to_a

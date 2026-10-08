@@ -72,14 +72,17 @@ module UiHelper
     INPUT_CLASSES.sub("h-10", "min-h-20 py-2.5 leading-relaxed resize-y")
   end
 
-  # QR en SVG, sin archivos intermedios: lo usan el inventario y las fichas de participante.
+  # QR en SVG, sin archivos intermedios: lo usan el inventario y las fichas de participante. Armarlo cuesta
+  # ~16 ms (rqrcode, en Ruby) y el «Mi QR» va en la barra de todas las páginas, así que se guarda en la caché:
+  # el QR de una ficha no cambia.
   def qr_svg_tag(payload, label:, size: 132, classes: nil)
-    svg = RQRCode::QRCode.new(payload, level: :m).as_svg(
-      module_size: 4, use_path: true, standalone: true, viewbox: true, color: "1D2B4A",
-      svg_attributes: { role: "img", aria: { label: label } }
-    )
-    # La declaración XML que antepone rqrcode no va dentro de un documento HTML.
-    tag.div(svg.sub(/\A<\?xml.*?\?>/, "").html_safe,
+    svg = Rails.cache.fetch([ "qr-svg", 1, payload, label ]) do
+      RQRCode::QRCode.new(payload, level: :m).as_svg(
+        module_size: 4, use_path: true, standalone: true, viewbox: true, color: "1D2B4A",
+        svg_attributes: { role: "img", aria: { label: label } }
+      ).sub(/\A<\?xml.*?\?>/, "") # la declaración XML que antepone rqrcode no va dentro de un documento HTML
+    end
+    tag.div(svg.html_safe,
             class: [ "bg-white rounded-tile p-2.5 inline-block [&>svg]:block [&>svg]:w-full [&>svg]:h-auto", classes ].compact.join(" "),
             style: "width: #{size}px")
   end
