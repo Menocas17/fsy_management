@@ -1,6 +1,6 @@
 # Despliegue en un VPS de DigitalOcean (Kamal)
 
-La app y su Postgres en un mismo droplet de 6 dólares al mes (1 vCPU, 1 GB, 25 GB de disco), desplegados
+La app y su Postgres en un mismo droplet de 48 dólares al mes (4 vCPU, 8 GB, 160 GB de disco), desplegados
 con [Kamal](https://kamal-deploy.org). Reemplaza a Render + Neon (`docs/deploy_render.md`); las fotos siguen
 en Cloudflare R2 y el correo sigue saliendo por el Apps Script de Gmail.
 
@@ -20,9 +20,11 @@ Archivos: `config/deploy.yml`, `.kamal/secrets`, `script/vps/setup_server.sh`, `
 
 En DigitalOcean → **Create → Droplets**:
 
-- **Región:** la más cercana a Nicaragua que ofrezca, por ejemplo Atlanta o Nueva York.
+- **Región:** Atlanta si aparece (es la más cercana a Centroamérica); si no, Nueva York. Cada petición
+  viaja hasta allá y de vuelta: la región no se puede cambiar después sin migrar.
 - **Imagen:** Ubuntu 24.04 (LTS) x64.
-- **Tamaño:** Basic → Regular → **1 GB / 1 CPU / 25 GB** (6 dólares).
+- **Tamaño:** Basic → Regular → **8 GB / 4 CPU / 160 GB** (`s-4vcpu-8gb`, 48 dólares). `config/deploy.yml` está
+  ajustado a este tamaño; para otro, ver «Tamaño del droplet» al final.
 - **Autenticación:** *SSH Key* (agrega la llave pública de tu máquina). Sin contraseña.
 - Marca **Monitoring** (gratis): gráficas de CPU, memoria y disco en el panel.
 
@@ -67,6 +69,29 @@ adivine el nombre del archivo, con datos médicos dentro. Los respaldos van a ot
    ```
 
 Se guardan 7 días en el disco del droplet y 30 en R2. El registro queda en `/var/log/fsy-backup.log`.
+
+## 4b. CORS del bucket de fotos (subida directa)
+
+Las fotos de perfil se suben desde el teléfono directo al bucket `fsy-management`
+(`avatar_preview_controller.js`, `DirectUploadsController`), sin pasar por el servidor. Para que el navegador
+pueda hacerlo, el bucket tiene que aceptar subidas desde el dominio de la app: Cloudflare → R2 →
+`fsy-management` → **Settings → CORS Policy → Edit**:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://<APP_HOST>"],
+    "AllowedMethods": ["PUT"],
+    "AllowedHeaders": ["Content-Type", "Content-MD5", "Content-Disposition"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Mientras Render siga en uso, agrega también su dirección (`https://….onrender.com`) a `AllowedOrigins`. Sin
+esta regla no se rompe nada: la subida directa falla y la foto viaja con el formulario como antes, solo que
+pasando por el servidor. Para comprobarlo, al elegir una foto en una ficha debe aparecer «Subiendo foto… %» y
+luego «Foto lista».
 
 ## 5. Llave SSH para GitHub Actions
 
@@ -191,9 +216,28 @@ docker exec -i fsy_management-db pg_restore -U fsy_management -d fsy_management_
 
 Y `bin/kamal app boot`.
 
+## Tamaño del droplet
+
+`config/deploy.yml` está ajustado para el de 48 dólares (4 vCPU, 8 GB). Cada proceso de Puma usa un núcleo
+(Ruby ejecuta de a un hilo por proceso) y ~300-400 MB; Postgres se queda con un cuarto de la RAM como
+`shared_buffers`, y el resto lo usa el sistema como caché de disco.
+
+| Droplet | `WEB_CONCURRENCY` | `IMAGE_JOB_CONCURRENCY` | `shared_buffers` / `effective_cache_size` | `max_connections` |
+|---------|-------------------|-------------------------|-------------------------------------------|-------------------|
+| 1 GB, 1 vCPU | 1 | 1 | 128MB / 384MB | 40 |
+| 8 GB, 4 vCPU (el actual) | 4 | 3 | 2GB / 5GB | 150 |
+| 16 GB, 8 vCPU | 8 | 4 | 4GB / 11GB | 200 |
+
+Para cambiar de tamaño: los dos primeros van en `env.clear` de `config/deploy.yml` y se aplican con el
+siguiente deploy; los de Postgres van en el `cmd` del accesorio `db` y se aplican con
+`bin/kamal accessory reboot db` (Postgres se reinicia unos segundos). En DigitalOcean, **Resize → CPU and RAM
+only** (sin agrandar el disco, así se puede volver a bajar); apaga el droplet 1-2 minutos. El orden importa:
+para **subir**, primero el Resize y después el deploy con más procesos; para **bajar**, primero el deploy con
+menos procesos y después el Resize, o la app arrancaría pidiendo más memoria de la que hay.
+
 ## Memoria
 
-1 GB repartido así, aproximadamente: sistema ~100 MB, Postgres ~150-250 MB (`shared_buffers` de 128 MB en
-`config/deploy.yml`), kamal-proxy ~20 MB y Rails ~300-400 MB, que sube al procesar fotos (de a una, ver
-`config/initializers/image_processing.rb`). El swap de 2 GB absorbe los picos. Si el panel de DigitalOcean
-muestra la memoria siempre arriba del 90 %, se sube el droplet a 2 GB desde **Resize** sin reinstalar nada.
+8 GB repartidos así, aproximadamente: sistema ~200 MB, Postgres ~2.5 GB (2 GB de `shared_buffers`), los cuatro
+procesos de Puma ~1.5 GB, el proceso principal (con la cola de trabajos) ~400 MB y hasta ~300 MB más cuando
+procesa tres fotos a la vez. Lo que sobra lo usa el sistema como caché de disco para Postgres. El swap de 2 GB
+queda de colchón. El panel de DigitalOcean (Monitoring) muestra memoria y CPU en vivo.

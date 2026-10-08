@@ -10,7 +10,7 @@
 #   1. Crea el usuario deploy (Kamal no entra como root) con las mismas llaves SSH que root.
 #   2. Instala Docker y deja a deploy usarlo.
 #   3. Firewall: solo SSH, 80 y 443.
-#   4. Un swap de 2 GB: con 1 GB de RAM es el colchón para los picos (fotos, migraciones).
+#   4. Un swap de 2 GB: el colchón para los picos de memoria (fotos, migraciones).
 #   5. Actualizaciones de seguridad automáticas.
 #   6. El respaldo diario de la base a R2 (backup.sh), que queda listo en cuanto se llene /etc/fsy-backup.env.
 set -euo pipefail

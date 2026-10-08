@@ -1,4 +1,4 @@
-# Despliegue con Kamal a un droplet de DigitalOcean (Ubuntu 24.04, 1 vCPU, 1 GB). La guía está en
+# Despliegue con Kamal a un droplet de DigitalOcean (Ubuntu 24.04, s-4vcpu-8gb: 4 vCPU, 8 GB). La guía está en
 # docs/deploy_vps.md. La app y su Postgres viven en la misma máquina: kamal-proxy recibe el tráfico, saca
 # el certificado de Let's Encrypt y se lo pasa a Thruster (puerto 80 del contenedor), que se lo pasa a Puma.
 #
@@ -10,8 +10,8 @@
 
 service: fsy_management
 
-# En ghcr.io, el registro de GitHub. La imagen se construye en GitHub Actions (x86, como el droplet): en un
-# droplet de 1 GB no hay memoria para compilar, y en un Mac con Apple Silicon saldría emulada y lenta.
+# En ghcr.io, el registro de GitHub. La imagen se construye en GitHub Actions (x86, como el droplet): así el
+# droplet no gasta CPU compilando mientras atiende, y en un Mac con Apple Silicon saldría emulada y lenta.
 image: menocas17/fsy_management
 
 servers:
@@ -51,10 +51,16 @@ env:
   clear:
     APP_HOST: <%= app_host %>
     R2_BUCKET: fsy-management
-    # Solid Queue corre dentro de Puma, en hilos (config/puma.rb): un solo contenedor para web y trabajos.
+    # Solid Queue corre dentro de Puma, en hilos del proceso principal (config/puma.rb): un solo contenedor
+    # para web y trabajos.
     SOLID_QUEUE_IN_PUMA: true
-    # Un solo proceso de Puma: con 1 GB y Postgres al lado no caben dos.
+    # Un proceso de Puma por vCPU: Ruby ejecuta de a un hilo por proceso, así que con uno solo se usaría un
+    # núcleo de los cuatro. Cada proceso ocupa ~300-400 MB. Para otro tamaño de droplet, la tabla está en
+    # docs/deploy_vps.md (sección «Tamaño del droplet»).
+    WEB_CONCURRENCY: 4
     RAILS_MAX_THREADS: 3
+    # Fotos procesadas a la vez (config/initializers/image_processing.rb); en 1 GB tiene que ser 1.
+    IMAGE_JOB_CONCURRENCY: 3
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
@@ -78,14 +84,20 @@ accessories:
     # Solo desde la propia máquina (para un túnel SSH); la app llega por la red interna de Docker con el
     # nombre fsy_management-db. Nunca se expone 5432 a internet.
     port: "127.0.0.1:5432:5432"
-    # Memoria pensada para 1 GB compartido con la app: Rails usa ~300-400 MB y el sistema ~100 MB.
+    # Memoria pensada para 8 GB compartidos con la app (~2 GB entre los procesos de Puma): un cuarto para
+    # shared_buffers y el resto lo usa el sistema como caché de disco. Conexiones: 4 procesos y el principal,
+    # con un pool por base (primaria, cola, caché, cable), y el doble mientras Kamal cambia de contenedor.
     cmd: >-
       postgres
-      -c shared_buffers=128MB
-      -c effective_cache_size=384MB
-      -c work_mem=4MB
-      -c maintenance_work_mem=64MB
-      -c max_connections=40
+      -c shared_buffers=2GB
+      -c effective_cache_size=5GB
+      -c work_mem=16MB
+      -c maintenance_work_mem=256MB
+      -c max_connections=150
+    # Docker le da 64 MB de /dev/shm; las consultas en paralelo de Postgres lo usan y con tanto shared_buffers
+    # fallarían por falta de espacio.
+    options:
+      shm-size: 512m
     env:
       clear:
         POSTGRES_USER: fsy_management

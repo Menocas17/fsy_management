@@ -69,6 +69,9 @@ Por qué así y no todo en Render:
    foto. Las llaves de los archivos son aleatorias y no se pueden adivinar, pero quien tenga un enlace
    puede abrir esa foto. Sin `R2_PUBLIC_URL` la app funciona igual, con enlaces firmados.
    R2.dev tiene límite de velocidad: para el evento conviene el dominio propio.
+6. **CORS**, para que las fotos de perfil se suban desde el teléfono directo al bucket: en el bucket →
+   **Settings → CORS Policy**, la regla de `docs/deploy_vps.md` (sección 4b) con la dirección de la app en
+   `AllowedOrigins`. Sin ella todo funciona igual, pero las fotos pasan por el servidor.
 
 ## 3. Gmail por Apps Script (correo)
 
