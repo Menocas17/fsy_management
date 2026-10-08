@@ -5,5 +5,13 @@
 <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
 <%# The chart fills the screen on desktop, so the page itself carries no padding there. %>
 <div class="md:h-full">
-  <%= render(@view == "mi_compania" ? "organigrama/mine" : "organigrama/general") %>
+  <% if @view == "mi_compania" %>
+    <%= render "organigrama/mine" %>
+  <% else %>
+    <%# Igual para todos: en caché, y sus datos se cargan solo si hace falta dibujarlo. %>
+    <% cache [ "organigrama", @view, @organigrama_version ] do %>
+      <% load_general_organigrama %>
+      <%= render "organigrama/general" %>
+    <% end %>
+  <% end %>
 </div>

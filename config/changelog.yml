@@ -12,7 +12,8 @@
   title: Páginas más livianas
   summary: Cada página hace menos trabajo en el servidor, así que responde antes, sobre todo cuando muchos la usan a la vez.
   changes:
-    - La agenda, la página de tu compañía, Compañías y las listas de jóvenes y staff abren más rápido.
+    - La agenda, la página de tu compañía, Compañías, el organigrama y las listas de jóvenes y staff abren más rápido.
+    - La primera vez que abres la app carga antes: la letra ya viene con ella.
     - La lista de la campanita y tu código QR se cargan al abrirlos; verás «Cargando…» un instante.
     - Cuando llega una alerta, la campanita se actualiza sola en unos segundos, sin recargar la página.
 - id: 2026-10-08-rendimiento-detalle
