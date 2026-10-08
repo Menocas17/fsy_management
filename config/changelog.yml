@@ -1,0 +1,27 @@
+# Novedades de la app (ChangelogEntry), la más nueva arriba. Cada entrada se anuncia una sola vez en la
+# campanita al desplegarse (bin/rails novedades:anunciar, desde bin/docker-entrypoint) y queda en /novedades.
+#
+#   id:      único y estable, nunca se cambia (con él se recuerda cuál ya se anunció)
+#   date:    el día en que sale
+#   title:   corto, va en la campanita
+#   summary: una o dos frases, el cuerpo de la notificación
+#   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
+#   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-07-ajustes-modo-simple
+  date: 2026-10-07
+  title: Ajustes al modo simple y al escáner
+  summary: La cifra de enfermería del inicio es más corta y el escáner de capacitaciones vuelve a donde lo abriste.
+  changes:
+    - En el inicio del teléfono la cifra dice «Enfermería», con «Ahora» en gris junto al icono.
+    - Al escanear la asistencia desde una capacitación, «Volver» te lleva a esa capacitación (o a la lista de capacitaciones), no al inicio.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
+- id: 2026-10-07-modo-simple
+  date: 2026-10-07
+  title: Modo simple en el teléfono
+  summary: En el teléfono el menú ahora vive abajo, a mano del pulgar, y el inicio muestra solo tus cifras.
+  changes:
+    - Una barra inferior con Inicio, lo tuyo, Agenda y «Más» reemplaza al menú lateral.
+    - El botón del centro abre la búsqueda en toda la app o tu código QR.
+    - El inicio muestra las tres cifras de tu rol y las gráficas por estaca y por rol.
+    - Puedes apagarlo en Configuración → Modo simple. En la computadora no cambia nada.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]

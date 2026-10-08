@@ -36,6 +36,30 @@
             action: "toggleTheme", target: "themeToggle")) %>
     </section>
 
+    <% unless Current.user.participant&.joven? %>
+      <%# Se guarda en la cuenta (no en el dispositivo): el servidor arma la barra inferior y el inicio. %>
+      <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-simple" aria-labelledby="settings-simple-title">
+        <h2 id="settings-simple-title" class="<%= card_heading %>">
+          <%= icon "smartphone", class: "w-[17px] h-[17px]" %>
+          Modo simple
+        </h2>
+        <% simple = Current.user.simple_mode? %>
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-body font-semibold text-ink-900">Barra inferior en el teléfono</p>
+            <p class="mt-0.5 text-label leading-relaxed text-ink-500">
+              El menú queda abajo, a mano del pulgar, y el inicio muestra solo tus cifras. Apágalo para volver al menú completo. En la computadora no cambia nada.
+            </p>
+          </div>
+          <%= button_to simple_mode_settings_path, method: :patch, params: { simple_mode: simple ? "0" : "1" },
+                role: "switch", aria: { checked: simple, label: "Modo simple: #{simple ? "apagar" : "encender"}" },
+                class: "relative shrink-0 w-[42px] h-6 rounded-full cursor-pointer transition-colors #{simple ? "bg-primary-600" : "bg-line"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
+            <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if simple %>"></span>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
     <%# El permiso de notificaciones es por dispositivo: este bloque habla del teléfono o la compu que estás usando. %>
     <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push"
              data-controller="push" data-push-public-key-value="<%= Rails.application.credentials.dig(:vapid, :public_key) %>"

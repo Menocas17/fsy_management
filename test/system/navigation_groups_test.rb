@@ -35,6 +35,8 @@ class NavigationGroupsTest < ApplicationSystemTestCase
   end
 
   test "the phone drawer keeps its look, with the same groups" do
+    # Con el modo simple (encendido por defecto) el teléfono lleva la barra inferior en vez del cajón.
+    users(:one).update!(simple_mode: false)
     sign_in_as(users(:one))
     resize_to_mobile
     visit logistics_areas_path

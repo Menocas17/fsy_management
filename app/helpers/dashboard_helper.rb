@@ -88,4 +88,20 @@ module DashboardHelper
   def event_start_label
     "#{SpanishDates.long(Rails.configuration.x.event_start_on, capitalize: false)} de #{Rails.configuration.x.event_start_on.year}"
   end
+
+  # A dónde lleva cada cifra del inicio simple (DashboardFacade#simple_kpis), solo si la persona puede abrirla.
+  def simple_kpi_url(link)
+    user = Current.user
+    case link
+    when :my_company then my_company_link
+    when :participants then participants_path
+    when :staff then staff_participants_path
+    when :infirmary then infirmary_visits_path if user.infirmary_viewer?
+    when :night_attendance then night_attendance_nav_item&.dig(:url)
+    when :checkins then checkins_path if user.checkin_registrar?
+    when :inventories then inventories_path if user.inventory_member?
+    when :logistics_areas then logistics_areas_path if user.logistics_areas_manager?
+    when :finances then finances_path if user.finance_viewer?
+    end
+  end
 end

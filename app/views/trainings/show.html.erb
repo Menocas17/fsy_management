@@ -24,7 +24,7 @@
         <% end %>
       <% end %>
       <% if can_check_in? && @training.scan_window.open? %>
-        <%= link_to checkins_path(training_id: @training.id),
+        <%= link_to checkins_path(training_id: @training.id, return_to: request.fullpath),
               class: button_classes do %>
           <%= icon "scan-qr-code", class: "w-4 h-4" %>
           Escanear asistencia

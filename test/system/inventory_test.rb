@@ -37,7 +37,7 @@ class InventoryTest < ApplicationSystemTestCase
     visit scan_inventories_path
 
     fill_in "Código del artículo", with: "mat-0001"
-    click_on "Buscar"
+    click_button "Buscar"
 
     assert_current_path inventory_item_path(@item, ajuste: 1, origen: "escaneo")
     assert_selector "dialog[open]", text: "Guardar ajuste"
@@ -47,7 +47,7 @@ class InventoryTest < ApplicationSystemTestCase
     visit scan_inventories_path
 
     fill_in "Código del artículo", with: "MAT-9999"
-    click_on "Buscar"
+    click_button "Buscar"
 
     assert_text "No encontramos ningún artículo con el código MAT-9999."
     assert_current_path scan_inventories_path

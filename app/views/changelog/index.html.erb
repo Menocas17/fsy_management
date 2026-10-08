@@ -1,0 +1,30 @@
+<% content_for :title, "Novedades" %>
+<% content_for :eyebrow, "Cuenta" %>
+<% back_to "Inicio", dashboard_path %>
+
+<%= render PageComponent.new(width: :form) do |page| %>
+  <% page.with_intro { "Lo que ha cambiado en la app, lo más nuevo arriba." } %>
+  <% if @entries.empty? %>
+    <%= render EmptyStateComponent.new(icon: "sparkles", title: "Sin novedades por ahora") %>
+  <% else %>
+    <div class="flex flex-col gap-5" data-changelog>
+      <% @entries.each do |entry| %>
+        <article id="<%= entry.anchor %>" class="<%= card_classes("px-5 py-6 md:px-[26px] scroll-mt-4") %>" data-changelog-entry="<%= entry.id %>">
+          <p class="text-meta font-bold tracking-[.08em] uppercase text-sun-ink"><%= spanish_date(entry.date) %></p>
+          <h2 class="mt-1 text-title font-bold text-ink-900"><%= entry.title %></h2>
+          <p class="mt-1.5 text-body leading-relaxed text-ink-700"><%= entry.summary %></p>
+          <% if entry.changes.any? %>
+            <ul class="mt-4 pt-4 border-t border-line-soft flex flex-col gap-2">
+              <% entry.changes.each do |change| %>
+                <li class="flex gap-2.5 text-label leading-relaxed text-ink-700">
+                  <%= icon "check", class: "mt-0.5 w-4 h-4 shrink-0 text-primary-600 dark:text-primary-300" %>
+                  <span><%= change %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

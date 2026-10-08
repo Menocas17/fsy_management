@@ -1,0 +1,80 @@
+<% content_for :title, "Buscar" %>
+<% content_for :eyebrow, "Buscar" %>
+<% content_for :heading, "En toda la app" %>
+<% modules = search_modules(@query) %>
+<% groups = @search.searchable? ? search_groups(@search, modules) : [] %>
+<%= render PageComponent.new(width: :form) do %>
+  <%# Como en Instagram: el campo arriba, ya enfocado, y «Cancelar» para volver. Los resultados llegan solos al
+      hacer una pausa (auto-submit) dentro del marco de abajo, sin recargar la página. %>
+  <%= form_with url: search_path, method: :get, role: "search", class: "flex items-center gap-3",
+        data: { turbo_frame: "search_results", turbo_action: "replace", controller: "auto-submit" } do |form| %>
+    <label class="relative flex-1 min-w-0">
+      <%= icon "search", class: "w-[18px] h-[18px] absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
+      <%= form.search_field :q, value: @query, autofocus: true, autocomplete: "off", enterkeyhint: "search",
+            placeholder: "Personas, compañías, artículos…", aria: { label: "Buscar en toda la app" },
+            data: { action: "input->auto-submit#typed" },
+            class: "w-full h-11 pl-10 pr-3 rounded-control bg-sunken border border-line text-body font-semibold text-ink-900 placeholder:font-medium placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500" %>
+    </label>
+    <%= link_to "Cancelar", dashboard_path, class: "shrink-0 text-body font-semibold text-ink-700 hover:text-ink-900" %>
+  <% end %>
+
+  <%= turbo_frame_tag "search_results", target: "_top", class: "flex flex-col gap-4", data: { search_results: true } do %>
+    <% if !@search.searchable? %>
+      <%= render EmptyStateComponent.new(title: "¿Qué buscas?", icon: "search",
+            text: "Escribe al menos #{GlobalSearch::MIN_LENGTH} letras: un nombre, el número de una compañía, un artículo o una estaca.") %>
+    <% elsif groups.empty? %>
+      <%= render EmptyStateComponent.new(title: "Sin resultados", icon: "search-x", text: "No hay nada que coincida con «#{@query}».") %>
+    <% else %>
+      <%# Los filtros cambian solo los resultados (el marco), no el campo. %>
+      <nav aria-label="Filtrar resultados" class="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1" data-search-filters>
+        <% chip = "shrink-0 px-3.5 py-1.5 rounded-full text-label font-bold whitespace-nowrap transition-colors" %>
+        <%= link_to "Todo", search_path(q: @query), data: { turbo_frame: "search_results", turbo_action: "replace" },
+              aria: { current: (@kind.nil? ? "page" : nil) },
+              class: "#{chip} #{@kind.nil? ? "bg-primary-800 text-white" : "bg-muted text-ink-700 hover:bg-line-soft"}" %>
+        <% groups.each do |kind, label, _, total| %>
+          <%= link_to "#{label} · #{total}", search_path(q: @query, tipo: kind), data: { turbo_frame: "search_results", turbo_action: "replace" },
+                aria: { current: (@kind == kind ? "page" : nil) },
+                class: "#{chip} #{@kind == kind ? "bg-primary-800 text-white" : "bg-muted text-ink-700 hover:bg-line-soft"}" %>
+        <% end %>
+      </nav>
+
+      <% groups.select { |kind, *| @kind.nil? || @kind == kind }.each do |kind, label, records, total| %>
+        <section class="<%= card_classes("px-4 py-3") %>" data-search-group="<%= kind %>">
+          <h2 class="pt-1 pb-1.5 text-meta font-bold tracking-[.08em] uppercase text-ink-500"><%= label %></h2>
+          <ul class="divide-y divide-line-soft">
+            <% (@kind ? records : records.first(4)).each do |record| %>
+              <% row = search_row(kind, record) %>
+              <li>
+                <%= link_to row[:url], class: "flex items-center gap-3 py-2.5 rounded-inner" do %>
+                  <% if row[:participant] %>
+                    <%= render AvatarComponent.new(participant: row[:participant]) %>
+                  <% else %>
+                    <%= render IconTileComponent.new(icon: row[:icon], tone: row[:tone], size: :md) %>
+                  <% end %>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-body font-bold text-ink-900 truncate"><%= row[:title] %></span>
+                    <span class="block text-label font-medium text-ink-500 truncate"><%= row[:meta] %></span>
+                  </span>
+                  <% if row[:chip] %>
+                    <%= render ChipComponent.new(label: row[:chip][0], tone: row[:chip][1]) %>
+                  <% else %>
+                    <%= icon "chevron-right", class: "w-4 h-4 shrink-0 text-ink-500" %>
+                  <% end %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+          <% shown = @kind ? records.size : [ records.size, 4 ].min %>
+          <% if total > shown %>
+            <% if @kind %>
+              <p class="pt-2 pb-1 text-label font-medium text-ink-500">Se muestran <%= shown %> de <%= total %>: escribe más para afinar.</p>
+            <% else %>
+              <%= link_to "Ver los #{total}", search_path(q: @query, tipo: kind), data: { turbo_frame: "search_results", turbo_action: "replace" },
+                    class: "block pt-2 pb-1 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+            <% end %>
+          <% end %>
+        </section>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,11 +1,12 @@
 <% content_for :page_h1, true %>
 <% content_for :title, @training ? "Asistencia · #{@training.name}" : "Registro de llegadas" %>
 <% content_for :eyebrow, "Evento" %>
-<% back_to "Inicio", dashboard_path %>
+<%# Vuelve a donde se abrió (una capacitación, la lista de capacitaciones); si no, al inicio. %>
+<% back_to_origin "Inicio", dashboard_path %>
 <% open = @window.open? %>
 <%= render PageComponent.new(width: :page,
             data: (open ? { controller: "checkin-scanner",
-                            checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id),
+                            checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id, return_to: params[:return_to].presence),
                             checkin_scanner_sync_url_value: register_checkins_path(training_id: @training&.id),
                             checkin_scanner_mode_value: @training ? "training-#{@training.id}" : "arrival",
                             checkin_scanner_total_value: @expected,

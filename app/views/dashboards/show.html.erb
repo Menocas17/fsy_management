@@ -7,7 +7,8 @@
   <%# En el teléfono el banner llena la primera pantalla (la altura visible menos la barra de 60px, el relleno de
       arriba de la página, 12px, y 16px de aire): según el teléfono se asomaban solo los iconos de los KPI, que parecían
       un menú inferior. Así los KPI empiezan siempre bajo el borde, y los atajos quedan abajo, a mano del pulgar. %>
-  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9 max-sm:flex max-sm:flex-col max-sm:min-h-[calc(100dvh-88px)]" data-entrance="hero">
+  <%# En el modo simple el banner mide lo que mide su contenido: abajo siguen las cifras y la barra inferior. %>
+  <section class="relative overflow-hidden rounded-panel bg-hero shadow-lg px-6 py-7 md:px-10 md:py-9 max-sm:flex max-sm:flex-col <%= "max-sm:min-h-[calc(100dvh-88px)]" unless @simple %>" data-entrance="hero">
     <%# La luz del sol detrás de la cuenta regresiva: en la entrada del panel sube como un amanecer. %>
     <span class="hero-sunglow" aria-hidden="true" data-entrance="sunglow"></span>
     <%# El lockup oficial ocupa el aire de la derecha; donde no cabe, el mismo texto queda en la píldora. %>
@@ -45,7 +46,7 @@
           <% end %>
         </div>
         <p class="mt-3 text-[13px] font-semibold text-white/80 [--entrance-at:300ms]" data-entrance="rise">Comienza el <%= event_start_label %></p>
-        <figure class="mt-4 rounded-tile bg-white/10 border border-white/15 px-5 py-4 [--entrance-at:360ms]" data-entrance="rise">
+        <figure class="<%= "max-md:hidden" if @simple %> mt-4 rounded-tile bg-white/10 border border-white/15 px-5 py-4 [--entrance-at:360ms]" data-entrance="rise">
           <blockquote class="text-[13px] md:text-[14.5px] leading-relaxed italic text-white/90">
             “He aquí mi Espíritu reposa sobre ti; por consiguiente justificaré todas tus palabras; y las montañas huirán de tu presencia, y los ríos se desviarán de su cauce; y tú permanecerás en mí, y yo en ti; por tanto, anda conmigo.”
           </blockquote>
@@ -61,9 +62,9 @@
           «Próximas fechas», más abajo), y una segunda y una tercera mientras sobre aire. Por alto de pantalla: por
           debajo de cada umbral no caben sin empujar los KPI a la vista. %>
       <% hero_next = next_up_items(@dashboard.next_activities) %>
-      <% row_visibility = [ "flex", "hidden [@media(min-height:830px)]:flex", "hidden [@media(min-height:890px)]:flex" ] %>
+      <% row_visibility = @simple ? %w[flex flex flex] : [ "flex", "hidden [@media(min-height:830px)]:flex", "hidden [@media(min-height:890px)]:flex" ] %>
       <% if hero_next.any? %>
-        <div class="hidden max-sm:[@media(min-height:770px)]:block max-sm:-mt-2 rounded-tile bg-white/10 border border-white/15 px-4 py-3.5 [--entrance-at:400ms]" data-hero-next data-entrance="rise">
+        <div class="hidden <%= @simple ? "max-md:block max-md:-mt-2" : "max-sm:[@media(min-height:770px)]:block max-sm:-mt-2" %> rounded-tile bg-white/10 border border-white/15 px-4 py-3.5 [--entrance-at:400ms]" data-hero-next data-entrance="rise">
           <div class="flex items-center justify-between gap-3 mb-2.5">
             <span class="text-[11px] font-bold tracking-[.08em] uppercase text-white/70">Lo que sigue</span>
             <%= link_to "Ver agenda ›", agenda_path, class: "text-label font-bold text-sun hover:underline" %>
@@ -85,7 +86,8 @@
           <% end %>
         </div>
       <% end %>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0 max-sm:mt-auto [--entrance-at:420ms]" data-entrance="rise">
+      <%# En el modo simple estos atajos viven en la barra inferior (Mi QR) y en «Más» (escanear gafete). %>
+      <div class="<%= "max-md:hidden" if @simple %> flex flex-col sm:flex-row sm:items-center gap-2.5 w-full lg:w-auto shrink-0 max-sm:mt-auto [--entrance-at:420ms]" data-entrance="rise">
         <% if can_create_participants? %>
           <%= link_to new_participant_path, class: shortcut_primary do %>
             <%= icon "plus", class: "w-4 h-4" %>
@@ -126,12 +128,20 @@
     </div>
   </section>
 
-  <%= render "main_kpis", total_jovenes: @dashboard.total_jovenes, total_participants: @dashboard.total_participants, total_staff: @dashboard.total_staff %>
-  <%# Primero lo que viene y lo que la cocina necesita saber; después el análisis. %>
-  <%= render "next_up", next_activities: @dashboard.next_activities %>
-  <% if can_view_reports? || can_view_inventory? %>
-    <%= render "care", special_care: @dashboard.special_care, dining_halls: @dashboard.jovenes_by_dining_hall %>
+  <%# Modo simple en el teléfono: las cifras del rol y solo dos gráficas; lo demás queda en la computadora,
+      donde el panel sigue completo (o apagando el modo simple en Configuración). %>
+  <% only_full = @simple ? "max-md:hidden md:contents" : "contents" %>
+  <%= render "simple_kpis", kpis: @dashboard.simple_kpis if @simple %>
+  <%= tag.div class: only_full do %>
+    <%= render "main_kpis", total_jovenes: @dashboard.total_jovenes, total_participants: @dashboard.total_participants, total_staff: @dashboard.total_staff %>
+    <%# Primero lo que viene y lo que la cocina necesita saber; después el análisis. %>
+    <%= render "next_up", next_activities: @dashboard.next_activities %>
+    <% if can_view_reports? || can_view_inventory? %>
+      <%= render "care", special_care: @dashboard.special_care, dining_halls: @dashboard.jovenes_by_dining_hall %>
+    <% end %>
   <% end %>
   <%= render "main_charts", count_by_stake: @dashboard.count_by_stake, count_by_role: @dashboard.count_by_role %>
-  <%= render "secondary_charts", data_by_age: @dashboard.participants_by_age, shirt_counts: @dashboard.shirt_count, male_count: @dashboard.male_count, female_count: @dashboard.female_count %>
+  <%= tag.div class: only_full do %>
+    <%= render "secondary_charts", data_by_age: @dashboard.participants_by_age, shirt_counts: @dashboard.shirt_count, male_count: @dashboard.male_count, female_count: @dashboard.female_count %>
+  <% end %>
 <% end %>
