@@ -73,6 +73,18 @@ class Company < ApplicationRecord
               .to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
 
+  # Versión de las tarjetas de Compañías (companies/_grid) para su caché, en una consulta: cambia si cambia una
+  # compañía, una compañía auxiliar, quién es consejero de cuál, o un consejero (su nombre o su foto).
+  def self.grid_version
+    connection.select_rows(<<~SQL).first.join("/")
+      SELECT (SELECT COUNT(*) || '-' || COALESCE(MAX(updated_at)::text, '') FROM companies),
+             (SELECT COUNT(*) || '-' || COALESCE(MAX(updated_at)::text, '') FROM auxiliar_companies),
+             (SELECT COUNT(*) || '-' || COALESCE(MAX(memberships.updated_at)::text, '') || '-' || COALESCE(MAX(participants.updated_at)::text, '')
+                FROM memberships JOIN participants ON participants.id = memberships.participant_id
+               WHERE memberships.associable_type = 'Company')
+    SQL
+  end
+
   # Versión de sus líderes (consejeros de la compañía y auxiliares de su compañía auxiliar) para la caché de la
   # página: cambia si alguien entra, sale o se edita (la foto también, ver config/initializers/image_processing.rb).
   # Una consulta, en vez de cargar las dos listas con sus fotos.

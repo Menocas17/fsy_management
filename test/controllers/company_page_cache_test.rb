@@ -65,4 +65,22 @@ class CompanyPageCacheTest < ActionDispatch::IntegrationTest
     get company_path(@company)
     assert_select "[data-leader-slot]", text: /Mariela/
   end
+
+  test "the Compañías cards follow counselors, names and counts" do
+    get companies_path
+    assert_select "[data-company-card='3']", text: /Consejeros por asignar/
+
+    Membership.create!(associable: @company, participant: participants(:maria))
+    get companies_path
+    assert_select "[data-company-card='3']", text: /#{participants(:maria).full_name}/
+
+    travel 1.second
+    @company.update!(nickname: "Los valientes")
+    get companies_path
+    assert_select "[data-company-card='3']", text: /Los valientes/
+
+    participants(:juan).update!(company: nil)
+    get companies_path
+    assert_select "[data-company-card='3']", text: /0\s*Jóvenes/
+  end
 end

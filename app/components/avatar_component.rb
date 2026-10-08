@@ -10,11 +10,13 @@ class AvatarComponent < ViewComponent::Base
   private
 
   def has_avatar?
-    @participant.avatar.attached?
+    avatar_url.present?
   end
 
   def avatar_url
-    helpers.storage_url(@participant.avatar.variant(:thumb))
+    return @avatar_url if defined?(@avatar_url)
+
+    @avatar_url = helpers.participant_thumb_url(@participant)
   end
 
   def initials
