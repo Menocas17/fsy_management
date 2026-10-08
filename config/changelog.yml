@@ -10,11 +10,11 @@
 - id: 2026-10-08-mas-rapida
   date: 2026-10-08
   title: La app responde más rápido
-  summary: Las páginas que más se abren tardan menos y los gafetes de todo el evento salen en segundos.
+  summary: Las páginas que más se abren tardan menos y el PDF de gafetes de todo el evento tarda bastante menos en generarse.
   changes:
     - En el teléfono, la agenda carga más rápido; el detalle de cada actividad aparece al abrirla.
     - El inicio, las fichas y la página de tu compañía responden más rápido.
-    - El PDF de gafetes de todos sale en unos segundos y pesa menos; el QR se imprime más nítido.
+    - El PDF de gafetes de todos tarda mucho menos en generarse y pesa menos; el QR se imprime más nítido.
 - id: 2026-10-08-foto-subida-directa
   date: 2026-10-08
   title: La foto se sube al elegirla
