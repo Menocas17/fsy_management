@@ -4,6 +4,17 @@ class DashboardFacade
   # se abre). Las tres cifras propias de cada rol (simple_kpis) no pasan por aquí: siempre van al día.
   GLOBAL_STATS_TTL = 30.seconds
 
+  # En la memoria del proceso y no en Rails.cache: en producción esa caché es la base de datos, y cada cifra era
+  # una ida y vuelta a Neon (nueve en el inicio). Cada proceso calcula las suyas una vez cada 30 s. Donde la caché
+  # está apagada (pruebas) se respeta.
+  def self.global_cache
+    @global_cache ||= if Rails.cache.is_a?(ActiveSupport::Cache::NullStore)
+      Rails.cache
+    else
+      ActiveSupport::Cache::MemoryStore.new(size: 4.megabytes)
+    end
+  end
+
   # user: quien abre el inicio; con él se arman sus tres cifras del modo simple (simple_kpis).
   def initialize(user: nil)
     @user = user
@@ -82,7 +93,7 @@ class DashboardFacade
 
   private
     def global(name, &block)
-      Rails.cache.fetch([ "dashboard-global", name ], expires_in: GLOBAL_STATS_TTL, &block)
+      self.class.global_cache.fetch([ "dashboard-global", name ], expires_in: GLOBAL_STATS_TTL, &block)
     end
 
     def kpi(label, value, icon, tone, sub: nil, badge: nil, link: nil)

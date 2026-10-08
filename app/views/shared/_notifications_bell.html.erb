@@ -2,11 +2,11 @@
   # Se renderiza también desde un job para refrescar la campanita en vivo: de ahí el local `user`,
   # porque fuera de una petición no hay Current.user ni helpers del controlador.
   user = local_assigns.fetch(:user, Current.user)
-  alerts = Alert.inbox_for(user).recent.limit(5).to_a
   unread = user&.unread_alerts_count.to_i
   badge = "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cat-rose text-white text-meta font-extrabold flex items-center justify-center border-2 border-surface empty:hidden"
 %>
 <div id="notifications_bell" class="contents" data-controller="alert-chime" data-alert-chime-unread-value="<%= unread %>"
+     data-action="alerts:changed@window->alert-chime#check"
      data-alert-chime-count-url-value="<%= count_notifications_path %>" data-alert-chime-read-url-value="<%= read_notifications_path %>">
 <%= link_to notifications_path, aria: { label: "Notificaciones#{unread.positive? ? ", #{unread} sin leer" : ""}" },
       class: "md:hidden relative w-8 h-8 after:absolute after:-inset-1.5 rounded-control border border-line bg-canvas flex items-center justify-center text-ink-500 dark:text-ink-700" do %>
@@ -23,29 +23,9 @@
   </button>
   <div class="dropdown-menu hidden absolute right-0 top-full mt-2 w-96 z-50 overflow-hidden bg-surface border border-line-soft rounded-tile shadow-lg"
        data-dropdown-target="menu">
-    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
-      <p class="text-title font-bold text-ink-900">Notificaciones</p>
-      <div class="flex items-center gap-3">
-        <% if alerts.any? %>
-          <%= button_to "Limpiar todo", clear_notifications_path, method: :delete, form_class: "contents",
-                form: { data: { alerts_when_any: true, turbo_confirm: "¿Limpiar todas tus notificaciones?",
-                                turbo_confirm_detail: "Se quitan de tu lista; las alertas nuevas seguirán llegando.",
-                                turbo_confirm_button: "Sí, limpiar" } },
-                class: "text-label font-bold text-ink-500 hover:text-ink-900 hover:underline cursor-pointer", data: { alerts_clear: true } %>
-        <% end %>
-        <% if user&.alert_manager? %>
-          <%= link_to "Nueva alerta", new_alert_path, class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
-        <% end %>
-      </div>
-    </div>
-    <% if alerts.any? %>
-      <div class="max-h-96 overflow-y-auto divide-y divide-line-soft" data-alerts-list>
-        <%= render partial: "alerts/alert", collection: alerts, as: :alert, locals: { compact: true, dismissible: true } %>
-      </div>
-      <%= link_to "Ver todas", notifications_path, data: { alerts_when_any: true },
-            class: "block px-5 py-3 border-t border-line-soft text-center text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
-    <% else %>
-      <%= render "notifications/empty_state" %>
+    <%# La lista se pide al abrir el menú (NotificationsController#menu): el frame perezoso carga cuando se ve. %>
+    <%= turbo_frame_tag "notifications_menu", src: menu_notifications_path, loading: :lazy, target: "_top" do %>
+      <p class="px-5 py-6 text-center text-label text-ink-500">Cargando…</p>
     <% end %>
   </div>
 </div>

@@ -73,6 +73,18 @@ class Company < ApplicationRecord
               .to_sentence(two_words_connector: " y ", last_word_connector: " y ")
   end
 
+  # Versión de sus líderes (consejeros de la compañía y auxiliares de su compañía auxiliar) para la caché de la
+  # página: cambia si alguien entra, sale o se edita (la foto también, ver config/initializers/image_processing.rb).
+  # Una consulta, en vez de cargar las dos listas con sus fotos.
+  def leaders_version
+    memberships = Membership.joins(:participant)
+    staff = memberships.where(associable: self)
+                       .or(memberships.where(associable_type: "AuxiliarCompany", associable_id: auxiliar_company_id))
+                       .order("memberships.id")
+                       .pluck("memberships.id", "memberships.associable_type", "participants.id", "participants.updated_at")
+    Digest::SHA256.hexdigest([ auxiliar_company_id, staff ].to_json)
+  end
+
   def room_occupancy
     participants.where.not(room: [ nil, "" ]).group(:room).order(:room).count
   end

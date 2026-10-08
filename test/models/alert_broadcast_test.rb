@@ -1,6 +1,7 @@
 require "test_helper"
 
-# La campanita de quien tenga la app abierta se refresca sola por Action Cable.
+# La campanita de quien tenga la app abierta se refresca sola por Action Cable: un solo aviso para todos
+# (stream "alerts"), y cada campanita pregunta su número.
 class AlertBroadcastTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
@@ -9,10 +10,24 @@ class AlertBroadcastTest < ActiveSupport::TestCase
     @counselor = User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria))
   end
 
-  test "a global alert refreshes every bell" do
-    assert_enqueued_with(job: Turbo::Streams::ActionBroadcastJob) do
+  test "an alert sends one signal for every open bell, not one bell per account" do
+    User.create!(email_address: "otra@fsy.com", password: "Consejera1!", participant: participants(:juan))
+
+    assert_enqueued_jobs 1, only: Turbo::Streams::ActionBroadcastJob do
       Alert.create!(title: "Aviso", body: "Texto", sender_name: "Coordinación", audience: :todos)
     end
+  end
+
+  test "the signal carries nothing of the alert, since it reaches everyone with the app open" do
+    alert = Alert.create!(title: "Solo consejeros", body: "Secreto", sender_name: "Coordinación",
+                          audience: :por_roles, target_roles: [ "consejero" ])
+
+    html = ApplicationController.render(partial: "shared/alerts_signal", locals: { alert: alert })
+
+    assert_includes html, 'id="alerts_signal"'
+    assert_includes html, 'data-controller="alert-signal"'
+    assert_not_includes html, "Solo consejeros"
+    assert_not_includes html, "Secreto"
   end
 
   test "an alert by role only refreshes the bells of those roles, plus the superadmin's, which shows them all" do
@@ -22,22 +37,20 @@ class AlertBroadcastTest < ActiveSupport::TestCase
     assert_equal [ @admin, @counselor ].sort_by(&:id), alert.push_recipients.sort_by(&:id)
   end
 
-  test "an individual alert rings only that person, though the superadmin's open bell refreshes too" do
+  test "an individual alert rings only that person" do
     alert = Alert.new(title: "Tu asignación", body: "Texto", sender_name: "Coordinación",
                       audience: :individual, recipient: participants(:maria))
 
     assert_equal [ @counselor ], alert.push_recipients.to_a
-    assert_equal [ @admin, @counselor ].sort_by(&:id), alert.bell_recipients.sort_by(&:id)
   end
 
-  test "an agenda alert for some roles still refreshes the superadmin's bell, where it counts as unread" do
+  test "an agenda alert for some roles still rings the superadmin, where it counts as unread" do
     activity = Activity.create!(title: "Taller", category: :clase, date: Activity.event_days.first.to_s,
                                 start_time: "10:00", end_time: "11:00", audience: :por_roles, target_roles: [ "joven" ])
 
     alert = Alert.announce(activity, action: :created, user: nil)
 
     assert_includes alert.push_recipients, @admin
-    assert_includes alert.bell_recipients, @admin
     assert_equal 1, @admin.unread_alerts_count
   end
 
@@ -60,13 +73,14 @@ class AlertBroadcastTest < ActiveSupport::TestCase
     assert_includes html, "hidden"
   end
 
-  test "the bell renders outside a request, which is how the broadcast draws it" do
+  test "the bell's list isn't drawn with every page: its menu asks for it when it opens" do
     Alert.create!(title: "Aviso nuevo", body: "Texto", sender_name: "Coordinación", audience: :todos)
 
     html = ApplicationController.render(partial: "shared/notifications_bell", locals: { user: @counselor })
 
-    assert_includes html, "notifications_bell"
-    assert_includes html, "Aviso nuevo"
     assert_includes html, "data-unread-count"
+    assert_includes html, 'src="/notificaciones/menu"'
+    assert_includes html, 'loading="lazy"'
+    assert_not_includes html, "Aviso nuevo"
   end
 end

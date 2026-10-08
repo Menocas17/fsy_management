@@ -35,7 +35,7 @@
     </button>
   </nav>
 
-  <%= render "participants/qr_dialog", participant: me if me %>
+  <%= render "participants/qr_dialog", participant: me, lazy: true if me %>
 
   <%# Una hoja que sube desde abajo; tocar fuera la cierra (no lleva botón de cerrar). %>
   <dialog data-dialog-target="modal" data-dialog-name="mas" data-action="click->dialog#clickOutside" aria-labelledby="more-sheet-title"

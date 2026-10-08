@@ -1,0 +1,27 @@
+<%# El menú de la campanita (NotificationsController#menu), dentro del frame perezoso de shared/_notifications_bell. %>
+<%= turbo_frame_tag "notifications_menu", target: "_top" do %>
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line-soft">
+      <p class="text-title font-bold text-ink-900">Notificaciones</p>
+      <div class="flex items-center gap-3">
+        <% if alerts.any? %>
+          <%= button_to "Limpiar todo", clear_notifications_path, method: :delete, form_class: "contents",
+                form: { data: { alerts_when_any: true, turbo_confirm: "¿Limpiar todas tus notificaciones?",
+                                turbo_confirm_detail: "Se quitan de tu lista; las alertas nuevas seguirán llegando.",
+                                turbo_confirm_button: "Sí, limpiar" } },
+                class: "text-label font-bold text-ink-500 hover:text-ink-900 hover:underline cursor-pointer", data: { alerts_clear: true } %>
+        <% end %>
+        <% if Current.user&.alert_manager? %>
+          <%= link_to "Nueva alerta", new_alert_path, class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+        <% end %>
+      </div>
+    </div>
+    <% if alerts.any? %>
+      <div class="max-h-96 overflow-y-auto divide-y divide-line-soft" data-alerts-list>
+        <%= render partial: "alerts/alert", collection: alerts, as: :alert, locals: { compact: true, dismissible: true } %>
+      </div>
+      <%= link_to "Ver todas", notifications_path, data: { alerts_when_any: true },
+            class: "block px-5 py-3 border-t border-line-soft text-center text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+    <% else %>
+      <%= render "notifications/empty_state" %>
+    <% end %>
+<% end %>
