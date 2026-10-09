@@ -23,8 +23,9 @@
   title: Dirección y coordinación entran a todo
   summary: El matrimonio director y los coordinadores ya pueden hacer todo en la app; presentar y aprobar gastos sigue como antes.
   changes:
-    - Enfermería completa (ingresar, dar de alta y escribir la ficha clínica), el Conteo de cualquier compañía y los registros activos del escáner en Configuración.
-    - El presupuesto, las categorías y el tipo de cambio de Finanzas.
+    - Operan Enfermería completa (ingresar, dar de alta y escribir la ficha clínica).
+    - Pasan el Conteo de cualquier compañía y eligen qué registro está activo en el escáner (Configuración).
+    - Definen el presupuesto, las categorías y el tipo de cambio de Finanzas.
     - Presentar y aprobar gastos sigue igual que antes.
   roles: [ director, coordinador ]
 - id: 2026-10-08-fechas-y-telefonos-angostos
