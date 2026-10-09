@@ -12,7 +12,12 @@
     <script>
       (function () {
         try {
-          if (localStorage.getItem('fsy:theme') === 'dark') {
+          // Sin elección guardada, el teléfono arranca en oscuro y la computadora en claro. Teléfono: pantalla
+          // táctil cuyo lado corto mide menos de 768 px (así una ventana angosta en la compu no cuenta, y el
+          // teléfono acostado tampoco cambia). Configuración → Modo oscuro guarda la elección en cualquiera.
+          var theme = localStorage.getItem('fsy:theme');
+          var phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 768;
+          if (theme === 'dark' || (theme === null && phone)) {
             document.documentElement.classList.add('dark');
           }
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
@@ -82,5 +87,11 @@
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>
+    <%# El tutorial (Tutorial, tour_controller.js): arranca solo la primera vez en el teléfono, o desde
+        Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página. %>
+    <% if !Current.viewing_as? && Tutorial.available_to?(Current.user) %>
+      <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path,
+            tour_autostart_value: Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
+    <% end %>
   </body>
 </html>

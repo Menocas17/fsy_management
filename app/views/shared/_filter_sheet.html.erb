@@ -19,8 +19,10 @@
      class="lg:hidden fixed inset-0 z-100 bg-black/50 opacity-0 pointer-events-none data-open:opacity-100 data-open:pointer-events-auto transition-opacity duration-200"></div>
 
 <%# Cerrada queda invisible (fuera del Tab); la visibilidad cambia al final del cierre para que se vea bajar.
+    También se cierra arrastrándola hacia abajo (sheet_drag_controller).
     El encabezado y «Ver resultados» quedan fijos; si los filtros no caben, se desplazan ellos en medio. %>
 <div id="<%= sheet_id %>" data-filter-sheet-target="sheet" role="group" aria-label="Filtros"
+     data-controller="sheet-drag" data-sheet-drag-media-value="(max-width: 63.99rem)" data-action="sheet-drag:dismiss->filter-sheet#close"
      class="max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-200 max-lg:max-h-[85dvh] max-lg:flex max-lg:flex-col max-lg:bg-surface max-lg:rounded-t-panel max-lg:shadow-lg max-lg:px-4 max-lg:pt-2 max-lg:pb-[max(1rem,env(safe-area-inset-bottom))]
             max-lg:translate-y-full max-lg:invisible max-lg:data-open:translate-y-0 max-lg:data-open:visible max-lg:transition-[translate,visibility] max-lg:duration-[360ms] max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] <%= local_assigns[:sheet_class] %>">
   <div class="lg:hidden shrink-0">

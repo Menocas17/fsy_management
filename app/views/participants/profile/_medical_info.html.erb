@@ -35,7 +35,7 @@
   <% if participant.joven? && can_view_infirmary? %>
     <% visits = participant.infirmary_visits.to_a %>
     <% ongoing = visits.find { |visit| visit.discharged_at.nil? } %>
-    <%= link_to infirmary_chart_path(participant), data: { profile_infirmary: ongoing&.status || "ninguna" },
+    <%= link_to infirmary_chart_path(participant, **practice_link_params(participant)), data: { profile_infirmary: ongoing&.status || "ninguna" },
           class: "mt-4 flex items-center gap-3 rounded-tile border border-line-soft px-4 py-3 hover:bg-canvas transition-colors" do %>
       <%= render IconTileComponent.new(icon: "heart-pulse", tone: ongoing ? :rose : :neutral) %>
       <span class="min-w-0 flex-1">

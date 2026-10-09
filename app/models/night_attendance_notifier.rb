@@ -21,9 +21,9 @@ module NightAttendanceNotifier
     title = [ (pluralize(pending, "lista sin pasar", "listas sin pasar") if pending.positive?),
               (pluralize(absent, "joven ausente", "jóvenes ausentes") if absent.positive?) ].compact.join(" y ")
 
-    Alert.create!(title: "Asistencia nocturna: #{title}".truncate(120), body: report.map { |line| line[:text] }.join("\n"),
+    Alert.create!(title: "Conteo: #{title}".truncate(120), body: report.map { |line| line[:text] }.join("\n"),
                   audience: :por_roles, target_roles: RECIPIENT_ROLES, priority: :importante, source: :asistencia,
-                  sender_name: "Asistencia nocturna", link_path: url_helpers.night_attendances_path(noche: night.iso8601))
+                  sender_name: "Conteo", link_path: url_helpers.night_attendances_path(noche: night.iso8601))
   end
 
   # Una línea por lista con faltantes: «Compañía 3 · hombres: sin pasar» o «… : Pedro López (Enfermería)».

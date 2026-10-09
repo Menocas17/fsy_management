@@ -26,7 +26,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to company_night_attendance_path(@company, genero: "H")
     list = NightAttendance.find_by!(company: @company, night_on: Date.new(2027, 1, 11), gender: "H")
     assert_equal "Carlos Prueba", list.taken_by_name
-    assert_equal "Pasó la asistencia nocturna de Compañía 3 (hombres): 1 presente y 0 ausentes", AuditLog.asistencia.last.summary
+    assert_equal "Pasó el conteo de Compañía 3 (hombres): 1 presente y 0 ausentes", AuditLog.asistencia.last.summary
 
     assert_no_difference -> { NightAttendance.count } do
       patch company_night_attendance_path(@company, genero: "M"), params: { marks: { @ana.id => { status: "presente" } } }
@@ -82,10 +82,10 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
 
     get company_night_attendance_path(@company, genero: "H")
     assert_select "[data-night-joven='#{@juan.id}']", text: /Ausente · Con sus papás/
-    assert_select "[data-night-toggle]", 0, "directors follow the lists, they don't take them"
+    assert_select "[data-night-toggle]", { minimum: 1 }, "full access may take any list tonight"
   end
 
-  test "the superadmin can take any list, but only on the test night before the event" do
+  test "the superadmin takes any list, on the test night before the event and during it" do
     travel_to Time.zone.local(2026, 10, 5, 20)
     sign_in_as users(:one)
 
@@ -102,7 +102,7 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one) # la sesión de octubre ya venció
     get company_night_attendance_path(@company, genero: "H")
     assert_response :success
-    assert_select "[data-night-toggle]", 0, "during the event only the counselors take it"
+    assert_select "[data-night-toggle]", { minimum: 1 }, "full access takes any list tonight"
     get night_attendances_path
     assert_select "[data-night-pager='2027-01-12']"
     get night_attendances_path(noche: "2027-01-15")
@@ -115,12 +115,12 @@ class NightAttendancesControllerTest < ActionDispatch::IntegrationTest
     panel = night_attendances_path(noche: "2027-01-11")
 
     get company_path(@company, return_to: panel)
-    assert_select "a[title='Volver a Asistencia nocturna'][href='#{panel}']"
+    assert_select "a[title='Volver a Conteo'][href='#{panel}']"
     assert_select "a", text: /Gafetes/, count: 0
-    assert_select "a[href^='#{company_night_attendance_path(@company)}']", text: /Asistencia nocturna/
+    assert_select "a[href^='#{company_night_attendance_path(@company)}']", text: /Conteo/
 
     get company_night_attendance_path(@company, genero: "H", return_to: panel)
-    assert_select "a[title='Volver a Asistencia nocturna'][href='#{panel}']"
+    assert_select "a[title='Volver a Conteo'][href='#{panel}']"
   end
 
   test "past nights are read-only" do

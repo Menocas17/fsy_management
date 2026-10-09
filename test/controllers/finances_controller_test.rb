@@ -98,25 +98,25 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
     assert_nil expense.approved_by_id
   end
 
-  test "the superadmin does not move expenses: no budget, no categories, no new expenses" do
+  test "the superadmin sets the budget and categories, but does not present expenses" do
     sign_in_as(users(:one))
 
     get finances_path
     assert_response :success
-    assert_select "a[href='#{edit_finances_path}']", 0
+    assert_select "a[href='#{edit_finances_path}']"
     assert_select "a[href='#{new_expense_path}']", 0
 
     patch finances_path, params: { budget: "1" }
-    assert_equal 500_000, FinanceSettings.budget_cents
-    assert_no_difference -> { ExpenseCategory.count } do
-      post expense_categories_path, params: { expense_category: { name: "Pirata" } }
+    assert_equal 100, FinanceSettings.budget_cents
+    assert_difference -> { ExpenseCategory.count } do
+      post expense_categories_path, params: { expense_category: { name: "Transporte extra" } }
     end
     assert_no_difference -> { Expense.count } do
       post expenses_path, params: { expense: { concept: "Pirata", currency: "NIO", estimated_amount: "10" } }
     end
   end
 
-  test "dirección and coordinación see finances but cannot move expenses or the budget" do
+  test "dirección and coordinación set the budget but cannot present expenses" do
     sign_in_as(@coordinator_user)
 
     get finances_path
@@ -128,7 +128,7 @@ class FinancesControllerTest < ActionDispatch::IntegrationTest
       post expenses_path, params: { expense: { concept: "Pirata", currency: "NIO", estimated_amount: "10" } }
     end
     get edit_finances_path
-    assert_redirected_to finances_path
+    assert_response :success
   end
 
   test "someone outside finances does not even see the section" do

@@ -16,7 +16,7 @@ class NightAttendanceTest < ApplicationSystemTestCase
   test "the counselor taps each joven present, and Falta asks for the reason" do
     sign_in_as(@user, password: "Prueba123!")
     visit company_path(@company)
-    click_on "Pasar asistencia"
+    click_on "Pasar conteo"
 
     assert_button "Confirmar asistencia", disabled: true
     save_screenshot(File.join(ENV["SCREENSHOTS"], "asistencia-pendiente.png")) if ENV["SCREENSHOTS"]

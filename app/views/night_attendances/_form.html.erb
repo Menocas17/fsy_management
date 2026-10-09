@@ -7,7 +7,7 @@
 <% marked = @jovenes.count { |joven| mark_of.(joven)&.status.present? } %>
 <%# Los ausentes van primero (en el navegador suben con una animación al marcarlos); el resto, en orden alfabético. %>
 <% ordered = @jovenes.each_with_index.sort_by { |joven, index| [ mark_of.(joven)&.ausente? ? 0 : 1, index ] } %>
-<%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), method: :patch,
+<%= form_with url: company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence, practica: ("1" if @practice)), method: :patch,
       id: "night_attendance_#{@gender}", data: { controller: "night-attendance" } do %>
   <div class="flex items-center gap-3 mb-4">
     <span class="text-label font-bold text-ink-900 tabular-nums whitespace-nowrap" data-night-attendance-target="count"><%= marked %> de <%= @jovenes.size %></span>

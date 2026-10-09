@@ -54,6 +54,8 @@ Rails.application.routes.draw do
   # Lector general del panel: un gafete abre la ficha de la persona; un artículo, su ficha de inventario.
   # La búsqueda de toda la app (botón central de la barra inferior del modo simple).
   get "buscar" => "searches#show", as: :search
+  # El tutorial: empezarlo (manda la alerta de práctica y devuelve los pasos) y terminarlo o saltarlo.
+  resource :tutorial, only: %i[create update], path: "tutorial"
   get "escanear" => "scans#show", as: :scan
   get "escanear/buscar" => "scans#lookup", as: :scan_lookup
 

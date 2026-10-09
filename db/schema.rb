@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -429,9 +429,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.date "birth_date"
     t.string "other_stake"
     t.string "other_ward"
+    t.boolean "practice", default: false, null: false
     t.index ["code"], name: "index_participants_on_code", unique: true
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
+    t.index ["practice"], name: "index_participants_on_practice", where: "practice"
   end
 
   create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -494,6 +496,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.datetime "first_signed_in_at"
     t.datetime "alerts_cleared_at"
     t.boolean "simple_mode", default: true, null: false
+    t.datetime "tutorial_completed_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["participant_id"], name: "index_users_on_participant_id", unique: true
   end

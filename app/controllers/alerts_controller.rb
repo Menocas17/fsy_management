@@ -3,7 +3,7 @@ class AlertsController < ApplicationController
   before_action :set_alert, only: %i[show destroy]
 
   def index
-    @pagy, @alerts = pagy(Alert.includes(sender: Participant::AVATAR_PRELOAD, images_attachments: :blob).recent)
+    @pagy, @alerts = pagy(Alert.sent.includes(sender: Participant::AVATAR_PRELOAD, images_attachments: :blob).recent)
   end
 
   def show
@@ -50,7 +50,7 @@ class AlertsController < ApplicationController
 
     # La tarjeta ya se fue con la animación del deslizamiento; aquí se quita del DOM y se ajusta el total.
     def removal_streams(alert)
-      remaining = Alert.count
+      remaining = Alert.sent.count
       streams = [
         turbo_stream.remove_all("[data-alert-item='#{alert.id}']"),
         turbo_stream.update_all("[data-alerts-sent-total]", helpers.pluralize(remaining, "alerta enviada", plural: "alertas enviadas"))

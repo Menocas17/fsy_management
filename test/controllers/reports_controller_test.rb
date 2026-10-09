@@ -19,6 +19,8 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{agenda_reports_path}']"
     assert_select "a[href='#{badges_reports_path}']"
     assert_select "a[href='#{birthdays_reports_path}']"
+    assert_select "a[href='#{trainings_reports_path}'][target=_blank]", 1, "el PDF de asistencia a capacitaciones vive aquí"
+    assert_select "a[href='#{agenda_trainings_path}']:not([target])"
     assert_select "a[href='#{new_participant_import_path}']"
   end
 

@@ -17,6 +17,8 @@ class CompaniesController < ApplicationController
   def show
     load_leaders
     @rooms = @company.room_occupancy
+    # En el tutorial, los jóvenes de práctica aparecen aparte, en la compañía de quien lo hace.
+    @practice_jovenes = practice_mode? && practice_company == @company ? Participant.practice_jovenes_for(@company) : []
     @jovenes_total = @company.participants.count
     @pagy, @participants = pagy(@company.participants
                                         .with_attached_avatar

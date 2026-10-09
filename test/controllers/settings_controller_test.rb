@@ -43,10 +43,22 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert ScanWindow.arrival.open?
   end
 
-  test "nobody else sees or changes them, not even the directors" do
+  test "the directors, with full access, change them too" do
     director = Participant.create!(first_name: "Ana", last_name: "Ruiz", age: 40, stake: "las_americas",
                                    shirt_number: "m", gender: "M", rol: :director)
     sign_in_as(User.create!(email_address: "ana@fsy.com", password: "Directora1!", participant: director))
+
+    get settings_path
+    assert_select "#settings-scan"
+
+    patch scan_windows_settings_path, params: { scan: "arrival" }
+    assert ScanWindow.arrival.open?
+  end
+
+  test "nobody else sees or changes them" do
+    counselor = Participant.create!(first_name: "Ana", last_name: "Ruiz", age: 30, stake: "las_americas",
+                                    shirt_number: "m", gender: "M", rol: :consejero)
+    sign_in_as(User.create!(email_address: "ana@fsy.com", password: "Consejera1!", participant: counselor))
 
     get settings_path
     assert_select "#settings-scan", 0

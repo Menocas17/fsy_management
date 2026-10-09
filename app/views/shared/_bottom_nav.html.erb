@@ -9,26 +9,26 @@
   <nav aria-label="Menú principal" data-bottom-nav
        class="md:hidden relative z-10 shrink-0 grid grid-cols-[1fr_1fr_64px_1fr_1fr] items-end bg-surface border-t border-line-soft pb-[max(env(safe-area-inset-bottom),10px)]">
     <%= render "shared/bottom_nav_item", item: items[0] %>
-    <%= render "shared/bottom_nav_item", item: items[1] %>
+    <%= render "shared/bottom_nav_item", item: items[1], tour: "own" %>
 
     <% center_classes = "flex flex-col items-center gap-1 pb-1.5 text-meta tracking-tight font-extrabold text-ink-900 cursor-pointer" %>
     <% center_disc = "size-[58px] -mt-6 rounded-full border-4 border-surface bg-sun text-primary-900 shadow-md flex items-center justify-center" %>
     <% if searcher %>
       <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar" }, class: center_classes do %>
-        <span class="<%= center_disc %>"><%= icon "search", class: "size-[26px] stroke-[2.4]" %></span>
+        <span class="<%= center_disc %>" data-tour="center"><%= icon "search", class: "size-[26px] stroke-[2.4]" %></span>
         Buscar
       <% end %>
     <% elsif me %>
       <button type="button" data-action="dialog#open" data-dialog-name="qr" aria-label="Mi código QR" data-bottom-nav-item="Mi QR" class="<%= center_classes %>">
-        <span class="<%= center_disc %>"><%= icon "qr-code", class: "size-[26px]" %></span>
+        <span class="<%= center_disc %>" data-tour="center"><%= icon "qr-code", class: "size-[26px]" %></span>
         Mi QR
       </button>
     <% else %>
       <span></span>
     <% end %>
 
-    <%= render "shared/bottom_nav_item", item: items[2] %>
-    <button type="button" data-action="dialog#open" data-dialog-name="mas" aria-haspopup="dialog" data-bottom-nav-item="Más"
+    <%= render "shared/bottom_nav_item", item: items[2], tour: "agenda" %>
+    <button type="button" data-action="dialog#open" data-dialog-name="mas" aria-haspopup="dialog" data-bottom-nav-item="Más" data-tour="more"
             class="min-h-[60px] flex flex-col items-center justify-center gap-1 text-meta tracking-tight font-semibold text-ink-500 hover:text-ink-900 cursor-pointer transition-colors">
       <%= icon "ellipsis", class: "size-[22px] stroke-[2.4]" %>
       Más
@@ -37,10 +37,11 @@
 
   <%= render "participants/qr_dialog", participant: me, lazy: true if me %>
 
-  <%# Una hoja que sube desde abajo; tocar fuera la cierra (no lleva botón de cerrar). %>
+  <%# Una hoja que sube desde abajo; tocar fuera o arrastrarla hacia abajo la cierra (no lleva botón de cerrar). %>
   <dialog data-dialog-target="modal" data-dialog-name="mas" data-action="click->dialog#clickOutside" aria-labelledby="more-sheet-title"
           class="md:hidden p-0 mt-auto mb-0 mx-0 w-full max-w-none bg-transparent backdrop:bg-black/50 backdrop:backdrop-blur-[2px]">
-    <div class="px-[18px] pt-2.5 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-panel bg-surface shadow-lg">
+    <div class="px-[18px] pt-2.5 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-panel bg-surface shadow-lg"
+         data-controller="sheet-drag" data-action="sheet-drag:dismiss->dialog#close">
       <div class="w-10 h-1 mx-auto mb-3.5 rounded-full bg-line" aria-hidden="true"></div>
       <h2 id="more-sheet-title" class="mb-3 text-meta font-bold tracking-[.08em] uppercase text-sun-ink">Más opciones</h2>
       <div class="grid grid-cols-3 gap-2.5" data-more-items>

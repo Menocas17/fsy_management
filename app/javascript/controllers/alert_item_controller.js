@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Una alerta en la campanita o en Notificaciones. Con el dedo se desliza a la izquierda y deja ver
 // «Eliminar» detrás (como en el correo del teléfono); deslizada hasta el fondo se borra sola. Al borrarse,
 // por el botón o por la X de escritorio, se va hacia la izquierda y la lista se cierra sobre el hueco.
+// Las tarjetas de capacitaciones usan el mismo gesto para borrarse (trainings/_summary_card).
 const REVEAL = 96 // ancho del botón «Eliminar»
 const SLOP = 8 // px antes de decidir si el gesto es horizontal o de scroll
 

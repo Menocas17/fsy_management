@@ -70,7 +70,9 @@ class User < ApplicationRecord
     "#{SecureRandom.base58(24)}A1!"
   end
 
-  # Acceso total al evento: superadmin, el matrimonio director y los coordinadores.
+  # Acceso total al evento: superadmin, el matrimonio director y los coordinadores. Entran a todo y editan todo,
+  # salvo presentar o aprobar gastos (finance_operator?, expense_approver?); Accesos y «Ver como» son solo del
+  # superadmin.
   def full_access?
     return true if superadmin?
     participant&.coordinador? || participant&.director? || false
@@ -114,9 +116,9 @@ class User < ApplicationRecord
     participant&.director? || participant&.coordinador?
   end
 
-  # Quién elige qué registro está activo en el escáner (Configuración): el superadmin y el director de logística.
+  # Quién elige qué registro está activo en el escáner (Configuración): el acceso total y el director de logística.
   def scan_manager?
-    superadmin? || participant&.director_logistica? || false
+    full_access? || participant&.director_logistica? || false
   end
 
   # Quién registra llegadas: el acceso total, el director de logística y el comité de logística cuya área
@@ -145,13 +147,13 @@ class User < ApplicationRecord
   end
 
   # Enfermería: el doctor y quien lo acompañe son de logística, en un área con la bandera nursing. Ellos (y el
-  # superadmin) ingresan, dan de alta y escriben la ficha clínica; un consejero solo avisa que lleva a un joven.
+  # acceso total) ingresan, dan de alta y escriben la ficha clínica; un consejero solo avisa que lleva a un joven.
   def nursing_member?
     participant&.logistica? && participant.logistics_area&.nursing? || false
   end
 
   def infirmary_operator?
-    superadmin? || nursing_member?
+    full_access? || nursing_member?
   end
 
   # El tablero de enfermería lo ve todo el staff; los jóvenes no.
@@ -177,10 +179,10 @@ class User < ApplicationRecord
     finance_operator? || expense_approver? || full_access?
   end
 
-  # Presupuesto, categorías y tipo de cambio: solo el director de logística. El superadmin, como dirección
-  # y coordinación, solo ve.
+  # Presupuesto, categorías y tipo de cambio: el director de logística y el acceso total. Presentar y aprobar
+  # gastos no: eso sigue siendo de finance_operator? y expense_approver?.
   def finance_configurator?
-    participant&.director_logistica? || false
+    full_access? || participant&.director_logistica? || false
   end
 
   # El inventario lo mueve logística entera, más el acceso total.

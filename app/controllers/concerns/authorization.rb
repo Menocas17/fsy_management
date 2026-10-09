@@ -32,8 +32,9 @@ module Authorization
   # La cadena de mando: el director de logística manda sobre su comité, logística con la bandera Registro sobre
   # los jóvenes,
   # el auxiliar sobre los jóvenes de su rama y el consejero sobre los de su compañía. Todos sobre su propia ficha.
+  # Un joven de práctica (tutorial) no lo edita, borra ni asigna nadie: solo se mira.
   def can_edit_participant?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
@@ -58,7 +59,7 @@ module Authorization
   end
 
   def can_delete_participant?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
@@ -173,11 +174,11 @@ module Authorization
     can_view_night_attendance? || night_attendance_gender_for(company).present?
   end
 
-  # Pasar una lista: la de su género, y solo la de esta noche. El superadmin, cualquiera, pero solo en la
-  # noche de prueba (antes del evento).
+  # Pasar una lista: la de su género, y solo la de esta noche. El acceso total pasa cualquiera de esta noche,
+  # también la de prueba (antes del evento).
   def can_take_night_attendance?(company, gender, night)
     return false unless night == NightAttendance.current_night
-    return true if Current.user&.superadmin? && NightAttendance.testing?
+    return true if full_company_access?
 
     night_attendance_gender_for(company) == gender.to_s
   end
@@ -263,7 +264,7 @@ module Authorization
   end
 
   def can_handle_account_of?(participant)
-    return false unless can_manage_accounts?
+    return false if participant.practice? || !can_manage_accounts?
 
     full_company_access? || !(participant.director? || participant.coordinador?)
   end
@@ -319,7 +320,7 @@ module Authorization
   # reach everybody, an auxiliar reaches their branch, a consejero their own company, and the logistics
   # director their own team.
   def can_assign_to?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
@@ -364,7 +365,7 @@ module Authorization
     end
 
     def require_finance_configurator!
-      redirect_to finances_path, alert: "El presupuesto lo define el director de logística" unless can_configure_finances?
+      redirect_to finances_path, alert: "El presupuesto lo definen el director de logística y la dirección" unless can_configure_finances?
     end
 
     def require_infirmary_viewer!
@@ -372,7 +373,7 @@ module Authorization
     end
 
     def require_infirmary_operator!
-      redirect_to infirmary_visits_path, alert: "Solo enfermería ingresa, da de alta y escribe la ficha clínica" unless can_operate_infirmary?
+      redirect_to infirmary_visits_path, alert: "Solo enfermería y la dirección ingresan, dan de alta y escriben la ficha clínica" unless can_operate_infirmary?
     end
 
     def require_logistics_areas_access!

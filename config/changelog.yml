@@ -7,6 +7,46 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-09-tutorial
+  date: 2026-10-09
+  title: Un tutorial de 5 minutos
+  summary: La primera vez que entras desde el teléfono, la app te muestra lo que vas a usar en la semana, y lo practicas sin cambiar nada.
+  changes:
+    - Ilumina una parte de la app a la vez y te pide tocarla, deslizarla o probarla, sobre la app de verdad.
+    - "Lo que practicas no se guarda: borrar una capacitación, enviar una alerta, llevar a un joven a enfermería o pasar el Conteo."
+    - Consejeros y auxiliares practican con jóvenes de ejemplo que solo aparecen en el tutorial, aunque todavía no tengan jóvenes asignados.
+    - Lo puedes saltar cuando quieras y volver a verlo en Configuración → Ver el tutorial.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
+- id: 2026-10-08-oscuro-en-el-telefono
+  date: 2026-10-08
+  title: Modo oscuro en el teléfono y detalles visuales
+  summary: En el teléfono la app arranca en modo oscuro, y se corrigieron la agenda y la gráfica por edad.
+  changes:
+    - En el teléfono la app se abre en modo oscuro. Si prefieres el claro, apágalo en Configuración → Apariencia y queda guardado.
+    - Al abrir una actividad de la agenda en el teléfono, el detalle ya no queda pegado al título y el espacio entre filas es parejo.
+    - En la gráfica «Jóvenes por edad» cada número queda justo encima de su barra.
+    - En el inicio del teléfono, la cifra del conteo de anoche se llama «Conteo», como el módulo.
+- id: 2026-10-08-conteo-y-hojas
+  date: 2026-10-08
+  title: «Conteo», hojas que se arrastran y capacitaciones
+  summary: La asistencia nocturna ahora se llama Conteo, las hojas del teléfono se cierran arrastrándolas y las capacitaciones se borran desde su tarjeta.
+  changes:
+    - «Asistencia nocturna» ahora se llama «Conteo», en el menú, las alertas y el historial.
+    - En el teléfono, el menú «Más» y los filtros (jóvenes, staff, historial) se cierran arrastrándolos hacia abajo.
+    - El menú «Más» ya no aparece un instante arriba de la pantalla al cambiar de página.
+    - "Capacitaciones: quien edita la agenda borra una capacitación desde su tarjeta (en el teléfono, deslizándola a la izquierda, como las alertas)."
+    - El PDF de asistencia a capacitaciones pasó a Reportes; en Capacitaciones quedan «Escanear» y «Nueva», en una sola fila aun en teléfonos angostos.
+    - Áreas de logística ya no se desliza de lado en pantallas angostas.
+- id: 2026-10-08-acceso-total-direccion
+  date: 2026-10-08
+  title: Dirección y coordinación entran a todo
+  summary: El matrimonio director y los coordinadores ya pueden hacer todo en la app; presentar y aprobar gastos sigue como antes.
+  changes:
+    - Operan Enfermería completa (ingresar, dar de alta y escribir la ficha clínica).
+    - Pasan el Conteo de cualquier compañía y eligen qué registro está activo en el escáner (Configuración).
+    - Definen el presupuesto, las categorías y el tipo de cambio de Finanzas.
+    - Presentar y aprobar gastos sigue igual que antes.
+  roles: [ director, coordinador ]
 - id: 2026-10-08-fechas-y-telefonos-angostos
   date: 2026-10-08
   title: Fechas día/mes/año y teléfonos angostos

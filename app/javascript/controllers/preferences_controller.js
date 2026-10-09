@@ -10,7 +10,8 @@ export default class extends Controller {
   static targets = ['themeToggle', 'motionToggle', 'textSizeToggle'];
 
   connect() {
-    this.themeToggleTarget.checked = this.read(KEYS.theme) === 'dark';
+    // Lo que se ve, no lo guardado: sin elección, el teléfono ya viene en oscuro (layouts/application).
+    this.themeToggleTarget.checked = document.documentElement.classList.contains('dark');
     this.motionToggleTarget.checked = this.read(KEYS.reduceMotion) === 'true';
     this.textSizeToggleTarget.checked = this.read(KEYS.textSize) === 'large';
   }

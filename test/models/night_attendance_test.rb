@@ -63,7 +63,7 @@ class NightAttendanceTest < ActiveSupport::TestCase
     end
 
     alert = Alert.last
-    assert_equal "Asistencia nocturna: 2 listas sin pasar y 1 joven ausente", alert.title
+    assert_equal "Conteo: 2 listas sin pasar y 1 joven ausente", alert.title
     assert_match "Compañía 3 · hombres: Pedro Prueba (Enfermería)", alert.body
     assert_match "Compañía 3 · mujeres: sin pasar", alert.body
     assert_match "Compañía 4 · mujeres: sin pasar", alert.body

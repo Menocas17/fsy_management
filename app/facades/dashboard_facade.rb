@@ -115,7 +115,7 @@ class DashboardFacade
         kpi(label, jovenes.count, "users", :green, link: link),
         kpi("Enfermería", InfirmaryVisit.adentro.where(participant_id: jovenes.select(:id)).count, "heart-pulse", :rose,
             badge: "Ahora", link: :infirmary),
-        kpi("Asistencia", present || "—", "moon-star", :indigo,
+        kpi("Conteo", present || "—", "moon-star", :indigo,
             sub: present ? "de #{jovenes.count} · #{night}" : "Sin pasar", link: :night_attendance)
       ]
     end

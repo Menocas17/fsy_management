@@ -43,6 +43,8 @@
               icon: "bed-double", url: rooms_reports_path },
             { title: "Agenda", text: "Los seis días del evento con horario, lugar y a quién va dirigida cada actividad.",
               icon: "calendar-days", url: agenda_reports_path },
+            { title: "Asistencia a capacitaciones", text: "El staff con una columna por capacitación: quién asistió, quién faltó y cuántas lleva cada uno.",
+              icon: "graduation-cap", url: trainings_reports_path, extras: [ [ "Ver capacitaciones", agenda_trainings_path, false ] ] },
             { title: "Cumpleañeros", text: "Quiénes cumplen años en #{SpanishDates.month(Rails.configuration.x.event_start_on)} y, aparte, durante la semana del FSY, con la edad que cumplen.",
               icon: "cake", url: birthdays_reports_path,
               extras: [ [ "Solo jóvenes", birthdays_reports_path(scope: "jovenes") ] ] },
@@ -64,8 +66,9 @@
                 <%= icon "printer", class: "w-4 h-4" %>
                 Generar PDF
               <% end %>
-              <% Array(report[:extras]).each do |label, url| %>
-                <%= link_to label, url, target: "_blank", rel: "noopener", class: secondary %>
+              <%# Un extra con false es un enlace dentro de la app (se abre aquí mismo), no otro PDF. %>
+              <% Array(report[:extras]).each do |label, url, pdf = true| %>
+                <%= link_to label, url, class: secondary, **(pdf ? { target: "_blank", rel: "noopener" } : {}) %>
               <% end %>
             </div>
           </article>

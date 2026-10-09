@@ -114,7 +114,8 @@ class ParticipantsController < ApplicationController
   end
 
   def set_participant
-    @participant = Participant.find(params[:id])
+    # En el tutorial, la ficha de un joven de práctica se puede ver (solo ver: no hay quien la edite).
+    @participant = (practice_participant(params[:id]) if action_name == "show") || Participant.find(params[:id])
   end
 
   def participant_params

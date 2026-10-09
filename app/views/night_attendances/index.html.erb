@@ -1,4 +1,4 @@
-<% content_for :title, "Asistencia nocturna" %>
+<% content_for :title, "Conteo" %>
 <% content_for :eyebrow, "Seguimiento" %>
 <% content_for :head do %>
   <%# Cada lista que se confirma refresca el panel abierto (NightAttendance#after_commit), sin perder el scroll. %>
@@ -46,7 +46,7 @@
   <% if lists.empty? %>
     <div class="<%= card_classes("p-5 md:p-6") %>">
       <%= render EmptyStateComponent.new(title: "Todavía no hay jóvenes en compañías", icon: "moon-star", tone: :indigo, name: "night-attendance",
-            text: "La asistencia nocturna se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
+            text: "El conteo se pasa por compañía; aparece aquí cuando los jóvenes tengan la suya.") %>
     </div>
   <% else %>
     <%# La misma cuadrícula de Compañías. Cada lista (hombres, mujeres) es un botón que abre esa lista; quién falta

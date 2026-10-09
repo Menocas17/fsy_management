@@ -32,5 +32,8 @@ module FsyManagement
     # «¿Olvidaste tu contraseña?» por correo. Apagado mientras no haya SMTP en production.rb: sin él, el
     # correo nunca salía y la pantalla igual decía que sí. Mientras, cada quien cambia la suya en Configuración.
     config.x.password_reset_emails = false
+    # El tutorial arranca solo la primera vez en el teléfono (Tutorial). Las pruebas lo apagan para que no tape
+    # las demás pantallas; TutorialTest lo vuelve a encender.
+    config.x.tutorial_autostart = true
   end
 end

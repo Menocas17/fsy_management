@@ -21,6 +21,20 @@ class TrainingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-staff-row='#{@counselor.id}'] [data-mark='yes']", 1
     assert_select "[data-staff-row='#{@logistics.id}'] [data-mark='no']", 1, "quien no vino a una que ya pasó, faltó"
     assert_select "[data-staff-row='#{@counselor.id}'] [data-mark='pending']", 1, "la que no llega todavía no se juzga"
+    assert_select "a[href='#{trainings_reports_path}']", 0, "el PDF de asistencia está en Reportes"
+  end
+
+  test "whoever edits the agenda deletes a training from its card, warned of what goes with it" do
+    TrainingAttendance.create!(training: @past, participant: @counselor, recorded_at: @past.held_on)
+
+    get agenda_trainings_path
+    card = "[data-training-card='#{@past.id}']"
+    assert_select "#{card} form[action='#{agenda_training_path(@past)}'][data-turbo-confirm-detail*='de 1 persona'] button[data-training-delete]"
+    assert_select "form[action='#{agenda_training_path(@past)}'] button[data-training-swipe-delete]", 1, "en el teléfono, deslizando la tarjeta"
+
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: @counselor))
+    get agenda_trainings_path
+    assert_select "[data-training-delete], [data-training-swipe-delete]", 0
   end
 
   test "the table says how many of the held trainings each one attended" do

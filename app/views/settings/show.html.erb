@@ -26,7 +26,7 @@
       </div>
     </section>
 
-    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-appearance">
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-appearance" data-tour="theme">
       <h2 id="settings-appearance" class="<%= card_heading %>">
         <%= icon "sun", class: "w-[17px] h-[17px]" %>
         Apariencia
@@ -57,6 +57,21 @@
             <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if simple %>"></span>
           <% end %>
         </div>
+      </section>
+    <% end %>
+
+    <% if Tutorial.available_to?(Current.user) %>
+      <%# El tutorial recorre la barra de abajo: solo existe en el teléfono con el modo simple. %>
+      <section class="md:hidden <%= card_classes("px-5 py-6") %>" aria-labelledby="settings-tutorial" data-settings-tutorial>
+        <h2 id="settings-tutorial" class="<%= card_heading %>">
+          <%= icon "graduation-cap", class: "w-[17px] h-[17px]" %>
+          Tutorial
+        </h2>
+        <p class="text-label leading-relaxed text-ink-500">Un recorrido de 5 minutos por la app, para repasar lo que vas a usar. Lo que practiques no se guarda.</p>
+        <%= link_to dashboard_path(tutorial: "ver"), class: button_classes(:secondary, extra: "mt-3 w-full") do %>
+          <%= icon "play", class: "w-4 h-4" %>
+          Ver el tutorial
+        <% end %>
       </section>
     <% end %>
 

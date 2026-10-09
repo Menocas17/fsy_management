@@ -18,6 +18,8 @@ class NightAttendancesController < ApplicationController
   end
 
   def show
+    return show_practice if practice_mode? && practice_company == @company
+
     @attendance = NightAttendance.includes(marks: :participant).find_by(company: @company, night_on: @night, gender: @gender)
     @jovenes = NightAttendance.expected(@company, @gender).to_a
     @editable = editable?
@@ -25,6 +27,9 @@ class NightAttendancesController < ApplicationController
   end
 
   def update
+    # La lista de práctica del tutorial nunca se guarda (y sus jóvenes no existen fuera de él).
+    return redirect_to company_night_attendance_path(@company, genero: @gender), notice: "Práctica del tutorial: la lista no se guardó." if practice_mode?
+
     return redirect_to company_night_attendance_path(@company, genero: @gender), alert: "Esta lista no te toca pasarla" unless editable?
 
     @attendance = NightAttendance.includes(marks: :participant).find_or_initialize_by(company: @company, night_on: @night, gender: @gender)
@@ -41,13 +46,24 @@ class NightAttendancesController < ApplicationController
   end
 
   private
+    # En el tutorial: la lista de esta noche solo con los jóvenes de práctica de este género, para marcarlos y
+    # confirmar sin tocar la de verdad.
+    def show_practice
+      @practice = true
+      @attendance = nil
+      @jovenes = Participant.practice_jovenes_for(@company).select { |joven| joven.gender == @gender }
+      @editable = true
+      @in_infirmary = Set.new
+      render :show
+    end
+
     def require_night_attendance_viewer!
-      redirect_to dashboard_path, alert: "El panel de asistencia nocturna es de dirección, coordinadores y auxiliares" unless can_view_night_attendance?
+      redirect_to dashboard_path, alert: "El conteo es de dirección, coordinadores y auxiliares" unless can_view_night_attendance?
     end
 
     def set_company
       @company = Company.find(params[:company_id])
-      redirect_to dashboard_path, alert: "No tienes acceso a la asistencia nocturna de esta compañía" unless can_open_night_attendance?(@company)
+      redirect_to dashboard_path, alert: "No tienes acceso al conteo de esta compañía" unless can_open_night_attendance?(@company)
     end
 
     # La lista que se abre: la pedida, o la que le toca pasar a quien entra.
@@ -85,6 +101,6 @@ class NightAttendancesController < ApplicationController
       present = @attendance.marks.size - absent
       verb = first_time ? "Pasó" : "Corrigió"
       tally = [ ActionController::Base.helpers.pluralize(present, "presente"), ActionController::Base.helpers.pluralize(absent, "ausente") ].join(" y ")
-      "#{verb} la asistencia nocturna de #{@attendance.label}: #{tally}"
+      "#{verb} el conteo de #{@attendance.label}: #{tally}"
     end
 end

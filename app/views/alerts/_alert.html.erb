@@ -13,7 +13,7 @@
 %>
 <% if dismissible %>
 <%# En el celular se desliza a la izquierda y aparece «Eliminar» detrás; en escritorio, la X al pasar el ratón. %>
-<div class="relative overflow-hidden" data-alert-item="<%= alert.id %>" data-controller="alert-item"
+<div class="relative overflow-hidden" data-alert-item="<%= alert.id %>" data-controller="alert-item" <%= "data-alert-tutorial" if alert.source_tutorial? %>
      data-action="turbo:submit-start->alert-item#leave turbo:submit-end->alert-item#settle">
   <div class="absolute inset-y-0 right-0 flex" data-alert-item-target="actions" hidden>
     <%= button_to dismiss_path, method: :delete, form: { class: "flex", data: dismiss_form_data },
