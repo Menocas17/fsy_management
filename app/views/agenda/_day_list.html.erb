@@ -25,7 +25,7 @@
               <div class="px-4 pt-4 pb-5 bg-surface border-t border-line-soft">
                 <%# Lazy: un frame dentro de un <details> cerrado no es visible, así que se pide al abrirlo. %>
                 <%= turbo_frame_tag dom_id(activity, :details), src: agenda_activity_path(activity), loading: :lazy do %>
-                  <p class="py-2 text-label font-semibold text-ink-500">Cargando…</p>
+                  <%= render SkeletonComponent.new(variant: :details, count: 3, label: "Cargando la actividad…") %>
                 <% end %>
               </div>
             </details>

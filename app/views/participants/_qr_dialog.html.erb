@@ -10,7 +10,7 @@
     <%# lazy: el de la barra inferior va en todas las páginas, así que el código se pide al abrir el diálogo. %>
     <% if local_assigns[:lazy] %>
       <%= turbo_frame_tag dom_id(participant, :qr), src: participant_qr_path(participant), loading: :lazy do %>
-        <p class="py-24 text-label text-ink-500">Cargando…</p>
+        <%= render SkeletonComponent.new(variant: :qr, label: "Cargando el código…") %>
       <% end %>
     <% else %>
       <%= render "participants/qr_card", participant: participant %>

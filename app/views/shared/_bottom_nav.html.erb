@@ -53,7 +53,7 @@
           </button>
         <% end %>
         <% simple_more_items.each do |item| %>
-          <%= link_to item[:url], class: "flex flex-col items-center gap-2 px-1.5 py-3.5 rounded-tile bg-sunken text-label font-bold text-ink-900 text-center" do %>
+          <%= link_to item[:url], data: { more_link: true }, class: "flex flex-col items-center gap-2 px-1.5 py-3.5 rounded-tile bg-sunken text-label font-bold text-ink-900 text-center" do %>
             <span class="size-[46px] rounded-tile bg-sun text-primary-900 flex items-center justify-center"><%= icon item[:icon], class: "size-[22px]" %></span>
             <%= item[:text] %>
           <% end %>
