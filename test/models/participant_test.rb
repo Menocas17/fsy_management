@@ -120,16 +120,27 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_match "solo se acepta para el staff", juan.errors.full_messages.to_sentence
   end
 
-  test "the age comes from the birth date, counted on the first day of the event" do
+  test "the age is today's, from the birth date, and it goes up on the birthday by itself" do
     juan = participants(:juan)
-    event = Rails.configuration.x.event_start_on
+    travel_to Date.new(2026, 10, 7) do
+      juan.update!(birth_date: Date.new(2010, 10, 7))
+      assert_equal 16, juan.age, "today is the birthday"
+      juan.update!(birth_date: Date.new(2010, 10, 8))
+      assert_equal 15, juan.age, "one day short of the birthday"
+    end
 
-    juan.update!(birth_date: event.prev_year(16))
-    assert_equal 16, juan.age
-    juan.update!(birth_date: event.prev_year(16) + 1)
-    assert_equal 15, juan.age, "one day short of the birthday"
+    travel_to Date.new(2026, 10, 8) do
+      assert_equal 16, juan.reload.age, "nobody saved the ficha: it is a year older all the same"
+      assert_equal({ 16 => 1, 25 => 1 }, Participant.data_by_age)
+    end
 
     assert_not Participant.new(first_name: "Sin", last_name: "Fecha", stake: "villa_flor", shirt_number: "m", gender: "H").valid?
+  end
+
+  test "without a birth date the written age stays" do
+    juan = participants(:juan)
+    juan.update!(birth_date: nil, age: 17)
+    assert_equal 17, juan.reload.age
   end
 
   test "the nickname is the preferred name only when it differs from the first name" do

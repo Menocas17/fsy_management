@@ -31,7 +31,7 @@
           </div>
           <div>
             <%= form.label :date, "Fecha", class: field_label_classes %>
-            <%= form.date_field :date, required: true, min: Activity.event_days.first, max: Activity.event_days.last, class: field_input_classes %>
+            <%= date_input form.field_name(:date), form.object.date, id: form.field_id(:date), required: true, min: Activity.event_days.first, max: Activity.event_days.last %>
             <p class="<%= hint %>">Del <%= Activity.event_days.first.day %> al <%= Activity.event_days.last.day %> de <%= SpanishDates.month(Activity.event_days.last) %>.</p>
           </div>
           <div>

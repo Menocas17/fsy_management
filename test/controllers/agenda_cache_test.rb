@@ -4,8 +4,10 @@ require "test_helper"
 # actividad nueva, editada o borrada se ve en la visita siguiente.
 class AgendaCacheTest < ActionDispatch::IntegrationTest
   setup do
-    @cache, @perform = Rails.cache, ActionController::Base.perform_caching
+    @cache, @perform, @fragments = Rails.cache, ActionController::Base.perform_caching, ActionController::Base.cache_store
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    # Los fragmentos de las vistas van a la caché del controlador, no a Rails.cache (ver company_page_cache_test).
+    ActionController::Base.cache_store = Rails.cache
     ActionController::Base.perform_caching = true
     sign_in_as(users(:one))
     @day = Activity.event_days.first
@@ -14,6 +16,7 @@ class AgendaCacheTest < ActionDispatch::IntegrationTest
 
   teardown do
     Rails.cache = @cache
+    ActionController::Base.cache_store = @fragments
     ActionController::Base.perform_caching = @perform
   end
 

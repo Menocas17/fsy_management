@@ -16,7 +16,7 @@
       </div>
       <div>
         <%= form.label :held_on, "Fecha", class: field_label_classes %>
-        <%= form.date_field :held_on, required: true, class: field_input_classes %>
+        <%= date_input form.field_name(:held_on), form.object.held_on || form.object.held_on_before_type_cast, id: form.field_id(:held_on), required: true %>
         <p class="mt-1.5 text-label font-medium text-ink-500">Ese día se abre sola la asistencia por escaneo.</p>
       </div>
       <div class="sm:col-span-2">

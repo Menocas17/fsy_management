@@ -85,6 +85,7 @@ Rails.application.routes.draw do
       get :rooms, path: "cuartos"
       get :agenda
       get :badges, path: "gafetes"
+      get :birthdays, path: "cumpleaneros"
       get :inventory, path: "inventario"
       get :labels, path: "etiquetas"
       get :trainings, path: "capacitaciones"

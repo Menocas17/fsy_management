@@ -5,7 +5,7 @@
       <% by_role.each do |label, figures| %>
         <% share = figures[:expected].zero? ? 0 : (figures[:attended] * 100.0 / figures[:expected]).round %>
         <li class="flex items-center gap-3" data-role-row="<%= label.parameterize %>">
-          <span class="w-40 shrink-0 text-body font-bold text-ink-900 truncate"><%= label %></span>
+          <span class="w-28 sm:w-40 shrink-0 text-body font-bold leading-tight text-ink-900"><%= label %></span>
           <span class="flex-1 flex h-2 rounded-full overflow-hidden bg-canvas">
             <span class="<%= share >= 80 ? "bg-cat-green-solid" : "bg-cat-amber-solid" %>" style="width: <%= share %>%"></span>
           </span>
