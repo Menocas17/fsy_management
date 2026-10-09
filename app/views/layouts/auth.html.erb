@@ -13,9 +13,8 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
+    <%# La letra la sirve la app (app/assets/tailwind/application.css): se pide junto con el CSS, sin ir a Google. %>
+    <link rel="preload" href="<%= asset_path("onest-latin.woff2") %>" as="font" type="font/woff2" crossorigin>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>

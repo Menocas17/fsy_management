@@ -15,7 +15,7 @@ class AlertsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Envió la alerta «Cambio de hora» a todos los participantes", AuditLog.alertas.recent.first.summary
     assert_equal 1, AuditLog.alertas.count, "the alert records itself once, not twice"
 
-    get dashboard_path
+    get menu_notifications_path
     assert_select "[data-alert-id='#{alert.id}']", text: /Cambio de hora/
   end
 

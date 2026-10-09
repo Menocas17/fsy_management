@@ -41,9 +41,8 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
+    <%# La letra la sirve la app (app/assets/tailwind/application.css): se pide junto con el CSS, sin ir a Google. %>
+    <link rel="preload" href="<%= asset_path("onest-latin.woff2") %>" as="font" type="font/woff2" crossorigin>
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -51,8 +50,11 @@
   <%# overflow-clip y no overflow-hidden: el body no debe desplazarse nunca (solo <main>), y con hidden el
       navegador igual lo corría al enfocar algo fuera de vista, dejando la página cortada sin forma de volver. %>
   <body class="h-dvh overflow-clip bg-canvas text-ink-900">
-    <%# Canal propio de cada persona: por aquí llega la campanita al instante, sin recargar. %>
-    <%= turbo_stream_from Current.user if Current.user&.persisted? %>
+    <%# El aviso de que entró una alerta (shared/_alerts_signal): llega a todos y cada campanita pregunta lo suyo. %>
+    <% if Current.user&.persisted? %>
+      <%= turbo_stream_from "alerts" %>
+      <div id="alerts_signal" hidden></div>
+    <% end %>
     <%= render "shared/toast"%>
     <%# Only <main> scrolls: the sidebar and top bar stay fixed, and main always fills the remaining height. %>
     <div class="flex h-full">

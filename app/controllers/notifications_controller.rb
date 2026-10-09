@@ -10,6 +10,13 @@ class NotificationsController < ApplicationController
     head :no_content
   end
 
+  # Las últimas alertas del menú de la campanita (escritorio). Llega como un turbo-frame perezoso: solo se pide
+  # al abrir el menú, así ninguna otra página paga la consulta ni el dibujo de la lista.
+  def menu
+    @alerts = Alert.inbox_for(Current.user).recent.limit(5).to_a
+    render partial: "shared/notifications_menu", locals: { alerts: @alerts }
+  end
+
   # Lo consulta la campanita al volver atrás: el HTML cacheado trae el contador de antes de leerlas.
   def count
     render json: { unread: Current.user&.unread_alerts_count.to_i }

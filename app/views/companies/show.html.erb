@@ -63,7 +63,10 @@
         </div>
       </section>
 
-      <%= render "companies/leaders", company: @company, counselors: @counselors, auxiliars: @auxiliars %>
+      <%# En caché: es lo mismo para quien la abra, y sin ella eran una docena de consultas con sus fotos. %>
+      <% cache [ "company-leaders", @company.id, @company.leaders_version ] do %>
+        <%= render "companies/leaders", company: @company, counselors: @counselors, auxiliars: @auxiliars %>
+      <% end %>
 
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Cuartos asignados", "door-open" %>
@@ -98,7 +101,11 @@
         <% end %>
       </div>
       <%= turbo_frame_tag "company_participants" do %>
-        <%= render "companies/participants", participants: @participants, pagy: @pagy %>
+        <%# @participants como parte de la llave: una consulta da cuántos son y su última edición (la página,
+            sin cargarlos); si nada cambió, la lista sale de la caché sin cargar ni dibujar sus fotos. %>
+        <% cache [ "company-jovenes", @company.id, request.fullpath, @pagy.count, @participants ] do %>
+          <%= render "companies/participants", participants: @participants, pagy: @pagy %>
+        <% end %>
       <% end %>
     </section>
   </div>

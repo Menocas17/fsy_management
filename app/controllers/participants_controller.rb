@@ -4,9 +4,10 @@ class ParticipantsController < ApplicationController
   before_action :require_participant_create!, only: %i[new create]
   before_action :require_participant_edit!, only: %i[edit update]
 
+  # Sin with_attached_avatar: la lista precarga solo las fotos que no tiene guardadas (preload_thumbs).
   def index
     @pagy, @participants = pagy(Participant.jovenes
-                                           .includes(:company).with_attached_avatar
+                                           .includes(:company)
                                            .search_by_name(params[:query])
                                            .by_stake(params[:stake])
                                            .by_ward(params[:ward])
@@ -18,7 +19,7 @@ class ParticipantsController < ApplicationController
 
   def staff
     @pagy, @participants = pagy(Participant.staff
-                                           .includes(:company).with_attached_avatar
+                                           .includes(:company)
                                            .search_by_name(params[:query])
                                            .by_stake(params[:stake])
                                            .by_ward(params[:ward])
