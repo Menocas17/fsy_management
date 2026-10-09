@@ -197,11 +197,24 @@ jobs:
       - name: Llave SSH del usuario deploy
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+          # Solo la llave ed25519. net-ssh (el SSH de Kamal) elige ed25519 o ecdsa aunque known_hosts no las
+          # tenga, y si ssh-keyscan trae solo la rsa (le pasaba en el runner) da HostKeyMismatch. Con el secret
+          # SSH_KNOWN_HOSTS (la línea de tu ~/.ssh/known_hosts) se usa esa en vez de preguntarle al servidor.
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            for intento in 1 2 3 4 5; do
+              ssh-keyscan -T 10 -t ed25519 "$SERVER_IP" > ~/.ssh/known_hosts 2>/dev/null && grep -q ssh-ed25519 ~/.ssh/known_hosts && break
+              sleep 3
+            done
+          fi
+          grep -q ssh-ed25519 ~/.ssh/known_hosts || { echo "No llegó la llave ed25519 del servidor $SERVER_IP"; exit 1; }
+          ssh-keygen -lf ~/.ssh/known_hosts
 
       - name: Deploy
         run: bin/kamal deploy
