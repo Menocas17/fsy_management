@@ -55,6 +55,27 @@ module UiHelper
     INPUT_CLASSES
   end
 
+  # Campo de fecha que se escribe y se lee siempre día/mes/año. El <input type="date"> del navegador sigue el idioma
+  # del teléfono (en inglés, mes/día/año) y no se puede cambiar; este es de texto, se llena solo con las barras
+  # (date_input_controller) y el botón del calendario abre el selector nativo. Rails lee «14/03/2010» como 14 de marzo.
+  def date_input(name, value, id: nil, required: false, min: nil, max: nil)
+    date = value.is_a?(String) ? (Date.strptime(value, "%Y-%m-%d") rescue nil) : value
+    text = date ? date.strftime("%d/%m/%Y") : value.presence
+
+    tag.div(class: "relative", data: { controller: "date-input", date_input_min_value: min&.iso8601, date_input_max_value: max&.iso8601 }) do
+      safe_join([
+        text_field_tag(name, text, id: id, required: required, placeholder: "dd/mm/aaaa", inputmode: "numeric",
+                       autocomplete: "off", maxlength: 10, pattern: '\d{1,2}/\d{1,2}/\d{4}', title: "Día/mes/año, por ejemplo 14/03/2010",
+                       class: "#{field_input_classes} pr-12 tabular-nums", data: { date_input_target: "text", action: "input->date-input#typed blur->date-input#check" }),
+        tag.button(type: "button", aria: { label: "Elegir en el calendario" }, data: { action: "date-input#openPicker" },
+                   class: "absolute inset-y-0 right-0 w-11 flex items-center justify-center text-ink-500 hover:text-ink-900 cursor-pointer") { icon("calendar", class: "w-[18px] h-[18px]") },
+        # El selector nativo, invisible: solo se usa su calendario, nunca su forma de escribir la fecha.
+        tag.input(type: "date", value: date&.iso8601, min: min&.iso8601, max: max&.iso8601, tabindex: -1, aria: { hidden: true },
+                  class: "absolute right-0 bottom-0 size-px opacity-0 pointer-events-none", data: { date_input_target: "picker", action: "change->date-input#picked" })
+      ])
+    end
+  end
+
   # Las pantallas de acceso van siempre en claro y el formulario es todo el contenido: campos algo más altos.
   def auth_input_classes
     "w-full h-11 px-3.5 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-3 focus:ring-primary-500/15 focus:border-primary-500"

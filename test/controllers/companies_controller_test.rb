@@ -109,6 +109,8 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
     assert_includes stacked["aria-label"], "Compañía 3: 1 hombres y 0 mujeres"
     assert_select "[data-chart-kind-value='donut'][aria-label*='Salón Nicaragua: 1']"
     assert_select "[data-overview-row='3']", text: /1\/2.*1.*1 \/ 0/m
+    # En el teléfono, la misma información en tarjetas (sin tabla que se salga de la pantalla).
+    assert_select "[data-overview-list] [data-overview-card='3']", text: /1\/2 consejeros.*1.*jóvenes \(1 H · 0 M\)/m
     assert_select "[data-overview-kpi='consejeros-asignados']", "1/2"
   end
 
