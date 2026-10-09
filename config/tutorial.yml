@@ -28,16 +28,19 @@ own_checkin:
   text: Tu área es Registro. Desde aquí recibes a la gente escaneando el QR de su gafete; la llegada queda anotada con la hora, y si te equivocas la anulas ahí mismo.
 practice_joven:
   title: La ficha de un joven
-  text: "Arriba están los jóvenes de práctica: son de ejemplo y solo aparecen en el tutorial. Toca a Sofía para abrir su ficha."
+  text: "Arriba están los jóvenes de práctica: son de ejemplo y solo aparecen en el tutorial. Toca a Sofía Práctica para abrir su ficha."
 ficha_infirmary:
   title: ¿Lo llevas a enfermería?
   text: "En la ficha está su información médica. Toca «Enfermería» para abrir su ficha de enfermería."
 chart_announce:
-  title: Avisa que lo llevas
+  title: Su ficha de enfermería
   text: "Toca «Llevar a enfermería»."
+announce_reason:
+  title: Elige el motivo
+  text: "Toca por qué lo llevas. Abajo puedes escribir qué pasó: lo leen enfermería, sus consejeros, su auxiliar y la dirección."
 announce_form:
-  title: Elige el motivo y avisa
-  text: "Elige por qué lo llevas y toca el botón para avisar. En la semana, enfermería ya lo espera y su auxiliar se entera."
+  title: Avisa que lo llevas
+  text: "Toca el botón. En la semana, enfermería ya lo espera y su auxiliar se entera."
   result_title: "Práctica: enfermería no recibió nada"
   result: "Así se avisa. Queda «En camino» y puedes retirar el aviso si al final no van. Enfermería te avisa si sale a su casa o al hospital, nunca el detalle clínico."
 center_qr:
@@ -87,7 +90,7 @@ more_conteo:
   title: El Conteo
   text: "Cada noche se pasa lista. Abre «Más» otra vez."
 sheet_conteo:
-  title: El Conteo
+  title: Abre el Conteo
   text: "Toca «Conteo»."
 conteo_mark:
   title: Marca a cada joven

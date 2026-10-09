@@ -132,7 +132,7 @@ class Participant < ApplicationRecord
   def self.practice_jovenes
     PRACTICE_JOVENES.map do |first_name, gender|
       unscoped.find_or_create_by!(practice: true, first_name: first_name) do |participant|
-        participant.assign_attributes(last_name: "(práctica)", gender: gender, rol: :joven, age: 15, shirt_number: :m,
+        participant.assign_attributes(last_name: "Práctica", gender: gender, rol: :joven, age: 15, shirt_number: :m,
                                       stake: "bello_horizonte", ward: "bello_horizonte", room: "Práctica",
                                       medical_information: "Alergia al maní (de práctica)",
                                       emergency_contact_name: "Contacto de práctica", emergency_contact_number: "0000 0000")

@@ -59,6 +59,7 @@ export default class extends Controller {
     window.removeEventListener('resize', this.onReposition);
     document.querySelector('main')?.removeEventListener('scroll', this.onReposition);
     clearTimeout(this.timer);
+    cancelAnimationFrame(this.frame);
     this.overlay?.remove();
   }
 
@@ -221,9 +222,7 @@ export default class extends Controller {
 
     if (target && !result) this.markPractice(target);
     if (target) target.scrollIntoView({ block: 'center', behavior: this.reducedMotion ? 'auto' : 'smooth' });
-    this.place();
-    clearTimeout(this.placeTimer);
-    this.placeTimer = setTimeout(() => this.place(), this.reducedMotion ? 0 : 380);
+    this.follow();
     (this.coach.querySelector('[data-tour-go]') || this.coach).focus({ preventScroll: true });
   }
 
@@ -261,6 +260,18 @@ export default class extends Controller {
     if (action === 'next') this.next();
     if (action === 'back') this.go(this.state.index - 1);
     if (action === 'skip' || action === 'close') this.finish();
+  }
+
+  // Lo iluminado puede seguir moviéndose un momento (el desplazamiento suave, la hoja «Más» que sube): el
+  // foco lo acompaña cuadro a cuadro durante el primer segundo.
+  follow() {
+    cancelAnimationFrame(this.frame);
+    const until = performance.now() + 1000;
+    const tick = () => {
+      this.place();
+      if (performance.now() < until) this.frame = requestAnimationFrame(tick);
+    };
+    tick();
   }
 
   // Ilumina lo del paso: el foco con su sombra alrededor, la capa que tapa el resto (con un hueco justo ahí

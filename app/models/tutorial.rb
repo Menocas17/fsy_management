@@ -97,7 +97,8 @@ class Tutorial
         step(:practice_joven, company_path(practice_company, practica: "1"), target: "[data-practice-joven]", action: :tap),
         step(:ficha_infirmary, participant_path(joven, practica: "1"), target: "[data-profile-infirmary]", action: :tap),
         step(:chart_announce, infirmary_chart_path(joven, practica: "1"), target: "[data-tour='announce']", action: :tap),
-        step(:announce_form, new_infirmary_visit_path(participant_id: joven.id, practica: "1"), target: "[data-infirmary-form]", action: :practice)
+        step(:announce_reason, new_infirmary_visit_path(participant_id: joven.id, practica: "1"), target: "[data-infirmary-form] fieldset", action: :play),
+        step(:announce_form, new_infirmary_visit_path(participant_id: joven.id, practica: "1"), target: "[data-infirmary-form] button[type='submit']", action: :practice)
       ]
     end
 

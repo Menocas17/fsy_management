@@ -7,6 +7,16 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-09-tutorial
+  date: 2026-10-09
+  title: Un tutorial de 5 minutos
+  summary: La primera vez que entras desde el teléfono, la app te muestra lo que vas a usar en la semana, y lo practicas sin cambiar nada.
+  changes:
+    - Ilumina una parte de la app a la vez y te pide tocarla, deslizarla o probarla, sobre la app de verdad.
+    - "Lo que practicas no se guarda: borrar una capacitación, enviar una alerta, llevar a un joven a enfermería o pasar el Conteo."
+    - Consejeros y auxiliares practican con jóvenes de ejemplo que solo aparecen en el tutorial, aunque todavía no tengan jóvenes asignados.
+    - Lo puedes saltar cuando quieras y volver a verlo en Configuración → Ver el tutorial.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
 - id: 2026-10-08-oscuro-en-el-telefono
   date: 2026-10-08
   title: Modo oscuro en el teléfono y detalles visuales
