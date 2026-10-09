@@ -4,8 +4,10 @@ require "test_helper"
 # cambio de personas o de compañías se ve en la visita siguiente.
 class OrganigramaCacheTest < ActionDispatch::IntegrationTest
   setup do
-    @cache, @perform = Rails.cache, ActionController::Base.perform_caching
+    @cache, @perform, @fragments = Rails.cache, ActionController::Base.perform_caching, ActionController::Base.cache_store
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    # Los fragmentos de las vistas van a la caché del controlador, no a Rails.cache (ver company_page_cache_test).
+    ActionController::Base.cache_store = Rails.cache
     ActionController::Base.perform_caching = true
     sign_in_as(users(:one))
     @auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa")
@@ -14,6 +16,7 @@ class OrganigramaCacheTest < ActionDispatch::IntegrationTest
 
   teardown do
     Rails.cache = @cache
+    ActionController::Base.cache_store = @fragments
     ActionController::Base.perform_caching = @perform
   end
 
@@ -30,6 +33,8 @@ class OrganigramaCacheTest < ActionDispatch::IntegrationTest
     get organigrama_path
     assert_includes response.body, "Mariela García"
 
+    # El reloj de la prueba está congelado: sin avanzarlo, esta edición cae en el mismo instante que la anterior.
+    travel 1.second
     participants(:juan).update!(company: @company)
     get organigrama_path
     assert_select "[data-company-id='#{@company.id}'] [data-jovenes-count='1']"
