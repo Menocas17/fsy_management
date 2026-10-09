@@ -11,3 +11,15 @@ document.addEventListener('turbo:before-render', (event) => {
 
   event.detail.newBody.querySelectorAll('dialog[open]').forEach((dialog) => dialog.removeAttribute('open'));
 });
+
+// Chrome avisa que la app se puede instalar (beforeinstallprompt) una sola vez por carga, a veces antes de que
+// conecte el controlador de la hoja de instalar (install_controller.js): se guarda aquí y se le avisa. Sin el
+// preventDefault, Chrome pondría además su propia barrita abajo.
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  window.fsyInstallPrompt = event;
+  document.dispatchEvent(new CustomEvent('fsy:installable'));
+});
+window.addEventListener('appinstalled', () => {
+  window.fsyInstallPrompt = null;
+});

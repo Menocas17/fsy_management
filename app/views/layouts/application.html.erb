@@ -87,6 +87,9 @@
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>
+    <%# Instalar la app (install_controller.js): sube sola en el navegador del teléfono; va antes del tutorial,
+        que espera a que se cierre. %>
+    <%= render "shared/install_sheet" unless Current.viewing_as? %>
     <%# El tutorial (Tutorial, tour_controller.js): arranca solo la primera vez en el teléfono, o desde
         Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página. %>
     <% if !Current.viewing_as? && Tutorial.available_to?(Current.user) %>
