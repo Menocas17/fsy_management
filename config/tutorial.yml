@@ -120,6 +120,9 @@ theme:
 simple_mode:
   title: Modo simple
   text: "Es la barra de abajo, a mano del pulgar. Si lo apagas, vuelves al menú completo. Durante el tutorial no se mueve (el tutorial usa la barra); lo cambias al terminar."
+push:
+  title: Activa las notificaciones
+  text: "Toca «Activar en este dispositivo» y luego «Permitir». Así te llegan las alertas al teléfono aunque tengas la app cerrada. En iPhone solo se puede con la app instalada en la pantalla de inicio: si aquí dice que no se puede, instálala primero desde «Instalar la app», un poco más arriba."
 done:
   title: ¡Listo para la semana!
   text: "Eso es todo. Si quieres repasarlo, está en Configuración → Ver el tutorial."

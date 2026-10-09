@@ -92,6 +92,9 @@ class TutorialTest < ApplicationSystemTestCase
     within(".tour-coach") { assert_text "Lo cambias cuando termines el tutorial" }
     assert @counselor.reload.simple_mode?
     go_on
+    expect "Activa las notificaciones"
+    assert_selector "[data-tour='push'] button", text: "Activar en este dispositivo"
+    go_on
 
     expect "¡Listo para la semana!"
     within(".tour-coach") { click_on "Cerrar" }

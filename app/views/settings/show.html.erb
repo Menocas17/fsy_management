@@ -89,7 +89,7 @@
     </section>
 
     <%# El permiso de notificaciones es por dispositivo: este bloque habla del teléfono o la compu que estás usando. %>
-    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push"
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push" data-tour="push"
              data-controller="push" data-push-public-key-value="<%= Rails.application.credentials.dig(:vapid, :public_key) %>"
              data-push-url-value="<%= push_subscription_notifications_path %>">
       <h2 id="settings-push" class="<%= card_heading %>">
