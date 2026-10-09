@@ -80,6 +80,10 @@
      los fondos neutros de mosaicos y botones; sunken para los bloques hundidos dentro de una tarjeta. */
   --color-muted: oklch(96.5% 0.006 258);
   --color-sunken: oklch(96.5% 0.006 258);
+  /* La barra inferior del modo simple: en claro, la superficie lisa; en oscuro, un poco más honda que las
+     tarjetas y degradada hacia abajo, y el aro del botón central toma el tono de arriba. */
+  --color-bar-top: oklch(99% 0.003 260);
+  --color-bar-bottom: oklch(99% 0.003 260);
 
   --color-cat-blue: oklch(62% 0.13 230);
   --color-cat-indigo: oklch(55% 0.16 275);
@@ -160,6 +164,8 @@
   --color-line-soft: oklch(37.2% 0.044 257.287);
   --color-muted: oklch(37.2% 0.044 257.287);
   --color-sunken: oklch(24% 0.042 262);
+  --color-bar-top: oklch(26.5% 0.04 261);
+  --color-bar-bottom: oklch(21.5% 0.042 265);
   --color-ink-900: oklch(96.8% 0.007 247.896);
   --color-ink-700: oklch(86.9% 0.022 252.894);
   --color-ink-500: oklch(70.4% 0.04 256.788);
