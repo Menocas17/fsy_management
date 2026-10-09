@@ -7,14 +7,6 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
-- id: 2026-10-09-se-nota-que-carga
-  date: 2026-10-09
-  title: Se nota cuando algo está cargando
-  summary: Al tocar una opción del menú se marca al instante, y lo que tarda en llegar muestra su forma mientras carga.
-  changes:
-    - La opción que tocas en la barra de abajo o en el menú se enciende enseguida, antes de que abra la página.
-    - Si una página tarda, una barrita amarilla avanza arriba de la pantalla.
-    - "La campanita, «Mi QR» y el detalle de las actividades de la agenda muestran la forma de lo que viene en vez de «Cargando…»."
 - id: 2026-10-09-tutorial
   date: 2026-10-09
   title: Un tutorial de 5 minutos
