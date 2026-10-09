@@ -7,17 +7,48 @@
   else
     [ "bg-cat-indigo", "text-cat-indigo-ink bg-cat-indigo/12" ]
   end
+  # Quien edita la agenda la borra desde aquí, sin entrar a editarla: en el teléfono deslizando la tarjeta a la
+  # izquierda (como las alertas), en escritorio con el basurero que aparece al pasar el ratón.
+  deletable = can_manage_agenda?
+  delete_confirm = training_delete_confirm(training) if deletable
 %>
-<%= link_to agenda_training_path(training, return_to: return_here), class: card_classes("p-4 flex flex-col gap-3 hover:border-primary-300 dark:hover:border-primary-300 transition"),
-            data: { training_card: training.id } do %>
+<% if deletable %>
+<%# La sombra va en el envoltorio: el overflow-hidden que esconde «Eliminar» recortaría la de la tarjeta. %>
+<div class="relative h-full overflow-hidden rounded-card shadow-md" data-controller="alert-item"
+     data-action="turbo:submit-start->alert-item#leave turbo:submit-end->alert-item#settle">
+  <div class="absolute inset-y-0 right-0 flex" data-alert-item-target="actions" hidden>
+    <%= button_to agenda_training_path(training), method: :delete, form: { class: "flex", data: delete_confirm },
+          class: "w-24 flex flex-col items-center justify-center gap-1 bg-danger text-white text-label font-bold cursor-pointer",
+          data: { training_swipe_delete: true } do %>
+      <%= icon "trash-2", class: "w-5 h-5" %>
+      Eliminar
+    <% end %>
+  </div>
+<% end %>
+<%# Toda la tarjeta lleva a la capacitación (enlace estirado); el basurero va encima, con su propia capa. %>
+<article class="<%= deletable ? "bg-surface border border-line-soft rounded-card" : card_classes %> group relative h-full p-4 flex flex-col gap-3 hover:border-primary-300 dark:hover:border-primary-300 has-[[data-training-open]:focus-visible]:ring-2 has-[[data-training-open]:focus-visible]:ring-primary-500 transition <%= "touch-pan-y" if deletable %>"
+         data-training-card="<%= training.id %>" <%= tag.attributes(data: { alert_item_target: "panel" }) if deletable %>>
   <div class="flex items-center gap-3">
     <span class="w-10 h-10 shrink-0 rounded-control text-white flex items-center justify-center <%= tone %>">
       <%= icon "graduation-cap", class: "w-[19px] h-[19px]" %>
     </span>
-    <div class="min-w-0">
-      <p class="text-title font-bold text-ink-900 truncate"><%= training.name %></p>
+    <div class="min-w-0 flex-1">
+      <p class="text-title font-bold text-ink-900 truncate">
+        <%= link_to training.name, agenda_training_path(training, return_to: return_here),
+              class: "after:absolute after:inset-0 focus:outline-none", data: { training_open: true } %>
+      </p>
       <p class="text-label font-semibold text-ink-500"><%= SpanishDates.long(training.held_on) %></p>
     </div>
+    <% if deletable %>
+      <%# En pantallas táctiles no hay hover: ahí se desliza. %>
+      <%= button_to agenda_training_path(training), method: :delete,
+            form: { class: "relative z-10 -mr-1.5 self-start [@media(hover:none)]:hidden", data: delete_confirm },
+            aria: { label: "Borrar «#{training.name}»" }, title: "Borrar capacitación",
+            class: "w-8 h-8 rounded-inner flex items-center justify-center text-ink-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-cat-rose/10 hover:text-cat-rose-ink cursor-pointer transition",
+            data: { training_delete: true } do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+      <% end %>
+    <% end %>
   </div>
 
   <div class="flex items-baseline justify-between gap-2">
@@ -39,4 +70,7 @@
   <div class="flex h-2 rounded-full overflow-hidden bg-canvas">
     <span class="<%= tone %>" style="width: <%= training.attendance_rate %>%"></span>
   </div>
+</article>
+<% if deletable %>
+</div>
 <% end %>

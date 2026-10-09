@@ -36,13 +36,7 @@
 <div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
   <div>
     <% if training.persisted? %>
-      <% attended = training.attended_count %>
-      <%= button_to agenda_training_path(training), method: :delete,
-            form: { data: { turbo_confirm: "¿Borrar «#{training.name}»?",
-                            turbo_confirm_detail: if attended.zero? then "No tiene asistencias registradas. No se puede deshacer."
-                                                elsif attended == 1 then "Se pierde también la asistencia registrada de 1 persona. No se puede deshacer."
-                                                else "Se pierden también las asistencias registradas de #{attended} personas. No se puede deshacer." end,
-                            turbo_confirm_button: "Sí, borrar" } },
+      <%= button_to agenda_training_path(training), method: :delete, form: { data: training_delete_confirm(training) },
             class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
         <%= icon "trash-2", class: "w-4 h-4" %>
         Borrar capacitación

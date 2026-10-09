@@ -42,12 +42,12 @@ class NightAttendancesController < ApplicationController
 
   private
     def require_night_attendance_viewer!
-      redirect_to dashboard_path, alert: "El panel de asistencia nocturna es de dirección, coordinadores y auxiliares" unless can_view_night_attendance?
+      redirect_to dashboard_path, alert: "El conteo es de dirección, coordinadores y auxiliares" unless can_view_night_attendance?
     end
 
     def set_company
       @company = Company.find(params[:company_id])
-      redirect_to dashboard_path, alert: "No tienes acceso a la asistencia nocturna de esta compañía" unless can_open_night_attendance?(@company)
+      redirect_to dashboard_path, alert: "No tienes acceso al conteo de esta compañía" unless can_open_night_attendance?(@company)
     end
 
     # La lista que se abre: la pedida, o la que le toca pasar a quien entra.
@@ -85,6 +85,6 @@ class NightAttendancesController < ApplicationController
       present = @attendance.marks.size - absent
       verb = first_time ? "Pasó" : "Corrigió"
       tally = [ ActionController::Base.helpers.pluralize(present, "presente"), ActionController::Base.helpers.pluralize(absent, "ausente") ].join(" y ")
-      "#{verb} la asistencia nocturna de #{@attendance.label}: #{tally}"
+      "#{verb} el conteo de #{@attendance.label}: #{tally}"
     end
 end

@@ -78,7 +78,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     assert_select "a[data-bottom-nav-item='Compañías'][href='#{companies_path}']"
     assert_select "[data-bottom-nav-item='Mi QR']", false
     assert_select "dialog[data-dialog-name='mas'] button[data-dialog-name='qr']", text: /Mi QR/
-    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Asistencia nocturna" ],
+    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Conteo" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     assert_select "[data-simple-kpi='Jóvenes']"
     assert_select "[data-simple-kpi='Staff']"

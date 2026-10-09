@@ -452,8 +452,8 @@ module Demo
         d.nav_to("Reportes")
         d.tour_page(steps: 2)
       end
-      scene "Superadmin · Seguimiento", say: "La asistencia nocturna de todas las compañías y el historial de todo lo que se cambia, con quién y cuándo." do |d|
-        d.nav_to("Asistencia nocturna")
+      scene "Superadmin · Seguimiento", say: "El conteo de todas las compañías y el historial de todo lo que se cambia, con quién y cuándo." do |d|
+        d.nav_to("Conteo")
         d.tour_page(steps: 1)
         d.nav_to("Historial")
         d.tour_page(steps: 2)
@@ -486,10 +486,10 @@ module Demo
           d.open_first(record("companies"), "una compañía")
           d.tour_page(steps: 2)
         end
-        scene "Director · Reportes y asistencia", say: "Dirección imprime reportes y sigue la asistencia nocturna de todas las compañías." do |d|
+        scene "Director · Reportes y asistencia", say: "Dirección imprime reportes y sigue el conteo de todas las compañías." do |d|
           d.nav_to("Reportes")
           d.tour_page(steps: 1)
-          d.nav_to("Asistencia nocturna")
+          d.nav_to("Conteo")
           d.tour_page(steps: 1)
         end
       end
@@ -549,8 +549,8 @@ module Demo
           d.open_first(record("companies"), "una compañía")
           d.tour_page(steps: 2)
         end
-        scene "Auxiliar · Asistencia y enfermería", say: "Sigue la asistencia nocturna de su rama y ve el tablero de enfermería." do |d|
-          d.nav_to("Asistencia nocturna")
+        scene "Auxiliar · Asistencia y enfermería", say: "Sigue el conteo de su rama y ve el tablero de enfermería." do |d|
+          d.nav_to("Conteo")
           d.tour_page(steps: 1)
           d.nav_to("Enfermería")
           d.tour_page(steps: 1)
@@ -571,8 +571,8 @@ module Demo
           d.open_first(record("companies"), "su compañía")
           d.tour_page(steps: 2)
         end
-        scene "Consejero · Asistencia nocturna", say: "Cada noche pasa lista de su compañía desde el teléfono." do |d|
-          d.nav_to("Asistencia nocturna")
+        scene "Consejero · Conteo", say: "Cada noche pasa lista de su compañía desde el teléfono." do |d|
+          d.nav_to("Conteo")
           d.tour_page(steps: 2)
         end
         scene "Consejero · Lleva a un joven a enfermería", say: "Si un joven se siente mal, el consejero avisa «lo llevo»: enfermería lo ve venir en el tablero y confirma cuando llega." do |d|

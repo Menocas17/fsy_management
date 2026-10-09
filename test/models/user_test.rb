@@ -70,4 +70,18 @@ class UserTest < ActiveSupport::TestCase
     assert_not second.valid?
     assert second.errors.key?(:participant_id)
   end
+
+  test "la dirección y coordinación entran a todo, salvo presentar o aprobar gastos" do
+    coordinator = Participant.create!(first_name: "Pedro", last_name: "Mora", age: 40, stake: "las_americas",
+                                      shirt_number: "m", gender: "H", rol: :coordinador)
+    user = User.new(participant: coordinator)
+
+    assert user.full_access?
+    assert user.scan_manager?
+    assert user.infirmary_operator?
+    assert user.finance_configurator?
+    assert user.finance_viewer?
+    assert_not user.finance_operator?, "presentar gastos sigue siendo del área de Finanzas y el director de logística"
+    assert_not user.expense_approver?, "aprobar sigue siendo del superadmin, el director y el director de logística"
+  end
 end

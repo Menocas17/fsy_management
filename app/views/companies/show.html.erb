@@ -37,7 +37,7 @@
           <%= link_to company_night_attendance_path(@company, return_to: request.fullpath),
                 class: button_classes(:secondary, extra: "grow sm:grow-0 whitespace-nowrap") do %>
             <%= icon "moon-star", class: "w-4 h-4" %>
-            <%= night_attendance_gender_for(@company) ? "Pasar asistencia" : "Asistencia nocturna" %>
+            <%= night_attendance_gender_for(@company) ? "Pasar conteo" : "Conteo" %>
           <% end %>
         <% end %>
         <% if can_edit_company?(@company) %>

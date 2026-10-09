@@ -9,7 +9,8 @@
       </p>
       <% unless can_operate_finances? || can_approve_expenses? %>
         <span role="note" title="Los gastos los presentan el área de Finanzas y el director de logística, y los aprueban el matrimonio director y el director de logística.">
-          <%= render ChipComponent.new(label: "Solo lectura", icon: "eye", data: { finance_readonly: true }) %>
+          <%# Quien solo fija el presupuesto (la dirección y coordinación) ve los gastos sin moverlos. %>
+          <%= render ChipComponent.new(label: can_configure_finances? ? "Solo lectura de gastos" : "Solo lectura", icon: "eye", data: { finance_readonly: true }) %>
         </span>
       <% end %>
     </div>

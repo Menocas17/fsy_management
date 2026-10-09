@@ -2,7 +2,8 @@
     se va sola; en el teléfono, tocarla abre su diálogo (logistics_areas/_flag_dialogs, flag-help).
     align: hacia dónde se abre la nota (:left en la fila de arriba, :right en la esquina de las tarjetas).
     En pantallas táctiles la nota no existe (hover:none → hidden): invisible igual ocupaba lugar y en el teléfono
-    estiraba la página de lado. %>
+    estiraba la página de lado. Bajo md tampoco, aunque haya ratón (una ventana angosta, un teléfono que se
+    declara con hover): la nota de la última pastilla salía del borde y <main> se deslizaba; ahí tocarla abre el diálogo. %>
 <% align = local_assigns.fetch(:align, :left) %>
 <% label, description = LogisticsArea::FLAGS.fetch(flag) %>
 <span class="relative inline-flex group/flag">
@@ -12,7 +13,7 @@
     <%= render "logistics_areas/flag_chip", flag: flag %>
   </button>
   <span role="tooltip" aria-hidden="true" data-flag-tip="<%= flag %>"
-        class="pointer-events-none absolute top-full mt-2 z-30 w-64 [@media(hover:none)]:hidden rounded-tile border border-line-soft bg-surface px-3.5 py-2.5 shadow-lg text-left
+        class="pointer-events-none absolute top-full mt-2 z-30 w-64 max-md:hidden [@media(hover:none)]:hidden rounded-tile border border-line-soft bg-surface px-3.5 py-2.5 shadow-lg text-left
                <%= align == :right ? "right-0" : "left-0" %> invisible opacity-0 translate-y-1 transition duration-150 ease-out
                [@media(hover:hover)]:group-hover/flag:visible [@media(hover:hover)]:group-hover/flag:opacity-100 [@media(hover:hover)]:group-hover/flag:translate-y-0
                [@media(hover:hover)]:group-has-[:focus-visible]/flag:visible [@media(hover:hover)]:group-has-[:focus-visible]/flag:opacity-100 [@media(hover:hover)]:group-has-[:focus-visible]/flag:translate-y-0">

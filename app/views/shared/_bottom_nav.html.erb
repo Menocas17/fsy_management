@@ -37,10 +37,11 @@
 
   <%= render "participants/qr_dialog", participant: me, lazy: true if me %>
 
-  <%# Una hoja que sube desde abajo; tocar fuera la cierra (no lleva botón de cerrar). %>
+  <%# Una hoja que sube desde abajo; tocar fuera o arrastrarla hacia abajo la cierra (no lleva botón de cerrar). %>
   <dialog data-dialog-target="modal" data-dialog-name="mas" data-action="click->dialog#clickOutside" aria-labelledby="more-sheet-title"
           class="md:hidden p-0 mt-auto mb-0 mx-0 w-full max-w-none bg-transparent backdrop:bg-black/50 backdrop:backdrop-blur-[2px]">
-    <div class="px-[18px] pt-2.5 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-panel bg-surface shadow-lg">
+    <div class="px-[18px] pt-2.5 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-panel bg-surface shadow-lg"
+         data-controller="sheet-drag" data-action="sheet-drag:dismiss->dialog#close">
       <div class="w-10 h-1 mx-auto mb-3.5 rounded-full bg-line" aria-hidden="true"></div>
       <h2 id="more-sheet-title" class="mb-3 text-meta font-bold tracking-[.08em] uppercase text-sun-ink">Más opciones</h2>
       <div class="grid grid-cols-3 gap-2.5" data-more-items>

@@ -6,27 +6,26 @@
           { text: "Agenda del evento", icon: "calendar-days", href: agenda_path },
           { text: "Capacitaciones", icon: "graduation-cap", href: agenda_trainings_path, active: true }
         ]) %>
-    <div class="flex flex-wrap items-center gap-2">
-      <%= link_to trainings_reports_path, target: "_blank", rel: "noopener",
-            class: button_classes(:secondary) do %>
-        <%= icon "printer", class: "w-4 h-4" %>
-        PDF de asistencia
-      <% end %>
-      <%# Como en Inventario: escanear es secundario y crear, el botón navy, al final. %>
-      <% if can_check_in? && (next_training = @trainings.find { |training| training.scan_window.open? }) %>
-        <%= link_to checkins_path(training_id: next_training.id, return_to: request.fullpath),
-              class: button_classes(:secondary) do %>
-          <%= icon "scan-qr-code", class: "w-4 h-4" %>
-          Escanear asistencia
+    <%# Como en Inventario: escanear es secundario y crear, el botón navy, al final. El PDF de asistencia vive en
+        Reportes. En el teléfono los dos caben en una fila con su nombre corto (a 320 px el largo no entra). %>
+    <% scan_training = @trainings.find { |training| training.scan_window.open? } if can_check_in? %>
+    <% if scan_training || can_manage_agenda? %>
+      <div class="grid grid-flow-col auto-cols-fr sm:flex sm:items-center gap-2" data-training-actions>
+        <% if scan_training %>
+          <%= link_to checkins_path(training_id: scan_training.id, return_to: request.fullpath),
+                class: button_classes(:secondary, extra: "max-sm:px-3"), aria: { label: "Escanear asistencia" } do %>
+            <%= icon "scan-qr-code", class: "w-4 h-4" %>
+            <span class="sm:hidden">Escanear</span><span class="max-sm:hidden">Escanear asistencia</span>
+          <% end %>
         <% end %>
-      <% end %>
-      <% if can_manage_agenda? %>
-        <%= link_to new_agenda_training_path, class: button_classes do %>
-          <%= icon "plus", class: "w-4 h-4" %>
-          Nueva capacitación
+        <% if can_manage_agenda? %>
+          <%= link_to new_agenda_training_path, class: button_classes(extra: "max-sm:px-3"), aria: { label: "Nueva capacitación" } do %>
+            <%= icon "plus", class: "w-4 h-4" %>
+            <span class="sm:hidden">Nueva</span><span class="max-sm:hidden">Nueva capacitación</span>
+          <% end %>
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
   </div>
 
   <% if @trainings.any? %>

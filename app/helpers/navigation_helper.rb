@@ -93,7 +93,7 @@ module NavigationHelper
   end
 
   # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
-  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Asistencia nocturna" ].freeze
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo" ].freeze
 
   # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
   # escáner de gafetes; para acceso total, solo FULL_ACCESS_MORE_ITEMS. Configuración, Mi perfil y Cerrar sesión
@@ -111,9 +111,9 @@ module NavigationHelper
   # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.
   def night_attendance_nav_item
     if Current.user&.night_attendance_viewer?
-      { text: "Asistencia nocturna", url: night_attendances_path, lucide_icon: "moon-star", active_paths: [ night_attendances_path ] }
+      { text: "Conteo", url: night_attendances_path, lucide_icon: "moon-star", active_paths: [ night_attendances_path ] }
     elsif Current.user&.participant&.consejero? && (company = Current.user.participant.counselor_scope.first)
-      { text: "Asistencia nocturna", url: company_night_attendance_path(company), lucide_icon: "moon-star" }
+      { text: "Conteo", url: company_night_attendance_path(company), lucide_icon: "moon-star" }
     end
   end
 
@@ -193,7 +193,7 @@ module NavigationHelper
 
   def record_page_label(path)
     route = Rails.application.routes.recognize_path(path)
-    return "Asistencia nocturna" if route[:controller] == "night_attendances"
+    return "Conteo" if route[:controller] == "night_attendances"
     return unless route[:action] == "show" && route[:id]
 
     RECORD_PAGES[route[:controller]]&.call(route[:id])

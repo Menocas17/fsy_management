@@ -7,6 +7,26 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-08-conteo-y-hojas
+  date: 2026-10-08
+  title: «Conteo», hojas que se arrastran y capacitaciones
+  summary: La asistencia nocturna ahora se llama Conteo, las hojas del teléfono se cierran arrastrándolas y las capacitaciones se borran desde su tarjeta.
+  changes:
+    - «Asistencia nocturna» ahora se llama «Conteo», en el menú, las alertas y el historial.
+    - En el teléfono, el menú «Más» y los filtros (jóvenes, staff, historial) se cierran arrastrándolos hacia abajo.
+    - El menú «Más» ya no aparece un instante arriba de la pantalla al cambiar de página.
+    - "Capacitaciones: quien edita la agenda borra una capacitación desde su tarjeta (en el teléfono, deslizándola a la izquierda, como las alertas)."
+    - El PDF de asistencia a capacitaciones pasó a Reportes; en Capacitaciones quedan «Escanear» y «Nueva», en una sola fila aun en teléfonos angostos.
+    - Áreas de logística ya no se desliza de lado en pantallas angostas.
+- id: 2026-10-08-acceso-total-direccion
+  date: 2026-10-08
+  title: Dirección y coordinación entran a todo
+  summary: El matrimonio director y los coordinadores ya pueden hacer todo en la app; presentar y aprobar gastos sigue como antes.
+  changes:
+    - Enfermería completa (ingresar, dar de alta y escribir la ficha clínica), el Conteo de cualquier compañía y los registros activos del escáner en Configuración.
+    - El presupuesto, las categorías y el tipo de cambio de Finanzas.
+    - Presentar y aprobar gastos sigue igual que antes.
+  roles: [ director, coordinador ]
 - id: 2026-10-08-fechas-y-telefonos-angostos
   date: 2026-10-08
   title: Fechas día/mes/año y teléfonos angostos

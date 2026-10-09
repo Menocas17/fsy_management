@@ -173,11 +173,11 @@ module Authorization
     can_view_night_attendance? || night_attendance_gender_for(company).present?
   end
 
-  # Pasar una lista: la de su género, y solo la de esta noche. El superadmin, cualquiera, pero solo en la
-  # noche de prueba (antes del evento).
+  # Pasar una lista: la de su género, y solo la de esta noche. El acceso total pasa cualquiera de esta noche,
+  # también la de prueba (antes del evento).
   def can_take_night_attendance?(company, gender, night)
     return false unless night == NightAttendance.current_night
-    return true if Current.user&.superadmin? && NightAttendance.testing?
+    return true if full_company_access?
 
     night_attendance_gender_for(company) == gender.to_s
   end
@@ -364,7 +364,7 @@ module Authorization
     end
 
     def require_finance_configurator!
-      redirect_to finances_path, alert: "El presupuesto lo define el director de logística" unless can_configure_finances?
+      redirect_to finances_path, alert: "El presupuesto lo definen el director de logística y la dirección" unless can_configure_finances?
     end
 
     def require_infirmary_viewer!
@@ -372,7 +372,7 @@ module Authorization
     end
 
     def require_infirmary_operator!
-      redirect_to infirmary_visits_path, alert: "Solo enfermería ingresa, da de alta y escribe la ficha clínica" unless can_operate_infirmary?
+      redirect_to infirmary_visits_path, alert: "Solo enfermería y la dirección ingresan, dan de alta y escriben la ficha clínica" unless can_operate_infirmary?
     end
 
     def require_logistics_areas_access!

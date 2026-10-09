@@ -45,7 +45,7 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     post view_as_path, params: { rol: "consejero" }
     get dashboard_path
 
-    assert_select "nav", text: /Asistencia nocturna/
+    assert_select "nav", text: /Conteo/
     %w[Inventario Finanzas Reportes Librería Historial Alertas Áreas].each do |hidden|
       assert_select "nav", { text: /#{hidden}/, count: 0 }, "#{hidden} is not in a counselor's menu"
     end

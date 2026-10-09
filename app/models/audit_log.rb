@@ -7,7 +7,7 @@ class AuditLog < ApplicationRecord
   CATEGORY_LABELS = { "participantes" => "Participantes", "asignaciones" => "Asignaciones", "companias" => "Compañías",
                       "agenda" => "Agenda", "registro" => "Registro", "alertas" => "Alertas", "logistica" => "Logística",
                       "finanzas" => "Finanzas", "cuentas" => "Cuentas",
-                      "asistencia" => "Asistencia nocturna", "enfermeria" => "Enfermería" }.freeze
+                      "asistencia" => "Conteo", "enfermeria" => "Enfermería" }.freeze
 
   # Qué clase de cosa se hizo, para el ícono de cada fila y el filtro «Acción». La frase completa (quién,
   # qué y a quién) ya viene en summary; esto solo la agrupa. Las acciones que no estén aquí caen en «Otro».
