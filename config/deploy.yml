@@ -1,0 +1,129 @@
+# Despliegue con Kamal a un droplet de DigitalOcean (Ubuntu 24.04). La guía está en docs/deploy_vps.md. La app
+# y su Postgres viven en la misma máquina: kamal-proxy recibe el tráfico, saca el certificado de Let's Encrypt
+# y se lo pasa a Thruster (puerto 80 del contenedor), que se lo pasa a Puma.
+#
+# Lo propio de cada instalación sale del entorno para no versionar la IP ni el dominio:
+#   SERVER_IP     la IP del droplet
+#   APP_HOST      el dominio que apunta a esa IP (o <ip-con-guiones>.sslip.io si no hay dominio propio)
+#   DROPLET_SIZE  el tamaño del droplet, con el nombre de DigitalOcean (ver SIZES); sin él, el de 6 dólares
+<% server_ip = ENV.fetch("SERVER_IP") { abort "Falta SERVER_IP (la IP del droplet)" } %>
+<% app_host  = ENV.fetch("APP_HOST") { abort "Falta APP_HOST (el dominio que apunta al droplet)" } %>
+# Cada tamaño (DROPLET_SIZE) con lo que le cabe:
+#   Puma: un proceso por vCPU (Ruby ejecuta de a un hilo por proceso), ~300-400 MB cada uno; con 0 corre un
+#   solo proceso, sin el maestro aparte, que en 1 GB no sobra.
+#   Postgres: un cuarto de la RAM en shared_buffers y el resto lo usa el sistema como caché de disco.
+#   Conexiones: un pool por base (primaria, cola, caché, cable) por proceso, y el doble mientras Kamal cambia
+#   de contenedor.
+#   s-1vcpu-1gb  6 dólares, 1 vCPU, 1 GB: para empezar y los días tranquilos (el swap de 2 GB es el colchón).
+#   s-2vcpu-4gb  24 dólares, 2 vCPU, 4 GB.
+#   s-4vcpu-8gb  48 dólares, 4 vCPU, 8 GB: el del evento (650 personas a la vez, script/carga/README.md).
+# Para cambiar de tamaño, el orden está en docs/deploy_vps.md («Cambiar de tamaño»).
+<%
+  sizes = {
+    "s-1vcpu-1gb" => { web_concurrency: 0, image_jobs: 1, shared_buffers: "128MB", effective_cache_size: "512MB",
+                       work_mem: "4MB", maintenance_work_mem: "64MB", max_connections: 60, shm_size: "128m" },
+    "s-2vcpu-4gb" => { web_concurrency: 2, image_jobs: 2, shared_buffers: "1GB", effective_cache_size: "2560MB",
+                       work_mem: "8MB", maintenance_work_mem: "128MB", max_connections: 100, shm_size: "256m" },
+    "s-4vcpu-8gb" => { web_concurrency: 4, image_jobs: 3, shared_buffers: "2GB", effective_cache_size: "5GB",
+                       work_mem: "16MB", maintenance_work_mem: "256MB", max_connections: 150, shm_size: "512m" }
+  }
+  droplet_size = ENV["DROPLET_SIZE"].to_s.strip
+  droplet_size = "s-1vcpu-1gb" if droplet_size.empty?
+  size = sizes.fetch(droplet_size) { abort "DROPLET_SIZE=#{droplet_size} is not in config/deploy.yml: use #{sizes.keys.join(", ")}" }
+%>
+
+service: fsy_management
+
+# En ghcr.io, el registro de GitHub. La imagen se construye en GitHub Actions (x86, como el droplet): así el
+# droplet no gasta CPU compilando mientras atiende, y en un Mac con Apple Silicon saldría emulada y lenta.
+image: menocas17/fsy_management
+
+servers:
+  web:
+    - <%= server_ip %>
+
+proxy:
+  ssl: true
+  host: <%= app_host %>
+  app_port: 80
+  healthcheck:
+    path: /up
+
+registry:
+  server: ghcr.io
+  username: menocas17
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+
+# Kamal no entra como root: setup_server.sh crea este usuario con permiso para usar Docker.
+ssh:
+  user: deploy
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - R2_ACCOUNT_ID
+    - R2_ACCESS_KEY_ID
+    - R2_SECRET_ACCESS_KEY
+    - R2_PUBLIC_URL
+    - MAIL_RELAY_URL
+    - MAIL_RELAY_SECRET
+  clear:
+    APP_HOST: <%= app_host %>
+    R2_BUCKET: fsy-management
+    # Solid Queue corre dentro de Puma, en hilos del proceso principal (config/puma.rb): un solo contenedor
+    # para web y trabajos.
+    SOLID_QUEUE_IN_PUMA: true
+    # Procesos de Puma y fotos procesadas a la vez, según DROPLET_SIZE (arriba).
+    WEB_CONCURRENCY: <%= size[:web_concurrency] %>
+    RAILS_MAX_THREADS: 3
+    IMAGE_JOB_CONCURRENCY: <%= size[:image_jobs] %>
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+# Los assets con huella de la versión anterior siguen disponibles mientras se cambia de contenedor.
+asset_path: /rails/public/assets
+
+# El disco es de 25 GB: los logs de Docker rotan en vez de crecer sin límite.
+logging:
+  options:
+    max-size: 20m
+    max-file: 5
+
+accessories:
+  db:
+    image: postgres:18
+    host: <%= server_ip %>
+    # Solo desde la propia máquina (para un túnel SSH); la app llega por la red interna de Docker con el
+    # nombre fsy_management-db. Nunca se expone 5432 a internet.
+    port: "127.0.0.1:5432:5432"
+    # Memoria según DROPLET_SIZE (arriba). Cambiarla se aplica con `bin/kamal accessory reboot db`.
+    cmd: >-
+      postgres
+      -c shared_buffers=<%= size[:shared_buffers] %>
+      -c effective_cache_size=<%= size[:effective_cache_size] %>
+      -c work_mem=<%= size[:work_mem] %>
+      -c maintenance_work_mem=<%= size[:maintenance_work_mem] %>
+      -c max_connections=<%= size[:max_connections] %>
+    # Docker le da 64 MB de /dev/shm; las consultas en paralelo de Postgres lo usan y con mucho shared_buffers
+    # fallarían por falta de espacio.
+    options:
+      shm-size: <%= size[:shm_size] %>
+    env:
+      clear:
+        POSTGRES_USER: fsy_management
+        POSTGRES_DB: fsy_management_production
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      # postgres:18 guarda los datos en /var/lib/postgresql/18/docker y se niega a arrancar si hay un
+      # volumen montado en /var/lib/postgresql/data.
+      - data:/var/lib/postgresql

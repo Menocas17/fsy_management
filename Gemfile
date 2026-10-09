@@ -60,6 +60,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Despliegue al VPS como contenedor Docker [https://kamal-deploy.org] (config/deploy.yml)
+  gem "kamal", require: false
 end
 
 group :test do

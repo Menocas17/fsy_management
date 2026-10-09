@@ -9,7 +9,7 @@ formulario real y piden pantallas. Solo leen (GET), así que no cambian datos.
 ## Qué hace falta
 
 Tres cuentas de prueba (una de dirección o superadmin, una de consejero con compañía, una de joven) con la
-misma contraseña, y dos ids. En una consola de Rails conectada a esa base:
+misma contraseña, y dos ids. En una consola de Rails conectada a esa base (en el droplet, `bin/kamal console`):
 
 ```ruby
 c = User.find_by(email_address: "cuenta-del-consejero@…").participant
@@ -31,7 +31,7 @@ recarga el código en cada cambio y siempre será más lento que producción.
 
 ## Cómo correrlas
 
-Contra un servidor remoto, desde **otra máquina en la misma región** (una máquina virtual por horas sirve):
+Contra un servidor remoto (el droplet), desde **otra máquina en la misma región** (una máquina virtual por horas sirve):
 desde la casa se mediría la subida del internet propio, no el servidor. Contra la app en tu propia máquina,
 `BASE_URL=http://127.0.0.1:3000`. Hace falta Ruby (`apt install ruby`).
 

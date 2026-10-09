@@ -1,11 +1,15 @@
-# Render despliega main solo cuando todos estos jobs pasan (autoDeployTrigger: checksPass en render.yaml),
-# así que este workflow es también la puerta del deploy: aquí no hay job que despliegue.
+# Este workflow es también la puerta del deploy: el job deploy (al final) sube main al VPS con Kamal solo
+# cuando todos los demás pasan, y solo si la variable KAMAL_DEPLOY del repositorio vale "true"
+# (docs/deploy_vps.md). Mientras tanto Render sigue desplegando main por su cuenta (autoDeployTrigger:
+# checksPass en render.yaml).
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
+  # "Run workflow" en la pestaña Actions: corre todo y, sobre main, despliega sin necesidad de un push.
+  workflow_dispatch:
 
 jobs:
   scan_ruby:
@@ -152,3 +156,52 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  deploy:
+    needs: [scan_ruby, scan_js, lint, test, system-test]
+    # Solo main, y solo cuando el VPS ya está listo: sin la variable el job se salta y el CI sigue en verde.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.KAMAL_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    # Un deploy a la vez; si llegan dos pushes seguidos, el segundo espera al primero.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      SERVER_IP: ${{ vars.SERVER_IP }}
+      APP_HOST: ${{ vars.APP_HOST }}
+      # El tamaño del droplet (config/deploy.yml); sin la variable, el de 6 dólares.
+      DROPLET_SIZE: ${{ vars.DROPLET_SIZE }}
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+      MAIL_RELAY_URL: ${{ secrets.MAIL_RELAY_URL }}
+      MAIL_RELAY_SECRET: ${{ secrets.MAIL_RELAY_SECRET }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Llave SSH del usuario deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: bin/kamal deploy
