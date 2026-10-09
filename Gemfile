@@ -80,7 +80,7 @@ gem "view_component"
 
 gem "rails_icons", "~> 1.9"
 
-gem "pagy", "~> 43.6"
+gem "pagy", "~> 43.7"
 
 # PDF de los reportes imprimibles y los QR del inventario
 gem "prawn", "~> 2.5"
