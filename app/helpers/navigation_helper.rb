@@ -2,7 +2,12 @@ module NavigationHelper
   # El menú lateral y el cajón del teléfono comparten esta estructura: «Inicio» suelto y luego grupos
   # desplegables (shared/_nav_sections + nav_groups_controller). Cada grupo tiene un id estable: con él se
   # recuerda en el dispositivo si la persona lo dejó abierto o cerrado.
+  # Se arma una vez por petición: lo usan el menú lateral, el cajón y el «Más» del modo simple.
   def nav_sections
+    @nav_sections ||= build_nav_sections
+  end
+
+  def build_nav_sections
     sections = [
       { id: nil, label: nil, items: [
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" }

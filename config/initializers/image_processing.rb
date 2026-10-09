@@ -24,3 +24,13 @@ Rails.application.config.to_prepare do
     job.limits_concurrency key: "images", group: "ActiveStorageImages", to: Rails.application.config.x.image_job_concurrency
   end
 end
+
+# Cuando la miniatura de una foto de perfil queda lista, la ficha se marca como cambiada (touch): las listas en
+# caché (la página de la compañía) se arman con su updated_at, y así pasan del enlace que procesa la foto al
+# directo del bucket en vez de quedarse con el primero.
+Rails.application.config.to_prepare do
+  ActiveStorage::TransformJob.after_perform do |job|
+    blob = job.arguments.first
+    blob.attachments.where(record_type: "Participant").includes(:record).each { |attachment| attachment.record&.touch }
+  end
+end

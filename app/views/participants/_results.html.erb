@@ -1,6 +1,6 @@
 <% list_path = is_staff ? staff_participants_path : participants_path %>
 <%= render "participants/active_filters", is_staff: is_staff, pagy: pagy %>
-<% if participants.load.any? %>
+<% if preload_thumbs(participants.load).any? %>
   <div class="hidden md:block">
     <%= render(TableComponent.new(participants: participants, is_staff: is_staff)) %>
     <div class="flex items-center justify-between gap-4 mt-4 px-1">

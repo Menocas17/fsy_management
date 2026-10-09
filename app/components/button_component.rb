@@ -32,7 +32,9 @@ class ButtonComponent < ViewComponent::Base
   end
 
   def active?
-    helpers.nav_item_active?(url: @url, section: @section, active_paths: @active_paths,
+    return @active if defined?(@active)
+
+    @active = helpers.nav_item_active?(url: @url, section: @section, active_paths: @active_paths,
                              except_paths: @except_paths, disabled: disabled?)
   end
 

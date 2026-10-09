@@ -1,7 +1,7 @@
 <%# Phones: each activity opens in place, so nobody has to scroll to a separate panel. %>
 <div class="flex flex-col gap-4">
   <% days.each do |day| %>
-    <% activities = @activities_by_day.fetch(day, []) %>
+    <% activities = activities_by_day.fetch(day, []) %>
     <div class="<%= card_classes("overflow-hidden") %>">
       <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-line-soft">
         <p class="text-body font-bold text-ink-900"><%= spanish_date(day) %></p>
