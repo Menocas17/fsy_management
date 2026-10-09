@@ -47,6 +47,28 @@ El inicio de sesión admite 10 intentos cada 3 minutos por IP: `usuarios.rb` ent
 esa sesión entre todos sus usuarios. Si el servidor se acaba de desplegar, corre una prueba corta antes de
 medir: los primeros minutos Ruby todavía está agrandando su memoria y las pausas de limpieza son más largas.
 
+## Con k6
+
+[k6](https://grafana.com/docs/k6/) hace lo mismo que `usuarios.rb` (`script/carga/k6.js`: 60 % jóvenes, 30 %
+consejeros, 10 % dirección, solo GET, una sesión por rol) pero con miles de usuarios desde una máquina chica, y
+al final da mediana, p90, p95 y máximo **de cada pantalla**. Instalarlo: `brew install k6` en Mac, o
+`sudo apt install k6` con el repositorio de Grafana en Linux (ver su guía).
+
+```bash
+k6 run -e BASE_URL=https://<APP_HOST> -e PASSWORD=… \
+       -e EMAIL_ADMIN=… -e EMAIL_CONSEJERO=… -e EMAIL_JOVEN=… \
+       -e COMPANIA_ID=… -e JOVEN_DE_LA_COMPANIA_ID=… \
+       -e USUARIOS=650 -e PAUSA=12 -e DURACION=2m script/carga/k6.js
+```
+
+Los usuarios entran durante un minuto, se quedan `DURACION` todos a la vez y salen en 30 s. Si el p95 de
+alguna pantalla pasa de 1.5 s o más del 1 % de las respuestas no es 200, k6 lo marca con ✗ y termina con
+error. Con `--out web-dashboard` (o `K6_WEB_DASHBOARD=true`) abre gráficas en vivo en http://127.0.0.1:5665.
+
+Desde tu casa se mide también tu internet: para números del servidor, córrelo en un droplet de 6 dólares en la
+misma región (y bórralo después), o con Grafana Cloud k6 (`k6 cloud run`), que genera la carga desde sus
+servidores.
+
 ## Referencia (octubre de 2026)
 
 Medido con los datos de prueba del evento (`datos:sembrar`: 593 fichas, todas con foto), en modo producción
