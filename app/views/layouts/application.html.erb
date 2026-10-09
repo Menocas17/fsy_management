@@ -91,7 +91,7 @@
         Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página. %>
     <% if !Current.viewing_as? && Tutorial.available_to?(Current.user) %>
       <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path,
-            tour_autostart_value: Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
+            tour_autostart_value: Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
     <% end %>
   </body>
 </html>

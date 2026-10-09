@@ -60,6 +60,7 @@ export default class extends Controller {
     document.querySelector('main')?.removeEventListener('scroll', this.onReposition);
     clearTimeout(this.timer);
     cancelAnimationFrame(this.frame);
+    this.observer?.disconnect();
     this.overlay?.remove();
   }
 
@@ -186,6 +187,25 @@ export default class extends Controller {
   submitEnd(event) {
     if (!this.state || this.step?.action !== 'real' || !event.detail.success) return;
 
+    this.realDone();
+  }
+
+  // También cuando la alerta desaparece de la lista: el aviso del envío se puede perder si la página se
+  // refresca en vivo justo en ese momento.
+  watchReal() {
+    this.observer?.disconnect();
+    if (this.step.action !== 'real' || this.state.result || !this.target) return;
+
+    this.observer = new MutationObserver(() => {
+      if (!this.target) this.realDone();
+    });
+    this.observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  realDone() {
+    if (this.state.result) return;
+
+    this.observer?.disconnect();
     this.state.result = true;
     this.write();
     clearTimeout(this.timer);
@@ -221,6 +241,7 @@ export default class extends Controller {
     this.coach.addEventListener('click', (event) => this.coachAction(event));
 
     if (target && !result) this.markPractice(target);
+    this.watchReal();
     if (target) target.scrollIntoView({ block: 'center', behavior: this.reducedMotion ? 'auto' : 'smooth' });
     this.follow();
     (this.coach.querySelector('[data-tour-go]') || this.coach).focus({ preventScroll: true });

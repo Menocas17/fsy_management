@@ -4,6 +4,7 @@ require "application_system_test_case"
 # recorre entero (enfermería y Conteo con los jóvenes de práctica), y nada de lo practicado se guarda.
 class TutorialTest < ApplicationSystemTestCase
   setup do
+    Rails.configuration.x.tutorial_autostart = true
     @company = Company.create!(number: 7)
     participants(:juan).update!(company: @company)
     Membership.create!(associable: @company, participant: participants(:maria))
@@ -13,6 +14,7 @@ class TutorialTest < ApplicationSystemTestCase
   end
 
   teardown do
+    Rails.configuration.x.tutorial_autostart = false
     cdp("Emulation.clearDeviceMetricsOverride")
     cdp("Emulation.setTouchEmulationEnabled", enabled: false)
   end

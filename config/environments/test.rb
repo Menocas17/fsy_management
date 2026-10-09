@@ -41,6 +41,7 @@ Rails.application.configure do
 
   # Las pruebas cubren el flujo de correo aunque en producción siga apagado (config/application.rb).
   config.x.password_reset_emails = true
+  config.x.tutorial_autostart = false
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
