@@ -62,6 +62,7 @@ class Tutorial
       step(:settings_link, dashboard_path, target: "[data-tour='settings-link']", action: :tap),
       step(:theme, settings_path, target: "[data-tour='theme']", action: :play),
       step(:simple_mode, settings_path, target: "#settings-simple", action: :locked),
+      step(:push, settings_path, target: "[data-tour='push']", action: :play),
       step(:done, dashboard_path)
     ]
   end

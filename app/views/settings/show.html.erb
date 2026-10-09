@@ -75,8 +75,21 @@
       </section>
     <% end %>
 
+    <%# Abre la hoja de instalar (shared/_install_sheet). Ya instalada no hace falta: abierta desde su ícono, no sale. %>
+    <section class="md:hidden standalone:hidden <%= card_classes("px-5 py-6") %>" aria-labelledby="settings-install" data-settings-install>
+      <h2 id="settings-install" class="<%= card_heading %>">
+        <%= icon "smartphone", class: "w-[17px] h-[17px]" %>
+        Instalar la app
+      </h2>
+      <p class="text-label leading-relaxed text-ink-500">Agrégala a tu pantalla de inicio: se abre con un toque, a pantalla completa, y te llegan las alertas.</p>
+      <button type="button" data-install-open class="<%= button_classes(:secondary, extra: "mt-3 w-full") %>">
+        <%= icon "download", class: "w-4 h-4" %>
+        Instalar en este teléfono
+      </button>
+    </section>
+
     <%# El permiso de notificaciones es por dispositivo: este bloque habla del teléfono o la compu que estás usando. %>
-    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push"
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" aria-labelledby="settings-push" data-tour="push"
              data-controller="push" data-push-public-key-value="<%= Rails.application.credentials.dig(:vapid, :public_key) %>"
              data-push-url-value="<%= push_subscription_notifications_path %>">
       <h2 id="settings-push" class="<%= card_heading %>">

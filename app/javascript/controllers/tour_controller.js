@@ -47,11 +47,16 @@ export default class extends Controller {
     } else if (this.state) {
       this.show();
     } else if (this.autostartValue && this.onPhone && location.pathname === this.homeValue && !this.dismissed) {
-      this.start();
+      // Si la hoja de instalar la app está por salir o abierta, primero ella (install_controller.js).
+      if (!document.documentElement.dataset.installPrompt) return this.start();
+
+      this.onInstallSettled = () => !this.dismissed && this.start();
+      document.addEventListener('install:settled', this.onInstallSettled, { once: true });
     }
   }
 
   disconnect() {
+    document.removeEventListener('install:settled', this.onInstallSettled);
     window.removeEventListener('click', this.onClick, true);
     window.removeEventListener('submit', this.onSubmit, true);
     document.removeEventListener('turbo:submit-end', this.onSubmitEnd);

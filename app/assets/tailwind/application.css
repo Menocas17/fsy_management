@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* La app abierta desde su ícono (instalada), no en el navegador. */
+@custom-variant standalone (@media (display-mode: standalone));
 
 /* Onest servida por la app (app/assets/fonts, licencia OFL en Onest-OFL.txt) y no desde Google: la primera
    visita no espera a conectarse con dos dominios más antes de pintar. Latino y latino extendido, que cubren el
@@ -757,4 +759,48 @@ turbo-frame[aria-busy='true'] {
 }
 .scroll-reveal-x[data-scrolling]::-webkit-scrollbar-thumb {
   background: color-mix(in oklch, var(--color-ink-300) 85%, transparent);
+}
+
+/* Hoja de instalar la app (shared/_install_sheet): sube desde abajo como las hojas del teléfono y baja más
+   rápido de lo que sube. Las láminas del iPhone se deslizan sin barra de scroll. El botón a tocar en cada
+   dibujo late con un aro suave, para que se reconozca en la pantalla de verdad. */
+.install-sheet {
+  translate: 0 100%;
+  transition:
+    translate 220ms var(--ease-drawer),
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+}
+.install-sheet[open] {
+  translate: 0 0;
+  transition-duration: 420ms;
+  @starting-style {
+    translate: 0 100%;
+  }
+}
+.install-sheet::backdrop {
+  opacity: 0;
+  transition:
+    opacity 220ms,
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+}
+.install-sheet[open]::backdrop {
+  opacity: 1;
+  @starting-style {
+    opacity: 0;
+  }
+}
+.install-track {
+  scrollbar-width: none;
+}
+.install-track::-webkit-scrollbar {
+  display: none;
+}
+.install-pulse {
+  animation: install-pulse 1.8s var(--ease-fluid) infinite;
+}
+@keyframes install-pulse {
+  0% { box-shadow: 0 0 0 0 oklch(78% 0.14 78 / 0.55); }
+  70%, 100% { box-shadow: 0 0 0 10px oklch(78% 0.14 78 / 0); }
 }
