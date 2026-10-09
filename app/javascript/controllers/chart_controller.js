@@ -182,10 +182,12 @@ export default class extends Controller {
       },
       yaxis: { show: false },
       grid: this.gridOptions(),
+      // El número va anclado a la punta de cada barra (dataLabels.position: 'top') y sube sobre ella. Sin el
+      // ancla ApexCharts lo mide desde el centro: en las barras altas quedaba adentro y en las bajas, encima.
       dataLabels: this.showValuesValue
         ? {
             enabled: true,
-            offsetY: -22,
+            offsetY: -18,
             style: { fontSize: '11px', fontWeight: 700, colors: [this.mutedText] },
           }
         : { enabled: false },
@@ -195,6 +197,7 @@ export default class extends Controller {
           columnWidth: this.columnWidthValue,
           borderRadius: this.radiusValue,
           borderRadiusApplication: 'end',
+          dataLabels: { position: 'top' },
         },
       },
       fill: { type: 'solid', opacity: 1 },
@@ -203,7 +206,8 @@ export default class extends Controller {
 
   // Con los valores escritos sobre cada barra la cuadrícula sobra; sin ellos, unas líneas tenues dan la escala.
   gridOptions() {
-    const padding = { left: 0, right: 0, top: this.showValuesValue ? 10 : -10 };
+    // Con valores, aire arriba para el número de la barra más alta.
+    const padding = { left: 0, right: 0, top: this.showValuesValue ? 18 : -10 };
     if (this.showValuesValue) return { show: false, padding };
 
     return {

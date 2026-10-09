@@ -2,7 +2,8 @@
 <% notes = activity.notes_for(Current.user&.participant) %>
 <% last_alert = activity.alerts.recent.first %>
 
-<div class="flex flex-col gap-3">
+<%# Sin gap: cada info_row ya trae su relleno y su línea; con gap el aire de abajo doblaba al de arriba. %>
+<div class="flex flex-col">
   <%= info_row "Horario", "clock", "#{spanish_date(activity.day)} · #{activity.time_range}" %>
   <%= info_row "Lugar", "map-pin", activity.location %>
   <%= info_row "Responsables", "user-check", activity.responsible_names.presence %>

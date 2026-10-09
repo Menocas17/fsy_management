@@ -23,15 +23,15 @@ class DashboardFacadeTest < ActiveSupport::TestCase
       kpis = kpis_for(participants(:maria))
       assert_equal 1, kpis["Mis jóvenes"][:value]
       assert_equal 1, kpis["Enfermería"][:value]
-      assert_equal 1, kpis["Asistencia"][:value]
-      assert_equal "de 1 · anoche", kpis["Asistencia"][:sub]
+      assert_equal 1, kpis["Conteo"][:value]
+      assert_equal "de 1 · anoche", kpis["Conteo"][:sub]
     end
   end
 
   test "attendance reads as not taken when nobody passed the list" do
     kpis = kpis_for(participants(:maria))
-    assert_equal "—", kpis["Asistencia"][:value]
-    assert_equal "Sin pasar", kpis["Asistencia"][:sub]
+    assert_equal "—", kpis["Conteo"][:value]
+    assert_equal "Sin pasar", kpis["Conteo"][:sub]
   end
 
   test "logística sees the figures of its area's flag" do

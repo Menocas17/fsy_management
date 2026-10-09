@@ -12,7 +12,12 @@
     <script>
       (function () {
         try {
-          if (localStorage.getItem('fsy:theme') === 'dark') {
+          // Sin elección guardada, el teléfono arranca en oscuro y la computadora en claro. Teléfono: pantalla
+          // táctil cuyo lado corto mide menos de 768 px (así una ventana angosta en la compu no cuenta, y el
+          // teléfono acostado tampoco cambia). Configuración → Modo oscuro guarda la elección en cualquiera.
+          var theme = localStorage.getItem('fsy:theme');
+          var phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 768;
+          if (theme === 'dark' || (theme === null && phone)) {
             document.documentElement.classList.add('dark');
           }
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
