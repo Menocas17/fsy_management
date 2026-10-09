@@ -25,7 +25,8 @@
        data-dropdown-target="menu">
     <%# La lista se pide al abrir el menú (NotificationsController#menu): el frame perezoso carga cuando se ve. %>
     <%= turbo_frame_tag "notifications_menu", src: menu_notifications_path, loading: :lazy, target: "_top" do %>
-      <p class="px-5 py-6 text-center text-label text-ink-500">Cargando…</p>
+      <div class="px-5 py-4 border-b border-line-soft"><p class="text-title font-bold text-ink-900">Notificaciones</p></div>
+      <%= render SkeletonComponent.new(variant: :rows, count: 3, label: "Cargando notificaciones…") %>
     <% end %>
   </div>
 </div>
