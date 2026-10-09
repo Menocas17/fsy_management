@@ -25,16 +25,21 @@ class QrReadingTest < ApplicationSystemTestCase
 
     assert_equal "hilo", result["engine"]
     assert_equal "P-0421", result["payload"]
-    assert_operator result["reads"], :<=, 9, "at most one read every 120 ms"
+    # Con la CPU del CI repartida entre cuatro Chrome, una lectura en el hilo principal puede tardar casi el
+    # segundo entero: se sigue leyendo hasta tener dos (sin una segunda no hay pausa que medir).
+    assert_operator result["reads"], :>=, 2, "reads more than once"
+    assert_operator result["reads"], :<=, result["elapsed"] / 120 + 1, "at most one read every 120 ms"
     assert_operator result["longestGap"], :>=, 100, "pauses between reads (ms)"
   end
 
   private
-    # Lee durante un segundo, una lectura tras otra como el escáner, y cuenta lecturas, el cuadro más largo y la
-    # pausa más larga entre el fin de una lectura y el comienzo de la siguiente.
+    # Lee durante un segundo (y, si hasta ahí terminó menos de dos lecturas, hasta tener dos, como mucho 6 s), una
+    # lectura tras otra como el escáner, y cuenta lecturas, el cuadro más largo y la pausa más larga entre el fin
+    # de una lectura y el comienzo de la siguiente.
     def read_for_a_second(engine)
       png = Base64.strict_encode64(RQRCode::QRCode.new("P-0421").as_png(size: 240, border_modules: 2).to_s)
-      evaluate_async_script(<<~JS, png, engine)
+      # El guion puede seguir hasta 6 s: Capybara le da al script asíncrono su tiempo de espera, 2 s por defecto.
+      using_wait_time(10) { evaluate_async_script(<<~JS, png, engine) }
         const [png, engine, done] = arguments
         Promise.all([ import("jsqr"), import("lib/qr_frame") ]).then(async ([ { default: jsQR }, { QrReader } ]) => {
           const image = new Image()
@@ -52,14 +57,15 @@ class QrReadingTest < ApplicationSystemTestCase
           const reader = await QrReader.create(() => jsQR, { engine })
           const canvas = document.createElement("canvas")
           let reads = 0, payload = null, longestFrame = 0, longestGap = 0, finished = null, last = performance.now()
-          const end = last + 1000
+          const start = last, end = start + 1000, limit = start + 6000
           const tick = () => {
             const now = performance.now()
             longestFrame = Math.max(longestFrame, now - last)
             last = now
-            if (now >= end) {
+            if ((now >= end && reads >= 2) || now >= limit) {
               reader.close()
-              return done({ engine: reader.engine, reads, payload, longestFrame: Math.round(longestFrame), longestGap: Math.round(longestGap) })
+              return done({ engine: reader.engine, reads, payload, elapsed: Math.round(now - start),
+                            longestFrame: Math.round(longestFrame), longestGap: Math.round(longestGap) })
             }
             if (reader.ready(frame)) {
               if (finished !== null) longestGap = Math.max(longestGap, now - finished)
