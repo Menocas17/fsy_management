@@ -40,7 +40,9 @@ export default class extends Controller {
     if (saved != null) return this.jumpTo(saved);
 
     const active = this.element.querySelector('[aria-current="page"]');
-    if (!active) return;
+    // En el teléfono el menú lateral no se ve: medirlo obligaba al navegador a maquetar la página nueva entera
+    // en medio del connect, antes de que los demás controladores terminaran de cambiarla.
+    if (!active || this.element.checkVisibility?.() === false) return;
     const box = this.element.getBoundingClientRect();
     const item = active.getBoundingClientRect();
     if (item.top < box.top || item.bottom > box.bottom) {

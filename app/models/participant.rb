@@ -373,12 +373,14 @@ class Participant < ApplicationRecord
 
   def reload(*)
     @auxiliar_scope = nil
+    @counselor_scope = nil
     super
   end
 
   # 3) Counselor: only the standard Company directly assigned.
+  # Cargada una vez por ficha: los permisos la consultan por cada fila de una lista (can_edit_participant?).
   def counselor_scope
-    companies.includes(:auxiliar_company)
+    @counselor_scope ||= companies.includes(:auxiliar_company).load
   end
 
 
