@@ -13,7 +13,6 @@
   summary: En el teléfono la app arranca en modo oscuro, y se corrigieron la agenda y la gráfica por edad.
   changes:
     - En el teléfono la app se abre en modo oscuro. Si prefieres el claro, apágalo en Configuración → Apariencia y queda guardado.
-    - En modo oscuro, la barra de abajo es más honda y se degrada hacia abajo, y el botón amarillo del centro sobresale limpio, sin sombra.
     - Al abrir una actividad de la agenda en el teléfono, el detalle ya no queda pegado al título y el espacio entre filas es parejo.
     - En la gráfica «Jóvenes por edad» cada número queda justo encima de su barra.
     - En el inicio del teléfono, la cifra del conteo de anoche se llama «Conteo», como el módulo.
