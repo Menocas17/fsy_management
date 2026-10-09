@@ -10,7 +10,7 @@ class Alert < ApplicationRecord
 
   enum :audience, { todos: 0, por_roles: 1, individual: 2, personas: 3 }, prefix: true
   enum :priority, { informativa: 0, importante: 1, critica: 2 }, prefix: true
-  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4, enfermeria: 5, novedades: 6 }, prefix: true
+  enum :source, { manual: 0, agenda: 1, asignacion: 2, finanzas: 3, asistencia: 4, enfermeria: 5, novedades: 6, tutorial: 7 }, prefix: true
 
   PRIORITY_LABELS = { "informativa" => "Informativa", "importante" => "Importante", "critica" => "Crítica" }.freeze
   PRIORITY_STYLES = {
@@ -27,17 +27,20 @@ class Alert < ApplicationRecord
   validate :email_only_for_critical
 
   # Every alert leaves its own trace in Historial, whether a person sent it or the agenda did.
-  after_create :record_in_history
+  # (La de bienvenida del tutorial no: es solo de esa persona y no la envió nadie.)
+  after_create :record_in_history, unless: :source_tutorial?
   # …suena en los dispositivos suscritos aunque la app esté cerrada…
   after_create_commit :push_to_devices
   # …y refresca la campanita de quien la tenga abierta ahora mismo.
   after_create_commit :refresh_open_bells
 
   scope :recent, -> { order(created_at: :desc, id: :desc) }
+  # Las que alguien envió: sin la bienvenida del tutorial, que es de una sola persona y se borra al terminarlo.
+  scope :sent, -> { where.not(source: :tutorial) }
 
   # Superadmins (no participant) see every alert; everyone else sees the global ones, their roles' and their own.
   scope :visible_to, ->(participant) {
-    next all if participant.nil?
+    next sent if participant.nil?
 
     where(audience: :todos)
       .or(where("alerts.target_roles && ARRAY[?]::varchar[]", [ participant.rol.to_s ]))

@@ -6,7 +6,7 @@ class InfirmaryChartsController < ApplicationController
   before_action :require_infirmary_viewer!
 
   def show
-    load_infirmary_chart(Participant.jovenes.find(params[:participant_id]))
+    load_infirmary_chart(practice_participant(params[:participant_id]) || Participant.jovenes.find(params[:participant_id]))
     @note = InfirmaryNote.new
   end
 end

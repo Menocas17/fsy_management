@@ -31,7 +31,7 @@
             <%= @ongoing.en_camino? ? "Ya va en camino a enfermería" : "Ya está en enfermería" %>
           </p>
           <p class="text-label font-semibold text-ink-500">Desde las <%= @ongoing.started_at.strftime("%H:%M") %> · <%= @ongoing.reason_label %></p>
-          <%= link_to "Abrir su ficha", infirmary_chart_path(@participant), class: button_classes(:secondary, size: :sm, extra: "mt-3") %>
+          <%= link_to "Abrir su ficha", infirmary_chart_path(@participant, **practice_link_params(@participant)), class: button_classes(:secondary, size: :sm, extra: "mt-3") %>
         </div>
       <% else %>
         <%= form_with model: @visit, url: infirmary_visits_path(participant_id: @participant.id), class: "flex flex-col gap-4", data: { infirmary_form: true } do |form| %>

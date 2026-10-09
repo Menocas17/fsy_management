@@ -12,6 +12,10 @@ class Participant < ApplicationRecord
   has_many :companies, through: :memberships, source: :associable, source_type: "Company"
   has_many :auxiliar_companies, through: :memberships, source: :associable, source_type: "AuxiliarCompany"
 
+  # Los jóvenes de práctica del tutorial (ver practice_jovenes) no existen para el resto de la app: ni listas,
+  # ni cifras, ni reportes, ni búsquedas, ni Conteo. Solo el tutorial los carga, con Participant.unscoped.
+  default_scope { where(practice: false) }
+
   enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, logistica: 5, joven: 6, director_logistica: 7 }
 
   ROLE_LABELS = {
@@ -101,7 +105,8 @@ class Participant < ApplicationRecord
   # Cédula: se guarda en mayúsculas y sin guiones ni espacios (001-010190-0001A → 0010101900001A), así
   # la misma cédula escrita de dos formas es la misma. formatted_identity_document le devuelve los guiones.
   normalizes :identity_document, with: ->(value) { value.to_s.upcase.gsub(/[^0-9A-Z]/, "").presence }
-  before_create :assign_code
+  # Los de práctica no gastan un número de gafete.
+  before_create :assign_code, unless: :practice?
 
   # La dirección del evento es de parejas: un director y una directora (el matrimonio), un coordinador y
   # una coordinadora, un director y una directora de logística. Nunca un tercero: son roles con acceso
@@ -118,6 +123,39 @@ class Participant < ApplicationRecord
   def self.normalize_code(input)
     match = input.to_s.strip.match(/\A#{CODE_PREFIX}?[\s-]*(\d{1,6})\z/i)
     match && format("#{CODE_PREFIX}-%04d", match[1].to_i)
+  end
+
+  # Dos jóvenes y dos jóvenas de práctica: con ellos se practica en el tutorial llevar a alguien a enfermería y
+  # pasar el Conteo, aunque todavía no haya jóvenes asignados. Se crean la primera vez que se piden.
+  PRACTICE_JOVENES = [ [ "Sofía", "M" ], [ "Valeria", "M" ], [ "Mateo", "H" ], [ "Daniel", "H" ] ].freeze
+
+  def self.practice_jovenes
+    PRACTICE_JOVENES.map do |first_name, gender|
+      unscoped.find_or_create_by!(practice: true, first_name: first_name) do |participant|
+        participant.assign_attributes(last_name: "(práctica)", gender: gender, rol: :joven, age: 15, shirt_number: :m,
+                                      stake: "bello_horizonte", ward: "bello_horizonte", room: "Práctica",
+                                      medical_information: "Alergia al maní (de práctica)",
+                                      emergency_contact_name: "Contacto de práctica", emergency_contact_number: "0000 0000")
+      end
+    end
+  end
+
+  # Los de práctica tal como los ve quien hace el tutorial: de su compañía (solo en memoria, nunca guardado) y
+  # de solo lectura, así ninguna página puede cambiarlos aunque lo intente.
+  def self.practice_jovenes_for(company)
+    practice_jovenes.each do |participant|
+      participant.company = company
+      participant.readonly!
+    end
+  end
+
+  # Dónde le aparecen los jóvenes de práctica a quien hace el tutorial: la compañía del consejero, o la primera
+  # de la rama del auxiliar. nil para los demás (y para quien todavía no tiene compañía).
+  def practice_company
+    case rol
+    when "consejero" then counselor_scope.first
+    when "auxiliar"  then auxiliar_scope[:companies].first
+    end
   end
 
   # Quien ya ocupa el lugar de este rol y género en la dirección, si lo hay.

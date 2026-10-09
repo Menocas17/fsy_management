@@ -28,7 +28,8 @@ class InfirmaryVisitsController < ApplicationController
       flash.now[:alert] = "Ese gafete no es de ningún joven que puedas llevar a enfermería."
     end
 
-    @participant = reachable_jovenes.find_by(id: params[:participant_id]) if params[:participant_id].present?
+    # El de práctica abre el formulario de verdad; al enviarlo, create no lo encuentra (no existe fuera del tutorial).
+    @participant = practice_participant(params[:participant_id]) || (reachable_jovenes.find_by(id: params[:participant_id]) if params[:participant_id].present?)
     if @participant
       @visit = InfirmaryVisit.new(participant: @participant)
       @ongoing = @participant.infirmary_visits.ongoing.first

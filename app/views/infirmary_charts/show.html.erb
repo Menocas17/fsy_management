@@ -41,7 +41,7 @@
           <% end %>
         <% end %>
       <% elsif can_operate_infirmary? || can_announce_infirmary?(@participant) %>
-        <%= link_to new_infirmary_visit_path(participant_id: @participant.id), class: button_classes do %>
+        <%= link_to new_infirmary_visit_path(participant_id: @participant.id, **practice_link_params(@participant)), class: button_classes, data: { tour: "announce" } do %>
           <%= icon can_operate_infirmary? ? "log-in" : "footprints", class: "w-4 h-4" %>
           <%= can_operate_infirmary? ? "Ingresar" : "Llevar a enfermería" %>
         <% end %>
@@ -69,7 +69,7 @@
               [ @participant.emergency_contact_name, @participant.emergency_contact_relation.presence&.then { "(#{_1})" }, @participant.emergency_contact_number ].compact_blank.join(" "),
               href: tel_href(@participant.emergency_contact_number) %>
         <%= info_row "Consejeros", "users", @company&.counselor_names %>
-        <%= link_to "Ver su ficha completa", participant_path(@participant), class: button_classes(:secondary, size: :sm, extra: "mt-4 w-full") %>
+        <%= link_to "Ver su ficha completa", participant_path(@participant, **practice_link_params(@participant)), class: button_classes(:secondary, size: :sm, extra: "mt-4 w-full") %>
       </section>
     </aside>
 

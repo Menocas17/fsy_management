@@ -100,6 +100,27 @@
                 data: { action: "input->auto-submit#typed" } %>
         <% end %>
       </div>
+      <% if @practice_jovenes.any? %>
+        <%# Solo en el tutorial (?practica=1): los jóvenes de ejemplo con los que se practica, aparte de los de verdad. %>
+        <div class="mb-4" data-practice-jovenes>
+          <%= render "shared/practice_notice", text: "Estos jóvenes son de ejemplo y solo aparecen en el tutorial. Con ellos practicas sin cambiar nada." %>
+          <ul class="divide-y divide-line-soft">
+            <% @practice_jovenes.each do |joven| %>
+              <li>
+                <%= link_to participant_path(joven, practica: "1"), data: { turbo_frame: "_top", practice_joven: joven.gender },
+                      class: "flex items-center gap-3 py-2.5" do %>
+                  <%= render(AvatarComponent.new(participant: joven)) %>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-body font-bold text-ink-900"><%= joven.full_name %></span>
+                    <span class="block text-label font-semibold text-ink-500"><%= Participant::GENDER_LABELS[joven.gender] %> · <%= joven.age %> años</span>
+                  </span>
+                  <%= render ChipComponent.new(label: "Práctica", tone: :amber) %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
       <%= turbo_frame_tag "company_participants" do %>
         <%# @participants como parte de la llave: una consulta da cuántos son y su última edición (la página,
             sin cargarlos); si nada cambió, la lista sale de la caché sin cargar ni dibujar sus fotos. El día va en

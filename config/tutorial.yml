@@ -1,0 +1,122 @@
+# Los textos del tutorial (Tutorial, tour_controller.js), en palabras de quien usa la app. Qué pasos le tocan
+# a cada persona, en qué página y qué iluminan lo decide Tutorial#steps según lo que puede hacer; aquí solo va
+# lo que se lee. %{name} es su nombre de pila y %{role_notes} para quién son las notas de la agenda.
+#
+#   title:  el título de la tarjeta
+#   text:   lo que explica (o pide hacer)
+#   result: después de practicar, lo que pasó (y que no se guardó)
+welcome:
+  title: "Hola, %{name}"
+  text: "En 5 minutos te mostramos lo que vas a usar en la semana, sobre la app de verdad, y lo practicas. Lo que practiques no se guarda. Puedes saltarlo y verlo después desde Configuración."
+kpis:
+  title: Tus cifras de un vistazo
+  text: Lo más importante de tu rol, siempre al día. Toca cualquiera para ir al detalle.
+own_company:
+  title: Tu compañía
+  text: Aquí están tus jóvenes. Tócalo.
+own_branch:
+  title: Tu rama
+  text: Las compañías de tu rama, con sus consejeros y jóvenes. Tócalo.
+own_companies:
+  title: Todas las compañías
+  text: Sus consejeros, sus jóvenes y el organigrama. Puedes mover a cualquiera.
+own_area:
+  title: Tu área
+  text: Este botón te lleva directo al módulo de tu área de logística.
+own_checkin:
+  title: Registro de llegadas
+  text: Tu área es Registro. Desde aquí recibes a la gente escaneando el QR de su gafete; la llegada queda anotada con la hora, y si te equivocas la anulas ahí mismo.
+practice_joven:
+  title: La ficha de un joven
+  text: "Arriba están los jóvenes de práctica: son de ejemplo y solo aparecen en el tutorial. Toca a Sofía para abrir su ficha."
+ficha_infirmary:
+  title: ¿Lo llevas a enfermería?
+  text: "En la ficha está su información médica. Toca «Enfermería» para abrir su ficha de enfermería."
+chart_announce:
+  title: Avisa que lo llevas
+  text: "Toca «Llevar a enfermería»."
+announce_form:
+  title: Elige el motivo y avisa
+  text: "Elige por qué lo llevas y toca el botón para avisar. En la semana, enfermería ya lo espera y su auxiliar se entera."
+  result_title: "Práctica: enfermería no recibió nada"
+  result: "Así se avisa. Queda «En camino» y puedes retirar el aviso si al final no van. Enfermería te avisa si sale a su casa o al hospital, nunca el detalle clínico."
+center_qr:
+  title: Tu código QR
+  text: El botón amarillo. Lo muestras al llegar al evento y en cada capacitación; registro lo escanea y queda tu asistencia.
+center_search:
+  title: Busca cualquier cosa
+  text: "El botón amarillo: una persona, una compañía, una estaca o un módulo. Es el camino más corto a cualquier ficha."
+agenda_tab:
+  title: La agenda
+  text: "Toca «Agenda» para ver qué sigue."
+activity:
+  title: Despliega una actividad
+  text: Toca una actividad para ver su detalle.
+activity_detail:
+  title: Todo lo de esa actividad
+  text: "Horario, lugar, responsables y la nota para %{role_notes}. Si algo cambia, te llega una alerta."
+agenda_empty:
+  title: La agenda todavía está vacía
+  text: Cuando la dirección cargue las actividades, aparecen aquí día por día. Tocas una y se despliega su horario, lugar y la nota para tu rol.
+trainings_tab:
+  title: Capacitaciones
+  text: "Al lado de la agenda están las capacitaciones del staff. Tócalo."
+training_swipe:
+  title: Borra deslizando
+  text: "Desliza una capacitación hacia la izquierda y toca «Eliminar». Pruébalo con una de verdad: en el tutorial no se borra."
+  result_title: "Práctica: no se borró"
+  result: "La capacitación sigue ahí. En la semana, la app te pide confirmar, dice cuántas asistencias se pierden y la borra."
+bell:
+  title: La campanita
+  text: "Aquí llegan los avisos de la dirección y los cambios de agenda. Tócala."
+notification_swipe:
+  title: Desliza para borrar
+  text: "Arriba está tu alerta de bienvenida, que el tutorial te acaba de enviar. Deslízala hacia la izquierda y toca «Eliminar»."
+  result_title: Esta sí se borró
+  result: "Era solo tuya, así que borrarla no afecta a nadie. Así quitas de tu lista cualquier alerta; para los demás sigue ahí."
+more:
+  title: Más opciones
+  text: "Lo demás está en «Más». Tócalo. Se cierra tocando fuera o arrastrándolo hacia abajo."
+sheet_scan:
+  title: Escanear gafete
+  text: "Tócalo."
+scan:
+  title: La ficha de cualquier joven
+  text: "Activas la cámara y apuntas al QR del gafete de cualquier joven: se abre su ficha con alergias, contacto de emergencia y compañía. Sirve si encuentras a alguien solo."
+more_conteo:
+  title: El Conteo
+  text: "Cada noche se pasa lista. Abre «Más» otra vez."
+sheet_conteo:
+  title: El Conteo
+  text: "Toca «Conteo»."
+conteo_mark:
+  title: Marca a cada joven
+  text: "Es una lista de práctica. Toca a un joven para marcarlo presente, o «Falta» para marcarlo ausente con el motivo. Márcalos a todos."
+conteo_confirm:
+  title: Confirma la lista
+  text: "Con todos marcados, se confirma. Toca el botón."
+  result_title: "Práctica: la lista no se guardó"
+  result: "Así queda una lista confirmada. Esta noche la pasas normal; quien está en enfermería ya viene marcado, y a las 10 pm la dirección ve qué listas faltan."
+alert_form:
+  title: Enviar una alerta
+  text: "Este es el formulario de verdad: un título, el mensaje y a quién le llega (a todos o solo a ciertos roles)."
+alert_send:
+  title: Envíala
+  text: "Toca «Enviar alerta». En el tutorial no le llega a nadie."
+  result_title: "Práctica: no le llegó a nadie"
+  result: "Así se envía. En la semana llega a la campanita y como notificación al teléfono de quienes elegiste."
+account:
+  title: Tu cuenta
+  text: "Toca tu foto: ahí están tu perfil, Configuración y cerrar sesión."
+settings_link:
+  title: Configuración
+  text: "Tócalo."
+theme:
+  title: Modo oscuro
+  text: "En el teléfono viene encendido. Pruébalo: apágalo y préndelo. Esto sí se guarda: es tu preferencia."
+simple_mode:
+  title: Modo simple
+  text: "Es la barra de abajo, a mano del pulgar. Si lo apagas, vuelves al menú completo. Durante el tutorial no se mueve (el tutorial usa la barra); lo cambias al terminar."
+done:
+  title: ¡Listo para la semana!
+  text: "Eso es todo. Si quieres repasarlo, está en Configuración → Ver el tutorial."

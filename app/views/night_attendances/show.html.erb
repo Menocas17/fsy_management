@@ -26,6 +26,7 @@
   </div>
 
   <%= render "night_attendances/window_notice", night: @night %>
+  <%= render "shared/practice_notice", text: "Es una lista de práctica con jóvenes de ejemplo: márcalos y confírmala. No se guarda; la de verdad la pasas esta noche." if @practice %>
 
   <%# Sobre el lienzo gris va en superficie, con el borde y el mosaico en el color del estado: si fuera del
       mismo gris que el fondo no se notaría. %>

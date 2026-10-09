@@ -672,6 +672,20 @@ turbo-frame[aria-busy='true'] {
   }
 }
 
+/* El tutorial (tour_controller.js): una capa que tapa la página (con un hueco donde hay que tocar), el foco
+   que oscurece todo lo demás con su sombra y deja ver lo iluminado con un borde de sol, y la tarjeta. */
+.tour { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.tour-blocker { position: fixed; inset: 0; z-index: 1000; pointer-events: auto; }
+.tour-blocker-dim { background: oklch(15% 0.03 262 / 0.66); }
+.tour-spot {
+  position: fixed; z-index: 1001; pointer-events: none; border-radius: 16px;
+  box-shadow: 0 0 0 9999px oklch(15% 0.03 262 / 0.66), 0 0 0 3px var(--color-sun);
+  transition: top 300ms var(--ease-drawer), left 300ms var(--ease-drawer), width 300ms var(--ease-drawer), height 300ms var(--ease-drawer);
+}
+.tour-coach { pointer-events: auto; }
+.reduce-motion .tour-spot, .reduce-motion .tour-coach { transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .tour-spot, .tour-coach { transition: none !important; } }
+
 /* Menú lateral: los grupos se despliegan en vez de aparecer de golpe. La fila de la grilla va de 0fr a 1fr
    (anima hasta la altura justa sin medir nada) y el contenido se funde. El relleno con margen negativo deja
    sitio a la barra de la opción activa y al anillo de foco, que el overflow recortaría. Con «reducir

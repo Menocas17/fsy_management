@@ -44,7 +44,7 @@
       <%# En el teléfono la foto sola no parecía botón: lleva colgada de su esquina una insignia redonda con la
           flecha hacia abajo (como WhatsApp o Gmail). En escritorio, el nombre y la flecha van al lado. %>
       <div data-controller="dropdown" class="relative ml-1 md:ml-0">
-        <button type="button" aria-haspopup="true" aria-expanded="false" aria-label="Menú de cuenta"
+        <button type="button" aria-haspopup="true" aria-expanded="false" aria-label="Menú de cuenta" data-tour="account"
                 class="relative flex items-center gap-2.5 rounded-tile after:absolute after:-inset-1.5 md:after:hidden md:py-1.5 md:pl-1.5 md:pr-3 hover:bg-muted cursor-pointer transition"
                 data-action="click->dropdown#toggle click@window->dropdown#hide keydown.esc@window->dropdown#close">
           <%= current_user_avatar_tag(class: "w-8 h-8 md:w-9 md:h-9 text-label md:text-body") %>
@@ -68,7 +68,7 @@
               <span class="block text-label font-medium text-ink-500 truncate"><%= Current.user.role_label %></span>
             </span>
           </div>
-          <%= link_to settings_path, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-inner text-body font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900 transition" do %>
+          <%= link_to settings_path, data: { tour: "settings-link" }, class: "flex items-center gap-2.5 mx-1.5 px-3 py-2 rounded-inner text-body font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900 transition" do %>
             <%= icon "settings", class: "w-4 h-4" %>
             Configuración
           <% end %>

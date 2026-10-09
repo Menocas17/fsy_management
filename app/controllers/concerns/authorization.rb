@@ -32,8 +32,9 @@ module Authorization
   # La cadena de mando: el director de logística manda sobre su comité, logística con la bandera Registro sobre
   # los jóvenes,
   # el auxiliar sobre los jóvenes de su rama y el consejero sobre los de su compañía. Todos sobre su propia ficha.
+  # Un joven de práctica (tutorial) no lo edita, borra ni asigna nadie: solo se mira.
   def can_edit_participant?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
@@ -58,7 +59,7 @@ module Authorization
   end
 
   def can_delete_participant?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
@@ -263,7 +264,7 @@ module Authorization
   end
 
   def can_handle_account_of?(participant)
-    return false unless can_manage_accounts?
+    return false if participant.practice? || !can_manage_accounts?
 
     full_company_access? || !(participant.director? || participant.coordinador?)
   end
@@ -319,7 +320,7 @@ module Authorization
   # reach everybody, an auxiliar reaches their branch, a consejero their own company, and the logistics
   # director their own team.
   def can_assign_to?(participant)
-    return false if Current.user.nil? || participant.nil?
+    return false if Current.user.nil? || participant.nil? || participant.practice?
     return true if full_company_access?
 
     actor = Current.user.participant
