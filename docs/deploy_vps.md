@@ -1,7 +1,8 @@
 # Despliegue en un VPS de DigitalOcean (Kamal)
 
-La app y su Postgres en un mismo droplet de 48 dólares al mes (4 vCPU, 8 GB, 160 GB de disco), desplegados
-con [Kamal](https://kamal-deploy.org). Reemplaza a Render + Neon (`docs/deploy_render.md`); las fotos siguen
+La app y su Postgres en un mismo droplet, desplegados con [Kamal](https://kamal-deploy.org). Se empieza con el
+de 6 dólares al mes (1 vCPU, 1 GB) y se agranda para el evento con una variable (`DROPLET_SIZE`, ver «Cambiar
+de tamaño»). Reemplaza a Render + Neon (`docs/deploy_render.md`); las fotos siguen
 en Cloudflare R2 y el correo sigue saliendo por el Apps Script de Gmail.
 
 | Pieza | Dónde |
@@ -23,8 +24,9 @@ En DigitalOcean → **Create → Droplets**:
 - **Región:** Atlanta si aparece (es la más cercana a Centroamérica); si no, Nueva York. Cada petición
   viaja hasta allá y de vuelta: la región no se puede cambiar después sin migrar.
 - **Imagen:** Ubuntu 24.04 (LTS) x64.
-- **Tamaño:** Basic → Regular → **8 GB / 4 CPU / 160 GB** (`s-4vcpu-8gb`, 48 dólares). `config/deploy.yml` está
-  ajustado a este tamaño; para otro, ver «Tamaño del droplet» al final.
+- **Tamaño:** Basic → Regular → **1 GB / 1 CPU / 25 GB** (`s-1vcpu-1gb`, 6 dólares). Es el que
+  `config/deploy.yml` usa si no le dices otro. Para el evento se agranda sin reinstalar nada («Cambiar de
+  tamaño»).
 - **Autenticación:** *SSH Key* (agrega la llave pública de tu máquina). Sin contraseña.
 - Marca **Monitoring** (gratis): gráficas de CPU, memoria y disco en el panel.
 
@@ -124,6 +126,7 @@ En el repositorio → **Settings → Secrets and variables → Actions**.
 |--------|-------|
 | `SERVER_IP` | La IP del droplet |
 | `APP_HOST` | El dominio del paso 2 |
+| `DROPLET_SIZE` | El tamaño del droplet: `s-1vcpu-1gb` (o sin la variable) para el de 6 dólares, `s-4vcpu-8gb` para el de 48 |
 | `KAMAL_DEPLOY` | `true`, **recién en el paso 9**. Mientras no exista, el job `deploy` se salta y el CI sigue en verde |
 
 ## 7. Levantar Postgres (una vez, desde tu máquina)
@@ -132,7 +135,7 @@ Kamal también necesita los secretos en tu terminal. `KAMAL_REGISTRY_PASSWORD` e
 (Settings → Developer settings → Personal access tokens → *classic*, con `read:packages` y `write:packages`).
 
 ```bash
-export SERVER_IP=<IP> APP_HOST=<dominio>
+export SERVER_IP=<IP> APP_HOST=<dominio> DROPLET_SIZE=s-1vcpu-1gb
 export KAMAL_REGISTRY_PASSWORD=<token de GitHub>
 export RAILS_MASTER_KEY=$(cat config/master.key)
 export POSTGRES_PASSWORD=<la del paso 6>
@@ -223,28 +226,47 @@ docker exec -i fsy_management-db pg_restore -U fsy_management -d fsy_management_
 
 Y `bin/kamal app boot`.
 
-## Tamaño del droplet
+## Cambiar de tamaño
 
-`config/deploy.yml` está ajustado para el de 48 dólares (4 vCPU, 8 GB). Cada proceso de Puma usa un núcleo
-(Ruby ejecuta de a un hilo por proceso) y ~300-400 MB; Postgres se queda con un cuarto de la RAM como
-`shared_buffers`, y el resto lo usa el sistema como caché de disco.
+`config/deploy.yml` tiene una tabla de tamaños; `DROPLET_SIZE` dice cuál usar y de ahí salen los procesos de
+Puma, las fotos que se procesan a la vez y la memoria de Postgres:
 
-| Droplet | `WEB_CONCURRENCY` | `IMAGE_JOB_CONCURRENCY` | `shared_buffers` / `effective_cache_size` | `max_connections` |
-|---------|-------------------|-------------------------|-------------------------------------------|-------------------|
-| 1 GB, 1 vCPU | 1 | 1 | 128MB / 384MB | 40 |
-| 8 GB, 4 vCPU (el actual) | 4 | 3 | 2GB / 5GB | 150 |
-| 16 GB, 8 vCPU | 8 | 4 | 4GB / 11GB | 200 |
+| `DROPLET_SIZE` | Droplet | Procesos de Puma | Fotos a la vez | `shared_buffers` / `effective_cache_size` | `max_connections` |
+|----------------|---------|------------------|----------------|-------------------------------------------|-------------------|
+| `s-1vcpu-1gb` (sin la variable) | 6 dólares, 1 vCPU, 1 GB | 1 (sin maestro) | 1 | 128MB / 512MB | 60 |
+| `s-2vcpu-4gb` | 24 dólares, 2 vCPU, 4 GB | 2 | 2 | 1GB / 2560MB | 100 |
+| `s-4vcpu-8gb` | 48 dólares, 4 vCPU, 8 GB | 4 | 3 | 2GB / 5GB | 150 |
 
-Para cambiar de tamaño: los dos primeros van en `env.clear` de `config/deploy.yml` y se aplican con el
-siguiente deploy; los de Postgres van en el `cmd` del accesorio `db` y se aplican con
-`bin/kamal accessory reboot db` (Postgres se reinicia unos segundos). En DigitalOcean, **Resize → CPU and RAM
-only** (sin agrandar el disco, así se puede volver a bajar); apaga el droplet 1-2 minutos. El orden importa:
-para **subir**, primero el Resize y después el deploy con más procesos; para **bajar**, primero el deploy con
-menos procesos y después el Resize, o la app arrancaría pidiendo más memoria de la que hay.
+Cada proceso de Puma usa un núcleo (Ruby ejecuta de a un hilo por proceso) y ~300-400 MB. Para el lunes del
+evento, el de **4 vCPU / 8 GB**: con él la prueba de carga atendió a 650 personas con p95 de ~0,3 s
+(`script/carga/README.md`). Más RAM no lo haría más rápido, lo que limita es la CPU.
+
+**Para subir** (por ejemplo el viernes antes del evento):
+
+1. DigitalOcean → el droplet → **Resize** → **CPU and RAM only** (no agrandes el disco: así se puede volver a
+   bajar al de 6) → `s-4vcpu-8gb`. Apaga el droplet 1-2 minutos; Postgres y la app vuelven solos.
+2. En GitHub, la variable `DROPLET_SIZE` = `s-4vcpu-8gb`.
+3. Desde tu máquina, con las variables del paso 7 y `DROPLET_SIZE=s-4vcpu-8gb`:
+
+   ```bash
+   bin/kamal accessory reboot db   # Postgres toma la memoria nueva (se reinicia unos segundos)
+   bin/kamal deploy                # la app arranca con 4 procesos
+   ```
+
+**Para bajar** (después del evento), al revés: primero la variable `DROPLET_SIZE` = `s-1vcpu-1gb`,
+`bin/kamal accessory reboot db` y `bin/kamal deploy`, y **después** el Resize al de 6 dólares. Si se achica
+primero, la app y Postgres arrancarían pidiendo más memoria de la que hay.
+
+No cambies de tamaño el día del evento: un servidor recién arrancado responde más lento sus primeros minutos.
 
 ## Memoria
 
-8 GB repartidos así, aproximadamente: sistema ~200 MB, Postgres ~2.5 GB (2 GB de `shared_buffers`), los cuatro
-procesos de Puma ~1.5 GB, el proceso principal (con la cola de trabajos) ~400 MB y hasta ~300 MB más cuando
-procesa tres fotos a la vez. Lo que sobra lo usa el sistema como caché de disco para Postgres. El swap de 2 GB
-queda de colchón. El panel de DigitalOcean (Monitoring) muestra memoria y CPU en vivo.
+**1 GB:** sistema ~150 MB, Postgres ~250 MB, la app (un solo proceso con la cola de trabajos) ~400 MB y
+~150 MB más mientras procesa una foto. Mientras Kamal cambia de contenedor hay dos apps unos segundos: el swap
+de 2 GB lo absorbe. Alcanza para probar y para pocas personas a la vez, no para el lunes.
+
+**8 GB:** sistema ~200 MB, Postgres ~2.5 GB, los cuatro procesos de Puma ~1.5 GB, el proceso principal (con
+la cola de trabajos) ~400 MB y hasta ~300 MB más con tres fotos a la vez. Lo que sobra lo usa el sistema como
+caché de disco para Postgres.
+
+El panel de DigitalOcean (Monitoring) muestra memoria y CPU en vivo.

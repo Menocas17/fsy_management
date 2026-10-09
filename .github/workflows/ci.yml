@@ -173,6 +173,8 @@ jobs:
     env:
       SERVER_IP: ${{ vars.SERVER_IP }}
       APP_HOST: ${{ vars.APP_HOST }}
+      # El tamaño del droplet (config/deploy.yml); sin la variable, el de 6 dólares.
+      DROPLET_SIZE: ${{ vars.DROPLET_SIZE }}
       KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
