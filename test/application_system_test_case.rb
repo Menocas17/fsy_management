@@ -15,6 +15,12 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     options.add_argument("--blink-settings=#{ENV.fetch("SYSTEM_TEST_BLINK", "primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4")}")
   end
 
+  # El navegador se reusa entre pruebas: la que se achicó a teléfono (resize_to_mobile) dejaba angosta la ventana
+  # de la siguiente, y una prueba de escritorio no encontraba el menú lateral. Cada una empieza en escritorio.
+  setup do
+    page.driver.browser.manage.window.resize_to(1400, 1000)
+  end
+
   # Entra por el formulario real, no por la cookie: así la prueba también cubre el inicio de sesión.
   def sign_in_as(user, password: "password")
     visit new_session_path
