@@ -35,7 +35,7 @@
     <span><%= @text %></span>
   </span>
 <% elsif @is_nav %>
-  <%= link_to @url, class: "#{styles} #{active_classes}", aria: { current: (active? ? "page" : nil) }, data: { nav_link: true } do %>
+  <%= link_to @url, class: "#{styles} #{active_classes}", aria: { current: (active? ? "page" : nil) } do %>
     <% if @lucide_icon %>
       <%= helpers.icon(@lucide_icon, class: "w-[19px] h-[19px] shrink-0") %>
     <% elsif current_icon.present? %>

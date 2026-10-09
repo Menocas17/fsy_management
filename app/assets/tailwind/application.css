@@ -805,63 +805,29 @@ turbo-frame[aria-busy='true']:not(:has(> [data-skeleton])) {
   70%, 100% { box-shadow: 0 0 0 10px oklch(78% 0.14 78 / 0); }
 }
 
-/* Barra de progreso al cambiar de página (la de Turbo, que sale si la página tarda más de
-   Turbo.config.drive.progressBarDelay, en application.js): de sol y con un brillo en la punta, para que se vea
-   avanzar en los dos temas. Turbo trae su estilo en un <style> al principio del <head>; este le gana. */
+/* Cambiar de página: la barrita de Turbo no se muestra (arriba se leía como lentitud). Si la página tarda más
+   de PAGE_LOADING_DELAY (application.js), baja bajo la barra superior un círculo con un spinner, como el de
+   jalar para recargar; lo que llega antes no muestra nada. */
 html .turbo-progress-bar {
-  height: 3px;
-  background: var(--color-sun);
-  box-shadow: 0 0 10px color-mix(in oklch, var(--color-sun) 70%, transparent);
-  border-radius: 0 999px 999px 0;
+  display: none;
 }
-
-/* Al tocar una opción del menú (barra de abajo, menú lateral, hoja «Más»), se marca enseguida, antes de que
-   llegue la página (data-nav-pending, en application.js): la que estaba activa se apaga y la tocada se
-   enciende. Así el toque se siente al instante aunque la página tarde. */
-[data-bottom-nav][data-nav-switching] [aria-current='page'] {
-  color: var(--color-ink-500);
-  font-weight: 600;
-}
-[data-bottom-nav][data-nav-switching] [aria-current='page'] > span[aria-hidden] {
+.page-loading {
   opacity: 0;
+  translate: -50% -10px;
+  transition:
+    opacity 140ms ease-out,
+    translate 220ms var(--ease-fluid);
 }
-[data-bottom-nav] [data-nav-pending] {
-  color: var(--color-ink-900);
-  font-weight: 800;
+html[data-page-loading] .page-loading {
+  opacity: 1;
+  translate: -50% 0;
 }
-[data-bottom-nav] [data-bottom-nav-item]:not([data-bottom-nav-item="Buscar"])[data-nav-pending]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  inset-inline: 24%;
-  height: 3px;
-  border-radius: 0 0 999px 999px;
-  background: var(--color-sun);
-  animation: nav-pending-bar 260ms var(--ease-fluid) both;
+/* Gira solo mientras se ve: escondido no gasta nada en ninguna página. */
+html[data-page-loading] .page-loading > span {
+  animation: page-loading-spin 700ms linear infinite;
 }
-@keyframes nav-pending-bar {
-  from { scale: 0 1; }
-  to { scale: 1 1; }
-}
-nav[data-nav-switching] [data-nav-link][aria-current='page']:not([data-nav-pending]) {
-  background: transparent;
-  box-shadow: none;
-  color: var(--color-ink-500);
-}
-nav[data-nav-switching] [data-nav-link][aria-current='page']:not([data-nav-pending])::before {
-  opacity: 0;
-}
-[data-nav-link][data-nav-pending] {
-  background: color-mix(in oklch, var(--color-primary-100) 80%, transparent);
-  color: var(--color-primary-700);
-}
-.dark [data-nav-link][data-nav-pending] {
-  background: color-mix(in oklch, var(--color-primary-700) 50%, transparent);
-  color: white;
-}
-[data-more-link][data-nav-pending] {
-  outline: 2px solid var(--color-sun);
-  outline-offset: -2px;
+@keyframes page-loading-spin {
+  to { rotate: 1turn; }
 }
 
 /* Esqueletos (SkeletonComponent): la forma de lo que viene mientras llega un frame perezoso. Aparecen con un

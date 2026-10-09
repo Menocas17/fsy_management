@@ -79,6 +79,12 @@
             </span>
           </div>
         </div>
+        <%# Cargando la página (application.js): solo si tarda más de 400 ms, bajo la barra superior. %>
+        <div class="relative z-20 h-0" aria-hidden="true">
+          <div class="page-loading absolute left-1/2 top-3 size-10 rounded-full flex items-center justify-center bg-surface border border-line shadow-lg pointer-events-none" data-page-loading-indicator>
+            <span class="size-5 rounded-full border-[2.5px] border-line border-t-primary-600 dark:border-t-primary-300"></span>
+          </div>
+        </div>
         <main data-controller="scroll-memory" data-pull-refresh-target="scroller" class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain bg-canvas">
           <%= yield %>
         </main>
