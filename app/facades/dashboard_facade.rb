@@ -1,57 +1,75 @@
 class DashboardFacade
+  # Las cifras de todo el evento son las mismas para quien abra el inicio: se guardan unos segundos en la caché
+  # en vez de recalcularlas en cada visita (son la mitad de las consultas de la página, y el inicio es lo que más
+  # se abre). Las tres cifras propias de cada rol (simple_kpis) no pasan por aquí: siempre van al día.
+  GLOBAL_STATS_TTL = 30.seconds
+
+  # En la memoria del proceso y no en Rails.cache: en producción esa caché es la base de datos, y cada cifra era
+  # una ida y vuelta a Neon (nueve en el inicio). Cada proceso calcula las suyas una vez cada 30 s. Donde la caché
+  # está apagada (pruebas) se respeta.
+  def self.global_cache
+    @global_cache ||= if Rails.cache.is_a?(ActiveSupport::Cache::NullStore)
+      Rails.cache
+    else
+      ActiveSupport::Cache::MemoryStore.new(size: 4.megabytes)
+    end
+  end
+
   # user: quien abre el inicio; con él se arman sus tres cifras del modo simple (simple_kpis).
   def initialize(user: nil)
     @user = user
   end
 
   def total_participants
-    @total_participants ||= Participant.count
+    @total_participants ||= global(:total_participants) { Participant.count }
   end
 
   # Las gráficas de edad, género y estaca describen solo a los jóvenes: el staff (que además puede venir de
   # una estaca que no participa) queda fuera.
   def participants_by_age
-    @participants_by_age ||= Participant.jovenes.data_by_age
+    @participants_by_age ||= global(:participants_by_age) { Participant.jovenes.data_by_age }
   end
 
   def total_jovenes
-    @total_jovenes ||= Participant.jovenes_count
+    @total_jovenes ||= global(:total_jovenes) { Participant.jovenes_count }
   end
 
   def total_staff
-    @total_staff ||= Participant.staff_count
+    @total_staff ||= global(:total_staff) { Participant.staff_count }
   end
 
   def count_by_stake
-    @count_by_stake ||= Participant.jovenes.stake_count
+    @count_by_stake ||= global(:count_by_stake) { Participant.jovenes.stake_count }
   end
 
   def count_by_role
-    @count_by_role ||= Participant.role_count
+    @count_by_role ||= global(:count_by_role) { Participant.role_count }
   end
 
   def male_count
-    @male_count ||= Participant.jovenes.male_count
+    @male_count ||= global(:male_count) { Participant.jovenes.male_count }
   end
 
   def female_count
-    @female_count ||= Participant.jovenes.female_count
+    @female_count ||= global(:female_count) { Participant.jovenes.female_count }
   end
 
   def shirt_count
-    @shirt_count ||= Participant.shirt_count
+    @shirt_count ||= global(:shirt_count) { Participant.shirt_count }
   end
 
   # Cocina y enfermería: lo que cada ficha trae y que, si no se suma aquí, hay que ir a buscar de a una.
   def special_care
-    @special_care ||= {
-      medical_information: Participant.jovenes.with_medical_note(:medical_information).count,
-      diet: Participant.jovenes.with_medical_note(:diet).count
-    }
+    @special_care ||= global(:special_care) do
+      {
+        medical_information: Participant.jovenes.with_medical_note(:medical_information).count,
+        diet: Participant.jovenes.with_medical_note(:diet).count
+      }
+    end
   end
 
   def jovenes_by_dining_hall
-    @jovenes_by_dining_hall ||= Company.jovenes_by_dining_hall
+    @jovenes_by_dining_hall ||= global(:jovenes_by_dining_hall) { Company.jovenes_by_dining_hall }
   end
 
   # Lo que sigue en la agenda: durante el evento son las dos próximas del día.
@@ -74,6 +92,10 @@ class DashboardFacade
   end
 
   private
+    def global(name, &block)
+      self.class.global_cache.fetch([ "dashboard-global", name ], expires_in: GLOBAL_STATS_TTL, &block)
+    end
+
     def kpi(label, value, icon, tone, sub: nil, badge: nil, link: nil)
       { label: label, value: value, sub: sub, badge: badge, icon: icon, tone: tone, link: link }
     end

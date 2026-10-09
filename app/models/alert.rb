@@ -127,11 +127,6 @@ class Alert < ApplicationRecord
     addressed_users
   end
 
-  # A quién se le refresca la campanita abierta: a todo el que la ve en la suya, y el superadmin las ve todas.
-  def bell_recipients
-    audience_todos? ? User.all : everyone_addressed_and_the_superadmin
-  end
-
   # Only people with an account can be emailed.
   def email_recipients
     return User.none unless send_email? && priority_critica?
@@ -174,12 +169,12 @@ class Alert < ApplicationRecord
       PushNotificationJob.perform_later(id)
     end
 
-    # Un envío por persona, porque cada campanita muestra lo que esa persona puede ver.
+    # Un solo aviso para todos los que tienen la app abierta (stream "alerts", shared/_alerts_signal), no una
+    # campanita dibujada por persona: con cientos de cuentas eran cientos de trabajos que competían con las
+    # páginas. Cada campanita abierta pregunta su número (alert_signal_controller) y suena si creció.
     def refresh_open_bells
-      bell_recipients.find_each do |user|
-        broadcast_replace_later_to user, target: "notifications_bell",
-                                         partial: "shared/notifications_bell", locals: { user: user }
-      end
+      Turbo::StreamsChannel.broadcast_replace_later_to "alerts", target: "alerts_signal",
+                                                       partial: "shared/alerts_signal", locals: { alert: self }
     end
 
     def recipient_named_for_individual_alerts

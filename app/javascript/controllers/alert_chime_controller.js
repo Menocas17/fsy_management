@@ -29,7 +29,12 @@ export default class extends Controller {
     if (previous !== null && this.unreadValue > previous) this.announce()
   }
 
-  async refresh() {
+  // Entró una alerta (alert_signal_controller): se pregunta el número y, si creció, suena.
+  check() {
+    return this.refresh({ announce: true })
+  }
+
+  async refresh({ announce = false } = {}) {
     if (!this.hasCountUrlValue) return
 
     try {
@@ -37,8 +42,10 @@ export default class extends Controller {
       if (!response.ok) return
 
       const { unread } = await response.json()
+      const grew = unread > this.unreadValue
       this.paint(unread)
       this.remember(unread)
+      if (announce && grew) this.announce()
     } catch (error) {
       // Sin red: se queda lo que hay, y la próxima navegación lo corrige.
     }

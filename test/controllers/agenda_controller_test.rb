@@ -60,10 +60,27 @@ class AgendaControllerTest < ActionDispatch::IntegrationTest
     assert_select "details[data-activity-id]", 2
   end
 
-  test "on phones each activity opens in place, with its notes inside" do
+  test "on phones each activity opens in place and asks for its detail only when opened" do
     get agenda_path(date: @day, view: "dia")
 
-    assert_select "details[data-activity-id='#{@activity.id}'] [data-role-note='logistica']", text: /30 galones/
+    assert_select "details[data-activity-id='#{@activity.id}'] turbo-frame[loading=lazy][src='#{agenda_activity_path(@activity)}']"
+    assert_select "details[data-activity-id='#{@activity.id}'] [data-role-note]", 0, "the notes come with the frame, not with the page"
+
+    get agenda_activity_path(@activity)
+
+    assert_response :success
+    assert_select "turbo-frame##{ActionView::RecordIdentifier.dom_id(@activity, :details)} [data-role-note='logistica']", text: /30 galones/
+  end
+
+  test "the detail of an activity keeps each role's notes to that role" do
+    sign_out
+    sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
+
+    get agenda_activity_path(@activity)
+
+    assert_select "[data-role-note='jovenes']", text: /Llevar gorra/
+    assert_select "[data-role-note='logistica']", 0
+    assert_select "a[href='#{edit_activity_path(@activity)}']", 0
   end
 
   test "a joven reads only their own note and gets no edit buttons" do

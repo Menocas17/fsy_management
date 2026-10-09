@@ -1,4 +1,5 @@
-<div data-controller="mobile-menu" data-action="keydown.esc@window->mobile-menu#closeOnEscape" class="relative shrink-0">
+<%# En el modo simple el teléfono usa la barra inferior: el cajón no se abre nunca, así que ni se dibuja. %>
+<div <%= tag.attributes(data: { controller: "mobile-menu", action: "keydown.esc@window->mobile-menu#closeOnEscape" }) unless simple_mode? %> class="relative shrink-0">
   <%# Main nav bar %>
   <header class="h-[60px] md:h-[72px] px-3.5 md:px-8 flex items-center justify-between gap-4 bg-surface border-b border-line-soft">
     <div class="flex items-center gap-2 min-w-0">
@@ -119,6 +120,7 @@
     </div>
   </header>
 
+  <% unless simple_mode? %>
   <%# backdrop %>
   <div class="fixed inset-0 z-100 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200" data-mobile-menu-target="backdrop" data-action="click->mobile-menu#close">
   </div>
@@ -145,4 +147,5 @@
       <% end %>
     </div>
   </div>
+<% end %>
 </div>

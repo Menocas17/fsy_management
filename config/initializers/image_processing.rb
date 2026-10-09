@@ -8,10 +8,29 @@ ActiveSupport.on_load(:active_storage_blob) do
   Vips.cache_set_max(0)
 end
 
-# Analizar una imagen y sacar sus variantes, de a una: la variante grande y la chica de la misma foto, o dos
-# fotos subidas a la vez, ya no se procesan al mismo tiempo en los tres hilos de la cola.
+# Analizar una imagen y sacar sus variantes va en la cola images (config/queue.yml), y a lo sumo
+# IMAGE_JOB_CONCURRENCY a la vez: 1 (lo de fábrica) en una máquina de 512 MB-1 GB, donde dos fotos juntas no
+# caben; más en una máquina con memoria de sobra, para que la mañana en que se suben las fotos de todos las
+# miniaturas vayan al día. Con «auto», todos los núcleos menos uno (el otro queda para atender páginas).
+Rails.application.config.x.image_job_concurrency =
+  case (value = ENV.fetch("IMAGE_JOB_CONCURRENCY", "1"))
+  when "auto" then [ Etc.nprocessors - 1, 1 ].max
+  else [ value.to_i, 1 ].max
+  end
+
 Rails.application.config.to_prepare do
   [ ActiveStorage::AnalyzeJob, ActiveStorage::TransformJob ].each do |job|
-    job.limits_concurrency key: "images", group: "ActiveStorageImages", to: 1
+    job.queue_as :images
+    job.limits_concurrency key: "images", group: "ActiveStorageImages", to: Rails.application.config.x.image_job_concurrency
+  end
+end
+
+# Cuando la miniatura de una foto de perfil queda lista, la ficha se marca como cambiada (touch): las listas en
+# caché (la página de la compañía) se arman con su updated_at, y así pasan del enlace que procesa la foto al
+# directo del bucket en vez de quedarse con el primero.
+Rails.application.config.to_prepare do
+  ActiveStorage::TransformJob.after_perform do |job|
+    blob = job.arguments.first
+    blob.attachments.where(record_type: "Participant").includes(:record).each { |attachment| attachment.record&.touch }
   end
 end

@@ -29,7 +29,11 @@
   </div>
 
   <%= turbo_frame_tag "companies_grid" do %>
-    <%= render "companies/grid", companies: @companies, jovenes_counts: @jovenes_counts,
-                                 room_counts: @room_counts, total_companies: @total_companies %>
+    <%# En caché: las tarjetas son las mismas para todos; sin ella se cargaban los consejeros con sus fotos y se
+        dibujaban las 25 en cada visita. Las cuentas de jóvenes y cuartos ya están calculadas y van en la llave. %>
+    <% cache [ "companies-grid", request.fullpath, Company.grid_version, Digest::MD5.hexdigest([ @jovenes_counts.sort, @room_counts.sort, @total_companies ].to_json) ] do %>
+      <%= render "companies/grid", companies: @companies, jovenes_counts: @jovenes_counts,
+                                   room_counts: @room_counts, total_companies: @total_companies %>
+    <% end %>
   <% end %>
 <% end %>

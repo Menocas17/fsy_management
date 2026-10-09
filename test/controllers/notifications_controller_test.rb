@@ -50,6 +50,23 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-action*='alert-chime#markRead']"
   end
 
+  test "the bell's menu brings the latest alerts in its own frame, so no other page pays for them" do
+    Alert.create!(title: "Bienvenida", body: "Nos vemos en el auditorio.", sender_name: "Marta", audience: :todos)
+
+    get menu_notifications_path
+
+    assert_response :success
+    assert_select "turbo-frame#notifications_menu[target='_top'] [data-alert-id]", 1
+    assert_select "turbo-frame#notifications_menu", text: /Bienvenida/
+    assert_select "[data-alerts-list]"
+  end
+
+  test "the bell's menu says so when there is nothing" do
+    get menu_notifications_path
+
+    assert_select "turbo-frame#notifications_menu [data-empty-state='notifications']"
+  end
+
   test "explains the empty state when there are no alerts" do
     get notifications_path
 

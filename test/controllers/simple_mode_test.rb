@@ -25,8 +25,33 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[href='#{dashboard_path}']", false
       assert_select "a[href='#{agenda_path}']", false
     end
-    # Sin menú lateral en el teléfono: la barra lo reemplaza.
+    # Sin menú lateral en el teléfono: la barra lo reemplaza, y el cajón ni se dibuja.
     assert_select "button[aria-label='Abrir menú']", false
+    assert_select "#mobile-menu", false
+    assert_select "[data-controller~='mobile-menu']", false
+  end
+
+  test "the bottom bar's QR is asked for when its dialog opens, not drawn with every page" do
+    sign_in_as(@counselor)
+    get agenda_path
+
+    frame = "turbo-frame##{ActionView::RecordIdentifier.dom_id(participants(:maria), :qr)}"
+    assert_select "nav[data-bottom-nav] ~ dialog[data-dialog-name='qr'] #{frame}[loading='lazy'][src='#{participant_qr_path(participants(:maria))}']"
+    assert_select "dialog[data-dialog-name='qr'] svg[role='img']", false
+
+    get participant_qr_path(participants(:maria))
+    assert_response :success
+    assert_select "#{frame} svg[role='img']", 1
+    assert_select "#{frame}", text: /#{participants(:maria).full_name}/
+  end
+
+  test "without simple mode the phone still gets its drawer" do
+    @counselor.update!(simple_mode: false)
+    sign_in_as(@counselor)
+    get dashboard_path
+
+    assert_select "#mobile-menu nav[aria-label='Navegación principal']"
+    assert_select "[data-controller~='mobile-menu']"
   end
 
   test "the counselor's home shows their own figures, and two charts, without a way to the full dashboard" do

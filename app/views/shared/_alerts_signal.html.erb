@@ -1,0 +1,4 @@
+<%# El aviso de que entró una alerta (Alert#refresh_open_bells): reemplaza al #alerts_signal vacío del layout y,
+    al conectarse, alert_signal_controller le pide a la campanita que pregunte su número. No lleva nada de la
+    alerta: le llega a todos los que tienen la app abierta, y cada uno ve solo lo suyo al preguntar. %>
+<div id="alerts_signal" hidden data-controller="alert-signal" data-alert-signal-id-value="<%= alert.id %>"></div>

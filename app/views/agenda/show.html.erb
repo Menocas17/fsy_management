@@ -16,9 +16,9 @@
         </p>
         <p class="text-label font-semibold text-ink-500">
           <% if @view == "dia" %>
-            <%= pluralize(@day_activities.size, "actividad", plural: "actividades") %> este día
+            <%= pluralize(Activity.between(@selected_day, @selected_day).count, "actividad", plural: "actividades") %> este día
           <% else %>
-            <%= pluralize(@activities_by_day.values.sum(&:size), "actividad", plural: "actividades") %> en los <%= @days.size %> días del evento
+            <%= pluralize(@agenda_version.first, "actividad", plural: "actividades") %> en los <%= @days.size %> días del evento
           <% end %>
         </p>
       </div>
@@ -55,8 +55,11 @@
 
       <%# La cuadrícula de la semana necesita unos 680px más el panel de detalle: solo cabe desde xl.
           Por debajo (teléfono, tablet, portátil chica con la barra lateral) cada actividad se abre en su lugar. %>
-      <div class="hidden xl:block"><%= render "agenda/week", days: @visible_days %></div>
-      <div class="xl:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
+      <%# En caché: es la misma para todos (menos el «Agregar» de quien maneja la agenda). %>
+      <% cache [ "agenda", @agenda_version, @view, @selected_day, @activity&.id, params[:activity_id].present?, can_manage_agenda? ] do %>
+        <div class="hidden xl:block"><%= render "agenda/week", days: @visible_days %></div>
+        <div class="xl:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
+      <% end %>
     </div>
 
     <%# Fijo al desplazarse: la actividad que se toca al final del día se ve sin volver arriba. %>

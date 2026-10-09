@@ -10,6 +10,10 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # La subida directa de Active Storage, pero con sesión y solo imágenes (DirectUploadsController). Va antes que
+  # la ruta de fábrica, que queda tapada.
+  post "rails/active_storage/direct_uploads" => "direct_uploads#create", as: :direct_uploads
+
   # PWA: el manifest permite instalar la app y el service worker recibe las notificaciones push.
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
@@ -105,6 +109,8 @@ Rails.application.routes.draw do
       delete "limpiar" => "notifications#clear", as: :clear
       # La campanita pregunta por su número cuando vuelve de la caché de Turbo, donde viene congelado.
       get "campanita" => "notifications#count", as: :count
+      # Lo de adentro del menú de la campanita: se pide al abrirlo, no en cada página.
+      get "menu" => "notifications#menu", as: :menu
       # Abrir el menú de la campanita cuenta como leerlas, igual que abrir la página.
       patch "leidas" => "notifications#read", as: :read
       post "suscripcion" => "push_subscriptions#create", as: :push_subscription
@@ -113,6 +119,8 @@ Rails.application.routes.draw do
   end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
   resource :agenda, only: [ :show ], controller: "agenda"
+  # El detalle de una actividad en el acordeón del teléfono: se pide al abrirlo (AgendaController#activity).
+  get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
   resource :settings, only: [ :show ] do
@@ -149,6 +157,8 @@ Rails.application.routes.draw do
   # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
   resources :night_attendances, only: :index, path: "asistencia-nocturna"
   resources :assignments, only: [ :update, :destroy ], path: "asignaciones"
+  # El QR de una ficha, para el diálogo «Mi QR» de la barra inferior (se pide al abrirlo).
+  get "participants/:participant_id/qr" => "participant_qrs#show", as: :participant_qr
   resources :participants do
       resources :assignments, only: [ :new, :create ], path: "asignaciones"
       # Crear la cuenta de la ficha (POST) o restablecerla (PATCH); en los dos casos le llega un enlace por correo.
