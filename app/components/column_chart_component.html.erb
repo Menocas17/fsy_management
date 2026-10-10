@@ -1,0 +1,16 @@
+<%= tag.div role: "img", aria: { label: @label }, data: { column_chart: true } do %>
+  <%# El número va sobre cada barra; la más alta llena el alto menos el espacio de su número. %>
+  <div class="flex items-end gap-2" style="height: <%= @height %>px" aria-hidden="true">
+    <% bars.each do |bar| %>
+      <div class="flex-1 min-w-0 h-full flex flex-col items-center justify-end">
+        <span class="mb-1 text-label font-bold tabular-nums text-ink-500" data-chart-value><%= bar[:value] %></span>
+        <span class="block w-[45%] max-w-14 rounded-t-inner" style="height: calc((100% - 22px) * <%= bar[:ratio] %>); background: <%= bar[:color] %>"></span>
+      </div>
+    <% end %>
+  </div>
+  <div class="mt-2 pt-2 border-t border-line-soft flex gap-2" aria-hidden="true">
+    <% bars.each do |bar| %>
+      <p class="flex-1 min-w-0 text-center text-label font-semibold leading-tight text-ink-500 [overflow-wrap:anywhere]"><%= safe_join(bar[:lines], tag.br) %></p>
+    <% end %>
+  </div>
+<% end %>

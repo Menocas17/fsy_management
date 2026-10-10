@@ -3,24 +3,20 @@
 <section class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-4 md:gap-5">
   <div class="<%= card_classes("min-w-0 p-5 md:p-6") %>">
     <%= section_heading "Jóvenes por estaca", "map-pin", tone: :blue %>
-    <%= tag.div role: "img", aria: { label: "Jóvenes por estaca. #{chart_summary(count_by_stake.keys, count_by_stake.values)}" },
-          data: { controller: "chart", chart_kind_value: "columns", chart_name_value: "Participantes",
-                  chart_labels_value: count_by_stake.keys.map(&:split), chart_series_value: count_by_stake.values,
-                  chart_colors_value: count_by_stake.keys.map { |stake| stake_chart_color(stake) }, chart_height_value: 220 } do %>
-      <div data-chart-target="canvas" class="min-h-[220px]"></div>
-    <% end %>
+    <%# Dibujadas en el servidor: el inicio (el del teléfono sobre todo) no carga ApexCharts. %>
+    <%= render ColumnChartComponent.new(labels: count_by_stake.keys.map(&:split), values: count_by_stake.values,
+          colors: count_by_stake.keys.map { |stake| stake_chart_color(stake) },
+          label: "Jóvenes por estaca. #{chart_summary(count_by_stake.keys, count_by_stake.values)}") %>
   </div>
   <div class="<%= card_classes("min-w-0 flex flex-col p-5 md:p-6") %>">
     <%= section_heading "Distribución por rol", "user-cog", tone: :indigo %>
     <% if staff_roles.any? %>
       <div class="flex flex-col sm:flex-row items-center gap-6 flex-1">
-        <%= tag.div class: "w-[180px] shrink-0", role: "img",
-              aria: { label: "Distribución por rol. #{chart_summary(staff_roles.keys.map { |role| role_chart_label(role) }, staff_roles.values)}" },
-              data: { controller: "chart", chart_kind_value: "donut",
-                      chart_labels_value: staff_roles.keys.map { |role| role_chart_label(role) }, chart_series_value: staff_roles.values,
-                      chart_colors_value: staff_roles.keys.map { |role| role_chart_color(role) }, chart_height_value: 180, chart_total_value: staff_roles.values.sum } do %>
-          <div data-chart-target="canvas" class="min-h-[180px]"></div>
-        <% end %>
+        <div class="shrink-0">
+          <%= render DonutChartComponent.new(values: staff_roles.values, colors: staff_roles.keys.map { |role| role_chart_color(role) },
+                total: staff_roles.values.sum,
+                label: "Distribución por rol. #{chart_summary(staff_roles.keys.map { |role| role_chart_label(role) }, staff_roles.values)}") %>
+        </div>
         <ul class="w-full sm:w-auto flex flex-col gap-[9px]" aria-hidden="true">
           <% staff_roles.each do |role, count| %>
             <li class="flex items-center gap-2 text-label font-semibold text-ink-700">

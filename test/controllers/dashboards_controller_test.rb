@@ -174,12 +174,15 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-next-up]", 1, "la agenda sí la ve todo el mundo"
   end
 
-  test "renders ApexCharts mounts with their data and a text alternative" do
+  # Estaca y rol se dibujan en el servidor (ColumnChartComponent, DonutChartComponent): el inicio del teléfono no
+  # carga ApexCharts. Las de análisis (edad) siguen con ApexCharts.
+  test "draws the stake and role charts on the server and mounts ApexCharts only for the analysis ones" do
     get dashboard_path
 
-    assert_select "[data-controller='chart'][data-chart-kind-value='columns']", 2
-    assert_select "[data-controller='chart'][data-chart-kind-value='donut'][role='img'][aria-label^='Distribución por rol']", 1
-    assert_select "[data-controller='chart'] [data-chart-target='canvas']", 3
+    assert_select "[data-column-chart][role='img'][aria-label^='Jóvenes por estaca']", 1
+    assert_select "[data-donut-chart][role='img'][aria-label^='Distribución por rol']", 1
+    assert_select "[data-controller='chart'][data-chart-kind-value='columns'][aria-label^='Jóvenes por edad']", 1
+    assert_select "[data-controller='chart'] [data-chart-target='canvas']", 1
   end
 
   test "age and gender charts only count jóvenes, not staff" do
