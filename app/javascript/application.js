@@ -44,3 +44,38 @@ document.addEventListener('turbo:visit', (event) => {
 document.addEventListener('turbo:before-render', stopPageLoading);
 document.addEventListener('turbo:load', stopPageLoading);
 document.addEventListener('turbo:fetch-request-error', stopPageLoading);
+
+// Barra de abajo: la página se pide al apoyar el dedo, no al levantarlo, unos 100 ms antes (en la barra no se
+// desliza nada que pueda confundirse con un toque). El click que sigue ya no visita otra vez, y sus enlaces no
+// llevan el adelanto de Turbo al pasar el mouse (data-turbo-prefetch=false): pediría la página dos veces. Durante el
+// tutorial no: él decide qué hace cada toque (tour_controller.js).
+let pressedNavLink = null;
+
+const tourInProgress = () => {
+  try {
+    return sessionStorage.getItem('fsy:tour') !== null;
+  } catch (e) {
+    return false;
+  }
+};
+
+document.addEventListener('pointerdown', (event) => {
+  pressedNavLink = null;
+  if (event.pointerType !== 'touch' || !event.isPrimary) return;
+
+  const link = event.target.closest?.('a[data-bottom-nav-item][href]');
+  if (!link || link.getAttribute('aria-current') === 'page' || tourInProgress()) return;
+
+  pressedNavLink = link;
+  window.Turbo.visit(link.href);
+});
+
+document.addEventListener(
+  'click',
+  (event) => {
+    const link = pressedNavLink;
+    pressedNavLink = null;
+    if (link && event.target.closest?.('a') === link) event.preventDefault();
+  },
+  true
+);

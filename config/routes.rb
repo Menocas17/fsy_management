@@ -125,6 +125,7 @@ Rails.application.routes.draw do
   get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
+  get "instalar-app" => "install_sheets#show", as: :install_sheet
   resource :settings, only: [ :show ] do
     patch :scan_windows
     patch :simple_mode

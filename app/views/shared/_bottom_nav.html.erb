@@ -14,7 +14,7 @@
     <% center_classes = "flex flex-col items-center gap-1 pb-1.5 text-meta tracking-tight font-extrabold text-ink-900 cursor-pointer" %>
     <% center_disc = "size-[58px] -mt-6 rounded-full border-4 border-surface bg-sun text-primary-900 shadow-md flex items-center justify-center" %>
     <% if searcher %>
-      <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar" }, class: center_classes do %>
+      <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar", turbo_prefetch: false }, class: center_classes do %>
         <span class="<%= center_disc %>" data-tour="center"><%= icon "search", class: "size-[26px] stroke-[2.4]" %></span>
         Buscar
       <% end %>

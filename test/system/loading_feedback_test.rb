@@ -30,4 +30,23 @@ class LoadingFeedbackTest < ApplicationSystemTestCase
 
     assert_equal "none", evaluate_script("getComputedStyle(document.querySelector('.turbo-progress-bar')).display")
   end
+
+  # Barra de abajo: la página se pide al apoyar el dedo (pointerdown), sin esperar el click.
+  test "touching a bottom bar option starts its visit before the finger lifts, except during the tutorial" do
+    sign_in_as(users(:one))
+    touch = <<~JS
+      document.querySelector('a[data-bottom-nav-item="Agenda"]').dispatchEvent(
+        new PointerEvent('pointerdown', { pointerType: 'touch', isPrimary: true, bubbles: true }))
+    JS
+
+    execute_script("sessionStorage.setItem('fsy:tour', '{}')")
+    execute_script(touch)
+    sleep 0.5
+    assert_current_path dashboard_path
+
+    execute_script("sessionStorage.removeItem('fsy:tour')")
+    execute_script(touch)
+    assert_current_path agenda_path
+    assert_selector "a[data-bottom-nav-item='Agenda'][data-turbo-prefetch='false']", visible: :all
+  end
 end
