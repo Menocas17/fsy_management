@@ -1,6 +1,8 @@
 <% list_path = is_staff ? staff_participants_path : participants_path %>
 <%= render "participants/active_filters", is_staff: is_staff, pagy: pagy %>
 <% if preload_thumbs(participants.load).any? %>
+  <%# Tabla en la compu y tarjetas en el teléfono; al teléfono que lo dice (DeviceHelper) solo le va la suya. %>
+  <% if render_desktop_layout? %>
   <div class="hidden md:block">
     <%= render(TableComponent.new(participants: participants, is_staff: is_staff)) %>
     <div class="flex items-center justify-between gap-4 mt-4 px-1">
@@ -12,9 +14,10 @@
       <% end %>
     </div>
   </div>
+  <% end %>
 
   <%# Mobile: each page lives in its own frame; the lazy frame for the next page fetches itself once scrolled into view. %>
-  <div class="md:hidden">
+  <div class="<%= layout_split("md:hidden") %>">
     <%= turbo_frame_tag "participants_page_#{pagy.page}" do %>
       <%= render partial: "participants/participant_card", collection: participants, as: :participant,
                  locals: { is_staff: is_staff, list_path: list_path } %>
