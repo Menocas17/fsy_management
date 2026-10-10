@@ -3,6 +3,9 @@
   <head>
     <title><%= content_for(:title) || "Fsy Management" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%# El fondo que el navegador pinta donde la página todavía no dibujó (al abrirse el teclado, al cambiar de
+        tamaño): sin esto era blanco también en modo oscuro. El script de abajo lo pasa a dark. %>
+    <meta name="color-scheme" content="light">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Fsy Management">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,6 +22,7 @@
           var phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 768;
           if (theme === 'dark' || (theme === null && phone)) {
             document.documentElement.classList.add('dark');
+            document.querySelector('meta[name="color-scheme"]').content = 'dark';
           }
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
             document.documentElement.classList.add('reduce-motion');
