@@ -125,7 +125,7 @@
         <%# @participants como parte de la llave: una consulta da cuántos son y su última edición (la página,
             sin cargarlos); si nada cambió, la lista sale de la caché sin cargar ni dibujar sus fotos. El día va en
             la llave porque la lista muestra la edad, que sube sola el día del cumpleaños sin que nadie edite la ficha. %>
-        <% cache [ "company-jovenes", @company.id, request.fullpath, @pagy.count, @participants, Date.current ] do %>
+        <% cache [ "company-jovenes", @company.id, request.fullpath, @pagy.count, @participants, Date.current, phone_hint? ] do %>
           <%= render "companies/participants", participants: @participants, pagy: @pagy %>
         <% end %>
       <% end %>
