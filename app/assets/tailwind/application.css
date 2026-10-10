@@ -182,6 +182,9 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* El fondo de la página es del documento, no solo del <body> (h-dvh): lo que asome al cambiar de alto
+       (el teclado que sube) es lienzo del tema, no blanco. */
+    background-color: var(--color-canvas);
     /* Casillas y radios nativos en el color de la marca. */
     accent-color: var(--color-primary-600);
   }
