@@ -1,0 +1,11 @@
+<%= tag.div role: "img", aria: { label: @label }, data: { donut_chart: true }, class: "relative size-[180px]" do %>
+  <svg viewBox="0 0 <%= SIZE %> <%= SIZE %>" class="size-full -rotate-90" aria-hidden="true">
+    <% arcs.each do |arc| %>
+      <circle cx="<%= SIZE / 2 %>" cy="<%= SIZE / 2 %>" r="<%= radius %>" fill="none" stroke="<%= arc[:color] %>" stroke-width="<%= THICKNESS %>"
+              stroke-dasharray="<%= arc[:dash] %> <%= circumference.round(2) %>" stroke-dashoffset="<%= arc[:offset] %>"></circle>
+    <% end %>
+  </svg>
+  <% if @total %>
+    <span class="absolute inset-0 flex items-center justify-center text-[28px] font-extrabold tabular-nums text-ink-900" aria-hidden="true" data-chart-total><%= @total %></span>
+  <% end %>
+<% end %>

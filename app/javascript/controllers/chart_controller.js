@@ -45,9 +45,10 @@ export default class extends Controller {
     this.canvasTarget.replaceChildren();
     // Se lee antes de esperar la librería: turbo:load ya habrá apagado la bandera cuando llegue.
     this.restored = restoring;
-    const ApexCharts = await loadApexCharts();
-    // Crece cuando se ve, no al cargar: bajo el borde del panel la animación pasaba sin que nadie la viera.
+    // Crece cuando se ve, no al cargar: bajo el borde del panel la animación pasaba sin que nadie la viera. Y la
+    // librería se pide recién entonces: una gráfica que nadie baja a ver no la descarga.
     if (!this.restored) await this.untilVisible();
+    const ApexCharts = await loadApexCharts();
     // Turbo pudo haber salido de la página mientras llegaba.
     if (!this.element.isConnected || this.chart) return;
 
