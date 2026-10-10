@@ -17,9 +17,13 @@ class ThemeOnPhoneTest < ApplicationSystemTestCase
     visit settings_path
     assert dark?, "en el teléfono, oscuro por defecto"
     assert find("#theme-toggle", visible: :all).checked?, "el interruptor dice lo que se ve"
+    # Lo que asoma al abrirse el teclado (el fondo del documento y el del navegador) también es oscuro.
+    assert_equal "dark", color_scheme
+    assert_equal evaluate_script("getComputedStyle(document.body).backgroundColor"), root_background
 
     find("label[for='theme-toggle']").click
     assert_not dark?
+    assert_equal "light", color_scheme
     visit dashboard_path
     assert_not dark?, "la elección de claro queda guardada"
   end
@@ -27,6 +31,14 @@ class ThemeOnPhoneTest < ApplicationSystemTestCase
   private
     def dark?
       evaluate_script("document.documentElement.classList.contains('dark')")
+    end
+
+    def color_scheme
+      evaluate_script("document.querySelector('meta[name=\"color-scheme\"]').content")
+    end
+
+    def root_background
+      evaluate_script("getComputedStyle(document.documentElement).backgroundColor")
     end
 
     def cdp(command, **params)
