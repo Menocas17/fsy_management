@@ -23,8 +23,10 @@
                 <%= icon "chevron-down", class: "w-4 h-4 shrink-0 transition-transform group-open:rotate-180" %>
               </summary>
               <div class="px-4 pt-4 pb-5 bg-surface border-t border-line-soft">
-                <%# Lazy: un frame dentro de un <details> cerrado no es visible, así que se pide al abrirlo. %>
-                <%= turbo_frame_tag dom_id(activity, :details), src: agenda_activity_path(activity), loading: :lazy do %>
+                <%# Lazy: un frame dentro de un <details> cerrado no es visible, así que se pide al abrirlo.
+                    target _top: Editar y Eliminar van a la página entera; dentro del frame, Turbo buscaba este frame
+                    en la página de edición y mostraba «Content missing». %>
+                <%= turbo_frame_tag dom_id(activity, :details), src: agenda_activity_path(activity), loading: :lazy, target: "_top" do %>
                   <%= render SkeletonComponent.new(variant: :details, count: 3, label: "Cargando la actividad…") %>
                 <% end %>
               </div>
