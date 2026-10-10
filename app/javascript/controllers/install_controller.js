@@ -13,6 +13,10 @@ const SHOWN_KEY = 'fsy:install-shown';
 const DAY = 24 * 60 * 60 * 1000;
 const ANDROID_WAIT = 2500; // ms que se espera el permiso de Chrome antes de rendirse
 
+// La hoja no viaja con cada página (InstallSheetsController): se pide la primera vez que va a abrirse y su HTML
+// queda aquí para las visitas siguientes.
+let sheetHtml = null;
+
 const storage = (store, action, key, value) => {
   try {
     return action === 'get' ? store.getItem(key) : store.setItem(key, value);
@@ -23,6 +27,7 @@ const storage = (store, action, key, value) => {
 
 export default class extends Controller {
   static targets = ['sheet', 'track', 'dot', 'next', 'secondary', 'external', 'copyLabel'];
+  static values = { url: String };
 
   connect() {
     this.onOpenRequest = (event) => {
@@ -104,9 +109,12 @@ export default class extends Controller {
 
   // ---------- La hoja ----------
 
-  open(platform) {
+  async open(platform) {
     clearTimeout(this.timer);
     this.waiting = false;
+    // Sin la hoja (sin señal) no hay nada que mostrar: el tutorial no se queda esperándola.
+    if (!(await this.loadSheet())) return this.settle();
+
     let panel = platform;
     if (panel === 'android' && !window.fsyInstallPrompt) panel = 'android-manual';
 
@@ -123,6 +131,24 @@ export default class extends Controller {
 
     document.documentElement.dataset.installPrompt = 'open';
     if (!this.sheetTarget.open) this.sheetTarget.showModal();
+  }
+
+  async loadSheet() {
+    if (this.hasSheetTarget) return true;
+
+    try {
+      sheetHtml ||= fetch(this.urlValue, { headers: { Accept: 'text/html' } }).then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      });
+      const html = await sheetHtml;
+      // Dos pedidos a la vez (sale sola y además se tocó el botón): la pone uno solo.
+      if (!this.hasSheetTarget) this.element.insertAdjacentHTML('beforeend', html);
+    } catch (e) {
+      sheetHtml = null;
+      return false;
+    }
+    return this.hasSheetTarget;
   }
 
   async install() {

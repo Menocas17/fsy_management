@@ -14,7 +14,7 @@
     <% center_classes = "flex flex-col items-center gap-1 pb-1.5 text-meta tracking-tight font-extrabold text-ink-900 cursor-pointer" %>
     <% center_disc = "size-[58px] -mt-6 rounded-full border-4 border-surface bg-sun text-primary-900 shadow-md flex items-center justify-center" %>
     <% if searcher %>
-      <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar" }, class: center_classes do %>
+      <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar", turbo_prefetch: false }, class: center_classes do %>
         <span class="<%= center_disc %>" data-tour="center"><%= icon "search", class: "size-[26px] stroke-[2.4]" %></span>
         Buscar
       <% end %>
@@ -53,7 +53,7 @@
           </button>
         <% end %>
         <% simple_more_items.each do |item| %>
-          <%= link_to item[:url], data: { more_link: true }, class: "flex flex-col items-center gap-2 px-1.5 py-3.5 rounded-tile bg-sunken text-label font-bold text-ink-900 text-center" do %>
+          <%= link_to item[:url], class: "flex flex-col items-center gap-2 px-1.5 py-3.5 rounded-tile bg-sunken text-label font-bold text-ink-900 text-center" do %>
             <span class="size-[46px] rounded-tile bg-sun text-primary-900 flex items-center justify-center"><%= icon item[:icon], class: "size-[22px]" %></span>
             <%= item[:text] %>
           <% end %>
