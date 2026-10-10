@@ -77,9 +77,15 @@ module ApplicationHelper
   # busca su registro, y las listas dibujan cada foto dos veces (tabla y tarjetas) además de la de la barra
   # superior en todas las páginas. Se guarda en la memoria del proceso según el updated_at de la ficha, que cambia
   # al cambiar la foto y cuando su miniatura queda lista (config/initializers/image_processing.rb).
-  def participant_thumb_url(participant)
-    THUMB_URLS.fetch([ participant.id, participant.updated_at.to_f ], skip_nil: false) do
-      participant.avatar.attached? ? url_for(storage_url(participant.avatar.variant(:thumb))) : nil
+  # size: :small (listas, 128 px) o :thumb (perfil, 300 px). Una foto anterior a :small usa :thumb hasta que
+  # fotos:miniaturas le haga la suya: pedirla sin procesar la procesaría ahí mismo, en medio del pedido.
+  def participant_thumb_url(participant, size: :small)
+    THUMB_URLS.fetch([ participant.id, participant.updated_at.to_f, size ], skip_nil: false) do
+      next unless participant.avatar.attached?
+
+      variant = participant.avatar.variant(size)
+      variant = participant.avatar.variant(:thumb) if size == :small && variant.key.nil?
+      url_for(storage_url(variant))
     end
   end
 
@@ -87,7 +93,7 @@ module ApplicationHelper
   # (participant_thumb_url). Con todas guardadas no consulta nada: armar los ~9 registros de foto por persona
   # costaba más que la persona misma. Para las listas largas, en lugar de with_attached_avatar en la consulta.
   def preload_thumbs(participants)
-    missing = participants.reject { |participant| THUMB_URLS.exist?([ participant.id, participant.updated_at.to_f ]) }
+    missing = participants.reject { |participant| THUMB_URLS.exist?([ participant.id, participant.updated_at.to_f, :small ]) }
     ActiveRecord::Associations::Preloader.new(records: missing, associations: Participant::AVATAR_PRELOAD).call if missing.any?
     participants
   end
