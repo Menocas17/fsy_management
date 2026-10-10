@@ -3,8 +3,10 @@
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
-  # Lo nuevo de config/changelog.yml llega a la campanita una sola vez, con el despliegue que lo trae.
-  ./bin/rails novedades:anunciar
+  # Lo nuevo de config/changelog.yml llega a la campanita una sola vez, con el despliegue que lo trae. Y las fotos
+  # anteriores a una variante nueva (Participant#avatar) la reciben en segundo plano, de a una. Las dos en el
+  # mismo arranque de Rails, que en el droplet chico tarda.
+  ./bin/rails novedades:anunciar fotos:miniaturas
 fi
 
 exec "${@}"

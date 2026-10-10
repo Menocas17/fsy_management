@@ -225,7 +225,11 @@ class Participant < ApplicationRecord
 
 
   # this code will manage the avatar of the participants and will transform the image in a thumbnail image for the profile
+  # :small, para las listas y la barra superior (fotos de 28–40 px): un cuadrado de 128 px en WebP pesa una
+  # fracción de :thumb, que sigue para el perfil (92 px). Las fotos anteriores la reciben con fotos:miniaturas.
   has_one_attached :avatar do |attachable|
+   attachable.variant :small, resize_to_fill: [ 128, 128 ], format: :webp, saver: { quality: 75, strip: true },
+   preprocessed: true
    attachable.variant :thumb, resize_to_limit: [ 300, 300 ],
    preprocessed: true
    attachable.variant :preview, resize_to_limit: [ 1200, 1200 ],

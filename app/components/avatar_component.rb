@@ -16,7 +16,8 @@ class AvatarComponent < ViewComponent::Base
   def avatar_url
     return @avatar_url if defined?(@avatar_url)
 
-    @avatar_url = helpers.participant_thumb_url(@participant)
+    # El perfil la muestra a 92 px: la de 300. Las listas, a 28–40 px: la chica.
+    @avatar_url = helpers.participant_thumb_url(@participant, size: @is_profile ? :thumb : :small)
   end
 
   def initials
