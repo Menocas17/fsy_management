@@ -35,6 +35,17 @@ class InfirmaryVisitsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_path
   end
 
+  test "who passed through goes from today to every day with a switch, not tabs that widened the phone" do
+    sign_in_as account(@nurse)
+
+    get infirmary_visits_path
+    assert_select "[data-infirmary-section=pasaron] a[role=switch][aria-checked=true][href='#{infirmary_visits_path(periodo: "todas")}']", text: /Solo hoy/
+    assert_select "[data-infirmary-section=pasaron] nav", 0
+
+    get infirmary_visits_path(periodo: "todas")
+    assert_select "[data-infirmary-section=pasaron] a[role=switch][aria-checked=false][href='#{infirmary_visits_path}']"
+  end
+
   test "a counselor only announces their own jovenes, and nursing confirms the arrival" do
     sign_in_as account(@counselor)
 

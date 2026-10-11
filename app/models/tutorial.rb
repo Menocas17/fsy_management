@@ -87,7 +87,7 @@ class Tutorial
       when "consejero" then practice_company ? [ step(:own_company, dashboard_path, target: "[data-tour='own']", action: :tap) ] : []
       when "auxiliar" then practice_company ? [ step(:own_branch, dashboard_path, target: "[data-tour='own']", action: :tap) ] : []
       when "logistica"
-        @user.checkin_member? ? [ step(:own_checkin, dashboard_path, target: "[data-tour='own']") ] : [ step(:own_area, dashboard_path, target: "[data-tour='own']") ]
+        [ step(:own_area, dashboard_path, target: "[data-tour='own']") ]
       else [ step(:own_companies, dashboard_path, target: "[data-tour='own']") ]
       end
     end
@@ -155,8 +155,12 @@ class Tutorial
       step(:notification_swipe, notifications_path, target: "[data-alert-tutorial]", action: :real)
     end
 
+    # El botón amarillo (NavigationHelper#simple_center).
     def center_key
-      @user.global_searcher? ? :center_search : :center_qr
+      if @user.global_searcher? then :center_search
+      elsif @user.checkin_member? then :center_checkin
+      else :center_qr
+      end
     end
 
     def practice_company

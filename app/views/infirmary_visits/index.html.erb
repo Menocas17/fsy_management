@@ -67,9 +67,17 @@
   </section>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-infirmary-section="pasaron">
+    <%# Un interruptor y no las pestañas Hoy / Todas: junto al título no cabían en el teléfono y la página se corría de lado. %>
     <%= section_heading "Pasaron por enfermería", "clipboard-clock", tone: :teal do %>
-      <%= render SegmentedToggleComponent.new(label: "Periodo", items: InfirmaryVisitsController::PERIODS.map { |key, label|
-            { text: label, href: infirmary_visits_path(periodo: (key unless key == "hoy")), active: key == @period, data: { infirmary_period: key } } }) %>
+      <% today = @period == "hoy" %>
+      <%= link_to infirmary_visits_path(periodo: ("todas" if today)), role: "switch", aria: { checked: today },
+            data: { infirmary_period_switch: true, turbo_action: "replace" },
+            class: "shrink-0 flex items-center gap-2 rounded-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
+        <span class="text-label font-semibold text-ink-700 whitespace-nowrap">Solo hoy</span>
+        <span class="relative w-[42px] h-6 rounded-full transition-colors <%= today ? "bg-primary-600" : "bg-line" %>">
+          <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm transition-transform <%= "translate-x-[18px]" if today %>"></span>
+        </span>
+      <% end %>
     <% end %>
     <% if @discharged.empty? %>
       <%= render EmptyStateComponent.new(title: @period == "hoy" ? "Nadie ha salido hoy" : "Todavía no hay visitas", icon: "clipboard-clock", tone: :teal,

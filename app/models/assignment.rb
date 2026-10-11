@@ -1,5 +1,6 @@
 # A task given to one participant. It usually points at an agenda activity, which supplies the schedule
-# and place; "otra" assignments carry their own title, time and location instead.
+# and place; "otra" assignments carry their own title, time and location instead. Quien la recibe la confirma
+# (confirm!), y quien la delegó lo sigue en /asignaciones con la hora en que la confirmó (confirmed_at).
 class Assignment < ApplicationRecord
   STATUS_LABELS = { "pendiente" => "Pendiente", "confirmada" => "Confirmada", "completada" => "Completada" }.freeze
   STATUS_STYLES = {
@@ -18,9 +19,21 @@ class Assignment < ApplicationRecord
   validates :title, presence: { message: "escribe el nombre de la asignación" }, unless: :from_agenda?
   validates :title, length: { maximum: 120 }, allow_blank: true
 
+  before_save :stamp_confirmation, if: :will_save_change_to_status?
+
+  scope :delegated_by, ->(participant) { where(assigned_by: participant) }
   scope :chronological, -> {
     left_joins(:activity).order(Arel.sql("COALESCE(activities.starts_at, assignments.starts_at) ASC NULLS LAST")).order(:created_at)
   }
+
+  def confirm!
+    update!(status: :confirmada)
+  end
+
+  # Quien la recibe no se la quita; solo si se la asignó a sí mismo.
+  def removable_by?(actor)
+    actor.nil? || actor != participant || assigned_by == actor
+  end
 
   def from_agenda?
     activity_id.present?
@@ -49,4 +62,12 @@ class Assignment < ApplicationRecord
   def status_styles
     STATUS_STYLES.fetch(status, STATUS_STYLES["pendiente"])
   end
+
+  private
+    # Vuelve a pendiente: ya no cuenta como confirmada. Completada conserva cuándo se confirmó.
+    def stamp_confirmation
+      if status_pendiente? then self.confirmed_at = nil
+      else self.confirmed_at ||= Time.current
+      end
+    end
 end

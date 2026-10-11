@@ -37,6 +37,8 @@ module NavigationHelper
         ({ text: "Reportes", url: reports_path, lucide_icon: "file-text",
            active_paths: [ reports_path, participant_imports_path ] } if Current.user&.reports_viewer?),
         night_attendance_nav_item,
+        ({ text: "Asignaciones", url: assignments_path, lucide_icon: "clipboard-check",
+           active_paths: [ assignments_path ] } if Current.user&.assignment_delegator?),
         ({ text: "Enfermería", url: infirmary_visits_path, lucide_icon: "heart-pulse",
            active_paths: [ infirmary_visits_path ] } if Current.user&.infirmary_viewer?),
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
@@ -78,33 +80,47 @@ module NavigationHelper
     when "director_logistica"
       return { text: "Logística", url: logistics_areas_path, icon: "layout-grid", active_paths: [ logistics_areas_path ] }
     when "logistica"
-      return simple_area_item(participant.logistics_area)
+      # Registro ya va en el botón central (simple_center): aquí queda el siguiente módulo de su área.
+      return simple_area_item(participant.logistics_area, skip_checkin: true)
     end
     { text: "Compañías", url: companies_path, icon: "building-2", active_paths: [ companies_path, auxiliar_companies_path ] }
   end
 
   # Logística entra al módulo que su área trabaja; sin bandera, al inventario (que mueve toda logística).
-  def simple_area_item(area)
-    if area&.checkin? then { text: "Registro", url: checkins_path, icon: "scan-line", active_paths: [ checkins_path ] }
+  def simple_area_item(area, skip_checkin: false)
+    if area&.checkin? && !skip_checkin then { text: "Registro", url: checkins_path, icon: "scan-line", active_paths: [ checkins_path ] }
     elsif area&.nursing? then { text: "Enfermería", url: infirmary_visits_path, icon: "heart-pulse", active_paths: [ infirmary_visits_path ] }
     elsif area&.finance? then { text: "Finanzas", url: finances_path, icon: "wallet", active_paths: [ finances_path ] }
     else { text: "Inventario", url: inventories_path, icon: "boxes", active_paths: [ inventories_path, "/articulos" ] }
     end
   end
 
+  # El botón amarillo del centro: la búsqueda para quien ve todo el evento, Registro para su comité (lo que
+  # hace toda la semana) y, para los demás, su código QR. Quien no lo tiene en el centro lo encuentra en «Más».
+  def simple_center
+    if Current.user.global_searcher? then :search
+    elsif Current.user.checkin_member? then :checkin
+    elsif Current.user.participant then :qr
+    end
+  end
+
   # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
-  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo" ].freeze
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial" ].freeze
+  # El consejero, lo que usa con su compañía en la semana, en este orden (tras el escáner).
+  COUNSELOR_MORE_ITEMS = [ "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes" ].freeze
 
   # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
-  # escáner de gafetes; para acceso total, solo FULL_ACCESS_MORE_ITEMS. Configuración, Mi perfil y Cerrar sesión
-  # siguen en el menú de la foto.
+  # escáner de gafetes; para acceso total y el consejero, solo su lista. Configuración, Mi perfil y Cerrar
+  # sesión siguen en el menú de la foto.
   def simple_more_items
     in_bar = simple_bar_items.map { |item| URI.parse(item[:url]).path }
+    in_bar << checkins_path if simple_center == :checkin
     items = nav_items.reject { |item| in_bar.include?(URI.parse(item[:url]).path) }
                      .map { |item| { text: item[:text], url: item[:url], icon: item[:lucide_icon] } }
-    if Current.user.full_access?
-      items = FULL_ACCESS_MORE_ITEMS.filter_map { |text| items.find { |item| item[:text] == text } }
+    only = if Current.user.full_access? then FULL_ACCESS_MORE_ITEMS
+    elsif Current.user.participant&.consejero? then COUNSELOR_MORE_ITEMS
     end
+    items = only.filter_map { |text| items.find { |item| item[:text] == text } } if only
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
   end
 

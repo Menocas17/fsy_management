@@ -1,6 +1,8 @@
 <%
   assignments = participant.assignments.includes(:activity).chronological
   editable = can_assign_to?(participant)
+  # Quien la recibe confirma las pendientes desde su propia ficha (AssignmentsController#confirm).
+  own = participant == Current.user&.participant
 %>
 <section class="<%= card_classes("p-5 md:p-6 2xl:order-4 2xl:col-span-full") %>" data-assignments>
   <%# La acción principal de la ficha es Editar: aquí «Nueva» va como secundaria, a la derecha del encabezado. %>
@@ -45,18 +47,32 @@
               <%= icon assignment.from_agenda? ? "calendar-days" : "clipboard-list", class: "w-3.5 h-3.5" %>
               <%= assignment.from_agenda? ? "De la agenda" : "Otra" %> · <%= assignment.assigned_by_name %>
             </span>
-            <% if editable %>
+            <% if assignment.confirmed_at %>
+              <span class="inline-flex items-center gap-1 text-meta font-semibold text-ink-500" data-assignment-confirmed>
+                <%= icon "check-check", class: "w-3.5 h-3.5" %>
+                Confirmó el <%= SpanishDates.short_with_time(assignment.confirmed_at) %>
+              </span>
+            <% end %>
+            <% if own && assignment.status_pendiente? %>
+              <%= button_to confirm_assignment_path(assignment), method: :patch, form_class: "ml-auto",
+                    data: { assignment_confirm: true }, class: button_classes(:primary, size: :sm) do %>
+                <%= icon "check", class: "size-3.5" %>
+                Confirmar
+              <% end %>
+            <% elsif editable %>
               <div class="ml-auto flex items-center gap-1.5">
                 <% next_status = assignment.status_pendiente? ? "confirmada" : (assignment.status_confirmada? ? "completada" : "pendiente") %>
                 <%= button_to assignment_path(assignment, assignment: { status: next_status }), method: :patch,
                       class: "inline-flex items-center min-h-11 md:min-h-0 px-1 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline cursor-pointer" do %>
                   Marcar <%= Assignment::STATUS_LABELS[next_status].downcase %>
                 <% end %>
-                <%= button_to assignment_path(assignment), method: :delete,
-                      form: { data: { turbo_confirm: "¿Quitar «#{assignment.display_title}»?", turbo_confirm_detail: "Se puede volver a asignar después.", turbo_confirm_button: "Sí, quitar" } },
-                      aria: { label: "Eliminar asignación" },
-                      class: "relative w-7 h-7 after:absolute after:-inset-2 rounded-inner flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition" do %>
-                  <%= icon "trash-2", class: "w-3.5 h-3.5" %>
+                <% if assignment.removable_by?(Current.user&.participant) %>
+                  <%= button_to assignment_path(assignment), method: :delete,
+                        form: { data: { turbo_confirm: "¿Quitar «#{assignment.display_title}»?", turbo_confirm_detail: "Se puede volver a asignar después.", turbo_confirm_button: "Sí, quitar" } },
+                        aria: { label: "Eliminar asignación" },
+                        class: "relative w-7 h-7 after:absolute after:-inset-2 rounded-inner flex items-center justify-center text-ink-500 hover:text-cat-rose-ink hover:bg-cat-rose/10 cursor-pointer transition" do %>
+                    <%= icon "trash-2", class: "w-3.5 h-3.5" %>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>

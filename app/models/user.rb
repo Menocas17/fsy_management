@@ -92,6 +92,11 @@ class User < ApplicationRecord
 
   # Paneles de gestión (historial, columnas de acciones): el acceso total más el director de logística,
   # que administra su propio comité. Un miembro raso de logística no administra a nadie.
+  # Quien puede delegar asignaciones (Authorization#can_assign_to?) y seguirlas en /asignaciones.
+  def assignment_delegator?
+    full_access? || %w[director_logistica auxiliar consejero].include?(participant&.rol.to_s)
+  end
+
   def admin_or_staff_manager?
     full_access? || participant&.director_logistica? || false
   end

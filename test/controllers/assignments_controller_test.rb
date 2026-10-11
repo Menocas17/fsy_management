@@ -63,6 +63,28 @@ class AssignmentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Quitó «Servicio comunitario» de Juan Pérez", AuditLog.asignaciones.recent.first.summary
   end
 
+  test "whoever receives it can't remove it" do
+    company = Company.create!(number: 1)
+    company.memberships.create!(participant: participants(:maria))
+    post participant_assignments_path(participants(:maria)), params: { assignment: { activity_id: @activity.id, status: "confirmada" } }
+    assignment = Assignment.last
+
+    sign_out
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
+    get myprofile_participants_path
+    assert_select "[data-assignment-id='#{assignment.id}'] button[aria-label='Eliminar asignación']", 0
+
+    assert_no_difference -> { Assignment.count } do
+      delete assignment_path(assignment)
+    end
+    assert_equal "Quien recibe la asignación no la puede quitar.", flash[:alert]
+
+    post participant_assignments_path(participants(:maria)), params: { assignment: { title: "Preparar la devocional" } }
+    assert_difference -> { Assignment.count }, -1, "one they gave themselves they can remove" do
+      delete assignment_path(Assignment.last)
+    end
+  end
+
   test "a counselor assigns within their own company but not outside it" do
     company = Company.create!(number: 1)
     company.memberships.create!(participant: participants(:maria))
@@ -96,5 +118,69 @@ class AssignmentsControllerTest < ActionDispatch::IntegrationTest
 
     get notifications_path
     assert_select "main [data-alert-id]", 1, "the assignment alert reaches them"
+  end
+
+  test "whoever receives it confirms it, and whoever delegated it is told" do
+    company = Company.create!(number: 1)
+    company.memberships.create!(participant: participants(:maria))
+    @joven.update!(company: company)
+    counselor = User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria))
+    sign_out
+    sign_in_as(counselor)
+    post participant_assignments_path(@joven), params: { assignment: { activity_id: @activity.id } }
+    assignment = Assignment.last
+
+    patch confirm_assignment_path(assignment)
+    assert assignment.reload.status_pendiente?, "the one who delegated it doesn't confirm it"
+
+    sign_out
+    sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: @joven))
+    get myprofile_participants_path
+    assert_select "[data-assignment-id='#{assignment.id}'] [data-assignment-confirm]"
+
+    assert_difference -> { Alert.where(recipient: participants(:maria)).count }, 1 do
+      patch confirm_assignment_path(assignment)
+    end
+    assert assignment.reload.status_confirmada?
+    assert_not_nil assignment.confirmed_at
+    assert_equal "/asignaciones", Alert.recent.first.link_path
+    assert_equal "Confirmó la asignación «Servicio comunitario»", AuditLog.asignaciones.recent.first.summary
+
+    get myprofile_participants_path
+    assert_select "[data-assignment-confirm]", 0
+    assert_select "[data-assignment-id='#{assignment.id}'] [data-assignment-confirmed]", text: /Confirmó el/
+
+    get assignments_path
+    assert_redirected_to dashboard_path, "a joven doesn't delegate"
+  end
+
+  test "the follow-up shows one's own delegations, and full access sees every one" do
+    company = Company.create!(number: 1)
+    company.memberships.create!(participant: participants(:maria))
+    @joven.update!(company: company)
+    post participant_assignments_path(@joven), params: { assignment: { title: "Del administrador" } }
+    counselor = User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria))
+    sign_out
+    sign_in_as(counselor)
+    post participant_assignments_path(@joven), params: { assignment: { activity_id: @activity.id } }
+    Assignment.find_by!(activity: @activity).confirm!
+
+    get assignments_path
+    assert_response :success
+    assert_select "[data-assignment-row]", 1
+    assert_select "[data-assignment-row]", text: /Servicio comunitario/
+    assert_select "[data-assignment-row] [data-assignment-confirmed]"
+    assert_select "nav a[href='#{assignments_path}']", text: /Asignaciones/
+
+    get assignments_path(estado: "pendiente")
+    assert_select "[data-assignment-row]", 0
+
+    sign_out
+    sign_in_as(users(:one))
+    get assignments_path
+    assert_select "[data-assignment-row]", 2
+    get assignments_path(de: "mi")
+    assert_select "[data-assignment-row]", 1
+    assert_select "[data-assignment-row]", text: /Del administrador/
   end
 end

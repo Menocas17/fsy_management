@@ -1,0 +1,71 @@
+<% content_for :title, "Asignaciones" %>
+<% content_for :eyebrow, "Seguimiento" %>
+<%# El seguimiento de lo delegado: cuántas faltan por confirmar y quién ya confirmó y cuándo. Las cifras filtran la
+    lista (tocar la elegida la quita). Acceso total ve todas o solo las suyas. %>
+<% tones = { "pendiente" => :amber, "confirmada" => :green, "completada" => :teal } %>
+<% icons = { "pendiente" => "hourglass", "confirmada" => "check-check", "completada" => "circle-check-big" } %>
+<% filter_path = ->(estado) { assignments_path(estado: estado, de: ("mi" unless @everyone || !Current.user.full_access?)) } %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro do %>
+    <%= @everyone ? "Todas las asignaciones del evento" : "Las asignaciones que delegaste" %> · <%= pluralize(@counts.values.sum, "asignación", plural: "asignaciones") %>
+  <% end %>
+  <% if Current.user.full_access? %>
+    <% page.with_actions do %>
+      <%= render SegmentedToggleComponent.new(label: "Asignaciones de", items: [
+            { text: "Todas", href: assignments_path(estado: @status), active: @everyone, data: { assignments_scope: "todas" } },
+            { text: "Delegadas por mí", href: assignments_path(estado: @status, de: "mi"), active: !@everyone, data: { assignments_scope: "mias" } }
+          ]) %>
+    <% end %>
+  <% end %>
+
+  <div class="grid grid-cols-3 gap-3 md:gap-4 mb-5">
+    <% AssignmentsController::STATUS_FILTERS.each do |status, label| %>
+      <%= render StatTileComponent.new(value: @counts.fetch(status, 0), label: label, icon: icons[status], tone: tones[status],
+            href: filter_path.(status == @status ? nil : status), data: { assignments_filter: status, active: status == @status }) %>
+    <% end %>
+  </div>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-assignments-list>
+    <%= section_heading @status ? AssignmentsController::STATUS_FILTERS[@status] : "Todas", "clipboard-check", tone: :green do %>
+      <% if @status %>
+        <%= link_to "Ver todas", filter_path.(nil), class: "shrink-0 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+      <% end %>
+    <% end %>
+
+    <% if @assignments.empty? %>
+      <%= render EmptyStateComponent.new(title: @status ? "Ninguna #{Assignment::STATUS_LABELS[@status].downcase}" : "Sin asignaciones delegadas",
+            icon: "clipboard-check", tone: :green, name: "assignments",
+            text: "Se asignan desde la ficha de cada persona, en Asignaciones → Nueva. Aquí ves si ya las confirmaron.") %>
+    <% else %>
+      <ul class="divide-y divide-line-soft">
+        <% @assignments.each do |assignment| %>
+          <% person = assignment.participant %>
+          <li data-assignment-row="<%= assignment.id %>">
+            <%= link_to participant_path(person), class: "flex flex-wrap items-center gap-x-3 gap-y-2 py-3 -mx-2 px-2 rounded-control hover:bg-canvas transition-colors" do %>
+              <span class="flex items-center gap-3 min-w-0 flex-1 basis-60">
+                <%= render AvatarComponent.new(participant: person) %>
+                <span class="min-w-0">
+                  <span class="block text-body font-bold text-ink-900 truncate"><%= assignment.display_title %></span>
+                  <span class="block text-label font-semibold text-ink-500 truncate">
+                    <%= [ person.full_name, assignment.when_label ].compact.join(" · ") %>
+                  </span>
+                  <% if @everyone %>
+                    <span class="block text-meta font-semibold text-ink-500 truncate">Delegó <%= assignment.assigned_by_name %></span>
+                  <% end %>
+                </span>
+              </span>
+              <span class="flex items-center gap-2 ml-auto">
+                <% if assignment.confirmed_at %>
+                  <span class="text-meta font-semibold text-ink-500 whitespace-nowrap" data-assignment-confirmed>
+                    <%= SpanishDates.short_with_time(assignment.confirmed_at) %>
+                  </span>
+                <% end %>
+                <%= render ChipComponent.new(label: assignment.status_label, tone: tones[assignment.status], data: { assignment_status: assignment.status }) %>
+              </span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+<% end %>
