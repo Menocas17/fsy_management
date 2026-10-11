@@ -77,6 +77,9 @@ notification_swipe:
   text: "Arriba está tu alerta de bienvenida, que el tutorial te acaba de enviar. Deslízala hacia la izquierda y toca «Eliminar»."
   result_title: Esta sí se borró
   result: "Era solo tuya, así que borrarla no afecta a nadie. Así quitas de tu lista cualquier alerta; para los demás sigue ahí."
+notification_swipe_preview:
+  title: Desliza para borrar
+  text: "Aquí la persona recibe una alerta de bienvenida del tutorial y practica borrarla deslizándola a la izquierda. Viendo como ella no se le envía nada."
 more:
   title: Más opciones
   text: "Lo demás está en «Más». Tócalo. Se cierra tocando fuera o arrastrándolo hacia abajo."

@@ -97,10 +97,11 @@
         que espera a que se cierre. %>
     <%= render "shared/install_sheet" unless Current.viewing_as? %>
     <%# El tutorial (Tutorial, tour_controller.js): arranca solo la primera vez en el teléfono, o desde
-        Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página. %>
-    <% if !Current.viewing_as? && Tutorial.available_to?(Current.user) %>
-      <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path,
-            tour_autostart_value: Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
+        Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página.
+        En «Ver como» solo desde Configuración: es una vista previa y no arranca sola. %>
+    <% if Tutorial.available_to?(Current.user) %>
+      <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path, tour_owner_value: Current.user.participant_id,
+            tour_autostart_value: !Current.viewing_as? && Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
     <% end %>
   </body>
 </html>

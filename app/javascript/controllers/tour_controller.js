@@ -23,7 +23,7 @@ const HINTS = {
 };
 
 export default class extends Controller {
-  static values = { url: String, autostart: Boolean, home: String };
+  static values = { url: String, autostart: Boolean, home: String, owner: String };
 
   connect() {
     this.onClick = this.click.bind(this);
@@ -38,7 +38,9 @@ export default class extends Controller {
     window.addEventListener('resize', this.onReposition);
     document.querySelector('main')?.addEventListener('scroll', this.onReposition, { passive: true });
 
+    // Un recorrido de otra persona (el superadmin cambió de «Ver como» a medias) no se retoma.
     this.state = this.read();
+    if (this.state && this.state.owner !== this.ownerValue) this.state = null;
     const params = new URLSearchParams(location.search);
     if (params.get('tutorial') === 'ver') {
       params.delete('tutorial');
@@ -78,7 +80,7 @@ export default class extends Controller {
     if (!response.ok) return;
 
     const { steps } = await response.json();
-    this.state = { steps, index: 0, result: false };
+    this.state = { steps, index: 0, result: false, owner: this.ownerValue };
     this.write();
     this.show();
   }
