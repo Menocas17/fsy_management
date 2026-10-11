@@ -9,9 +9,10 @@
 # - Cada consejera duerme en el cuarto de staff del pasillo donde está la mayoría de su compañía.
 # - Si los hombres no caben en sus pasillos, toman los últimos cuartos libres de un pasillo de mujeres (y al
 #   revés): se avisa en la propuesta, porque es lo que más se intenta evitar.
-# - Aparte: el matrimonio director y el de logística, cada uno en su cuarto; coordinación con los auxiliares de
-#   su mismo género, y el comité de logística por género. Van a los cuartos apartados para ellos (Room#purpose)
-#   o, si no hay, a uno libre.
+# - Aparte: el matrimonio director y el de logística, cada uno en su cuarto, y coordinación con los auxiliares de
+#   su mismo género. Van a los cuartos apartados para ellos (Room#purpose) o, si no hay, a uno libre.
+# - El comité de logística puede dormir con otros adultos de su género: primero ocupa sus cuartos apartados, después
+#   las camas libres de los cuartos de consejeros y de coordinación, y lo que falte, cuartos propios.
 # - Entra todo el mundo: lo que diga hoy cada ficha (aunque sea un cuarto escrito a mano) se reemplaza.
 #
 # «Reordenar» es otra semilla: cambia el orden de las compañías y de cada quien dentro de ellas. Cada semilla
@@ -400,9 +401,22 @@ class RoomPlanner
           place_group(people, :coordinacion, gender, halls_by_gender,
                       label: gender == "M" ? "coordinación (mujeres)" : "coordinación (hombres)")
           committee = @people.select { |person| LOGISTICS_ROLES.include?(person.rol) && person.gender == gender }
+          marked = @hallways.flat_map(&:rooms).select { |room| room.purpose_comite_logistica? && !taken?(room) }.sum(&:capacity)
+          place_group(committee.shift(marked), :comite_logistica, gender, halls_by_gender, label: "logística")
+          committee = share_adult_rooms(committee, gender)
           place_group(committee, :comite_logistica, gender, halls_by_gender,
                       label: gender == "M" ? "logística (mujeres)" : "logística (hombres)")
         end
+      end
+
+      # Las camas libres de los cuartos de adultos de ese género (consejeros y coordinación), en el orden del hotel.
+      # Devuelve a quienes no cupieron.
+      def share_adult_rooms(people, gender)
+        waiting = people.dup
+        @slots.values.select { |slot| %i[consejeros coordinacion].include?(slot.kind) && slot.gender == gender && slot.free.positive? }
+              .sort_by { |slot| @room_order[slot.room.id] }
+              .each { |slot| slot.occupants.concat(waiting.shift(slot.free)) }
+        waiting
       end
 
       def place_group(people, purpose, gender, halls_by_gender, label:)

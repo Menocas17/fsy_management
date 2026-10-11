@@ -122,7 +122,7 @@ class RoomPlannerTest < ActiveSupport::TestCase
     assert_nil logistics.reload.room, "un cuarto escrito a mano no sobrevive"
   end
 
-  test "everybody gets a room, the logistics committee apart by gender and never with jovenes" do
+  test "everybody gets a room; logistics fills the spare beds of the adults of its gender, never with jovenes" do
     hallways("A" => "01-08", "B" => "09-16")
     Participant.where.not(room: nil).update_all(room: "L1")
     committee = [ adult("logistica", "M"), adult("logistica", "M"), adult("logistica", "H") ]
@@ -135,9 +135,9 @@ class RoomPlannerTest < ActiveSupport::TestCase
     assert_empty plan.unplaced
     assert_equal 0, Participant.where(room: [ nil, "", "L1" ]).count, "todo el mundo tiene un cuarto del hotel"
     rooms = committee.map { |person| plan.slots.values.find { |slot| slot.occupants.include?(person) } }
-    assert_equal [ :comite_logistica ], rooms.map(&:kind).uniq
     assert_equal rooms[0], rooms[1]
-    assert_not_equal rooms[0], rooms[2]
+    assert_equal [ participants(:maria), *committee.first(2) ].to_set, rooms[0].occupants.to_set, "con la consejera, que tenía camas libres"
+    assert_equal :comite_logistica, rooms[2].kind, "sin consejeros con camas libres, cuarto propio"
     assert rooms.all? { |slot| slot.occupants.none?(&:joven?) && slot.occupants.map(&:gender).uniq.one? }
   end
 
