@@ -4,6 +4,7 @@ class AssignmentsController < ApplicationController
   before_action :set_participant, only: %i[new create]
   before_action :set_assignment, only: %i[update destroy confirm]
   before_action :require_assign_permission!, except: %i[index confirm]
+  before_action :forbid_recipient_removal!, only: :destroy
   before_action :require_delegator!, only: :index
 
   STATUS_FILTERS = { "pendiente" => "Pendientes", "confirmada" => "Confirmadas", "completada" => "Completadas" }.freeze
@@ -79,6 +80,12 @@ class AssignmentsController < ApplicationController
       unless can_assign_to?(@participant)
         redirect_to participant_path(@participant), alert: "No estás autorizado para cambiar las asignaciones de esta persona"
       end
+    end
+
+    def forbid_recipient_removal!
+      return if @assignment.removable_by?(Current.user.participant)
+
+      redirect_back fallback_location: participant_path(@participant), alert: "Quien recibe la asignación no la puede quitar."
     end
 
     def require_delegator!

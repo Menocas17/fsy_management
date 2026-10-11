@@ -13,6 +13,7 @@
   summary: Quien recibe una asignación la confirma desde su perfil, y quien la delegó sigue todas en Seguimiento → Asignaciones.
   changes:
     - En tu perfil, cada asignación pendiente tiene el botón «Confirmar»; a quien te la asignó le llega el aviso.
+    - Quien recibe una asignación ya no la puede quitar; solo quien la delegó.
     - "Seguimiento → Asignaciones: las que delegaste, cuántas faltan por confirmar y a qué hora confirmó cada quien."
     - En Enfermería, «Pasaron por enfermería» cambia entre hoy y todas con un interruptor, y ya no se corre de lado en el teléfono.
     - "En el teléfono, «Más» del consejero trae Escanear gafete, Conteo, Organigrama, Enfermería, Compañías y Jóvenes; la dirección suma Historial, y Registro tiene su botón amarillo."

@@ -30,6 +30,11 @@ class Assignment < ApplicationRecord
     update!(status: :confirmada)
   end
 
+  # Quien la recibe no se la quita; solo si se la asignó a sí mismo.
+  def removable_by?(actor)
+    actor.nil? || actor != participant || assigned_by == actor
+  end
+
   def from_agenda?
     activity_id.present?
   end

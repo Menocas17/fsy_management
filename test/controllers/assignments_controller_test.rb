@@ -63,6 +63,28 @@ class AssignmentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Quitó «Servicio comunitario» de Juan Pérez", AuditLog.asignaciones.recent.first.summary
   end
 
+  test "whoever receives it can't remove it" do
+    company = Company.create!(number: 1)
+    company.memberships.create!(participant: participants(:maria))
+    post participant_assignments_path(participants(:maria)), params: { assignment: { activity_id: @activity.id, status: "confirmada" } }
+    assignment = Assignment.last
+
+    sign_out
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
+    get myprofile_participants_path
+    assert_select "[data-assignment-id='#{assignment.id}'] button[aria-label='Eliminar asignación']", 0
+
+    assert_no_difference -> { Assignment.count } do
+      delete assignment_path(assignment)
+    end
+    assert_equal "Quien recibe la asignación no la puede quitar.", flash[:alert]
+
+    post participant_assignments_path(participants(:maria)), params: { assignment: { title: "Preparar la devocional" } }
+    assert_difference -> { Assignment.count }, -1, "one they gave themselves they can remove" do
+      delete assignment_path(Assignment.last)
+    end
+  end
+
   test "a counselor assigns within their own company but not outside it" do
     company = Company.create!(number: 1)
     company.memberships.create!(participant: participants(:maria))
