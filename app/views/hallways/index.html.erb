@@ -50,7 +50,7 @@
                   tone: hallway.gender ? RoomsHelper::GENDER_TONES[hallway.gender] : :neutral) %>
             <% if hallway.long? %><%= render ChipComponent.new(label: "Largo", icon: "shield-user") %><% end %>
             <% reserved.group_by(&:purpose_label).each do |label, rooms| %>
-              <%= render ChipComponent.new(label: "#{label}: #{rooms.map(&:number).join(", ")}", tone: :indigo) %>
+              <%= render ChipComponent.new(label: "#{label}: #{rooms.map(&:number).join(", ")}", tone: :neutral) %>
             <% end %>
           </div>
         </article>
