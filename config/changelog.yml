@@ -7,6 +7,15 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-11-companias-sugeridas
+  date: 2026-10-11
+  title: Compañías sugeridas al registrar
+  summary: Al registrar a un joven que llega sin compañía, la app sugiere las tres que mejor le quedan.
+  changes:
+    - Se basa en su edad primero, y después en dónde faltan mujeres u hombres, cuántos de su barrio hay ya y si algún consejero es de su mismo barrio.
+    - En el formulario aparecen al escribir su fecha de nacimiento y su género; «Elegir» llena la compañía.
+    - En la ficha de un joven sin compañía salen las mismas sugerencias con el botón «Asignar».
+  roles: [ director, coordinador, logistica, director_logistica ]
 - id: 2026-10-10-cuartos
   date: 2026-10-10
   title: Nuevo módulo de cuartos

@@ -6,8 +6,13 @@
       <div>
         <%= form.label :company_id, "Compañía", class: field_label_classes %>
         <%= form.select :company_id, Company.order(:name).map { |c| [ c.name, c.id ] },
-              { include_blank: "Sin compañía" }, class: field_select_classes %>
+              { include_blank: "Sin compañía" }, class: field_select_classes, data: { company_suggest_target: "company" } %>
       </div>
+      <%# Para un joven sin compañía (el que llega a registrarse el día del evento): las que mejor le quedan. %>
+      <% if can_suggest_company? %>
+        <%= turbo_frame_tag "company_suggestions", hidden: true, class: "sm:col-span-2",
+              data: { company_suggest_target: "frame", participant_id: form.object.id } %>
+      <% end %>
       <%# Solo para el rol logística (sus banderas le dan permisos): aparece o se va al elegir el rol, con role-fields. %>
       <% committee = form.object.logistica? %>
       <%= tag.div hidden: !committee, data: { role_fields_target: "field", roles: "logistica", logistics_area_field: true } do %>

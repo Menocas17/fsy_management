@@ -8,6 +8,7 @@
     <div class="space-y-5 2xl:space-y-0 2xl:contents">
       <%# En el teléfono la información médica va primero: es lo que busca enfermería o un consejero. %>
       <div class="lg:hidden"><%= render "participants/profile/medical_info", participant: participant %></div>
+      <%= render "participants/profile/company_suggestions", participant: participant %>
       <%= render "participants/profile/general_info", participant: participant %>
       <%= render "participants/profile/asignaciones", participant: participant %>
       <%= render "participants/profile/registro", participant: participant %>

@@ -170,6 +170,8 @@ Rails.application.routes.draw do
   resources :assignments, only: [ :index, :update, :destroy ], path: "asignaciones" do
     patch :confirm, on: :member, path: "confirmar"
   end
+  # Compañías sugeridas para un joven que se registra sin compañía (CompanySuggester): en su ficha y en el formulario.
+  get "companias/sugerencias" => "company_suggestions#show", as: :company_suggestions
   # El QR de una ficha, para el diálogo «Mi QR» de la barra inferior (se pide al abrirlo).
   get "participants/:participant_id/qr" => "participant_qrs#show", as: :participant_qr
   resources :participants do
