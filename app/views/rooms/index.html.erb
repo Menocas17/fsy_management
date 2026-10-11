@@ -41,7 +41,7 @@
     <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen">
       <%= render StatTileComponent.new(value: "#{@sleeping}/#{@beds}", label: "Camas ocupadas", short_label: "Ocupadas",
             icon: "bed-double", tone: :blue, value_data: { figure: "ocupadas" }) %>
-      <%= render StatTileComponent.new(value: @without_room.size, label: "Jóvenes y consejeros sin cuarto", short_label: "Sin cuarto",
+      <%= render StatTileComponent.new(value: @without_room.size, label: "Personas sin cuarto", short_label: "Sin cuarto",
             icon: "user-x", tone: :amber, href: ("#sin-cuarto" if @without_room.any?), value_data: { figure: "sin-cuarto" }) %>
       <% if @issues.any? %>
         <%= render StatTileComponent.new(value: @issues.size, label: "Cuartos por revisar", short_label: "Revisar",
@@ -91,13 +91,13 @@
                   <% end %>
                 </div>
               <% else %>
-                <p class="text-body text-ink-500">Todas tienen cuarto.</p>
+                <p class="text-body text-ink-500">Nadie sin cuarto.</p>
               <% end %>
             </div>
           <% end %>
         </div>
         <% if can_manage_rooms? %>
-          <p class="mt-4 text-label text-ink-500">«Ordenar cuartos» los acomoda a todos; para uno solo, cambia el cuarto en su ficha.</p>
+          <p class="mt-4 text-label text-ink-500">«Ordenar cuartos» acomoda a todo el mundo; para una sola persona, cambia el cuarto en su ficha.</p>
         <% end %>
       </section>
     <% end %>
@@ -105,7 +105,7 @@
     <% if @other_rooms.any? %>
       <section class="<%= card_classes("p-5 md:p-6") %>" data-other-rooms>
         <%= section_heading "Fuera de los pasillos", "door-open", tone: :neutral %>
-        <p class="-mt-2 mb-3 text-label text-ink-500">Cuartos escritos a mano en las fichas que no están en la configuración del hotel.</p>
+        <p class="-mt-2 mb-3 text-label text-ink-500">Cuartos escritos a mano en las fichas que no están en el hotel. «Ordenar cuartos» los reemplaza.</p>
         <ul class="divide-y divide-line-soft">
           <% @other_rooms.each do |number, people| %>
             <li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">

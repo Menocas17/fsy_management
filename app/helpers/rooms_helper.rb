@@ -5,10 +5,11 @@ module RoomsHelper
 
   KIND_LABELS = {
     jovenes: "Jóvenes", consejeros: "Consejeros", coordinacion: "Coordinación y auxiliares",
-    direccion: "Matrimonio director", logistica: "Matrimonio de logística", staff: "Staff", mixto: "Jóvenes y adultos"
+    direccion: "Matrimonio director", logistica: "Matrimonio de logística", comite_logistica: "Comité de logística",
+    staff: "Staff", mixto: "Jóvenes y adultos"
   }.freeze
   KIND_ICONS = { consejeros: "shield-user", coordinacion: "users-round", direccion: "heart-handshake",
-                 logistica: "heart-handshake", staff: "user-check", mixto: "triangle-alert" }.freeze
+                 logistica: "heart-handshake", comite_logistica: "boxes", staff: "user-check", mixto: "triangle-alert" }.freeze
   # Mujeres en rosa y hombres en azul, como en las gráficas (ChartsHelper::GENDER_CATEGORY); un cuarto de los
   # dos (un matrimonio), en índigo.
   TILE_TONES = {
@@ -108,6 +109,7 @@ module RoomsHelper
       return :direccion if roles == [ "director" ]
       return :logistica if roles == [ "director_logistica" ]
       return :coordinacion if (roles - RoomPlanner::COORDINATION_ROLES).empty?
+      return :comite_logistica if (roles - RoomPlanner::LOGISTICS_ROLES).empty?
 
       :staff
     end

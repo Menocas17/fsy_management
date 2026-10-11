@@ -9,8 +9,10 @@
 # - Cada consejera duerme en el cuarto de staff del pasillo donde está la mayoría de su compañía.
 # - Si los hombres no caben en sus pasillos, toman los últimos cuartos libres de un pasillo de mujeres (y al
 #   revés): se avisa en la propuesta, porque es lo que más se intenta evitar.
-# - Aparte: el matrimonio director y el de logística, cada uno en su cuarto, y coordinación con los auxiliares
-#   de su mismo género. Van a los cuartos apartados para ellos (Room#purpose) o, si no hay, a uno libre.
+# - Aparte: el matrimonio director y el de logística, cada uno en su cuarto; coordinación con los auxiliares de
+#   su mismo género, y el comité de logística por género. Van a los cuartos apartados para ellos (Room#purpose)
+#   o, si no hay, a uno libre.
+# - Entra todo el mundo: lo que diga hoy cada ficha (aunque sea un cuarto escrito a mano) se reemplaza.
 #
 # «Reordenar» es otra semilla: cambia el orden de las compañías y de cada quien dentro de ellas. Cada semilla
 # prueba TRIALS órdenes y se queda con el mejor (Plan#score); la misma semilla da siempre la misma propuesta.
@@ -21,9 +23,10 @@ class RoomPlanner
   GENDERS = %w[M H].freeze
   COUNSELOR_ROLES = %w[consejero].freeze
   COORDINATION_ROLES = %w[coordinador auxiliar].freeze
+  LOGISTICS_ROLES = %w[logistica].freeze
   COUPLES = { direccion: "director", logistica: "director_logistica" }.freeze
-  # Los roles que acomoda el ordenamiento; logística (y quien no tenga género) se queda con su cuarto.
-  PLANNED_ROLES = %w[joven consejero coordinador auxiliar director director_logistica].freeze
+  # El ordenamiento acomoda a todos los roles, sin excepción.
+  PLANNED_ROLES = Participant.rols.keys.freeze
 
   # Un cuarto de la propuesta. kind: :jovenes, :consejeros, :coordinacion, :direccion o :logistica.
   Slot = Struct.new(:room, :hallway, :kind, :gender, :occupants, :spill, keyword_init: true) do
@@ -66,14 +69,13 @@ class RoomPlanner
                    .count { |(company_id, _), halls| company_id && halls.size > 1 }
     end
 
-    # Guarda la propuesta en las fichas (participants.room). Quien entra al ordenamiento y no quedó ubicado (o
-    # todavía no llegó, con «solo llegados») queda sin cuarto; logística y quien no tiene género, con el suyo.
+    # Guarda la propuesta en las fichas (participants.room). Quien no quedó ubicado (o, con «solo llegados»,
+    # el joven que todavía no llegó) queda sin cuarto: no sobrevive ningún cuarto escrito a mano.
     # Devuelve cuántas fichas cambiaron.
     def apply!
       now = Time.current
       Participant.transaction do
-        planned = Participant.where(rol: PLANNED_ROLES).where.not(gender: nil)
-        changed = planned.where.not(id: assignments.keys).where.not(room: [ nil, "" ]).update_all(room: nil, updated_at: now)
+        changed = Participant.where.not(id: assignments.keys).where.not(room: [ nil, "" ]).update_all(room: nil, updated_at: now)
         assignments.group_by(&:last).each do |number, pairs|
           changed += Participant.where(id: pairs.map(&:first)).where("room IS DISTINCT FROM ?", number)
                                 .update_all(room: number, updated_at: now)
@@ -397,6 +399,9 @@ class RoomPlanner
                           .sort_by { |person| person.coordinador? ? 0 : 1 }
           place_group(people, :coordinacion, gender, halls_by_gender,
                       label: gender == "M" ? "coordinación (mujeres)" : "coordinación (hombres)")
+          committee = @people.select { |person| LOGISTICS_ROLES.include?(person.rol) && person.gender == gender }
+          place_group(committee, :comite_logistica, gender, halls_by_gender,
+                      label: gender == "M" ? "logística (mujeres)" : "logística (hombres)")
         end
       end
 

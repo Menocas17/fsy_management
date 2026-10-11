@@ -110,7 +110,7 @@ class RoomPlannerTest < ActiveSupport::TestCase
   test "applying writes each room on the fichas and clears whoever was left out" do
     hallways("A" => "01-04")
     girls = jovenes([ @companies.first ], "M", 3).each(&:save!)
-    stranger = Participant.create!(first_name: "Sin", last_name: "Género", age: 15, shirt_number: "m", gender: "M", rol: "joven",
+    stranger = Participant.create!(first_name: "Fuera", last_name: "Plan", age: 15, shirt_number: "m", gender: "M", rol: "joven",
                                    stake: "bello_horizonte", ward: "la_rotonda", room: "99")
     logistics = adult("logistica", "H").tap { |person| person.update!(room: "L1") }
 
@@ -118,8 +118,27 @@ class RoomPlannerTest < ActiveSupport::TestCase
     plan.apply!
 
     assert girls.all? { |girl| girl.reload.room.present? }
-    assert_nil stranger.reload.room, "un joven fuera de la propuesta queda sin cuarto"
-    assert_equal "L1", logistics.reload.room, "logística conserva el suyo"
+    assert_nil stranger.reload.room, "fuera de la propuesta queda sin cuarto"
+    assert_nil logistics.reload.room, "un cuarto escrito a mano no sobrevive"
+  end
+
+  test "everybody gets a room, the logistics committee apart by gender and never with jovenes" do
+    hallways("A" => "01-08", "B" => "09-16")
+    Participant.where.not(room: nil).update_all(room: "L1")
+    committee = [ adult("logistica", "M"), adult("logistica", "M"), adult("logistica", "H") ]
+    jovenes(@companies, "M", 3).each(&:save!)
+    jovenes(@companies, "H", 3).each(&:save!)
+
+    plan = RoomPlanner.new(seed: 2).call
+    plan.apply!
+
+    assert_empty plan.unplaced
+    assert_equal 0, Participant.where(room: [ nil, "", "L1" ]).count, "todo el mundo tiene un cuarto del hotel"
+    rooms = committee.map { |person| plan.slots.values.find { |slot| slot.occupants.include?(person) } }
+    assert_equal [ :comite_logistica ], rooms.map(&:kind).uniq
+    assert_equal rooms[0], rooms[1]
+    assert_not_equal rooms[0], rooms[2]
+    assert rooms.all? { |slot| slot.occupants.none?(&:joven?) && slot.occupants.map(&:gender).uniq.one? }
   end
 
   test "the hallway form understands ranges and keeps the zeros" do

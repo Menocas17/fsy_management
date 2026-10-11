@@ -5,11 +5,11 @@ class Room < ApplicationRecord
 
   # auto: lo usa el ordenamiento para jóvenes o consejeros. Los demás quedan apartados para su grupo; fuera_de_uso
   # no se usa.
-  enum :purpose, { auto: 0, direccion: 1, logistica: 2, coordinacion: 3, fuera_de_uso: 4 }, prefix: true
+  enum :purpose, { auto: 0, direccion: 1, logistica: 2, coordinacion: 3, fuera_de_uso: 4, comite_logistica: 5 }, prefix: true
 
   PURPOSE_LABELS = {
     "auto" => "Jóvenes o consejeros", "direccion" => "Matrimonio director", "logistica" => "Matrimonio de logística",
-    "coordinacion" => "Coordinación y auxiliares", "fuera_de_uso" => "Fuera de uso"
+    "coordinacion" => "Coordinación y auxiliares", "comite_logistica" => "Comité de logística", "fuera_de_uso" => "Fuera de uso"
   }.freeze
   DEFAULT_CAPACITY = 4
   MAX_CAPACITY = 12

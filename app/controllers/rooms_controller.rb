@@ -4,9 +4,6 @@
 class RoomsController < ApplicationController
   before_action :require_rooms_viewer!
 
-  # Quienes se cuentan en «sin cuarto»: los que el ordenamiento acomoda en los pasillos.
-  HALLWAY_ROLES = %w[joven consejero].freeze
-
   def index
     @hallways = Hallway.ordered.includes(:rooms).to_a
     rooms = @hallways.flat_map(&:rooms)
@@ -16,7 +13,7 @@ class RoomsController < ApplicationController
     @other_rooms = @occupants.reject { |number, _| hotel_numbers.include?(number) }.sort_by { |number, _| [ number.to_i, number ] }
     @beds = rooms.reject(&:purpose_fuera_de_uso?).sum(&:capacity)
     @sleeping = rooms.sum { |room| @occupants.fetch(room.number, []).size }
-    @without_room = Participant.where(rol: HALLWAY_ROLES, room: [ nil, "" ]).order(:first_name, :last_name).to_a
+    @without_room = Participant.where(room: [ nil, "" ]).order(:first_name, :last_name).to_a
     @issues = @tiles.values.select(&:issue).sort_by { |tile| [ tile.room.hallway.position, tile.room.position ] }
   end
 

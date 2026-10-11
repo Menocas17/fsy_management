@@ -14,7 +14,7 @@
   changes:
     - Cada cuarto se pinta de rosa si es de mujeres y de azul si es de hombres; tócalo para ver quién duerme ahí.
     - "«Ordenar cuartos» arma una propuesta: mujeres primero, un cuarto de consejeras o consejeros en cada pasillo (dos en los largos), las compañías juntas y nadie solo. «Reordenar» muestra otra combinación, y nada cambia hasta «Aplicar»."
-    - El matrimonio director y el de logística tienen su propio cuarto, y coordinación duerme con los auxiliares de su género.
+    - Ubica a todo el mundo, sin excepción. El matrimonio director y el de logística tienen su propio cuarto, coordinación duerme con los auxiliares de su género y el comité de logística va aparte, mujeres y hombres separados.
     - El tablero avisa de lo que hay que revisar a mano (un joven solo, jóvenes con adultos) y de quién no tiene cuarto todavía.
     - En el perfil de cada compañía, sus cuartos salen en rosa o azul según sean de mujeres o de hombres.
   roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
