@@ -18,4 +18,10 @@ class InstallSheetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-install-panel]", minimum: 4
     assert_no_match(/<html/, response.body, "solo la hoja, sin el layout")
   end
+
+  test "the login page links the manifest, so Chrome on Android lets it install from there" do
+    get new_session_path
+
+    assert_select "link[rel='manifest']"
+  end
 end
