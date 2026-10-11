@@ -2,6 +2,9 @@ require "test_helper"
 
 # Varios controles solo tienen aria-label (el menú de cuenta, la cantidad del ajuste, el código del artículo).
 Capybara.enable_aria_label = true
+# En el CI corren cuatro Chrome a la vez: guardar una ficha con foto tardaba más de los 2 s de siempre en mostrar
+# el aviso. Solo alarga lo que de todos modos iba a fallar.
+Capybara.default_max_wait_time = 5
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # CHROME_BIN apunta a otro Chrome/Chromium cuando el del sistema no sirve (p. ej. un contenedor sin Chrome).
@@ -34,6 +37,16 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     click_on "Menú de cuenta"
     click_on "Cerrar sesión"
     assert_current_path new_session_path
+  end
+
+  # Lo que el navegador guarda con un fetch de fondo, sin cambiar la página (terminar el tutorial): se espera a
+  # que llegue a la base en vez de leerla en el acto.
+  def assert_eventually(message = nil, wait: Capybara.default_max_wait_time)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + wait
+    until yield
+      flunk(message || "No pasó en #{wait} s") if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+      sleep 0.05
+    end
   end
 
   # El ancho de un celular común, para las pruebas que cuidan el diseño en pantallas angostas.
