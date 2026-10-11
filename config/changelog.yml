@@ -7,6 +7,15 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-10-asignaciones-confirmar
+  date: 2026-10-10
+  title: Confirma tus asignaciones
+  summary: Quien recibe una asignación la confirma desde su perfil, y quien la delegó sigue todas en Seguimiento → Asignaciones.
+  changes:
+    - En tu perfil, cada asignación pendiente tiene el botón «Confirmar»; a quien te la asignó le llega el aviso.
+    - "Seguimiento → Asignaciones: las que delegaste, cuántas faltan por confirmar y a qué hora confirmó cada quien."
+    - En Enfermería, «Pasaron por enfermería» cambia entre hoy y todas con un interruptor, y ya no se corre de lado en el teléfono.
+    - "En el teléfono, «Más» del consejero trae Escanear gafete, Conteo, Organigrama, Enfermería, Compañías y Jóvenes; la dirección suma Historial, y Registro tiene su botón amarillo."
 - id: 2026-10-09-tutorial
   date: 2026-10-09
   title: Un tutorial de 5 minutos

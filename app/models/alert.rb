@@ -83,6 +83,23 @@ class Alert < ApplicationRecord
     )
   end
 
+  # A quien la delegó, cuando quien la recibe la confirma: lleva al seguimiento de sus asignaciones.
+  def self.announce_assignment_confirmed(assignment)
+    return unless assignment.assigned_by && assignment.assigned_by != assignment.participant
+
+    create!(
+      title: "Confirmada: #{assignment.display_title}",
+      body: "#{assignment.participant.full_name} confirmó la asignación.",
+      audience: :individual,
+      recipient: assignment.assigned_by,
+      priority: :informativa,
+      source: :asignacion,
+      link_path: "/asignaciones",
+      sender: assignment.participant,
+      sender_name: assignment.participant.full_name
+    )
+  end
+
   def self.announce(activity, action:, user:, detail: nil)
     template, priority = ANNOUNCEMENTS.fetch(action)
 

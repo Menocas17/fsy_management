@@ -159,7 +159,10 @@ Rails.application.routes.draw do
   get "enfermeria/fichas/:participant_id" => "infirmary_charts#show", as: :infirmary_chart
   # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
   resources :night_attendances, only: :index, path: "asistencia-nocturna"
-  resources :assignments, only: [ :update, :destroy ], path: "asignaciones"
+  # El seguimiento de las asignaciones delegadas; quien recibe una la confirma.
+  resources :assignments, only: [ :index, :update, :destroy ], path: "asignaciones" do
+    patch :confirm, on: :member, path: "confirmar"
+  end
   # El QR de una ficha, para el diálogo «Mi QR» de la barra inferior (se pide al abrirlo).
   get "participants/:participant_id/qr" => "participant_qrs#show", as: :participant_qr
   resources :participants do
