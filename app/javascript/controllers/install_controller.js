@@ -8,8 +8,12 @@ import { Controller } from '@hotwired/stimulus';
 //
 // El tutorial espera a que esta hoja se cierre: mientras puede salir, <html data-install-prompt> lo avisa y al
 // terminar se dispara install:settled.
+//
+// Demo (el superadmin en «Ver como»): sale también en la compu con la ventana al ancho del teléfono (nunca en
+// la vista de escritorio), una vez por persona en la visita, con un selector iPhone / Android y el botón de instalar simulado. No guarda nada: ni «Ahora no» ni «Ya la tengo».
 const SNOOZE_KEY = 'fsy:install-snooze';
 const SHOWN_KEY = 'fsy:install-shown';
+const PHONE = '(max-width: 47.99rem)';
 const DAY = 24 * 60 * 60 * 1000;
 const ANDROID_WAIT = 2500; // ms que se espera el permiso de Chrome antes de rendirse
 
@@ -27,19 +31,20 @@ const storage = (store, action, key, value) => {
 
 export default class extends Controller {
   static targets = ['sheet', 'track', 'dot', 'next', 'secondary', 'external', 'copyLabel'];
-  static values = { url: String };
+  static values = { url: String, demo: Boolean, owner: String };
 
   connect() {
     this.onOpenRequest = (event) => {
       if (!event.target.closest('[data-install-open]')) return;
       event.preventDefault();
-      this.open(this.platform || 'android');
+      this.open(this.platform || (this.demoValue ? 'ios' : 'android'));
     };
     this.onInstallable = () => this.waiting && this.open('android');
     document.addEventListener('click', this.onOpenRequest);
     document.addEventListener('fsy:installable', this.onInstallable);
 
     this.platform = this.detect();
+    if (this.demoValue && !this.platform) this.setPlatform('ios');
     if (this.shouldAutoOpen) this.autoOpen();
   }
 
@@ -58,7 +63,12 @@ export default class extends Controller {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
+  get shownKey() {
+    return this.demoValue ? `${SHOWN_KEY}:demo:${this.ownerValue}` : SHOWN_KEY;
+  }
+
   get shouldAutoOpen() {
+    if (this.demoValue) return window.matchMedia(PHONE).matches && !storage(sessionStorage, 'get', this.shownKey);
     if (!this.platform || this.standalone) return false;
     if (storage(sessionStorage, 'get', SHOWN_KEY)) return false;
 
@@ -68,7 +78,7 @@ export default class extends Controller {
 
   autoOpen() {
     document.documentElement.dataset.installPrompt = 'pending';
-    if (this.platform !== 'android') return this.open(this.platform);
+    if (this.platform !== 'android' || this.demoValue) return this.open(this.platform);
 
     // Chrome da el permiso solo si la app no está instalada. Si no llega, o ya está o este navegador no
     // instala (Firefox sí se explica: tiene menú pero no permiso).
@@ -102,6 +112,18 @@ export default class extends Controller {
     return 'ios';
   }
 
+  // Lo que la demo muestra en la compu (o al cambiar con el selector): el Safari de hoy o Chrome de Android.
+  setPlatform(platform) {
+    this.platform = platform;
+    this.os = platform;
+    this.variant = platform === 'ios' ? 'safari26' : undefined;
+  }
+
+  preview({ params: { platform } }) {
+    this.setPlatform(platform);
+    this.open(platform);
+  }
+
   // Chrome pide un service worker para considerar la app instalable; el de las notificaciones sirve.
   registerWorker() {
     navigator.serviceWorker?.register('/service-worker', { scope: '/' }).catch(() => {});
@@ -116,9 +138,14 @@ export default class extends Controller {
     if (!(await this.loadSheet())) return this.settle();
 
     let panel = platform;
-    if (panel === 'android' && !window.fsyInstallPrompt) panel = 'android-manual';
+    if (panel === 'android' && !window.fsyInstallPrompt && !this.demoValue) panel = 'android-manual';
 
-    storage(sessionStorage, 'set', SHOWN_KEY, '1');
+    storage(sessionStorage, 'set', this.shownKey, '1');
+    const switcher = this.sheetTarget.querySelector('[data-install-demo]');
+    switcher.hidden = !this.demoValue || panel === 'installed';
+    switcher.querySelectorAll('button').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.installPlatformParam === this.os));
+    });
     this.sheetTarget.querySelectorAll('[data-install-panel]').forEach((section) => {
       section.hidden = section.dataset.installPanel !== panel;
     });
@@ -153,6 +180,7 @@ export default class extends Controller {
 
   async install() {
     const prompt = window.fsyInstallPrompt;
+    if (this.demoValue) return this.open('installed');
     if (!prompt) return this.open('android-manual');
 
     window.fsyInstallPrompt = null; // cada permiso se usa una sola vez
@@ -166,6 +194,7 @@ export default class extends Controller {
 
   // Cerrar sin instalar: vuelve a salir mañana.
   later() {
+    if (this.demoValue) return this.close();
     storage(localStorage, 'set', SNOOZE_KEY, String(Date.now() + DAY));
     this.close();
   }
@@ -173,6 +202,7 @@ export default class extends Controller {
   // Ya instalada (o vio los pasos hasta el final): no se insiste en un mes. Si la agregó, el tutorial se ve
   // en la app instalada, no aquí en el navegador.
   installed() {
+    if (this.demoValue) return this.close();
     storage(localStorage, 'set', SNOOZE_KEY, String(Date.now() + 30 * DAY));
     this.skipTutorialHere();
     this.close();

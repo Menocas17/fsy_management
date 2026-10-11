@@ -9,6 +9,8 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
+    <%# Sin el manifest, Chrome de Android no da permiso de instalar y la hoja de instalar no sale al entrar. %>
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
     <%# El .ico va primero: es el que los navegadores pintan en la pestaña sin reescalar el de 512. %>
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">

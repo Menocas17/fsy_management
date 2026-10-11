@@ -86,4 +86,24 @@ class TutorialPracticeTest < ActionDispatch::IntegrationTest
     assert_predicate @counselor.reload.tutorial_completed_at, :present?
     assert_not Alert.source_tutorial.exists?
   end
+
+  test "the superadmin previews someone's tutorial in Ver como without touching their account" do
+    sign_in_as users(:one)
+    post view_as_path, params: { participant_id: participants(:maria).id }
+
+    get dashboard_path
+    assert_select "[data-controller='tour'][data-tour-autostart-value='false']"
+
+    post tutorial_path, as: :json
+    assert_response :success
+    ids = response.parsed_body["steps"].map { |step| step["id"] }
+    assert_includes ids, "announce_form", "los pasos son los de la consejera"
+    assert_includes ids, "notification_swipe_preview"
+    assert_not_includes ids, "notification_swipe"
+    assert_not Alert.source_tutorial.exists?, "no le llega la alerta de bienvenida"
+
+    patch tutorial_path
+    assert_response :no_content
+    assert_nil @counselor.reload.tutorial_completed_at
+  end
 end
