@@ -101,6 +101,12 @@ class Company < ApplicationRecord
     participants.where.not(room: [ nil, "" ]).group(:room).order(:room).count
   end
 
+  # Los mismos cuartos con cuántos de cada género: { "017" => { "M" => 3 } }. El perfil los pinta de rosa o azul.
+  def room_occupancy_by_gender
+    participants.where.not(room: [ nil, "" ]).group(:room, :gender).order(:room).count
+                .each_with_object({}) { |((room, gender), count), map| (map[room] ||= {})[gender] = count }
+  end
+
   def staff_status
     case counselors.size
     when 2.. then :complete

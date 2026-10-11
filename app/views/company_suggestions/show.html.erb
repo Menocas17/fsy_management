@@ -1,0 +1,37 @@
+<%= turbo_frame_tag "company_suggestions" do %>
+  <% if @suggestions.empty? %>
+    <p class="text-label text-ink-500" data-company-suggestions="empty">Escribe su fecha de nacimiento y su género para sugerirle compañía.</p>
+  <% else %>
+    <p class="mb-2 text-label font-bold text-ink-700">Compañías sugeridas</p>
+    <ol class="space-y-2" data-company-suggestions>
+      <% @suggestions.each_with_index do |suggestion, index| %>
+        <li class="flex flex-col sm:flex-row sm:items-center gap-2.5 p-3 rounded-tile border border-line-soft bg-canvas"
+            data-company-suggestion="<%= suggestion.company.number %>">
+          <div class="flex items-start gap-3 min-w-0 flex-1">
+            <%= initials_tile(suggestion.company.initials, seed: suggestion.company.name, size: :sm) %>
+            <div class="min-w-0">
+              <p class="text-body font-bold text-ink-900">
+                <%= suggestion.company.name %>
+                <% if index.zero? %><span class="ml-1 text-label font-semibold text-cat-green-ink">· la mejor</span><% end %>
+              </p>
+              <div class="mt-1 flex flex-wrap gap-1.5">
+                <% suggestion.reasons.each do |reason| %>
+                  <%= render ChipComponent.new(label: reason.text, tone: reason.tone) %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <% if @profile %>
+            <%= button_to "Asignar", participant_path(@participant), method: :patch,
+                  params: { participant: { company_id: suggestion.company.id } },
+                  form: { data: { turbo_frame: "_top", turbo_confirm: "¿Poner a #{@participant.first_name} en #{suggestion.company.name}?", turbo_confirm_button: "Sí, asignar" } },
+                  class: button_classes(index.zero? ? :primary : :secondary, size: :sm, extra: "w-full sm:w-auto shrink-0") %>
+          <% else %>
+            <button type="button" class="<%= button_classes(index.zero? ? :primary : :secondary, size: :sm, extra: "w-full sm:w-auto shrink-0") %>"
+                    data-action="company-suggest#choose" data-company-suggest-id-param="<%= suggestion.company.id %>">Elegir</button>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+<% end %>

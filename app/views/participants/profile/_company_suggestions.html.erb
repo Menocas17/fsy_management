@@ -1,0 +1,11 @@
+<%# Un joven sin compañía (llegó a registrarse el día del evento): las compañías que mejor le quedan, para asignarle
+    una con un toque. Se pide al verla (CompanySuggestionsController, modo ficha). %>
+<% if participant.joven? && participant.company_id.nil? && !participant.practice? && can_suggest_company? && can_edit_participant?(participant) %>
+  <section class="<%= card_classes("p-6") %>" data-profile-company-suggestions>
+    <%= section_heading "Sin compañía todavía", "building-2", tone: :amber %>
+    <p class="-mt-2 mb-3 text-label text-ink-500">Sugeridas por su edad, el balance de hombres y mujeres, cuántos de su barrio hay y el barrio de los consejeros.</p>
+    <%= turbo_frame_tag "company_suggestions", src: company_suggestions_path(participant_id: participant.id, modo: "ficha"), loading: :lazy do %>
+      <p class="text-label text-ink-500">Buscando compañías…</p>
+    <% end %>
+  </section>
+<% end %>

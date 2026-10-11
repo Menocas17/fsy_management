@@ -16,7 +16,8 @@ class CompaniesController < ApplicationController
 
   def show
     load_leaders
-    @rooms = @company.room_occupancy
+    @rooms = @company.room_occupancy_by_gender
+    @hotel_rooms = Room.where(number: @rooms.keys).pluck(:number).to_set
     # En el tutorial, los jóvenes de práctica aparecen aparte, en la compañía de quien lo hace.
     @practice_jovenes = practice_mode? && practice_company == @company ? Participant.practice_jovenes_for(@company) : []
     @jovenes_total = @company.participants.count

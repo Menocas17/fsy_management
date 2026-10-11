@@ -41,7 +41,7 @@ class NavigationHelperTest < ActionView::TestCase
     assert_equal({ nil => [ "Inicio" ],
                    "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
                    "Evento" => [ "Agenda", "Registro", "Alertas" ],
-                   "Logística" => [ "Áreas", "Inventario", "Finanzas" ],
+                   "Logística" => [ "Áreas", "Inventario", "Finanzas", "Cuartos" ],
                    "Seguimiento" => [ "Reportes", "Conteo", "Asignaciones", "Enfermería", "Historial" ] }, groups)
   ensure
     Current.reset

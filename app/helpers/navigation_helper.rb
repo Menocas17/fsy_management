@@ -31,7 +31,8 @@ module NavigationHelper
         # Las fichas de artículo cuelgan de /articulos, fuera de /inventario.
         ({ text: "Inventario", url: inventories_path, lucide_icon: "boxes",
            active_paths: [ inventories_path, "/articulos" ] } if Current.user&.inventory_member?),
-        ({ text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] } if Current.user&.finance_viewer?)
+        ({ text: "Finanzas", url: finances_path, lucide_icon: "wallet", active_paths: [ finances_path ] } if Current.user&.finance_viewer?),
+        ({ text: "Cuartos", url: rooms_path, lucide_icon: "bed-double", active_paths: [ rooms_path ] } if Current.user&.rooms_viewer?)
       ] },
       { id: "seguimiento", label: "Seguimiento", items: [
         ({ text: "Reportes", url: reports_path, lucide_icon: "file-text",
@@ -189,7 +190,8 @@ module NavigationHelper
 
     named = nav_items.filter_map { |item| [ URI.parse(item[:url]).path, item[:text] ] if item[:url] }
     extra = [ [ overview_companies_path, "Vista general" ], [ auxiliar_companies_path, "Compañías auxiliares" ],
-              [ agenda_trainings_path, "Capacitaciones" ] ]
+              [ agenda_trainings_path, "Capacitaciones" ],
+              [ room_plan_path, "Ordenar cuartos" ], [ hallways_path, "Configurar hotel" ] ]
     # La dirección más larga que coincida gana: /companies/overview antes que /companies.
     (extra + named).sort_by { |route, _| -route.length }.find { |route, _| path == route || path.start_with?("#{route}/") }&.last
   rescue URI::InvalidURIError
@@ -204,7 +206,8 @@ module NavigationHelper
     "trainings" => ->(id) { Training.find_by(id: id)&.name },
     "inventories" => ->(id) { Inventory.find_by(id: id)&.name },
     "inventory_items" => ->(id) { InventoryItem.find_by(code: id)&.name },
-    "expenses" => ->(id) { Expense.find_by(id: id)&.concept }
+    "expenses" => ->(id) { Expense.find_by(id: id)&.concept },
+    "rooms" => ->(number) { "Cuarto #{number}" if Room.exists?(number: number) }
   }.freeze
 
   def record_page_label(path)

@@ -1,0 +1,69 @@
+<% content_for :title, "Ordenar cuartos" %>
+<% content_for :eyebrow, "Cuartos" %>
+<% back_to "Cuartos", rooms_path %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% if @hallways.empty? %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Primero configura el hotel", icon: "hotel", tone: :indigo, name: "room-plan",
+            text: "El ordenamiento recorre los pasillos y cuartos del hotel; todavía no hay ninguno.") do |empty| %>
+        <% empty.with_action { link_to "Configurar el hotel", hallways_path, class: button_classes } %>
+      <% end %>
+    </div>
+  <% else %>
+    <% page.with_intro { "Propuesta sin guardar: nada cambia hasta que la apliques." } %>
+    <% page.with_actions do %>
+      <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+        <%= link_to room_plan_path(semilla: rand(1..999_999), llegados: ("1" if @arrived_only)),
+              class: button_classes(:secondary, extra: "grow sm:grow-0"), data: { turbo_action: "replace", rooms_action: "reordenar" } do %>
+          <%= icon "shuffle", class: "size-4" %>
+          Reordenar
+        <% end %>
+        <%= button_to room_plan_path, params: { semilla: @seed, llegados: ("1" if @arrived_only), huella: @fingerprint }.compact,
+              form_class: "grow sm:grow-0 flex", class: button_classes(extra: "w-full"),
+              form: { data: { turbo_confirm: "¿Aplicar esta distribución?",
+                              turbo_confirm_detail: "#{pluralize(@plan.placed_count, "persona")} quedan en el cuarto de esta propuesta. Lo que se haya cambiado a mano en las fichas se reemplaza.",
+                              turbo_confirm_button: "Sí, aplicar" } },
+              data: { rooms_action: "aplicar" } do %>
+          <%= icon "check-check", class: "size-4" %>
+          Aplicar
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= render SegmentedToggleComponent.new(label: "Quiénes entran", items: [
+          { text: "Todos los jóvenes", href: room_plan_path(semilla: @seed), active: !@arrived_only, icon: "users" },
+          { text: "Solo los que llegaron · #{@arrived_count}", href: room_plan_path(semilla: @seed, llegados: "1"), active: @arrived_only, icon: "scan-line" }
+        ]) %>
+
+    <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen de la propuesta">
+      <%= render StatTileComponent.new(value: @plan.placed_count, label: "Personas con cuarto", short_label: "Con cuarto",
+            icon: "users", tone: :green, value_data: { figure: "ubicados" }) %>
+      <%= render StatTileComponent.new(value: "#{@plan.rooms_used}/#{@tiles.size}", label: "Cuartos usados", short_label: "Cuartos",
+            icon: "door-open", tone: :blue, value_data: { figure: "cuartos" }) %>
+      <%= render StatTileComponent.new(value: @plan.mixed_rooms, label: "Cuartos con dos compañías", short_label: "Mezclados",
+            icon: "layers-2", tone: :amber, hint: "Solo cuando no sobran camas para separarlas.", value_data: { figure: "mezclados" }) %>
+    </section>
+
+    <% if @plan.warnings.any? || @plan.unplaced.any? || @plan.spill_rooms.positive? %>
+      <section class="<%= card_classes("p-5 md:p-6") %>" data-plan-warnings>
+        <%= section_heading "Para revisar", "triangle-alert", tone: :amber %>
+        <ul class="space-y-2 text-body text-ink-700">
+          <% if @plan.spill_rooms.positive? %>
+            <li class="flex gap-2"><%= icon "triangle-alert", class: "size-4 mt-0.5 shrink-0 text-cat-amber-ink" %>
+              <span><%= pluralize(@plan.spill_rooms, "cuarto queda", plural: "cuartos quedan") %> en un pasillo del otro género (marcados en la cuadrícula): no alcanzaron los suyos.</span></li>
+          <% end %>
+          <% @plan.warnings.uniq.each do |warning| %>
+            <li class="flex gap-2"><%= icon "triangle-alert", class: "size-4 mt-0.5 shrink-0 text-cat-amber-ink" %><span><%= warning %></span></li>
+          <% end %>
+          <% @plan.unplaced.group_by(&:last).each do |reason, pairs| %>
+            <li class="flex gap-2"><%= icon "user-x", class: "size-4 mt-0.5 shrink-0 text-cat-rose-ink" %>
+              <span><strong class="font-bold"><%= reason %>:</strong> <%= pairs.map { |person, _| person.full_name }.first(12).join(", ") %><%= " y #{pairs.size - 12} más" if pairs.size > 12 %></span></li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <%= render "rooms/legend" %>
+    <%= render "rooms/hallways", hallways: @hallways, tiles: @tiles, link_rooms: false %>
+  <% end %>
+<% end %>

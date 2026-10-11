@@ -1,0 +1,22 @@
+# Los pasillos del Hotel Las Mercedes y sus cuartos, leídos del plano (PDF «Mapa Hotel LasMercedes»). Se cargan
+# desde Cuartos → Configurar el hotel (Hallway.load_layout!) cuando todavía no hay ninguno; las camas arrancan
+# en Room::DEFAULT_CAPACITY y se corrigen a mano. El cuarto 165 no está confirmado en el plano.
+name: Hotel Las Mercedes
+hallways:
+  A1: "017-032"
+  A2: "033-047"
+  A3: "048-059"
+  A4: "060-075"
+  A5: "076-091"
+  A6: "092-106"
+  B1: "107-114"
+  B2: "115-130"
+  B3: "131-146"
+  C1: "147-150"
+  C2: "151-163"
+  C3: "164"
+  D1: "166-173"
+  D2: "174-177"
+  D3: "178-191"
+  D4: "192-194"
+  D5: "195-196"

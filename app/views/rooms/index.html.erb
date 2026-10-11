@@ -1,0 +1,122 @@
+<% content_for :title, "Cuartos" %>
+<% content_for :eyebrow, "Logística" %>
+<% rooms_total = @hallways.sum { |hallway| hallway.rooms.size } %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "#{pluralize(@hallways.size, "pasillo")} · #{pluralize(rooms_total, "cuarto")} · #{pluralize(@beds, "cama")}" } %>
+  <% page.with_actions do %>
+    <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+      <% if can_view_participant_reports? %>
+        <%= link_to rooms_reports_path, target: "_blank", class: button_classes(:secondary, extra: "max-md:hidden") do %>
+          <%= icon "printer", class: "size-4" %>
+          Imprimir
+        <% end %>
+      <% end %>
+      <% if can_manage_rooms? %>
+        <%= link_to hallways_path, class: button_classes(:secondary, extra: "grow sm:grow-0") do %>
+          <%= icon "settings-2", class: "size-4" %>
+          Configurar hotel
+        <% end %>
+        <% if @hallways.any? %>
+          <%= link_to room_plan_path, class: button_classes(extra: "grow sm:grow-0"), data: { rooms_action: "ordenar" } do %>
+            <%= icon "shuffle", class: "size-4" %>
+            Ordenar cuartos
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @hallways.empty? %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "El hotel todavía no está configurado", icon: "hotel", tone: :indigo, name: "rooms",
+            text: "Con sus pasillos y cuartos, aquí se ve quién duerme dónde y se ordenan los cuartos de todo el evento.") do |empty| %>
+        <% if can_manage_rooms? %>
+          <% empty.with_action do %>
+            <%= link_to "Configurar el hotel", hallways_path, class: button_classes %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen">
+      <%= render StatTileComponent.new(value: "#{@sleeping}/#{@beds}", label: "Camas ocupadas", short_label: "Ocupadas",
+            icon: "bed-double", tone: :blue, value_data: { figure: "ocupadas" }) %>
+      <%= render StatTileComponent.new(value: @without_room.size, label: "Personas sin cuarto", short_label: "Sin cuarto",
+            icon: "user-x", tone: :amber, href: ("#sin-cuarto" if @without_room.any?), value_data: { figure: "sin-cuarto" }) %>
+      <% if @issues.any? %>
+        <%= render StatTileComponent.new(value: @issues.size, label: "Cuartos por revisar", short_label: "Revisar",
+              icon: "triangle-alert", tone: :rose, href: "#revisar", value_data: { figure: "revisar" }) %>
+      <% else %>
+        <%= render StatTileComponent.new(value: 0, label: "Cuartos por revisar", short_label: "Revisar",
+              icon: "circle-check", tone: :green, hint: "Todos siguen las reglas.", value_data: { figure: "revisar" }) %>
+      <% end %>
+    </section>
+
+    <% if @issues.any? %>
+      <section id="revisar" class="<%= card_classes("p-5 md:p-6 scroll-mt-24") %>" data-room-issues>
+        <%= section_heading "Por revisar", "triangle-alert", tone: :rose %>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <% @issues.each do |tile| %>
+            <li>
+              <%= link_to room_path(tile.room), class: "flex items-center gap-3 px-3 py-2.5 rounded-control border border-line-soft bg-canvas hover:bg-muted transition-colors" do %>
+                <span class="text-body font-extrabold text-ink-900 tabular-nums"><%= tile.room.number %></span>
+                <span class="min-w-0 flex-1 text-label font-semibold text-cat-rose-ink truncate"><%= tile.issue %></span>
+                <span class="text-meta font-semibold text-ink-500">Pasillo <%= tile.room.hallway.name %></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <%= render "rooms/legend" %>
+    <%= render "rooms/hallways", hallways: @hallways, tiles: @tiles, link_rooms: true %>
+
+    <% if @without_room.any? %>
+      <section id="sin-cuarto" class="<%= card_classes("p-5 md:p-6 scroll-mt-24") %>" data-without-room>
+        <%= section_heading "Sin cuarto · #{@without_room.size}", "user-x", tone: :amber %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <% Hallway::GENDER_LABELS.each do |gender, label| %>
+            <% people = @without_room.select { |person| person.gender == gender } %>
+            <div>
+              <p class="mb-2 text-label font-bold text-ink-700"><%= label %> · <%= people.size %></p>
+              <% if people.any? %>
+                <div class="flex flex-wrap gap-1.5">
+                  <% people.first(40).each do |person| %>
+                    <%= link_to person.full_name, participant_path(person, return_to: rooms_path),
+                          class: "inline-flex items-center h-7 px-2.5 rounded-full text-label font-semibold #{Tones.tint(RoomsHelper::GENDER_TONES[gender])} hover:brightness-95 transition" %>
+                  <% end %>
+                  <% if people.size > 40 %>
+                    <span class="inline-flex items-center h-7 px-2.5 text-label font-semibold text-ink-500">y <%= people.size - 40 %> más</span>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-body text-ink-500">Nadie sin cuarto.</p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <% if can_manage_rooms? %>
+          <p class="mt-4 text-label text-ink-500">«Ordenar cuartos» acomoda a todo el mundo; para una sola persona, cambia el cuarto en su ficha.</p>
+        <% end %>
+      </section>
+    <% end %>
+
+    <% if @other_rooms.any? %>
+      <section class="<%= card_classes("p-5 md:p-6") %>" data-other-rooms>
+        <%= section_heading "Fuera de los pasillos", "door-open", tone: :neutral %>
+        <p class="-mt-2 mb-3 text-label text-ink-500">Cuartos escritos a mano en las fichas que no están en el hotel. «Ordenar cuartos» los reemplaza.</p>
+        <ul class="divide-y divide-line-soft">
+          <% @other_rooms.each do |number, people| %>
+            <li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
+              <span class="text-body font-extrabold text-ink-900"><%= number %></span>
+              <span class="min-w-0 flex-1 text-label text-ink-700">
+                <%= safe_join(people.map { |person| link_to(person.full_name, participant_path(person), class: "hover:underline") }, ", ") %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  <% end %>
+<% end %>
