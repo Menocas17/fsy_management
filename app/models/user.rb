@@ -166,6 +166,16 @@ class User < ApplicationRecord
     superadmin? || participant&.staff_member? || false
   end
 
+  # El tablero de cuartos lo ve todo el staff; los jóvenes no.
+  def rooms_viewer?
+    superadmin? || participant&.staff_member? || false
+  end
+
+  # Ordenar los cuartos y configurar el hotel: el acceso total y el director de logística.
+  def rooms_manager?
+    full_access? || participant&.director_logistica? || false
+  end
+
   # Quién administra las áreas de logística (crearlas, sus banderas y sus miembros).
   def logistics_areas_manager?
     full_access? || participant&.director_logistica? || false

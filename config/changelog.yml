@@ -7,6 +7,17 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-10-cuartos
+  date: 2026-10-10
+  title: Nuevo módulo de cuartos
+  summary: Logística → Cuartos muestra cada pasillo del hotel con quién duerme en cada cuarto, y la dirección ordena los cuartos de todo el evento con un clic.
+  changes:
+    - Cada cuarto se pinta de rosa si es de mujeres y de azul si es de hombres; tócalo para ver quién duerme ahí.
+    - "«Ordenar cuartos» arma una propuesta: mujeres primero, un cuarto de consejeras o consejeros en cada pasillo (dos en los largos), las compañías juntas y nadie solo. «Reordenar» muestra otra combinación, y nada cambia hasta «Aplicar»."
+    - El matrimonio director y el de logística tienen su propio cuarto, y coordinación duerme con los auxiliares de su género.
+    - El tablero avisa de lo que hay que revisar a mano (un joven solo, jóvenes con adultos) y de quién no tiene cuarto todavía.
+    - En el perfil de cada compañía, sus cuartos salen en rosa o azul según sean de mujeres o de hombres.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
 - id: 2026-10-10-asignaciones-confirmar
   date: 2026-10-10
   title: Confirma tus asignaciones

@@ -157,6 +157,13 @@ Rails.application.routes.draw do
     resources :notes, only: :create, controller: "infirmary_notes", path: "notas"
   end
   get "enfermeria/fichas/:participant_id" => "infirmary_charts#show", as: :infirmary_chart
+  # Cuartos: el tablero, la propuesta del ordenamiento (?semilla=, ?llegados=1) y aplicarla, y la configuración
+  # del hotel (sus pasillos y cuartos). Van antes de cuartos/:id, que si no se las tragaría.
+  resource :room_plan, only: %i[show create], path: "cuartos/ordenar"
+  resources :hallways, except: :show, path: "cuartos/pasillos", path_names: { new: "nuevo", edit: "editar" } do
+    post :load_layout, on: :collection, path: "cargar-hotel"
+  end
+  resources :rooms, only: %i[index show], path: "cuartos"
   # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
   resources :night_attendances, only: :index, path: "asistencia-nocturna"
   # El seguimiento de las asignaciones delegadas; quien recibe una la confirma.

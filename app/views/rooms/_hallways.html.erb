@@ -1,0 +1,36 @@
+<%# Los pasillos del hotel con sus cuartos en orden (RoomsHelper#room_tiles_*). En el tablero cada cuarto abre su
+    página; en la propuesta del ordenamiento (link_rooms: false) solo se mira, con las compañías de cada cuarto. %>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5" data-hallways>
+  <% hallways.each do |hallway| %>
+    <% hall_tiles = hallway.rooms.map { |room| tiles.fetch(room.id) } %>
+    <% beds = hall_tiles.reject { |tile| tile.room.purpose_fuera_de_uso? }.sum { |tile| tile.room.capacity } %>
+    <section class="<%= card_classes("p-4 md:p-5") %>" data-hallway="<%= hallway.name %>" aria-label="Pasillo <%= hallway.name %>">
+      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 mb-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <h2 class="text-title font-bold text-ink-900">Pasillo <%= hallway.name %></h2>
+          <%= hallway_gender_chip(hallway_gender(hallway, tiles)) %>
+        </div>
+        <span class="text-label font-semibold text-ink-500 tabular-nums"><%= hall_tiles.sum(&:count) %>/<%= beds %> camas</span>
+      </div>
+      <ol class="grid grid-cols-4 min-[414px]:grid-cols-5 sm:grid-cols-8 gap-1.5">
+        <% hall_tiles.each do |tile| %>
+          <% glyph = room_tile_icon(tile) %>
+          <li>
+            <%= content_tag(link_rooms ? :a : :div, href: (room_path(tile.room) if link_rooms), title: room_tile_title(tile),
+                  aria: { label: room_tile_title(tile) },
+                  class: "flex flex-col justify-between gap-0.5 min-h-[54px] px-2 py-1.5 rounded-inner border #{room_tile_classes(tile)}#{" hover:brightness-95 dark:hover:brightness-110 transition" if link_rooms}",
+                  data: { room_tile: tile.room.number, room_gender: tile.gender, room_kind: tile.kind }) do %>
+              <span class="flex items-center justify-between gap-1">
+                <span class="text-body font-extrabold tabular-nums"><%= tile.room.number %></span>
+                <%= icon glyph, class: "size-3.5 shrink-0" if glyph %>
+              </span>
+              <span class="text-meta font-semibold tabular-nums truncate">
+                <%= tile.count %>/<%= tile.room.capacity %><% if !link_rooms && tile.companies.present? %> · C<%= tile.companies.join("·") %><% end %>
+              </span>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+</div>
