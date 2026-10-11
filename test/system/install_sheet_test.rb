@@ -153,8 +153,15 @@ class InstallSheetTest < ApplicationSystemTestCase
       cdp("Emulation.setTouchEmulationEnabled", enabled: true, maxTouchPoints: 1)
     end
 
+    # La hoja sube deslizándose: un clic a medio camino cae debajo del botón y no hace nada (en el CI pasaba
+    # con «Android»). Se toca cuando ya llegó.
     def within_sheet(&block)
-      within("dialog.install-sheet[open]", &block)
+      sheet = find("dialog.install-sheet[open]")
+      sheet.synchronize do
+        settled = sheet.evaluate_script("this.getAnimations().length == 0 && Math.abs(this.getBoundingClientRect().bottom - innerHeight) < 1")
+        raise Capybara::ExpectationNotMet, "la hoja sigue subiendo" unless settled
+      end
+      within(sheet, &block)
     end
 
     def cdp(command, **params)

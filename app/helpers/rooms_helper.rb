@@ -10,16 +10,16 @@ module RoomsHelper
   }.freeze
   KIND_ICONS = { consejeros: "shield-user", coordinacion: "users-round", direccion: "heart-handshake",
                  logistica: "heart-handshake", comite_logistica: "boxes", staff: "user-check", mixto: "triangle-alert" }.freeze
-  # Mujeres en rosa y hombres en azul, como en las gráficas (ChartsHelper::GENDER_CATEGORY); un cuarto de los
-  # dos (un matrimonio), en índigo.
+  # Mujeres en índigo y hombres en azul; un cuarto de los dos (un matrimonio), en teal. No en rosa: en este tablero
+  # el rosa es lo que hay que revisar, y un pasillo de mujeres entero se leía como un error.
   TILE_TONES = {
-    "M" => "bg-cat-rose/15 text-cat-rose-ink border-cat-rose/30",
+    "M" => "bg-cat-indigo/15 text-cat-indigo-ink border-cat-indigo/30",
     "H" => "bg-cat-blue/15 text-cat-blue-ink border-cat-blue/30",
-    mixed: "bg-cat-indigo/15 text-cat-indigo-ink border-cat-indigo/30",
+    mixed: "bg-cat-teal/15 text-cat-teal-ink border-cat-teal/30",
     empty: "bg-sunken text-ink-500 border-line-soft",
     off: "bg-canvas text-ink-300 border-dashed border-line"
   }.freeze
-  GENDER_TONES = { "M" => :rose, "H" => :blue }.freeze
+  GENDER_TONES = { "M" => :indigo, "H" => :blue }.freeze
 
   # De lo guardado en las fichas: quién duerme hoy en cada cuarto.
   def room_tiles_from_occupants(rooms, occupants_by_room)
