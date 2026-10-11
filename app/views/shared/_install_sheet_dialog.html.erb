@@ -11,7 +11,7 @@
                    entre Safari 26, el Safari de antes y Chrome del iPhone va en data-only.
     inapp          Dentro de Facebook, Instagram o Messenger no se puede de ninguna forma: a abrirla afuera.
 
-  En la demo de «Ver como» (data-demo) sale también en la compu, centrada, con un selector iPhone / Android.
+  En la demo de «Ver como» sale también en la compu achicada al ancho del teléfono, con un selector iPhone / Android.
 %>
 <% benefit = ->(icon_name, text) do %>
   <li class="flex items-center gap-3">
@@ -38,7 +38,7 @@
 <% end %>
 
 <dialog data-install-target="sheet" data-action="click->install#clickOutside cancel->install#cancel" aria-labelledby="install-sheet-title"
-        class="install-sheet md:not-data-demo:hidden md:data-demo:mx-auto md:data-demo:max-w-[420px] p-0 mt-auto mb-0 mx-0 w-full max-w-none bg-transparent backdrop:bg-black/50 backdrop:backdrop-blur-[2px]">
+        class="install-sheet md:hidden p-0 mt-auto mb-0 mx-0 w-full max-w-none bg-transparent backdrop:bg-black/50 backdrop:backdrop-blur-[2px]">
   <%# autofocus aquí: si no, el diálogo enfoca lo primero que encuentra (las láminas, un botón) y lo marca con el aro. %>
   <div class="px-5 pt-2.5 pb-[max(env(safe-area-inset-bottom),20px)] rounded-t-panel bg-surface shadow-lg outline-none"
        tabindex="-1" autofocus data-controller="sheet-drag" data-action="sheet-drag:dismiss->install#later">

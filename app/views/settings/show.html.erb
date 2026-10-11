@@ -76,8 +76,7 @@
     <% end %>
 
     <%# Abre la hoja de instalar (shared/_install_sheet). Ya instalada no hace falta: abierta desde su ícono, no sale. %>
-    <%# En «Ver como» también en la compu: la hoja sale ahí como demo. %>
-    <section class="<%= "md:hidden" unless Current.viewing_as? %> standalone:hidden <%= card_classes("px-5 py-6") %>" aria-labelledby="settings-install" data-settings-install>
+    <section class="md:hidden standalone:hidden <%= card_classes("px-5 py-6") %>" aria-labelledby="settings-install" data-settings-install>
       <h2 id="settings-install" class="<%= card_heading %>">
         <%= icon "smartphone", class: "w-[17px] h-[17px]" %>
         Instalar la app

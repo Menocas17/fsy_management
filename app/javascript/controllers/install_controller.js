@@ -9,10 +9,11 @@ import { Controller } from '@hotwired/stimulus';
 // El tutorial espera a que esta hoja se cierre: mientras puede salir, <html data-install-prompt> lo avisa y al
 // terminar se dispara install:settled.
 //
-// Demo (el superadmin en «Ver como»): sale también en la compu, una vez por persona en la visita, con un
-// selector iPhone / Android y el botón de instalar simulado. No guarda nada: ni «Ahora no» ni «Ya la tengo».
+// Demo (el superadmin en «Ver como»): sale también en la compu con la ventana al ancho del teléfono (nunca en
+// la vista de escritorio), una vez por persona en la visita, con un selector iPhone / Android y el botón de instalar simulado. No guarda nada: ni «Ahora no» ni «Ya la tengo».
 const SNOOZE_KEY = 'fsy:install-snooze';
 const SHOWN_KEY = 'fsy:install-shown';
+const PHONE = '(max-width: 47.99rem)';
 const DAY = 24 * 60 * 60 * 1000;
 const ANDROID_WAIT = 2500; // ms que se espera el permiso de Chrome antes de rendirse
 
@@ -67,7 +68,7 @@ export default class extends Controller {
   }
 
   get shouldAutoOpen() {
-    if (this.demoValue) return !storage(sessionStorage, 'get', this.shownKey);
+    if (this.demoValue) return window.matchMedia(PHONE).matches && !storage(sessionStorage, 'get', this.shownKey);
     if (!this.platform || this.standalone) return false;
     if (storage(sessionStorage, 'get', SHOWN_KEY)) return false;
 
@@ -140,7 +141,6 @@ export default class extends Controller {
     if (panel === 'android' && !window.fsyInstallPrompt && !this.demoValue) panel = 'android-manual';
 
     storage(sessionStorage, 'set', this.shownKey, '1');
-    this.sheetTarget.toggleAttribute('data-demo', this.demoValue);
     const switcher = this.sheetTarget.querySelector('[data-install-demo]');
     switcher.hidden = !this.demoValue || panel === 'installed';
     switcher.querySelectorAll('button').forEach((button) => {
