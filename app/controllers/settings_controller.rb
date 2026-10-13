@@ -1,5 +1,7 @@
 class SettingsController < ApplicationController
   before_action :require_scan_manager!, only: :scan_windows
+  # Tiene su propio aviso viendo como otro (abajo).
+  skip_before_action :block_writes_while_viewing_as, only: :simple_mode
 
   def show
     @trainings = Training.chronological if Current.user.scan_manager?

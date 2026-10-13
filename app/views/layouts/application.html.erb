@@ -14,7 +14,7 @@
     <% if Current.user && !Current.viewing_as %><meta name="push-subscription-url" content="<%= push_subscription_notifications_path %>"><% end %>
     <%= csp_meta_tag %>
     <%= yield :head %>
-    <script>
+    <script nonce="<%= content_security_policy_nonce %>">
       (function () {
         try {
           // Sin elección guardada, el teléfono arranca en oscuro y la computadora en claro. Teléfono: pantalla

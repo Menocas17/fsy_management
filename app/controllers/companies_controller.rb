@@ -75,8 +75,15 @@ class CompaniesController < ApplicationController
     @dining_counts = Company.jovenes_by_dining_hall
   end
 
+  # Solo uno de los que ofrece la página (load_staff_options): consejero, del género que falta y sin otra
+  # compañía. Sin esto, un id cualquiera metía a otra persona, o se llevaba al consejero de otra rama, que
+  # quedaba en dos compañías.
   def assign_staff
-    @membership = @company.memberships.build(membership_params)
+    load_staff_options
+    candidate = @counselor_candidates.find_by(id: membership_params[:participant_id])
+    return redirect_to edit_company_path(@company, anchor: "lideres"), alert: "Esa persona no se puede asignar a esta compañía." unless candidate
+
+    @membership = @company.memberships.build(participant: candidate)
     if @membership.save
       record_audit!(category: :companias, action: "assigned_staff", target: @company,
                     summary: "Asignó a #{@membership.participant.full_name} como #{ROLE_LABELS.fetch(@membership.role, @membership.role)} en #{@company.name}")

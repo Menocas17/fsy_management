@@ -134,7 +134,39 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     assert_nil Company.find_by(number: 9)
   end
 
+  test "registration's upload makes every row a joven, whatever the Rol column says" do
+    sign_in_as_registrar
+    file = csv_upload("Nombre,Apellido,Edad,Sexo,Estaca,Talla de camiseta,Rol,Compañía\nLuis,Staff,25,Masculino,Villa Flor,M,Consejero,3\n")
+
+    post participant_imports_path, params: { file: file }
+
+    luis = Participant.find_by(first_name: "Luis", last_name: "Staff")
+    assert luis.nil? || luis.joven?, "never staff"
+    assert_not Participant.where(first_name: "Luis").where.not(rol: :joven).exists?
+    assert_empty Membership.joins(:participant).where(participants: { first_name: "Luis" })
+  end
+
+  test "registration can't turn a waiting row into staff, nor approve one that is" do
+    import = ParticipantImport.create!(filename: "staff.xlsx", uploaded_by_name: "Admin")
+    row = import.rows.create!(row_number: 2, status: :pending, issues: [],
+                              values: { "first_name" => "Ana", "last_name" => "Staff", "age" => "30", "gender" => "Femenino",
+                                        "stake" => "Villa Flor", "shirt_number" => "M", "rol" => "Coordinador" })
+    sign_in_as_registrar
+
+    patch approve_participant_import_row_path(import, row)
+    assert_not Participant.exists?(first_name: "Ana", last_name: "Staff")
+
+    patch participant_import_row_path(import, row), params: { row: { rol: "Director" } }
+    assert_equal "joven", row.reload.values["rol"]
+  end
+
   private
+    def sign_in_as_registrar
+      registrar = Participant.create!(first_name: "Rita", last_name: "Registro", age: 30, stake: "villa_flor", shirt_number: "m",
+                                      gender: "M", rol: "logistica", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
+      sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: registrar))
+    end
+
     def spreadsheet
       fixture_file_upload("participantes.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     end

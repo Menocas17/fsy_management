@@ -9,12 +9,17 @@ class ParticipantImportRowsController < ApplicationController
 
   def update
     values = @row.values.merge(params.expect(row: ParticipantImportRow::EDITABLE.keys).to_h.transform_values(&:presence))
+    values["rol"] = "joven" unless can_import_staffing? # el registro corrige jóvenes, no crea staff
     @row.update!(values: values)
     @row.reevaluate!
     redirect_to back_to_report, notice: @row.blocking? ? "Guardado. Todavía tiene algo que resolver." : "Guardado: ya se puede aprobar."
   end
 
   def approve
+    if !can_import_staffing? && @row.evaluator.build.rol != "joven"
+      return redirect_to back_to_report, alert: "#{@row.name} entraría como staff: eso lo aprueba quien tiene acceso total."
+    end
+
     if @row.approve!(actor_name)
       record_audit!(category: :participantes, action: "created", target: @row.participant,
                     summary: "Aprobó a #{@row.participant.full_name} desde la carga «#{@import.filename}»")
