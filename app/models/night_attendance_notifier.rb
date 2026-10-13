@@ -7,12 +7,21 @@ module NightAttendanceNotifier
 
   module_function
 
-  # Una vez por noche aunque el job corra dos veces. Sin faltantes, no hay aviso.
+  # Una vez por noche aunque el job corra dos veces. Sin faltantes, no hay aviso. La marca de «ya avisé» y la
+  # alerta van en la misma transacción: si la alerta fallara, la marca no queda y el job puede volver a intentar.
   def nightly_check(night)
     key = "night_attendance_alerted:#{night.iso8601}"
     return if AppSetting[key].present?
 
-    AppSetting[key] = Time.current.iso8601
+    ActiveRecord::Base.transaction do
+      AppSetting[key] = Time.current.iso8601
+      alert_for(night)
+    end
+  rescue ActiveRecord::RecordNotUnique
+    nil # otra corrida del job ya avisó esta noche
+  end
+
+  def alert_for(night)
     report = issues(night)
     return if report.empty?
 

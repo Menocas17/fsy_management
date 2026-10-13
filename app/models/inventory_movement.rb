@@ -34,6 +34,9 @@ class InventoryMovement < ApplicationRecord
   validate :reason_matches_direction
 
   before_validation :stamp_participant_name
+  # Dos salidas a la vez leían la misma existencia y las dos pasaban: el artículo se bloquea (y se relee) dentro
+  # de la transacción del guardado, antes de revisar que no quede en negativo.
+  before_validation :lock_item, on: :create
   after_create :update_item_quantity
 
   scope :recent, -> { order(created_at: :desc) }
@@ -63,6 +66,10 @@ class InventoryMovement < ApplicationRecord
       return if (allowed == :in) == delta.positive?
 
       errors.add(:reason, "«#{reason_label}» no aplica para #{delta.positive? ? 'sumar' : 'restar'}")
+    end
+
+    def lock_item
+      inventory_item.lock! if inventory_item&.persisted?
     end
 
     def cannot_leave_negative_stock

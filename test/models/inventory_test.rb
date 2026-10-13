@@ -98,4 +98,16 @@ class InventoryTest < ActiveSupport::TestCase
   test "the QR carries the item code" do
     assert_equal "MAT-0001", @item.qr_payload
   end
+
+  test "two removals at once can't take the stock below zero" do
+    @item.adjust!(delta: 10, participant: participants(:maria), reason: :compra)
+    first_screen = InventoryItem.find(@item.id)
+    second_screen = InventoryItem.find(@item.id)
+
+    first_screen.adjust!(delta: -8, participant: participants(:maria), reason: :entrega)
+    assert_raises(ActiveRecord::RecordInvalid) do
+      second_screen.adjust!(delta: -8, participant: participants(:maria), reason: :entrega)
+    end
+    assert_equal 2, @item.reload.quantity
+  end
 end

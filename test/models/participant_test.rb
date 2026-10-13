@@ -171,4 +171,16 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_nil item.movements.first.participant_id
     assert_nil expense.reload.presented_by_id
   end
+
+  test "a badge code is never handed out twice, not even after deleting the newest ficha" do
+    newest = Participant.create!(first_name: "Nuevo", last_name: "Último", age: 15, stake: "villa_flor", shirt_number: "m",
+                                 gender: "H", rol: :joven)
+    used = newest.code
+    newest.destroy!
+
+    again = Participant.create!(first_name: "Otra", last_name: "Persona", age: 15, stake: "villa_flor", shirt_number: "m",
+                                gender: "M", rol: :joven)
+    assert_not_equal used, again.code, "the printed badge of the deleted ficha must not open someone else's"
+    assert_operator again.code.delete_prefix("P-").to_i, :>, used.delete_prefix("P-").to_i
+  end
 end
