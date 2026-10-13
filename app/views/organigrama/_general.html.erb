@@ -13,7 +13,9 @@
 %>
 
 <% if branches || @directors.any? %>
-  <%# Desktop: the canvas is the page — no card, no margins, controls floating on top. %>
+  <%# Desktop: the canvas is the page — no card, no margins, controls floating on top. Al teléfono que lo dice
+      (DeviceHelper) no se le manda: el lienzo es un tercio del HTML y allá nunca se ve. %>
+  <% if render_desktop_layout? %>
   <div class="hidden md:block h-full">
     <div id="org-chart-<%= @view %>" class="org-chart relative h-full" data-controller="org-chart">
       <div data-org-chart-target="viewport" tabindex="0" role="region"
@@ -118,9 +120,10 @@
       </div>
     </div>
   </div>
+  <% end %>
 
   <%# Teléfono: la misma regla que el lienzo, las compañías empiezan cerradas y cada rama abre las suyas. %>
-  <div class="md:hidden px-4 pt-6 pb-10 space-y-5" data-controller="org-branches">
+  <div class="<%= layout_split("md:hidden") %> px-4 pt-6 pb-10 space-y-5" data-controller="org-branches">
     <%= render "organigrama/view_switch" %>
     <% if @show_companies && @auxiliar_companies.any? %>
       <button type="button" data-action="org-branches#toggleAll" data-org-branches-target="toggleAllButton" aria-pressed="false"

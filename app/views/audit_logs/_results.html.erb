@@ -10,6 +10,8 @@
 </div>
 
 <% if audit_logs.load.any? %>
+  <%# Tabla en la compu y tarjetas en el teléfono; al teléfono que lo dice (DeviceHelper) solo le va la suya. %>
+  <% if render_desktop_layout? %>
   <div class="hidden md:block">
     <div class="<%= card_classes("overflow-hidden") %>">
       <div class="overflow-x-auto px-7">
@@ -51,9 +53,10 @@
       <% end %>
     </div>
   </div>
+  <% end %>
 
   <%# Teléfono: una tarjeta por registro, todo a lo ancho y sin desplazamiento lateral; carga más al bajar. %>
-  <div class="md:hidden">
+  <div class="<%= layout_split("md:hidden") %>">
     <%= turbo_frame_tag "audit_logs_page_#{pagy.page}" do %>
       <% audit_logs.each do |log| %>
         <article class="<%= card_classes("p-3.5 mb-2.5") %>" data-audit-log-card="<%= log.id %>">
