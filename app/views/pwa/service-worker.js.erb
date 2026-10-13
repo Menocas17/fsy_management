@@ -1,0 +1,55 @@
+// Service worker de FSY Management: recibe las notificaciones push y abre la alerta al tocarlas.
+// Vive en la raíz del sitio (/service-worker) para poder controlar toda la app.
+
+self.addEventListener("push", async (event) => {
+  if (!event.data) return;
+
+  const { title, options } = event.data.json();
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const path = event.notification.data?.path || "/notificaciones";
+
+  // Si la app ya está abierta en alguna pestaña, se reutiliza en vez de abrir otra.
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.navigate(path);
+          return client.focus();
+        }
+      }
+
+      return self.clients.openWindow(path);
+    })
+  );
+});
+
+// El navegador puede rotar las llaves de una suscripción; cuando pasa, se vuelve a registrar sola. Chrome no
+// siempre trae la suscripción vieja, así que la llave del servidor va aquí. El encabezado X-Service-Worker es el
+// que deja pasar este POST sin el token CSRF (PushSubscriptionsController): sin él, el servidor lo rechazaba y el
+// teléfono se quedaba sin alertas sin que nadie lo notara.
+const SERVER_KEY = "<%= j Rails.application.credentials.dig(:vapid, :public_key).to_s %>";
+
+const decodeKey = (key) => {
+  const base64 = (key + "=".repeat((4 - (key.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
+  return Uint8Array.from([...atob(base64)].map((char) => char.charCodeAt(0)));
+};
+
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (event.newSubscription
+      ? Promise.resolve(event.newSubscription)
+      : self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeKey(SERVER_KEY) })
+    ).then((subscription) =>
+      fetch("/notificaciones/suscripcion", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-Service-Worker": "1" },
+        body: JSON.stringify({ subscription: subscription.toJSON() })
+      })
+    )
+  );
+});

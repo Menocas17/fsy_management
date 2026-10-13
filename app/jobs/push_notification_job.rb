@@ -15,23 +15,43 @@ class PushNotificationJob < ApplicationJob
     subscriptions.find_each { |subscription| deliver(subscription, alert) }
   end
 
+  # Un aviso a un dispositivo. Devuelve nil si salió, o por qué no (también lo usa la prueba de Configuración,
+  # PushSubscriptionsController#test, para mostrarle a la persona qué contestó el servidor de push).
+  def self.deliver(subscription, message, urgency: "normal")
+    WebPush.payload_send(
+      message: message.to_json,
+      endpoint: subscription.endpoint,
+      p256dh: subscription.p256dh_key,
+      auth: subscription.auth_key,
+      vapid: vapid,
+      urgency: urgency,
+      ttl: 12.hours.to_i
+    )
+    subscription.update_column(:last_used_at, Time.current)
+    nil
+  rescue WebPush::ExpiredSubscription, WebPush::InvalidSubscription => error
+    # El navegador ya no quiere saber nada de este endpoint: se borra y no se reintenta.
+    subscription.destroy
+    "#{error.class.name.demodulize}: el teléfono ya no acepta este registro"
+  rescue WebPush::ResponseError => error
+    Rails.logger.warn("Push rechazado para #{subscription.id}: #{error.class} #{error.message}")
+    "#{error.class.name.demodulize} #{error.response&.code}: #{error.response&.body.to_s.truncate(160)}"
+  rescue StandardError => error
+    Rails.logger.warn("Push falló para #{subscription.id}: #{error.class} #{error.message}")
+    "#{error.class}: #{error.message.truncate(160)}"
+  end
+
+  def self.vapid
+    {
+      public_key: Rails.application.credentials.dig(:vapid, :public_key),
+      private_key: Rails.application.credentials.dig(:vapid, :private_key),
+      subject: Rails.application.config.x.push_subject
+    }
+  end
+
   private
     def deliver(subscription, alert)
-      WebPush.payload_send(
-        message: payload(alert).to_json,
-        endpoint: subscription.endpoint,
-        p256dh: subscription.p256dh_key,
-        auth: subscription.auth_key,
-        vapid: vapid,
-        urgency: alert.priority_critica? ? "high" : "normal",
-        ttl: 12.hours.to_i
-      )
-      subscription.update_column(:last_used_at, Time.current)
-    rescue WebPush::ExpiredSubscription, WebPush::InvalidSubscription
-      # El navegador ya no quiere saber nada de este endpoint: se borra y no se reintenta.
-      subscription.destroy
-    rescue WebPush::ResponseError => error
-      Rails.logger.warn("Push rechazado para #{subscription.id}: #{error.class} #{error.message}")
+      self.class.deliver(subscription, payload(alert), urgency: alert.priority_critica? ? "high" : "normal")
     end
 
     def payload(alert)
@@ -49,14 +69,6 @@ class PushNotificationJob < ApplicationJob
           silent: false,
           data: { path: alert.link_path.presence || "/alertas/#{alert.id}", priority: alert.priority }
         }
-      }
-    end
-
-    def vapid
-      {
-        public_key: Rails.application.credentials.dig(:vapid, :public_key),
-        private_key: Rails.application.credentials.dig(:vapid, :private_key),
-        subject: Rails.application.config.x.push_subject
       }
     end
 end
