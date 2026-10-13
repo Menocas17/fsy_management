@@ -30,7 +30,7 @@ const TONES = {
 
 export default class extends Controller {
   static targets = ["video", "canvas", "start", "status", "card", "last", "corner", "arrived", "pending", "manual",
-                    "voidDialog", "voidName", "voidDetail"]
+                    "voidDialog", "voidName", "voidDetail", "viewer", "expand", "codeDialog"]
   static values = { rosterUrl: String, syncUrl: String, mode: String, total: Number, arrived: Number }
 
   connect() {
@@ -50,7 +50,7 @@ export default class extends Controller {
     // La cámara no sobrevive a salir de la página: Turbo guardaba la pantalla con el botón oculto y el
     // video sin señal, y al volver con el gesto quedaba en negro. Se apaga al salir o al esconder la app,
     // se deja la pantalla como nueva, y se vuelve a encender sola si ya había permiso.
-    this.onBeforeCache = () => { this.stop(); this.resetCamera() }
+    this.onBeforeCache = () => { this.stop(); this.exitFullscreen(); this.resetCamera() }
     this.onVisibility = () => document.hidden ? this.stop() : this.resume()
     this.onPageShow = (event) => { if (event.persisted) this.resume() }
     this.onFirstTouch = () => this.unlockAudio()
@@ -76,6 +76,7 @@ export default class extends Controller {
     this.element.removeEventListener("pointerdown", this.onFirstTouch)
     window.removeEventListener("online", this.onOnline)
     clearInterval(this.timer)
+    this.releaseWakeLock()
   }
 
   // Cámara ----------------------------------------------------------------
@@ -88,6 +89,8 @@ export default class extends Controller {
     const stillWanted = () => run === this.run && this.element.isConnected && !document.hidden
     this.starting = true
     this.startTarget.hidden = true
+    // En el teléfono la cámara se abre en pantalla completa, salvo que en esta visita ya se haya salido de ella.
+    if (this.phone && !this.leftFullscreen) this.enterFullscreen()
     this.unlockAudio()
     this.say("Abriendo la cámara…")
     try {
@@ -101,6 +104,7 @@ export default class extends Controller {
       if (!this.stream) return
     } catch (error) {
       this.stop()
+      this.exitFullscreen()
       this.startTarget.hidden = false
       return this.say("No se pudo abrir la cámara. Puedes registrar con el código a mano.", true)
     } finally {
@@ -109,6 +113,8 @@ export default class extends Controller {
 
     this.say("Apunta al código del gafete")
     this.scanning = true
+    this.expandTarget.hidden = this.fullscreen
+    if (this.fullscreen) this.keepAwake()
     this.tick()
   }
 
@@ -117,6 +123,7 @@ export default class extends Controller {
     this.scanning = false
     if (this.frame) cancelAnimationFrame(this.frame)
     this.stream = closeCamera(this.stream, this.videoTarget)
+    this.expandTarget.hidden = true
   }
 
   // Pantalla como recién abierta: botón visible, sin video ni tarjeta encima.
@@ -141,6 +148,86 @@ export default class extends Controller {
     }
   }
 
+  // Pantalla completa (teléfono) -------------------------------------------
+  // Una capa fija sobre todo (.scan-viewer[data-fullscreen]). «Atrás» en Android (y Esc) solo la cierra, con un
+  // CloseWatcher: una entrada propia en el historial no sirve, porque al volver de ella Turbo recargaba la página.
+  expand() {
+    this.leftFullscreen = false
+    this.enterFullscreen()
+    if (!this.scanning) this.start()
+  }
+
+  // La ✕: sale de la pantalla completa y la cámara sigue prendida debajo, con «Pantalla completa» para volver.
+  collapse() {
+    this.leftFullscreen = true
+    this.exitFullscreen()
+  }
+
+  enterFullscreen() {
+    if (this.fullscreen) return
+    this.fullscreen = true
+    this.viewerTarget.dataset.fullscreen = ""
+    this.expandTarget.hidden = true
+    if (window.CloseWatcher) {
+      this.closeWatcher = new CloseWatcher()
+      this.closeWatcher.addEventListener("close", () => {
+        this.closeWatcher = null
+        this.collapse()
+      })
+    }
+    this.keepAwake()
+  }
+
+  exitFullscreen() {
+    if (!this.fullscreen) return
+    this.fullscreen = false
+    delete this.viewerTarget.dataset.fullscreen
+    this.closeWatcher?.destroy()
+    this.closeWatcher = null
+    this.expandTarget.hidden = !this.scanning
+    if (this.codeDialogTarget.open) this.codeDialogTarget.close()
+    this.releaseWakeLock()
+  }
+
+  // Con la fila avanzando, el teléfono no se debe bloquear entre una persona y otra. El navegador suelta el
+  // bloqueo al esconder la app; al volver, start() pasa otra vez por aquí.
+  async keepAwake() {
+    if (!navigator.wakeLock || this.wakeLock) return
+    try {
+      const lock = await navigator.wakeLock.request("screen")
+      if (!this.fullscreen) return lock.release()
+      this.wakeLock = lock
+      lock.addEventListener("release", () => { if (this.wakeLock === lock) this.wakeLock = null })
+    } catch (error) {
+      // Sin permiso o sin soporte: la pantalla se apaga como siempre.
+    }
+  }
+
+  releaseWakeLock() {
+    this.wakeLock?.release().catch(() => {})
+    this.wakeLock = null
+  }
+
+  get phone() {
+    return window.matchMedia("(max-width: 767.98px)").matches
+  }
+
+  // El código a mano desde la pantalla completa: un diálogo arriba, lejos del teclado.
+  askCode() {
+    this.unlockAudio()
+    this.codeDialogTarget.querySelector("form").reset()
+    this.codeDialogTarget.showModal()
+    this.codeDialogTarget.querySelector("input[name=code]").focus()
+  }
+
+  closeCode() {
+    this.codeDialogTarget.close()
+  }
+
+  closeCodeOutside(event) {
+    if (event.target === this.codeDialogTarget) this.closeCode()
+  }
+
   tick() {
     if (!this.scanning) return
 
@@ -155,12 +242,15 @@ export default class extends Controller {
   }
 
   // Registro --------------------------------------------------------------
+  // Del campo debajo de la cámara o del diálogo de la pantalla completa.
   typed(event) {
     event.preventDefault()
-    const code = this.manualTarget.value.trim()
+    const input = event.target.querySelector("input[name=code]")
+    const code = input.value.trim()
     this.unlockAudio()
+    if (this.codeDialogTarget.open) this.closeCode()
     if (code) this.handle(code, { force: true })
-    this.manualTarget.value = ""
+    input.value = ""
   }
 
   handle(payload, { force = false } = {}) {
@@ -272,7 +362,7 @@ export default class extends Controller {
 
   setArrived(count) {
     this.arrivedValue = count
-    this.arrivedTarget.textContent = count
+    this.arrivedTargets.forEach((target) => { target.textContent = count })
   }
 
   // El QR trae el id; a mano se escribe el código corto del gafete (P-0421, p421 o solo 421).
@@ -326,8 +416,10 @@ export default class extends Controller {
 
   paintPending() {
     const count = this.queue.length
-    this.pendingTarget.hidden = count === 0
-    this.pendingTarget.textContent = count === 1 ? "1 sin sincronizar" : `${count} sin sincronizar`
+    this.pendingTargets.forEach((target) => {
+      target.hidden = count === 0
+      target.textContent = count === 1 ? "1 sin sincronizar" : `${count} sin sincronizar`
+    })
   }
 
   async refreshRoster() {
@@ -364,11 +456,15 @@ export default class extends Controller {
 
     // Franja compacta de alto fijo (tres líneas cortadas) en la zona de abajo del visor; el enlace a la ficha
     // va en la nota de «Último» debajo de la cámara, para no navegar por un toque sin querer.
-    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex flex-col justify-center rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg transition-opacity duration-200`
+    // En pantalla completa «Último» no se ve: ahí la tarjeta trae su propio «Anular».
+    this.cardTarget.className = `absolute inset-x-3 bottom-3 z-10 h-[76px] flex items-center gap-3 rounded-tile border border-line border-l-4 ${tone.bar} bg-surface/95 px-3.5 shadow-lg transition-opacity duration-200`
     this.cardTarget.innerHTML = `
-      <p class="text-meta font-bold uppercase tracking-[.07em] leading-tight ${tone.text}">${tone.label}</p>
-      <p class="flex items-center gap-2 min-w-0"><span class="text-title font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</p>
-      ${result.detail ? `<p class="text-label font-semibold leading-tight text-ink-700 truncate">${this.escape(result.detail)}</p>` : ""}
+      <div class="min-w-0 flex-1 flex flex-col justify-center">
+        <p class="text-meta font-bold uppercase tracking-[.07em] leading-tight ${tone.text}">${tone.label}</p>
+        <p class="flex items-center gap-2 min-w-0"><span class="text-title font-extrabold leading-snug text-ink-900 truncate">${this.escape(result.title)}</span>${this.genderChip(result.gender)}</p>
+        ${result.detail ? `<p class="text-label font-semibold leading-tight text-ink-700 truncate">${this.escape(result.detail)}</p>` : ""}
+      </div>
+      ${result.void && this.fullscreen ? this.voidButton(result.void, "data-void-card") : ""}
     `
     this.cardTarget.hidden = false
     this.cardTarget.classList.remove("opacity-0")
@@ -398,7 +494,7 @@ export default class extends Controller {
   }
 
   dismissCard(event) {
-    if (event.target.closest("a")) return
+    if (event.target.closest("a, button")) return
     this.hideCard()
   }
 
@@ -423,11 +519,15 @@ export default class extends Controller {
         ${result.detail ? `<span class="block text-label font-semibold text-ink-500 truncate">${this.escape(result.detail)}</span>` : ""}
       </span>
       ${result.url ? `<a href="${this.escape(result.url)}" class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-label font-bold text-primary-700 dark:text-primary-300 underline underline-offset-2">Ver perfil</a>` : ""}
-      ${result.void ? `<button type="button" data-action="checkin-scanner#askVoid" data-token="${this.escape(result.void.token)}"
-          data-participant-id="${this.escape(result.void.participantId)}" data-name="${this.escape(result.void.name)}" data-void-last
-          class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-label font-bold text-cat-rose-ink underline underline-offset-2 cursor-pointer">Anular</button>` : ""}
+      ${result.void ? this.voidButton(result.void, "data-void-last") : ""}
     `
     this.lastTarget.hidden = false
+  }
+
+  voidButton(target, marker) {
+    return `<button type="button" data-action="checkin-scanner#askVoid" data-token="${this.escape(target.token)}"
+        data-participant-id="${this.escape(target.participantId)}" data-name="${this.escape(target.name)}" ${marker}
+        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 text-label font-bold text-cat-rose-ink underline underline-offset-2 cursor-pointer">Anular</button>`
   }
 
   // Dos escaneos «ok» seguidos se ven iguales: el pulso y las esquinas de color marcan que hubo uno nuevo.
