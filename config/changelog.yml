@@ -7,6 +7,16 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-13-registro-pantalla-completa
+  date: 2026-10-13
+  title: Registro en pantalla completa
+  summary: En el teléfono, la cámara del registro de llegadas se abre en pantalla completa para escanear sin distracciones.
+  changes:
+    - Solo se ve la cámara, cuántos van registrados y el resultado del último escaneo, con «Anular» ahí mismo.
+    - El botón «Código» abre un cuadro para escribir el código del gafete cuando no se puede leer.
+    - La ✕ (o «atrás» en Android) vuelve a la página; «Pantalla completa», sobre la cámara, la abre de nuevo.
+    - Mientras escaneas, la pantalla no se apaga.
+  roles: [ director, coordinador, logistica, director_logistica ]
 - id: 2026-10-11-cuartos-colores
   date: 2026-10-11
   title: Cuartos de mujeres en morado
