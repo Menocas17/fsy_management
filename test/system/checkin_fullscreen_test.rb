@@ -1,15 +1,9 @@
 require "application_system_test_case"
 
 # En el teléfono la cámara del registro se abre en pantalla completa; el código se escribe desde ahí, y la ✕ o Esc
-# (el «atrás» de Android) la cierran sin salir de la página. Una cámara falsa de Chrome hace las veces de la real.
+# (el «atrás» de Android) la cierran sin salir de la página. La cámara es un canvas: la falsa de Chrome no siempre
+# abría en el CI, y sin cámara la pantalla completa se cierra sola.
 class CheckinFullscreenTest < ApplicationSystemTestCase
-  driven_by :selenium, using: :headless_chrome, screen_size: [ 390, 844 ] do |options|
-    options.binary = ENV["CHROME_BIN"] if ENV["CHROME_BIN"].present?
-    options.add_argument("--no-sandbox") if Process.uid.zero?
-    options.add_argument("--use-fake-ui-for-media-stream")
-    options.add_argument("--use-fake-device-for-media-stream")
-  end
-
   setup do
     ScanWindow.activate!(ScanWindow.arrival)
     Participant.create!(first_name: "Andrea", last_name: "Chavarría", age: 15, stake: "villa_flor",
@@ -20,7 +14,9 @@ class CheckinFullscreenTest < ApplicationSystemTestCase
     sign_in_as(users(:one))
     resize_to_mobile
     visit checkins_path
-    click_on "Activar la cámara" if page.has_button?("Activar la cámara", wait: 2)
+    fake_camera
+    click_on "Activar la cámara"
+    assert_text "Apunta al código del gafete"
     assert_selector ".scan-viewer[data-fullscreen]"
 
     click_on "Código"
@@ -44,4 +40,17 @@ class CheckinFullscreenTest < ApplicationSystemTestCase
     assert_no_selector ".scan-viewer[data-fullscreen]"
     assert_selector "button", text: "Pantalla completa"
   end
+
+  private
+    def fake_camera
+      page.execute_script(<<~JS)
+        navigator.mediaDevices.getUserMedia = async () => {
+          const canvas = document.createElement("canvas")
+          canvas.width = 640
+          canvas.height = 480
+          canvas.getContext("2d").fillRect(0, 0, 640, 480)
+          return canvas.captureStream(15)
+        }
+      JS
+    end
 end
