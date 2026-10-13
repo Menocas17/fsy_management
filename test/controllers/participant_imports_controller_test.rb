@@ -85,7 +85,7 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#flash-messages", /No se pudo leer el archivo/
   end
 
-  test "only full access and the Registro area may import" do
+  test "only full access and the logistics director may import" do
     sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
 
     get new_participant_import_path
@@ -121,37 +121,39 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ 3 ], luis.companies.pluck(:number)
   end
 
-  test "registration (logística) only sees the jóvenes tab and can't upload companies" do
-    registrar = Participant.create!(first_name: "Rita", last_name: "Registro", age: 30, stake: "villa_flor", shirt_number: "m",
-                                    gender: "M", rol: "logistica", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
-    sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Prueba123!", participant: registrar))
+  test "registration (logística) can't open nor use the bulk upload anymore" do
+    sign_in_as_registrar
 
-    get new_participant_import_path(tipo: "companias")
-    assert_select "[data-import-tab]", 0
-    assert_select "[data-import-form='jovenes']"
+    get new_participant_import_path
+    assert_redirected_to dashboard_path
 
+    assert_no_difference -> { Participant.count } do
+      post participant_imports_path, params: { file: csv_upload("Nombre,Apellido,Edad,Sexo,Estaca,Talla de camiseta\nLuis,Uno,15,Masculino,Villa Flor,M\n") }
+    end
     post company_imports_path, params: { file: csv_upload("Número\n9\n") }
     assert_nil Company.find_by(number: 9)
   end
 
-  test "registration's upload makes every row a joven, whatever the Rol column says" do
-    sign_in_as_registrar
+  test "the logistics director uploads jóvenes, and every row enters as a joven whatever the Rol column says" do
+    director = Participant.create!(first_name: "Dora", last_name: "Logística", age: 40, stake: "villa_flor", shirt_number: "m",
+                                   gender: "M", rol: "director_logistica")
+    sign_in_as(User.create!(email_address: "dora@fsy.com", password: "Prueba123!", participant: director))
     file = csv_upload("Nombre,Apellido,Edad,Sexo,Estaca,Talla de camiseta,Rol,Compañía\nLuis,Staff,25,Masculino,Villa Flor,M,Consejero,3\n")
 
     post participant_imports_path, params: { file: file }
 
-    luis = Participant.find_by(first_name: "Luis", last_name: "Staff")
-    assert luis.nil? || luis.joven?, "never staff"
     assert_not Participant.where(first_name: "Luis").where.not(rol: :joven).exists?
     assert_empty Membership.joins(:participant).where(participants: { first_name: "Luis" })
   end
 
-  test "registration can't turn a waiting row into staff, nor approve one that is" do
+  test "without full access a waiting row can't be turned into staff, nor approved if it is" do
     import = ParticipantImport.create!(filename: "staff.xlsx", uploaded_by_name: "Admin")
     row = import.rows.create!(row_number: 2, status: :pending, issues: [],
                               values: { "first_name" => "Ana", "last_name" => "Staff", "age" => "30", "gender" => "Femenino",
                                         "stake" => "Villa Flor", "shirt_number" => "M", "rol" => "Coordinador" })
-    sign_in_as_registrar
+    director = Participant.create!(first_name: "Dora", last_name: "Logística", age: 40, stake: "villa_flor", shirt_number: "m",
+                                   gender: "M", rol: "director_logistica")
+    sign_in_as(User.create!(email_address: "dora@fsy.com", password: "Prueba123!", participant: director))
 
     patch approve_participant_import_row_path(import, row)
     assert_not Participant.exists?(first_name: "Ana", last_name: "Staff")

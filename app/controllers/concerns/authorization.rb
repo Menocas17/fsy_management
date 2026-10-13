@@ -315,8 +315,9 @@ module Authorization
     full_company_access? || Current.user&.participant&.director_logistica? || false
   end
 
+  # La carga masiva: acceso total y el director de logística (el registro ya no: crea fichas de a una).
   def can_import_participants?
-    full_company_access? || Current.user&.checkin_member? || false
+    full_company_access? || Current.user&.participant&.director_logistica? || false
   end
 
   # Compañías y consejeros por archivo: arman el personal de las compañías, que es de acceso total.

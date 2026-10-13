@@ -51,7 +51,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/filename="participantes-/, response.headers["Content-Disposition"])
   end
 
-  test "the logistics director only sees the logistics section" do
+  test "the logistics director sees the logistics section and the bulk upload" do
     director = Participant.create!(first_name: "Luis", last_name: "Logística", age: 40, stake: "las_americas",
                                    shirt_number: "l", gender: "H", rol: :director_logistica)
     sign_in_as(User.create!(email_address: "logistica@fsy.com", password: "Logistica1!", participant: director))
@@ -59,7 +59,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     get reports_path
     assert_response :success
     assert_select "a[href='#{participants_reports_path}']", false
-    assert_select "a[href='#{new_participant_import_path}']", false
+    assert_select "a[href='#{new_participant_import_path}']"
     assert_select "a[href='#{inventory_reports_path}']", text: /Generar PDF/
     assert_select "a[href='#{labels_reports_path}']"
 
