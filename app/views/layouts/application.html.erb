@@ -10,6 +10,8 @@
     <meta name="application-name" content="Fsy Management">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
+    <%# application.js le recuerda al servidor el permiso de notificaciones de este teléfono (una vez por sesión). %>
+    <% if Current.user && !Current.viewing_as %><meta name="push-subscription-url" content="<%= push_subscription_notifications_path %>"><% end %>
     <%= csp_meta_tag %>
     <%= yield :head %>
     <script>

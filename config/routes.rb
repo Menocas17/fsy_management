@@ -117,6 +117,7 @@ Rails.application.routes.draw do
       patch "leidas" => "notifications#read", as: :read
       post "suscripcion" => "push_subscriptions#create", as: :push_subscription
       delete "suscripcion" => "push_subscriptions#destroy"
+      post "suscripcion/prueba" => "push_subscriptions#send_test", as: :push_test
     end
   end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"

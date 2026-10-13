@@ -79,3 +79,31 @@ document.addEventListener(
   },
   true
 );
+
+// Notificaciones con la app cerrada: el teléfono guarda su permiso, pero el servidor puede haberlo perdido (se
+// borró por un error, se cambió de base o de llave). Al abrir la app, una vez por sesión, se le vuelve a mandar
+// sin preguntar nada; si la llave cambió, lo rehace Configuración (push_controller.js).
+const syncPushSubscription = async () => {
+  const url = document.querySelector('meta[name="push-subscription-url"]')?.content;
+  if (!url || !('serviceWorker' in navigator) || !('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    if (sessionStorage.getItem('fsy:push-synced')) return;
+    const registration = await navigator.serviceWorker.getRegistration('/');
+    const subscription = await registration?.pushManager.getSubscription();
+    if (!subscription) return;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name=csrf-token]')?.content,
+      },
+      body: JSON.stringify({ subscription: subscription.toJSON() }),
+    });
+    if (response.ok) sessionStorage.setItem('fsy:push-synced', '1');
+  } catch (e) {
+    // Sin conexión o sin sessionStorage: se intenta en la próxima página.
+  }
+};
+document.addEventListener('turbo:load', () => setTimeout(syncPushSubscription, 3000), { once: true });
