@@ -33,11 +33,11 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
 
     frame = "turbo-frame##{ActionView::RecordIdentifier.dom_id(participants(:maria), :qr)}"
     assert_select "nav[data-bottom-nav] ~ dialog[data-dialog-name='qr'] #{frame}[loading='lazy'][src='#{participant_qr_path(participants(:maria))}']"
-    assert_select "dialog[data-dialog-name='qr'] svg[role='img']", false
+    assert_select "dialog[data-dialog-name='qr'] [role='img'] > svg", false
 
     get participant_qr_path(participants(:maria))
     assert_response :success
-    assert_select "#{frame} svg[role='img']", 1
+    assert_select "#{frame} [role='img'] > svg", 1
     assert_select "#{frame}", text: /#{participants(:maria).full_name}/
   end
 

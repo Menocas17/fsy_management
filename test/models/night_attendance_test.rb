@@ -81,6 +81,21 @@ class NightAttendanceTest < ActiveSupport::TestCase
     end
   end
 
+
+  test "if the 10 pm alert fails, the night isn't marked as warned and the job can try again" do
+    Alert.define_singleton_method(:create!) { |*| raise ActiveRecord::RecordInvalid }
+    begin
+      assert_raises(ActiveRecord::RecordInvalid) { NightAttendanceNotifier.nightly_check(@night) }
+    ensure
+      Alert.singleton_class.remove_method(:create!)
+    end
+    assert_nil AppSetting["night_attendance_alerted:#{@night.iso8601}"]
+
+    assert_difference -> { Alert.count }, 1 do
+      NightAttendanceNotifier.nightly_check(@night)
+    end
+  end
+
   private
     def person(name, rol, gender, company: nil)
       Participant.create!(first_name: name, last_name: "Prueba", age: 17, stake: "bello_horizonte", ward: "la_rotonda",

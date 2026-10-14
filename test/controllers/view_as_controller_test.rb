@@ -93,13 +93,25 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @registrar.user.reload.alerts_read_at
   end
 
-  test "actions while viewing as are logged under the superadmin" do
+  test "viewing as only looks: changes are stopped and nothing is written in the other person's name" do
     sign_in_as @admin
     post view_as_path, params: { participant_id: @coordinator.id }
-    patch participant_path(participants(:juan)), params: { participant: { first_name: "Juanito" } }
 
-    log = AuditLog.order(:id).last
-    assert_equal "Administrador del sistema (viendo como Cora Prueba)", log.actor_name
+    assert_no_difference -> { AuditLog.count } do
+      patch participant_path(participants(:juan)), params: { participant: { first_name: "Juanito" } }
+    end
+    assert_redirected_to dashboard_path
+    assert_match "solo se mira", flash[:alert]
+    assert_equal "Juan", participants(:juan).reload.first_name
+
+    assert_no_difference -> { PushSubscription.count } do
+      post push_subscription_notifications_path, as: :json,
+           params: { subscription: { endpoint: "https://push.example/x", keys: { p256dh: "k", auth: "a" } } }
+    end
+    assert_response :forbidden
+
+    delete view_as_path
+    assert_nil session[:view_as_participant_id]
   end
 
   test "only the superadmin views as someone, and nobody as a joven" do

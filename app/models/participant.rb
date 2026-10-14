@@ -118,6 +118,8 @@ class Participant < ApplicationRecord
   # un número correlativo. Es lo que se escribe a mano cuando el QR no se lee.
   CODE_PREFIX = "P".freeze
   CODE_FORMAT = /\A#{CODE_PREFIX}-\d{4,}\z/
+  CODE_LOCK_KEY = 4_217_001 # el candado de assign_code (pg_advisory_xact_lock)
+  CODE_SETTING = "participant_code_last".freeze
 
   # Acepta como se escriba: «P-0421», «p0421», «P 421» o solo «421». nil si no parece un código.
   def self.normalize_code(input)
@@ -452,10 +454,16 @@ class Participant < ApplicationRecord
       errors.add(:base, "Ya hay #{Participant.role_label(rol).downcase} #{gender == 'M' ? 'mujer' : 'hombre'}: #{occupant.full_name} (solo uno por género)")
     end
 
+    # El código del gafete nunca se repite. Con un candado de Postgres (dura hasta que termina el guardado) dos
+    # registradores a la vez ya no sacan el mismo número; y el último entregado queda anotado en AppSetting, así
+    # que borrar la ficha más nueva no deja su número libre: su gafete impreso abriría la ficha de otra persona.
     def assign_code
       return if code.present?
 
-      last = Participant.where.not(code: nil).maximum(Arel.sql("substring(code from 3)::int")) || 0
-      self.code = format("#{CODE_PREFIX}-%04d", last + 1)
+      self.class.connection.execute("SELECT pg_advisory_xact_lock(#{CODE_LOCK_KEY})")
+      used = Participant.unscoped.where.not(code: nil).maximum(Arel.sql("substring(code from 3)::int")) || 0
+      number = [ used, AppSetting[CODE_SETTING].to_i ].max + 1
+      AppSetting[CODE_SETTING] = number.to_s
+      self.code = format("#{CODE_PREFIX}-%04d", number)
     end
 end

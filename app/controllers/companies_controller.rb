@@ -60,7 +60,10 @@ class CompaniesController < ApplicationController
   end
 
   def destroy
-    @company.destroy
+    unless @company.destroy
+      return redirect_to company_path(@company), alert: "No se pudo eliminar: #{@company.errors.full_messages.to_sentence.presence || "inténtalo de nuevo"}."
+    end
+
     record_audit!(category: :companias, action: "destroyed", target: @company, summary: "Eliminó #{@company.name}")
     redirect_to companies_path, status: :see_other, notice: "Compañía eliminada."
   end
@@ -75,9 +78,16 @@ class CompaniesController < ApplicationController
     @dining_counts = Company.jovenes_by_dining_hall
   end
 
+  # Solo uno de los que ofrece la página (load_staff_options): consejero, del género que falta y sin otra
+  # compañía. Sin esto, un id cualquiera metía a otra persona, o se llevaba al consejero de otra rama, que
+  # quedaba en dos compañías.
   def assign_staff
-    @membership = @company.memberships.build(membership_params)
-    if @membership.save
+    load_staff_options
+    candidate = @counselor_candidates.find_by(id: membership_params[:participant_id])
+    return redirect_to edit_company_path(@company, anchor: "lideres"), alert: "Esa persona no se puede asignar a esta compañía." unless candidate
+
+    @membership = @company.memberships.build(participant: candidate)
+    if save_membership(@membership)
       record_audit!(category: :companias, action: "assigned_staff", target: @company,
                     summary: "Asignó a #{@membership.participant.full_name} como #{ROLE_LABELS.fetch(@membership.role, @membership.role)} en #{@company.name}")
       redirect_to edit_company_path(@company, anchor: "lideres"), notice: "Personal asignado."
@@ -88,13 +98,24 @@ class CompaniesController < ApplicationController
 
   def remove_staff
     membership = @company.memberships.includes(:participant).find(params[:membership_id])
-    membership.destroy
+    unless membership.destroy
+      return redirect_to edit_company_path(@company, anchor: "lideres"), alert: "No se pudo quitar a #{membership.participant.full_name}."
+    end
+
     record_audit!(category: :companias, action: "removed_staff", target: @company,
                   summary: "Removió a #{membership.participant.full_name} de #{@company.name}")
     redirect_to edit_company_path(@company, anchor: "lideres"), notice: "Personal removido."
   end
 
   private
+    # Dos pestañas asignando el mismo lugar a la vez: la validación pasa en las dos y la base frena a la segunda.
+    def save_membership(membership)
+      membership.save
+    rescue ActiveRecord::RecordNotUnique
+      membership.errors.add(:base, "Ese lugar se acaba de ocupar. Recarga la página.")
+      false
+    end
+
     def set_company
       @company = Company.find(params[:id])
     end

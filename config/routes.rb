@@ -29,6 +29,8 @@ Rails.application.routes.draw do
   # «Ver como» otra persona (su menú y sus permisos): solo el superadmin.
   resource :view_as, only: %i[create destroy], controller: "view_as", path: "ver-como"
   delete "accesos/sesiones/:id" => "accesses#destroy_session", as: :access_session
+  post "accesos/acceso-total" => "accesses#grant_full_access", as: :access_full_access_grants
+  delete "accesos/acceso-total/:id" => "accesses#revoke_full_access", as: :access_full_access_grant
   # Finanzas: el panel y su configuración, las categorías y los gastos con sus tres etapas (docs/finanzas.md).
   resource :finances, only: %i[show edit update], path: "finanzas", path_names: { edit: "configurar" }
   resources :expense_categories, only: %i[new create edit update destroy], path: "finanzas/categorias",

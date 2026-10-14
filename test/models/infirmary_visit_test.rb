@@ -87,6 +87,19 @@ class InfirmaryVisitTest < ActiveSupport::TestCase
     assert_includes medicine.errors[:base], "elige el medicamento que se le dio (o escríbelo si no está en el inventario)"
   end
 
+
+  test "confirming the arrival twice (two taps, two nurses) enters once and alerts once" do
+    visit = InfirmaryVisit.announce(@juan, by: @counselor, reason: "fiebre").tap(&:start)
+    first_tap = InfirmaryVisit.find(visit.id)
+    second_tap = InfirmaryVisit.find(visit.id)
+
+    assert_difference -> { Alert.count }, 1 do
+      assert first_tap.admit!(by: @nurse)
+      assert_not second_tap.admit!(by: @nurse)
+    end
+    assert visit.reload.adentro?
+  end
+
   private
     def person(name, rol, gender, **attrs)
       Participant.create!(first_name: name, last_name: "Prueba", age: 30, stake: "bello_horizonte", ward: "la_rotonda",

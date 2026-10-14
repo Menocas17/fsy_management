@@ -71,7 +71,10 @@ class InfirmaryVisitsController < ApplicationController
   def admit
     return redirect_to infirmary_chart_path(@visit.participant), alert: "Esa visita ya no está en camino" unless @visit.en_camino?
 
-    @visit.admit!(by: Current.user.participant)
+    unless @visit.admit!(by: Current.user.participant)
+      return redirect_to infirmary_chart_path(@visit.participant), alert: "Esa visita ya no está en camino"
+    end
+
     record_audit!(category: :enfermeria, action: "updated", target: @visit.participant,
                   summary: "Confirmó la entrada de #{@visit.participant.full_name} a enfermería")
     redirect_back_or_to infirmary_chart_path(@visit.participant), notice: "Entrada confirmada. Se avisó a sus consejeros y auxiliares."

@@ -4,6 +4,7 @@
 # otra persona.
 class TutorialsController < ApplicationController
   before_action :require_tutorial
+  skip_before_action :block_writes_while_viewing_as
 
   def create
     Tutorial.welcome_alert_for(Current.user) unless Current.viewing_as?

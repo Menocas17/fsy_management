@@ -98,6 +98,20 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Removió a María García de Compañía 3", AuditLog.recent.first.summary
   end
 
+  test "only a free counselor of the missing gender can be assigned, never someone from another company" do
+    other = Company.create!(number: 44)
+    taken = Participant.create!(first_name: "Otro", last_name: "Consejero", age: 30, stake: "villa_flor",
+                                shirt_number: "m", gender: "H", rol: :consejero)
+    other.memberships.create!(participant: taken)
+
+    assert_no_difference -> { Membership.count } do
+      post assign_staff_company_path(@company), params: { participant_id: taken.id }
+      post assign_staff_company_path(@company), params: { participant_id: participants(:juan).id }
+    end
+    assert_equal [ other.id ], taken.reload.memberships.pluck(:associable_id)
+    assert_match "no se puede asignar", flash[:alert]
+  end
+
   test "overview charts jóvenes by company and gender and by dining hall" do
     participants(:juan).update!(company: @company, room: "301")
     @company.memberships.create!(participant: participants(:maria))

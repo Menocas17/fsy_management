@@ -62,4 +62,20 @@ class CompanyTest < ActiveSupport::TestCase
     assert_equal "C3", Company.new(name: "Compañía 3", number: 3).initials
     assert_equal "L", Company.new(name: "Luz del Mundo").initials
   end
+
+  test "a company holds one counselor of each gender, and a counselor sits in one company only" do
+    company = Company.create!(number: 71)
+    other = Company.create!(number: 72)
+    first = Participant.create!(first_name: "Uno", last_name: "Consejero", age: 30, stake: "villa_flor", shirt_number: "m", gender: "H", rol: :consejero)
+    second = Participant.create!(first_name: "Dos", last_name: "Consejero", age: 30, stake: "villa_flor", shirt_number: "m", gender: "H", rol: :consejero)
+    company.memberships.create!(participant: first)
+
+    same_gender = company.memberships.build(participant: second)
+    assert_not same_gender.save, "a second man is refused with a message, not a database error"
+    assert_match "Ya hay consejero hombre", same_gender.errors.full_messages.to_sentence
+
+    twice = other.memberships.build(participant: first)
+    assert_not twice.save
+    assert_match "ya es consejero de otra compañía", twice.errors.full_messages.to_sentence
+  end
 end

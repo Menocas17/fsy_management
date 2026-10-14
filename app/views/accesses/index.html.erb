@@ -18,6 +18,44 @@
     <% end %>
   </div>
 
+  <%# Excepciones puntuales: acceso total a una cuenta que no lo tiene por su rol. Solo el superadmin las da y las quita. %>
+  <section id="acceso-total" class="<%= card_classes("p-5 md:p-6") %>" data-full-access-grants>
+    <%= section_heading "Acceso total a dedo", "shield-check" %>
+    <p class="-mt-2 mb-4 text-label text-ink-500">
+      Para excepciones puntuales: la persona entra y edita todo, como el director o un coordinador. Queda en el Historial.
+    </p>
+    <% if @granted.any? %>
+      <ul class="divide-y divide-line-soft mb-5">
+        <% @granted.each do |user| %>
+          <li class="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 first:pt-0" data-full-access-grant="<%= user.id %>">
+            <span class="min-w-0 flex-1">
+              <span class="block text-body font-bold text-ink-900 truncate"><%= user.participant&.full_name || user.email_address %></span>
+              <span class="block text-label font-semibold text-ink-500"><%= account_label(user) %> · <%= user.email_address %></span>
+            </span>
+            <%= button_to access_full_access_grant_path(user), method: :delete,
+                  form: { data: { turbo_confirm: "¿Quitarle el acceso total a #{user.participant&.full_name || user.email_address}?",
+                                  turbo_confirm_button: "Sí, quitar" } },
+                  class: button_classes(:secondary, size: :sm) do %>
+              Quitar
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="mb-4 text-body text-ink-500">Nadie tiene acceso total fuera de su rol.</p>
+    <% end %>
+    <% if @grant_candidates.any? %>
+      <%= form_with url: access_full_access_grants_path, method: :post, class: "flex flex-col sm:flex-row gap-2.5" do %>
+        <%= select_tag :user_id, options_for_select(@grant_candidates.map { |user| [ "#{user.participant.full_name} · #{user.role_label}", user.id ] }),
+              include_blank: "Elige una cuenta de staff", required: true, aria: { label: "Cuenta a la que dar acceso total" },
+              class: "#{field_select_classes} sm:flex-1" %>
+        <%= tag.button "Dar acceso total", type: "submit", class: button_classes(:primary),
+              data: { turbo_confirm: "¿Darle acceso total a esta cuenta?", turbo_confirm_detail: "Podrá ver y editar todo en la app.",
+                      turbo_confirm_button: "Sí, dar acceso" } %>
+      <% end %>
+    <% end %>
+  </section>
+
   <section class="<%= card_classes("p-5 md:p-6") %>" data-online>
     <%= section_heading "En línea ahora", "radio" %>
     <% if @online.any? %>

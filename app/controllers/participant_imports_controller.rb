@@ -17,7 +17,10 @@ class ParticipantImportsController < ApplicationController
     counselors = params[:tipo] == "consejeros" && can_import_staffing?
     return redirect_to(new_participant_import_path(tipo: params[:tipo]), alert: "Elige un archivo para cargar.") if file.blank?
 
-    importer = ParticipantImporter.new(file, uploaded_by: Current.user.participant, role: ("consejero" if counselors)).call
+    # Sin acceso total (el registro), todas las filas entran como jóvenes, diga lo que diga la columna «Rol»:
+    # un Excel no puede crear staff que el formulario no deja crear.
+    role = counselors ? "consejero" : ("joven" unless can_import_staffing?)
+    importer = ParticipantImporter.new(file, uploaded_by: Current.user.participant, role: role).call
     if importer.fatal
       @tab = current_tab
       @imports = ParticipantImport.recent.limit(10)

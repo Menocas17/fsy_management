@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_10_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_231000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -445,6 +445,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_130000) do
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
     t.index ["practice"], name: "index_participants_on_practice", where: "practice"
+    t.index ["rol", "gender"], name: "index_participants_one_leader_per_gender", unique: true, where: "((rol = ANY (ARRAY[0, 1, 7])) AND (gender IS NOT NULL))"
   end
 
   create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -520,6 +521,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_130000) do
     t.datetime "alerts_cleared_at"
     t.boolean "simple_mode", default: true, null: false
     t.datetime "tutorial_completed_at"
+    t.boolean "full_access_granted", default: false, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["participant_id"], name: "index_users_on_participant_id", unique: true
   end

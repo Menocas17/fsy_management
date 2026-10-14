@@ -79,7 +79,11 @@ class ParticipantsController < ApplicationController
   end
 
   def destroy
-    @participant.destroy
+    # Si no se pudo borrar, el Historial no anota que se borró.
+    unless @participant.destroy
+      return redirect_to participant_path(@participant), alert: "No se pudo borrar: #{@participant.errors.full_messages.to_sentence.presence || "inténtalo de nuevo"}."
+    end
+
     record_audit!(category: :participantes, action: "destroyed", target: @participant, summary: "Eliminó el registro de #{@participant.full_name}")
     redirect_to participants_path, status: :see_other, notice: "El registro fue borrado exitosamente"
   end

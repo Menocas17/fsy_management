@@ -56,7 +56,7 @@ class InventoriesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "[data-item-quantity]", text: /62/
-    assert_select "svg[role='img']", 1, "el QR del artículo"
+    assert_select "[role='img'] > svg", 1, "el QR del artículo"
     assert_includes response.body, "Inventario inicial"
   end
 

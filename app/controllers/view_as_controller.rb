@@ -1,9 +1,10 @@
 # «Ver como»: el superadmin recorre la app con el menú y los permisos de otra persona, para probarla o
 # presentarla sin cambiar de cuenta. Elige un rol (se toma una ficha que lo muestre bien,
-# Participant.view_as_sample) o una ficha concreta desde su perfil. Lo que haga mientras tanto lo hace
-# como esa persona; el historial lo anota a nombre del superadmin (Auditable#record_audit!).
+# Participant.view_as_sample) o una ficha concreta desde su perfil. Mientras tanto solo mira: las escrituras
+# las frena ViewAsReadOnly, para que nada quede a nombre de esa persona.
 class ViewAsController < ApplicationController
   before_action :require_superadmin
+  skip_before_action :block_writes_while_viewing_as
 
   def create
     participant = if params[:participant_id].present?

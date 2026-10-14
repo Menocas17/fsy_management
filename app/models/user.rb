@@ -70,12 +70,27 @@ class User < ApplicationRecord
     "#{SecureRandom.base58(24)}A1!"
   end
 
-  # Acceso total al evento: superadmin, el matrimonio director y los coordinadores. Entran a todo y editan todo,
+  # Acceso total al evento: superadmin, el matrimonio director y los coordinadores, más las cuentas a las que el
+  # superadmin se lo dio a dedo (full_access_granted, desde Accesos; nunca a un joven). Entran a todo y editan todo,
   # salvo presentar o aprobar gastos (finance_operator?, expense_approver?); Accesos y «Ver como» son solo del
   # superadmin.
   def full_access?
     return true if superadmin?
+    return true if full_access_granted? && participant.present? && !participant.joven?
+
     participant&.coordinador? || participant&.director? || false
+  end
+
+  # Acceso total por su rol, sin contar el dado a dedo.
+  def full_access_by_role?
+    superadmin? || participant&.coordinador? || participant&.director? || false
+  end
+
+  # A quién se le puede dar a dedo: cuentas de staff que no lo tienen ya por su rol.
+  def self.full_access_candidates
+    joins(:participant).where(superadmin: false, full_access_granted: false)
+                       .where.not(participants: { rol: %i[joven director coordinador] })
+                       .includes(:participant).order("participants.first_name", "participants.last_name")
   end
 
   # Modo simple (solo en el teléfono): barra inferior en vez del menú lateral y un inicio con las cifras de

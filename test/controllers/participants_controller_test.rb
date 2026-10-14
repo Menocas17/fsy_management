@@ -312,7 +312,7 @@ class ParticipantsControllerTest < ActionDispatch::IntegrationTest
     get participant_path(juan)
 
     assert_select "[data-profile-qr]", 1
-    assert_select "dialog[data-dialog-name='qr'] svg[role='img']", 1
+    assert_select "dialog[data-dialog-name='qr'] [role='img'] > svg", 1
     assert_select "dialog[data-dialog-name='qr']", html: /#{Regexp.escape(juan.full_name)}/
   end
 
