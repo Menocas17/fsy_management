@@ -7,6 +7,13 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-14-fsynicaragua
+  date: 2026-10-14
+  title: La app ahora es fsynicaragua.com
+  summary: La dirección de la app cambió a fsynicaragua.com. La vieja te trae aquí sola.
+  changes:
+    - Entra siempre por fsynicaragua.com; la dirección anterior redirige a la nueva.
+    - Si tenías la app instalada en el teléfono, ábrela desde fsynicaragua.com e instálala otra vez, e inicia sesión de nuevo.
 - id: 2026-10-13-registro-pantalla-completa
   date: 2026-10-13
   title: Registro en pantalla completa

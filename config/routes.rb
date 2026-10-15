@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  # En el VPS el proxy atiende también el www y la dirección vieja de sslip.io (config/deploy.yml): todo eso se
+  # manda a APP_HOST para que la sesión y la app instalada vivan en un solo dominio. /up queda afuera porque el
+  # proxy revisa la salud del contenedor con otro host.
+  if Rails.env.production? && (canonical_host = ENV["APP_HOST"].presence)
+    constraints(->(request) { request.host != canonical_host && request.path != "/up" }) do
+      match "(*path)", via: :all, to: redirect(status: 301) { |_params, request| "https://#{canonical_host}#{request.fullpath}" }
+    end
+  end
+
   mount RailsIcons::Engine, at: "/rails_icons"
   resource :session
   resources :passwords, param: :token

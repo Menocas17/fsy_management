@@ -8,6 +8,12 @@
 #   DROPLET_SIZE  el tamaño del droplet, con el nombre de DigitalOcean (ver SIZES); sin él, el de 6 dólares
 <% server_ip = ENV.fetch("SERVER_IP") { abort "Falta SERVER_IP (la IP del droplet)" } %>
 <% app_host  = ENV.fetch("APP_HOST") { abort "Falta APP_HOST (el dominio que apunta al droplet)" } %>
+# Con dominio propio el proxy atiende también su www y la dirección de sslip.io con que se empezó; la app
+# redirige esas dos a APP_HOST (config/routes.rb), así los links y las apps instaladas viejas siguen llegando.
+<%
+  sslip_host = "#{server_ip.tr(".", "-")}.sslip.io"
+  proxy_hosts = app_host.end_with?(".sslip.io") ? [ app_host ] : [ app_host, "www.#{app_host}", sslip_host ]
+%>
 # Cada tamaño (DROPLET_SIZE) con lo que le cabe:
 #   Puma: un proceso por vCPU (Ruby ejecuta de a un hilo por proceso), ~300-400 MB cada uno; con 0 corre un
 #   solo proceso, sin el maestro aparte, que en 1 GB no sobra.
@@ -44,7 +50,10 @@ servers:
 
 proxy:
   ssl: true
-  host: <%= app_host %>
+  hosts:
+<% proxy_hosts.each do |host| %>
+    - <%= host %>
+<% end %>
   app_port: 80
   healthcheck:
     path: /up
