@@ -67,6 +67,27 @@ class SheetsOnPhoneTest < ApplicationSystemTestCase
     assert_equal evaluate_script("window.innerWidth"), evaluate_script("document.documentElement.scrollWidth")
   end
 
+  test "opening Más on the trainings page does not shift the app" do
+    Training.create!(name: "Primera", held_on: Date.current - 7.days)
+    Training.create!(name: "Segunda", held_on: Date.current + 7.days)
+    # Filas de sobra para que la tabla pase del borde de abajo de la pantalla.
+    12.times do |i|
+      participants(:juan).dup.tap { |staff| staff.assign_attributes(last_name: "Número #{i}", rol: "logistica", company: nil, room: nil) }.save!(validate: false)
+    end
+    sign_in_as(@admin)
+    emulate_phone(390)
+    visit agenda_trainings_path
+    assert_selector "[data-staff-row]", minimum: 12
+
+    # Los «Asistió»/«Faltó» ocultos (sr-only) de la tabla se salían de <main> y agrandaban la página: al abrir
+    # «Más» todo se corría hacia arriba y quedaba desplazable de lado.
+    assert_equal [ 390, 844 ], evaluate_script("[document.documentElement.scrollWidth, document.documentElement.scrollHeight]")
+    open_more
+    assert_equal [ 0, 0 ], evaluate_script("[document.scrollingElement.scrollLeft, document.scrollingElement.scrollTop]")
+    assert_equal 390, evaluate_script("window.innerWidth")
+    assert_in_delta 844, evaluate_script("document.querySelector(\"dialog[data-dialog-name='mas']\").getBoundingClientRect().bottom"), 1
+  end
+
   private
     def emulate_phone(width)
       cdp("Emulation.setDeviceMetricsOverride", width: width, height: 844, deviceScaleFactor: 2, mobile: true)
