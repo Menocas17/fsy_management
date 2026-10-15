@@ -1,0 +1,94 @@
+<%= form_with model: hallway, id: "hallway-form", class: "space-y-5" do |form| %>
+  <% errors = hallway.errors.full_messages + hallway.rooms.flat_map { |room| room.errors.full_messages.map { |message| "Cuarto #{room.number}: #{message}" } } %>
+  <% if errors.any? %>
+    <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">
+      <% errors.uniq.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Datos del pasillo", "door-open" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :name, "Nombre", class: field_label_classes %>
+        <%= form.text_field :name, required: true, maxlength: 30, placeholder: "Ej. A1", class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :position, "Orden en el hotel", class: field_label_classes %>
+        <%= form.number_field :position, min: 0, class: field_input_classes %>
+      </div>
+      <div>
+        <%= form.label :gender, "De quién es", class: field_label_classes %>
+        <%= form.select :gender, [ [ "Automático (lo decide el ordenamiento)", "" ], [ "Mujeres", "M" ], [ "Hombres", "H" ] ], {},
+              class: field_select_classes %>
+      </div>
+      <label class="flex items-start gap-3 self-end rounded-tile border border-line px-3.5 py-3 cursor-pointer transition hover:bg-canvas has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-700/30">
+        <%= form.check_box :long, class: "mt-[3px] w-4 h-4 accent-primary-600" %>
+        <span>
+          <span class="block text-body font-bold text-ink-900">Pasillo largo</span>
+          <span class="block mt-0.5 text-label text-ink-500">Un cuarto de consejeros al inicio y otro al final.</span>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  <% if hallway.persisted? && hallway.rooms.any? %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-hallway-rooms>
+      <%= section_heading "Cuartos · #{hallway.rooms.size}", "bed-double" %>
+      <p class="-mt-2 mb-4 text-label text-ink-500">En el orden en que se recorre el pasillo: el primero y el último son sus extremos.</p>
+      <div class="space-y-2">
+        <%= form.fields_for :rooms do |room_form| %>
+          <% room = room_form.object %>
+          <div class="grid grid-cols-[minmax(0,1fr)_72px] sm:grid-cols-[96px_80px_minmax(0,1fr)_auto] gap-2 items-center p-2 rounded-tile bg-sunken" data-room-row="<%= room.number %>">
+            <%= room_form.text_field :number, required: true, maxlength: Room::NUMBER_MAX, aria: { label: "Número del cuarto" }, class: field_input_classes %>
+            <%= room_form.number_field :capacity, min: 1, max: Room::MAX_CAPACITY, required: true, aria: { label: "Camas del cuarto #{room.number}" },
+                  class: field_input_classes %>
+            <%= room_form.select :purpose, Room::PURPOSE_LABELS.map { |key, label| [ label, key ] }, {},
+                  aria: { label: "Para quién es el cuarto #{room.number}" }, class: "#{field_select_classes} col-span-2 sm:col-span-1" %>
+            <label class="col-span-2 sm:col-span-1 inline-flex items-center gap-2 px-2 text-label font-semibold text-cat-rose-ink cursor-pointer">
+              <%= room_form.check_box :_destroy, class: "w-4 h-4 accent-primary-600" %>
+              Quitar
+            </label>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading hallway.persisted? ? "Agregar cuartos" : "Cuartos", "plus" %>
+    <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_140px] gap-x-4 gap-y-5">
+      <div>
+        <%= form.label :new_rooms, "Números", class: field_label_classes %>
+        <%= form.text_field :new_rooms, placeholder: "Ej. 017-032, 040", autocomplete: "off", class: field_input_classes %>
+        <p class="mt-1.5 text-label text-ink-500">Rangos con guion y separados por comas, en el orden del pasillo. «017-032» conserva los ceros.</p>
+      </div>
+      <div>
+        <%= form.label :new_rooms_capacity, "Camas por cuarto", class: field_label_classes %>
+        <%= form.number_field :new_rooms_capacity, min: 1, max: Room::MAX_CAPACITY, class: field_input_classes %>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<div class="<%= card_classes("mt-5 px-5 py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3") %>">
+  <div>
+    <% if hallway.persisted? %>
+      <%= button_to hallway_path(hallway), method: :delete,
+            form: { data: { turbo_confirm: "¿Borrar el pasillo #{hallway.name}?",
+                            turbo_confirm_detail: "Se borran sus #{pluralize(hallway.rooms.size, "cuarto")}. Las fichas conservan el número de su cuarto.",
+                            turbo_confirm_button: "Sí, borrar" } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer" do %>
+        <%= icon "trash-2", class: "w-4 h-4" %>
+        Borrar pasillo
+      <% end %>
+    <% end %>
+  </div>
+  <div class="flex gap-2.5 sm:justify-end">
+    <%= link_to "Cancelar", hallways_path, class: button_classes(:secondary, extra: "flex-1 sm:flex-none") %>
+    <%= tag.button hallway.persisted? ? "Guardar" : "Crear pasillo", type: "submit", form: "hallway-form",
+          data: { turbo_submits_with: "Guardando…" }, class: button_classes(:primary, extra: "flex-1 sm:flex-none whitespace-nowrap") %>
+  </div>
+</div>

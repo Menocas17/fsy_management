@@ -1,9 +1,10 @@
 <%# La barra inferior del modo simple, solo en el teléfono: Inicio, lo propio del rol, el botón central (la búsqueda
-    para quien ve todo el evento, si no su código QR), Agenda y Más. «Más» y el QR abren su diálogo encima de la
+    para quien ve todo el evento, Registro para su comité, si no su código QR; NavigationHelper#simple_center),
+    Agenda y Más. «Más» y el QR abren su diálogo encima de la
     página; los dos se cierran tocando fuera. %>
 <% items = simple_bar_items %>
 <% me = Current.user.participant %>
-<% searcher = Current.user.global_searcher? %>
+<% center = simple_center %>
 <%# relative z-10: el disco central sube sobre <main>, y sin capa propia los charts (posicionados) lo tapaban. %>
 <div data-controller="dialog" class="contents">
   <nav aria-label="Menú principal" data-bottom-nav
@@ -13,12 +14,17 @@
 
     <% center_classes = "flex flex-col items-center gap-1 pb-1.5 text-meta tracking-tight font-extrabold text-ink-900 cursor-pointer" %>
     <% center_disc = "size-[58px] -mt-6 rounded-full border-4 border-surface bg-sun text-primary-900 shadow-md flex items-center justify-center" %>
-    <% if searcher %>
+    <% if center == :search %>
       <%= link_to search_path, aria: { label: "Buscar en toda la app" }, data: { bottom_nav_item: "Buscar", turbo_prefetch: false }, class: center_classes do %>
         <span class="<%= center_disc %>" data-tour="center"><%= icon "search", class: "size-[26px] stroke-[2.4]" %></span>
         Buscar
       <% end %>
-    <% elsif me %>
+    <% elsif center == :checkin %>
+      <%= link_to checkins_path, data: { bottom_nav_item: "Registro" }, aria: { current: ("page" if request.path.start_with?(checkins_path)) }, class: center_classes do %>
+        <span class="<%= center_disc %>" data-tour="center"><%= icon "scan-line", class: "size-[26px] stroke-[2.4]" %></span>
+        Registro
+      <% end %>
+    <% elsif center == :qr %>
       <button type="button" data-action="dialog#open" data-dialog-name="qr" aria-label="Mi código QR" data-bottom-nav-item="Mi QR" class="<%= center_classes %>">
         <span class="<%= center_disc %>" data-tour="center"><%= icon "qr-code", class: "size-[26px]" %></span>
         Mi QR
@@ -45,7 +51,7 @@
       <div class="w-10 h-1 mx-auto mb-3.5 rounded-full bg-line" aria-hidden="true"></div>
       <h2 id="more-sheet-title" class="mb-3 text-meta font-bold tracking-[.08em] uppercase text-sun-ink">Más opciones</h2>
       <div class="grid grid-cols-3 gap-2.5" data-more-items>
-        <% if searcher && me %>
+        <% if center != :qr && me %>
           <button type="button" data-action="dialog#close dialog#open" data-dialog-name="qr"
                   class="flex flex-col items-center gap-2 px-1.5 py-3.5 rounded-tile bg-sunken text-label font-bold text-ink-900 text-center cursor-pointer">
             <span class="size-[46px] rounded-tile bg-sun text-primary-900 flex items-center justify-center"><%= icon "qr-code", class: "size-[22px]" %></span>

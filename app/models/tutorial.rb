@@ -37,9 +37,12 @@ class Tutorial
     Alert.source_tutorial.where(recipient: user.participant).destroy_all
   end
 
-  def initialize(user)
+  # preview: el superadmin lo recorre en «Ver como»; ve los pasos de esa persona, pero sin su alerta de
+  # bienvenida (borrarla se explica en vez de practicarse) y sin marcarle nada en la cuenta.
+  def initialize(user, preview: false)
     @user = user
     @participant = user.participant
+    @preview = preview
   end
 
   def steps
@@ -52,7 +55,7 @@ class Tutorial
       *agenda_steps,
       *training_steps,
       step(:bell, dashboard_path, target: "[data-tour='bell']", action: :tap),
-      step(:notification_swipe, notifications_path, target: "[data-alert-tutorial]", action: :real),
+      notification_step,
       step(:more, dashboard_path, target: "[data-tour='more']", action: :tap),
       step(:sheet_scan, dashboard_path, target: "[data-more-items] a[href='#{scan_path}']", action: :tap),
       step(:scan, scan_path, target: "[data-controller~='qr-scanner']"),
@@ -84,7 +87,7 @@ class Tutorial
       when "consejero" then practice_company ? [ step(:own_company, dashboard_path, target: "[data-tour='own']", action: :tap) ] : []
       when "auxiliar" then practice_company ? [ step(:own_branch, dashboard_path, target: "[data-tour='own']", action: :tap) ] : []
       when "logistica"
-        @user.checkin_member? ? [ step(:own_checkin, dashboard_path, target: "[data-tour='own']") ] : [ step(:own_area, dashboard_path, target: "[data-tour='own']") ]
+        [ step(:own_area, dashboard_path, target: "[data-tour='own']") ]
       else [ step(:own_companies, dashboard_path, target: "[data-tour='own']") ]
       end
     end
@@ -146,8 +149,18 @@ class Tutorial
       ]
     end
 
+    def notification_step
+      return step(:notification_swipe_preview, notifications_path, target: "[data-alert-item]") if @preview
+
+      step(:notification_swipe, notifications_path, target: "[data-alert-tutorial]", action: :real)
+    end
+
+    # El botón amarillo (NavigationHelper#simple_center).
     def center_key
-      @user.global_searcher? ? :center_search : :center_qr
+      if @user.global_searcher? then :center_search
+      elsif @user.checkin_member? then :center_checkin
+      else :center_qr
+      end
     end
 
     def practice_company

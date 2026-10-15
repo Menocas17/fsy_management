@@ -30,6 +30,8 @@ export default class extends Controller {
 
   applyAndPersist(className, enabled, key, onValue, offValue) {
     document.documentElement.classList.toggle(className, enabled);
+    // El fondo del navegador donde la página aún no dibujó sigue al tema (meta color-scheme del layout).
+    if (className === 'dark') document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', enabled ? 'dark' : 'light');
     this.write(key, enabled ? onValue : offValue);
   }
 

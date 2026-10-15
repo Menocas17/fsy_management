@@ -97,13 +97,15 @@ module UiHelper
   # ~16 ms (rqrcode, en Ruby) y el «Mi QR» va en la barra de todas las páginas, así que se guarda en la caché:
   # el QR de una ficha no cambia.
   def qr_svg_tag(payload, label:, size: 132, classes: nil)
-    svg = Rails.cache.fetch([ "qr-svg", 1, payload, label ]) do
+    # El nombre (label) va en el div, escapado por tag.div: rqrcode escribe svg_attributes sin escapar, y un
+    # apellido con comillas metía atributos (y código) en el <svg>. El SVG solo lleva el dibujo.
+    svg = Rails.cache.fetch([ "qr-svg", 2, payload ]) do
       RQRCode::QRCode.new(payload, level: :m).as_svg(
         module_size: 4, use_path: true, standalone: true, viewbox: true, color: "1D2B4A",
-        svg_attributes: { role: "img", aria: { label: label } }
+        svg_attributes: { "aria-hidden": "true" }
       ).sub(/\A<\?xml.*?\?>/, "") # la declaración XML que antepone rqrcode no va dentro de un documento HTML
     end
-    tag.div(svg.html_safe,
+    tag.div(svg.html_safe, role: "img", aria: { label: label },
             class: [ "bg-white rounded-tile p-2.5 inline-block [&>svg]:block [&>svg]:w-full [&>svg]:h-auto", classes ].compact.join(" "),
             style: "width: #{size}px")
   end

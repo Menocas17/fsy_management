@@ -1,4 +1,6 @@
 <% if participants.load.any? %>
+  <%# Tabla en la compu y lista en el teléfono; al teléfono que lo dice (DeviceHelper) solo le va la suya. %>
+  <% if render_desktop_layout? %>
   <div class="hidden md:block overflow-x-auto">
     <table class="w-full text-left">
       <thead>
@@ -27,8 +29,9 @@
       </tbody>
     </table>
   </div>
+  <% end %>
 
-  <ul class="md:hidden divide-y divide-line-soft">
+  <ul class="<%= layout_split("md:hidden") %> divide-y divide-line-soft">
     <% participants.each do |participant| %>
       <li>
         <%= link_to participant_path(participant, return_to: request.fullpath), data: { turbo_frame: "_top" },

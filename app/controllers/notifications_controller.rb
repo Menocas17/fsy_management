@@ -1,4 +1,6 @@
 class NotificationsController < ApplicationController
+  # Abrir la campanita viendo como otro no marca nada (mark_read lo cuida): no es un cambio.
+  skip_before_action :block_writes_while_viewing_as, only: :read
   def index
     @pagy, @alerts = pagy(Alert.inbox_for(Current.user).includes(images_attachments: :blob).recent)
     mark_read

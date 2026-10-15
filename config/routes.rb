@@ -38,6 +38,8 @@ Rails.application.routes.draw do
   # «Ver como» otra persona (su menú y sus permisos): solo el superadmin.
   resource :view_as, only: %i[create destroy], controller: "view_as", path: "ver-como"
   delete "accesos/sesiones/:id" => "accesses#destroy_session", as: :access_session
+  post "accesos/acceso-total" => "accesses#grant_full_access", as: :access_full_access_grants
+  delete "accesos/acceso-total/:id" => "accesses#revoke_full_access", as: :access_full_access_grant
   # Finanzas: el panel y su configuración, las categorías y los gastos con sus tres etapas (docs/finanzas.md).
   resource :finances, only: %i[show edit update], path: "finanzas", path_names: { edit: "configurar" }
   resources :expense_categories, only: %i[new create edit update destroy], path: "finanzas/categorias",
@@ -126,6 +128,7 @@ Rails.application.routes.draw do
       patch "leidas" => "notifications#read", as: :read
       post "suscripcion" => "push_subscriptions#create", as: :push_subscription
       delete "suscripcion" => "push_subscriptions#destroy"
+      post "suscripcion/prueba" => "push_subscriptions#send_test", as: :push_test
     end
   end
   resources :alerts, only: [ :index, :show, :new, :create, :destroy ], path: "alertas"
@@ -166,9 +169,21 @@ Rails.application.routes.draw do
     resources :notes, only: :create, controller: "infirmary_notes", path: "notas"
   end
   get "enfermeria/fichas/:participant_id" => "infirmary_charts#show", as: :infirmary_chart
+  # Cuartos: el tablero, la propuesta del ordenamiento (?semilla=, ?llegados=1) y aplicarla, y la configuración
+  # del hotel (sus pasillos y cuartos). Van antes de cuartos/:id, que si no se las tragaría.
+  resource :room_plan, only: %i[show create], path: "cuartos/ordenar"
+  resources :hallways, except: :show, path: "cuartos/pasillos", path_names: { new: "nuevo", edit: "editar" } do
+    post :load_layout, on: :collection, path: "cargar-hotel"
+  end
+  resources :rooms, only: %i[index show], path: "cuartos"
   # El panel: qué compañías ya pasaron la asistencia nocturna y quién falta.
   resources :night_attendances, only: :index, path: "asistencia-nocturna"
-  resources :assignments, only: [ :update, :destroy ], path: "asignaciones"
+  # El seguimiento de las asignaciones delegadas; quien recibe una la confirma.
+  resources :assignments, only: [ :index, :update, :destroy ], path: "asignaciones" do
+    patch :confirm, on: :member, path: "confirmar"
+  end
+  # Compañías sugeridas para un joven que se registra sin compañía (CompanySuggester): en su ficha y en el formulario.
+  get "companias/sugerencias" => "company_suggestions#show", as: :company_suggestions
   # El QR de una ficha, para el diálogo «Mi QR» de la barra inferior (se pide al abrirlo).
   get "participants/:participant_id/qr" => "participant_qrs#show", as: :participant_qr
   resources :participants do

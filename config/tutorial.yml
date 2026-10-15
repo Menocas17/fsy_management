@@ -23,9 +23,6 @@ own_companies:
 own_area:
   title: Tu área
   text: Este botón te lleva directo al módulo de tu área de logística.
-own_checkin:
-  title: Registro de llegadas
-  text: Tu área es Registro. Desde aquí recibes a la gente escaneando el QR de su gafete; la llegada queda anotada con la hora, y si te equivocas la anulas ahí mismo.
 practice_joven:
   title: La ficha de un joven
   text: "Arriba están los jóvenes de práctica: son de ejemplo y solo aparecen en el tutorial. Toca a Sofía Práctica para abrir su ficha."
@@ -46,6 +43,9 @@ announce_form:
 center_qr:
   title: Tu código QR
   text: El botón amarillo. Lo muestras al llegar al evento y en cada capacitación; registro lo escanea y queda tu asistencia.
+center_checkin:
+  title: Registro de llegadas
+  text: "El botón amarillo, porque tu área es Registro: recibes a la gente escaneando el QR de su gafete y la llegada queda anotada con la hora; si te equivocas, la anulas ahí mismo. Tu propio QR está en «Más»."
 center_search:
   title: Busca cualquier cosa
   text: "El botón amarillo: una persona, una compañía, una estaca o un módulo. Es el camino más corto a cualquier ficha."
@@ -77,6 +77,9 @@ notification_swipe:
   text: "Arriba está tu alerta de bienvenida, que el tutorial te acaba de enviar. Deslízala hacia la izquierda y toca «Eliminar»."
   result_title: Esta sí se borró
   result: "Era solo tuya, así que borrarla no afecta a nadie. Así quitas de tu lista cualquier alerta; para los demás sigue ahí."
+notification_swipe_preview:
+  title: Desliza para borrar
+  text: "Aquí la persona recibe una alerta de bienvenida del tutorial y practica borrarla deslizándola a la izquierda. Viendo como ella no se le envía nada."
 more:
   title: Más opciones
   text: "Lo demás está en «Más». Tócalo. Se cierra tocando fuera o arrastrándolo hacia abajo."

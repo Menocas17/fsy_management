@@ -149,13 +149,21 @@ class Expense < ApplicationRecord
   end
 
   private
+    # Con la fila bloqueada y releída: dos personas aprobando (o una aprobando y otra rechazando) a la vez
+    # pasaban las dos la revisión de la etapa, y quedaban sellos contradictorios y avisos dobles.
     def step(by, from:, not_by: nil, rule: nil)
       return fail_with("Este paso lo da alguien con ficha de participante.") if by.nil?
-      return fail_with("El gasto ya no está en esa etapa (#{status_label.downcase}).") unless status == from.to_s
-      return fail_with(rule) if not_by && by.id == not_by
 
-      yield
-      save
+      with_lock do
+        if status != from.to_s
+          fail_with("El gasto ya no está en esa etapa (#{status_label.downcase}).")
+        elsif not_by && by.id == not_by
+          fail_with(rule)
+        else
+          yield
+          save
+        end
+      end
     end
 
     def stamp(step, by)

@@ -6,6 +6,7 @@ class Membership < ApplicationRecord
 
   before_validation :derive_from_participant
   validate :within_staffing_limit
+  validate :gender_slot_free, :counselor_in_one_company
 
   # El otro lado de Participant#sync_counselor_membership: asignar o quitar al consejero desde la compañía
   # también cambia la «Compañía» de su ficha. update_all para no volver a disparar la sincronización.
@@ -37,6 +38,24 @@ class Membership < ApplicationRecord
       if current_count >= staffing_limit
         errors.add :base, "Esta compañía ya alcanzó su cupo de #{role} (#{staffing_limit})."
       end
+    end
+
+    # La base admite un hombre y una mujer por rol (índice único): sin esto, el segundo del mismo género pasaba el
+    # cupo de 2 y explotaba al guardar (error 500).
+    def gender_slot_free
+      return if participant? || associable.nil? || gender.nil? || !formula_applies? || staffing_limit.infinite?
+
+      taken = Membership.where(associable: associable, role: role, gender: gender).where.not(id: id)
+      errors.add(:base, "Ya hay #{role} #{gender == Participant.genders["M"] ? "mujer" : "hombre"} en esta compañía.") if taken.exists?
+    end
+
+    # Un consejero es de una sola compañía (su ficha guarda una): nunca queda sentado en dos.
+    def counselor_in_one_company
+      return unless counselor_of_company? && participant_id
+
+      elsewhere = Membership.where(associable_type: "Company", role: :consejero, participant_id: participant_id)
+                            .where.not(associable_id: associable_id).where.not(id: id)
+      errors.add(:base, "#{participant.full_name} ya es consejero de otra compañía.") if elsewhere.exists?
     end
 
     def formula_applies?

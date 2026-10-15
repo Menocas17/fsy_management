@@ -1,4 +1,5 @@
-<%= form_with model: participant, id: "participant-form", class: "space-y-5", data: { controller: "role-fields stake-ward", stake_ward_wards_value: stake_ward_options.to_json, stake_ward_other_value: Participant::OTHER_STAKE } do |form| %>
+<%= form_with model: participant, id: "participant-form", class: "space-y-5", data: { controller: "role-fields stake-ward company-suggest", stake_ward_wards_value: stake_ward_options.to_json, stake_ward_other_value: Participant::OTHER_STAKE,
+                                                                                      company_suggest_url_value: company_suggestions_path, action: "change->company-suggest#refresh input->company-suggest#refresh" } do |form| %>
   <%= hidden_field_tag :from, params[:from] %>
   <% if form.object.errors.any? %>
     <div class="rounded-tile border border-cat-rose/30 bg-cat-rose/10 px-5 py-3 text-sm font-semibold text-cat-rose-ink" role="alert">

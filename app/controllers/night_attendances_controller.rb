@@ -34,7 +34,10 @@ class NightAttendancesController < ApplicationController
 
     @attendance = NightAttendance.includes(marks: :participant).find_or_initialize_by(company: @company, night_on: @night, gender: @gender)
     first_time = @attendance.new_record?
-    if @attendance.record(marks_params, taken_by: Current.user.participant)
+    recorded = record_attendance
+    return if performed?
+
+    if recorded
       record_audit!(category: :asistencia, action: first_time ? "created" : "updated", target: @company, summary: audit_summary(first_time))
       redirect_to company_night_attendance_path(@company, genero: @gender, return_to: params[:return_to].presence), notice: "Asistencia confirmada."
     else
@@ -46,6 +49,16 @@ class NightAttendancesController < ApplicationController
   end
 
   private
+    # Dos personas guardando por primera vez la misma lista a la vez: la segunda choca con la base. Se le pide
+    # revisar la que quedó en vez de un error 500.
+    def record_attendance
+      @attendance.record(marks_params, taken_by: Current.user.participant)
+    rescue ActiveRecord::RecordNotUnique
+      redirect_to company_night_attendance_path(@company, genero: @gender),
+                  alert: "Alguien más acaba de guardar esta lista. Revísala y, si hace falta, corrígela."
+      nil
+    end
+
     # En el tutorial: la lista de esta noche solo con los jóvenes de práctica de este género, para marcarlos y
     # confirmar sin tocar la de verdad.
     def show_practice

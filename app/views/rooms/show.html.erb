@@ -1,0 +1,68 @@
+<% content_for :title, "Cuarto #{@room.number}" %>
+<% content_for :eyebrow, "Cuartos" %>
+<% back_to_origin "Cuartos", rooms_path %>
+<% tone = @tile.count.zero? ? :neutral : (RoomsHelper::GENDER_TONES[@tile.gender] || :teal) %>
+<%= render PageComponent.new(width: :form) do |page| %>
+  <% page.with_intro { "Pasillo #{@room.hallway.name} · #{pluralize(@room.capacity, "cama")}" } %>
+  <% page.with_actions do %>
+    <%= render DayPagerComponent.new(previous_label: "Cuarto anterior", next_label: "Cuarto siguiente",
+          previous_href: (room_path(@previous_room) if @previous_room), next_href: (room_path(@next_room) if @next_room)) %>
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-room="<%= @room.number %>">
+    <div class="flex items-center gap-4">
+      <span class="shrink-0 size-16 rounded-panel flex flex-col items-center justify-center <%= Tones.tint(tone) %>" aria-hidden="true">
+        <span class="text-meta font-bold uppercase tracking-[.08em] opacity-75">Cuarto</span>
+        <span class="text-title font-extrabold leading-none tabular-nums"><%= @room.number %></span>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-title font-bold text-ink-900"><%= @tile.count %> de <%= pluralize(@room.capacity, "cama") %></p>
+        <div class="mt-1.5 flex flex-wrap gap-1.5">
+          <% if @tile.count.positive? %>
+            <%= render ChipComponent.new(label: @tile.gender ? Hallway::GENDER_LABELS[@tile.gender] : "Hombres y mujeres", tone: tone) %>
+          <% end %>
+          <% if @tile.kind && @tile.kind != :jovenes %>
+            <%= render ChipComponent.new(label: RoomsHelper::KIND_LABELS[@tile.kind], icon: RoomsHelper::KIND_ICONS[@tile.kind]) %>
+          <% end %>
+          <% unless @room.purpose_auto? %>
+            <%= render ChipComponent.new(label: "Apartado: #{@room.purpose_label}", tone: :neutral) %>
+          <% end %>
+          <% @tile.companies.each do |number| %>
+            <%= render ChipComponent.new(label: "Compañía #{number}", tone: :green) %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <% if @tile.issue %>
+      <p class="mt-4 flex items-center gap-2.5 rounded-tile border border-cat-rose/40 bg-cat-rose/15 px-4 py-3 text-body font-bold text-cat-rose-ink" role="note" data-room-issue>
+        <%= icon "triangle-alert", class: "size-4 shrink-0" %>
+        <%= @tile.issue %>: cámbialo en la ficha de quien corresponda.
+      </p>
+    <% end %>
+  </section>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <%= section_heading "Quién duerme aquí", "bed-double" %>
+    <% if @occupants.any? %>
+      <ul class="divide-y divide-line-soft" data-room-occupants>
+        <% @occupants.each do |person| %>
+          <li>
+            <%= link_to participant_path(person, return_to: room_path(@room)), class: "flex items-center gap-3 py-2.5" do %>
+              <%= render AvatarComponent.new(participant: person) %>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-body font-bold text-ink-900"><%= person.full_name %></span>
+                <span class="block truncate text-label font-semibold text-ink-500">
+                  <%= [ person.role_label, person.company&.name ].compact.join(" · ") %>
+                </span>
+              </span>
+              <%= icon "chevron-right", class: "size-4 shrink-0 text-ink-500" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <%= render EmptyStateComponent.new(title: "Cuarto libre", icon: "bed-double", tone: :neutral, name: "room",
+            text: @room.purpose_fuera_de_uso? ? "Está fuera de uso: el ordenamiento no lo toma." : "Nadie tiene este cuarto en su ficha.") %>
+    <% end %>
+  </section>
+<% end %>

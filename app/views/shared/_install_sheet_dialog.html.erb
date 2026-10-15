@@ -10,6 +10,8 @@
     ios            iPhone no deja instalar desde la página: los pasos, en láminas que se deslizan. Lo que cambia
                    entre Safari 26, el Safari de antes y Chrome del iPhone va en data-only.
     inapp          Dentro de Facebook, Instagram o Messenger no se puede de ninguna forma: a abrirla afuera.
+
+  En la demo de «Ver como» sale también en la compu achicada al ancho del teléfono, con un selector iPhone / Android.
 %>
 <% benefit = ->(icon_name, text) do %>
   <li class="flex items-center gap-3">
@@ -42,6 +44,13 @@
        tabindex="-1" autofocus data-controller="sheet-drag" data-action="sheet-drag:dismiss->install#later">
     <div class="w-10 h-1 mx-auto mb-4 rounded-full bg-line" aria-hidden="true"></div>
     <span id="install-sheet-title" class="sr-only">Instalar la app</span>
+
+    <div data-install-demo hidden class="mb-4 flex p-1 gap-0.5 rounded-control bg-canvas border border-line" role="group" aria-label="Ver como en">
+      <% { "ios" => "iPhone", "android" => "Android" }.each do |platform, label| %>
+        <button type="button" data-action="install#preview" data-install-platform-param="<%= platform %>" aria-pressed="false"
+                class="flex-1 h-8 rounded-inner text-label font-semibold text-ink-500 cursor-pointer aria-pressed:bg-surface aria-pressed:shadow-sm aria-pressed:font-bold aria-pressed:text-ink-900"><%= label %></button>
+      <% end %>
+    </div>
 
     <%# Android con permiso: el botón abre el diálogo de instalar del teléfono. %>
     <div data-install-panel="android" hidden>

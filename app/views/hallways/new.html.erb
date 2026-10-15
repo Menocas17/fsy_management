@@ -1,0 +1,6 @@
+<% content_for :title, "Nuevo pasillo" %>
+<% content_for :eyebrow, "Cuartos" %>
+<% back_to "Configurar hotel", hallways_path %>
+<%= render PageComponent.new(width: :form) do %>
+  <%= render "hallways/form", hallway: @hallway %>
+<% end %>

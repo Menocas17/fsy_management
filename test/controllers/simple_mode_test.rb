@@ -19,12 +19,8 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[data-bottom-nav-item='Agenda'][href='#{agenda_path}']"
       assert_select "[data-bottom-nav-item='Buscar']", false
     end
-    assert_select "dialog[data-dialog-name='mas'] [data-more-items]" do
-      assert_select "a[href='#{scan_path}']", text: /Escanear gafete/
-      assert_select "a[href='#{participants_path}']", text: /Jóvenes/
-      assert_select "a[href='#{dashboard_path}']", false
-      assert_select "a[href='#{agenda_path}']", false
-    end
+    assert_equal [ "Escanear gafete", "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes" ],
+                 css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     # Sin menú lateral en el teléfono: la barra lo reemplaza, y el cajón ni se dibuja.
     assert_select "button[aria-label='Abrir menú']", false
     assert_select "#mobile-menu", false
@@ -37,11 +33,11 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
 
     frame = "turbo-frame##{ActionView::RecordIdentifier.dom_id(participants(:maria), :qr)}"
     assert_select "nav[data-bottom-nav] ~ dialog[data-dialog-name='qr'] #{frame}[loading='lazy'][src='#{participant_qr_path(participants(:maria))}']"
-    assert_select "dialog[data-dialog-name='qr'] svg[role='img']", false
+    assert_select "dialog[data-dialog-name='qr'] [role='img'] > svg", false
 
     get participant_qr_path(participants(:maria))
     assert_response :success
-    assert_select "#{frame} svg[role='img']", 1
+    assert_select "#{frame} [role='img'] > svg", 1
     assert_select "#{frame}", text: /#{participants(:maria).full_name}/
   end
 
@@ -78,10 +74,24 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     assert_select "a[data-bottom-nav-item='Compañías'][href='#{companies_path}']"
     assert_select "[data-bottom-nav-item='Mi QR']", false
     assert_select "dialog[data-dialog-name='mas'] button[data-dialog-name='qr']", text: /Mi QR/
-    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Conteo" ],
+    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Conteo", "Historial" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     assert_select "[data-simple-kpi='Jóvenes']"
     assert_select "[data-simple-kpi='Staff']"
+  end
+
+  test "Registro's committee gets Registro in the center, Inventario beside it and its QR inside Más" do
+    registrar = participants(:maria).dup
+    registrar.update!(rol: :logistica, first_name: "Rita", logistics_area: LogisticsArea.create!(name: "Registro", checkin: true))
+    sign_in_as(User.create!(email_address: "rita@fsy.com", password: "Registro1!", participant: registrar))
+    get dashboard_path
+
+    assert_select "a[data-bottom-nav-item='Registro'][href='#{checkins_path}'] [data-tour='center']"
+    assert_select "a[data-bottom-nav-item='Inventario'][href='#{inventories_path}']"
+    assert_select "[data-bottom-nav-item='Mi QR']", false
+    more = css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
+    assert_equal [ "Mi QR", "Escanear gafete" ], more.first(2)
+    assert_not_includes more, "Registro", "ya está en el centro"
   end
 
   test "switching it off in Configuración brings back the side menu" do

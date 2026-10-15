@@ -88,4 +88,17 @@ class ExpenseTest < ActiveSupport::TestCase
     assert_equal 50_000, row.available
     assert summary.rows.any? { |r| r.name == "General" }, "expenses without a category show up as General"
   end
+
+  test "two people answering the same expense at once: only the first one counts" do
+    other_approver = Participant.create!(first_name: "Otra", last_name: "Aprobadora", age: 45, stake: "villa_flor",
+                                         shirt_number: "l", gender: "M", rol: :director_logistica)
+    first_screen = Expense.find(@expense.id)
+    second_screen = Expense.find(@expense.id)
+
+    assert first_screen.approve(@director)
+    assert_not second_screen.reject(other_approver, "No hace falta"), "the second one sees the expense already moved on"
+    assert_match "ya no está en esa etapa", second_screen.errors.full_messages.to_sentence
+    assert @expense.reload.approved?
+    assert_nil @expense.rejected_by_name
+  end
 end

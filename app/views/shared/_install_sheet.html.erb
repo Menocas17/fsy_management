@@ -1,4 +1,8 @@
 <%# Instalar la app en el teléfono (install_controller.js): sale sola al entrar desde el navegador del teléfono, una
     vez por visita, o desde Configuración → Instalar la app (data-install-open). La hoja misma
-    (shared/_install_sheet_dialog) se pide al abrirla, no viaja con cada página. %>
-<%= tag.div class: "contents", data: { controller: "install", install_url_value: install_sheet_path } %>
+    (shared/_install_sheet_dialog) se pide al abrirla, no viaja con cada página.
+    demo: en «Ver como» sale también en la compu achicada al ancho del teléfono, una vez por persona, para mostrar
+    cómo la ve; no guarda nada. %>
+<% demo = Current.viewing_as? %>
+<%= tag.div class: "contents", data: { controller: "install", install_url_value: install_sheet_path,
+      install_demo_value: demo, install_owner_value: (Current.user.participant_id if demo) } %>

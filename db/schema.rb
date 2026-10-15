@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_231000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -122,6 +122,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "confirmed_at"
     t.index ["activity_id"], name: "index_assignments_on_activity_id"
     t.index ["assigned_by_id"], name: "index_assignments_on_assigned_by_id"
     t.index ["participant_id"], name: "index_assignments_on_participant_id"
@@ -228,6 +229,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
     t.index ["presented_by_id"], name: "index_expenses_on_presented_by_id"
     t.index ["rejected_by_id"], name: "index_expenses_on_rejected_by_id"
     t.index ["status"], name: "index_expenses_on_status"
+  end
+
+  create_table "hallways", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "gender"
+    t.boolean "long", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_hallways_on_name", unique: true
   end
 
   create_table "infirmary_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -434,6 +445,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
     t.index ["practice"], name: "index_participants_on_practice", where: "practice"
+    t.index ["rol", "gender"], name: "index_participants_one_leader_per_gender", unique: true, where: "((rol = ANY (ARRAY[0, 1, 7])) AND (gender IS NOT NULL))"
   end
 
   create_table "push_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -447,6 +459,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
     t.datetime "updated_at", null: false
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
+  create_table "rooms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "hallway_id", null: false
+    t.string "number", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "capacity", default: 4, null: false
+    t.integer "purpose", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hallway_id"], name: "index_rooms_on_hallway_id"
+    t.index ["number"], name: "index_rooms_on_number", unique: true
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -497,6 +521,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
     t.datetime "alerts_cleared_at"
     t.boolean "simple_mode", default: true, null: false
     t.datetime "tutorial_completed_at"
+    t.boolean "full_access_granted", default: false, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["participant_id"], name: "index_users_on_participant_id", unique: true
   end
@@ -546,6 +571,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_063903) do
   add_foreign_key "participants", "companies"
   add_foreign_key "participants", "logistics_areas", on_delete: :nullify
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "rooms", "hallways"
   add_foreign_key "sessions", "users"
   add_foreign_key "training_attendances", "participants"
   add_foreign_key "training_attendances", "participants", column: "recorded_by_id", on_delete: :nullify

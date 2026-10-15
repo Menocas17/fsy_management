@@ -1,0 +1,60 @@
+<% content_for :title, "Configurar hotel" %>
+<% content_for :eyebrow, "Cuartos" %>
+<% back_to "Cuartos", rooms_path %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "El ordenamiento recorre los pasillos en este orden; cada cuarto con sus camas." } %>
+  <% page.with_actions do %>
+    <%= link_to new_hallway_path, class: button_classes do %>
+      <%= icon "plus", class: "size-4" %>
+      Nuevo pasillo
+    <% end %>
+  <% end %>
+
+  <% if @hallways.empty? %>
+    <div class="<%= card_classes("p-5 md:p-6") %>">
+      <%= render EmptyStateComponent.new(title: "Sin pasillos todavía", icon: "hotel", tone: :indigo, name: "hallways",
+            text: "Carga el plano del #{Hallway.layout_name} (pasillos A1 a D5, con sus cuartos) y después corrige las camas de cada cuarto, o crea los pasillos a mano.") do |empty| %>
+        <% empty.with_action do %>
+          <%= button_to "Cargar el #{Hallway.layout_name}", load_layout_hallways_path, class: button_classes,
+                data: { turbo_submits_with: "Cargando…" } %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <section class="<%= card_classes("p-5 md:p-6") %>">
+      <%= section_heading "Cómo los usa el ordenamiento", "shuffle" %>
+      <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-body text-ink-700">
+        <li><strong class="font-bold text-ink-900">De quién es:</strong> en «Automático», los primeros pasillos son de mujeres hasta que quepan todas, y los siguientes de hombres.</li>
+        <li><strong class="font-bold text-ink-900">Largo:</strong> lleva un cuarto de consejeros al inicio y otro al final; los demás, uno al inicio.</li>
+        <li><strong class="font-bold text-ink-900">Apartados:</strong> un cuarto puede quedar para el matrimonio director, el de logística o coordinación con sus auxiliares.</li>
+        <li><strong class="font-bold text-ink-900">Fuera de uso:</strong> el ordenamiento no lo toma.</li>
+      </ul>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-label="Pasillos" data-hallway-list>
+      <% @hallways.each do |hallway| %>
+        <% reserved = hallway.rooms.reject(&:purpose_auto?) %>
+        <article class="<%= card_classes("p-4 md:p-5 flex flex-col gap-3") %>" data-hallway-config="<%= hallway.name %>">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="text-title font-bold text-ink-900">Pasillo <%= hallway.name %></h2>
+              <p class="mt-0.5 text-label font-semibold text-ink-500">
+                <%= pluralize(hallway.rooms.size, "cuarto") %> · <%= pluralize(hallway.beds, "cama") %>
+                <% if hallway.rooms.any? %> · <%= hallway.rooms.first.number %>–<%= hallway.rooms.last.number %><% end %>
+              </p>
+            </div>
+            <%= link_to "Editar", edit_hallway_path(hallway), class: button_classes(:secondary, size: :sm, extra: "shrink-0") %>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <%= render ChipComponent.new(label: hallway.gender ? Hallway::GENDER_LABELS[hallway.gender] : "Automático",
+                  tone: hallway.gender ? RoomsHelper::GENDER_TONES[hallway.gender] : :neutral) %>
+            <% if hallway.long? %><%= render ChipComponent.new(label: "Largo", icon: "shield-user") %><% end %>
+            <% reserved.group_by(&:purpose_label).each do |label, rooms| %>
+              <%= render ChipComponent.new(label: "#{label}: #{rooms.map(&:number).join(", ")}", tone: :neutral) %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </section>
+  <% end %>
+<% end %>

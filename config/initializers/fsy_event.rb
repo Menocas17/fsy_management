@@ -6,7 +6,9 @@ Rails.application.config.x.event_start_on = Date.new(2027, 1, 11)
 Rails.application.config.x.event_end_on = Date.new(2027, 1, 16)
 Rails.application.config.x.event_start_hour = 7
 
-# Quién firma las notificaciones push ante el servidor del navegador. Debe ser un mailto: o https:
-# real: si un envío falla, es a esta dirección a la que escriben.
-# Cambiar por el correo real del comité antes de producción: es a donde escriben si un envío falla.
-Rails.application.config.x.push_subject = ENV.fetch("PUSH_SUBJECT", "mailto:from@example.com")
+# Quién firma las notificaciones push ante el servidor del navegador: un mailto: o https: real, que es a donde
+# escriben si un envío falla. El de Apple puede rechazar uno de mentira (example.com, localhost), y entonces
+# el iPhone no recibe nada: sin PUSH_SUBJECT firma la dirección de la app.
+push_host = ENV["APP_HOST"].presence || ENV["RENDER_EXTERNAL_HOSTNAME"].presence
+Rails.application.config.x.push_subject = ENV["PUSH_SUBJECT"].presence ||
+                                          (push_host ? "https://#{push_host}" : "mailto:fsy@example.com")

@@ -14,6 +14,54 @@
   changes:
     - Entra siempre por fsynicaragua.com; la dirección anterior redirige a la nueva.
     - Si tenías la app instalada en el teléfono, ábrela desde fsynicaragua.com e instálala otra vez, e inicia sesión de nuevo.
+- id: 2026-10-13-registro-pantalla-completa
+  date: 2026-10-13
+  title: Registro en pantalla completa
+  summary: En el teléfono, la cámara del registro de llegadas se abre en pantalla completa para escanear sin distracciones.
+  changes:
+    - Solo se ve la cámara, cuántos van registrados y el resultado del último escaneo, con «Anular» ahí mismo.
+    - El botón «Código» abre un cuadro para escribir el código del gafete cuando no se puede leer.
+    - La ✕ (o «atrás» en Android) vuelve a la página; «Pantalla completa», sobre la cámara, la abre de nuevo.
+    - Mientras escaneas, la pantalla no se apaga.
+  roles: [ director, coordinador, logistica, director_logistica ]
+- id: 2026-10-11-cuartos-colores
+  date: 2026-10-11
+  title: Cuartos de mujeres en morado
+  summary: En Cuartos, los de mujeres ahora son morados en vez de rosa, que parecía un error.
+  changes:
+    - El rosa queda solo para lo que hay que revisar; los cuartos de hombres siguen en azul y los de un matrimonio pasan a verde azulado.
+    - También en la lista de cuartos del perfil de cada compañía.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
+- id: 2026-10-11-companias-sugeridas
+  date: 2026-10-11
+  title: Compañías sugeridas al registrar
+  summary: Al registrar a un joven que llega sin compañía, la app sugiere las tres que mejor le quedan.
+  changes:
+    - Se basa en su edad primero, y después en dónde faltan mujeres u hombres, cuántos de su barrio hay ya y si algún consejero es de su mismo barrio.
+    - En el formulario aparecen al escribir su fecha de nacimiento y su género; «Elegir» llena la compañía.
+    - En la ficha de un joven sin compañía salen las mismas sugerencias con el botón «Asignar».
+  roles: [ director, coordinador, logistica, director_logistica ]
+- id: 2026-10-10-cuartos
+  date: 2026-10-10
+  title: Nuevo módulo de cuartos
+  summary: Logística → Cuartos muestra cada pasillo del hotel con quién duerme en cada cuarto, y la dirección ordena los cuartos de todo el evento con un clic.
+  changes:
+    - Cada cuarto se pinta de rosa si es de mujeres y de azul si es de hombres; tócalo para ver quién duerme ahí.
+    - "«Ordenar cuartos» arma una propuesta: mujeres primero, un cuarto de consejeras o consejeros en cada pasillo (dos en los largos), las compañías juntas y nadie solo. «Reordenar» muestra otra combinación, y nada cambia hasta «Aplicar»."
+    - Ubica a todo el mundo, sin excepción. El matrimonio director y el de logística tienen su propio cuarto, coordinación duerme con los auxiliares de su género y el comité de logística ocupa las camas libres de los cuartos de consejeros y coordinación de su mismo género.
+    - El tablero avisa de lo que hay que revisar a mano (un joven solo, jóvenes con adultos) y de quién no tiene cuarto todavía.
+    - En el perfil de cada compañía, sus cuartos salen en rosa o azul según sean de mujeres o de hombres.
+  roles: [ director, coordinador, auxiliar, consejero, logistica, director_logistica ]
+- id: 2026-10-10-asignaciones-confirmar
+  date: 2026-10-10
+  title: Confirma tus asignaciones
+  summary: Quien recibe una asignación la confirma desde su perfil, y quien la delegó sigue todas en Seguimiento → Asignaciones.
+  changes:
+    - En tu perfil, cada asignación pendiente tiene el botón «Confirmar»; a quien te la asignó le llega el aviso.
+    - Quien recibe una asignación ya no la puede quitar; solo quien la delegó.
+    - "Seguimiento → Asignaciones: las que delegaste, cuántas faltan por confirmar y a qué hora confirmó cada quien."
+    - En Enfermería, «Pasaron por enfermería» cambia entre hoy y todas con un interruptor, y ya no se corre de lado en el teléfono.
+    - "En el teléfono, «Más» del consejero trae Escanear gafete, Conteo, Organigrama, Enfermería, Compañías y Jóvenes; la dirección suma Historial, y Registro tiene su botón amarillo."
 - id: 2026-10-09-tutorial
   date: 2026-10-09
   title: Un tutorial de 5 minutos

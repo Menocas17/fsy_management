@@ -70,4 +70,38 @@ class AccessesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
     assert_not Session.exists?(Current.session.id)
   end
+
+  test "the superadmin gives full access to one staff account and takes it back, and it is logged" do
+    sign_in_as(@admin)
+    assert_not @counselor_user.full_access?
+
+    get accesses_path
+    assert_select "[data-full-access-grants] select[name=user_id] option", text: /María/
+
+    post access_full_access_grants_path, params: { user_id: @counselor_user.id }
+    assert @counselor_user.reload.full_access?
+    assert_match "Le dio acceso total a", AuditLog.recent.first.summary
+
+    get accesses_path
+    assert_select "[data-full-access-grant='#{@counselor_user.id}']"
+
+    delete access_full_access_grant_path(@counselor_user)
+    assert_not @counselor_user.reload.full_access?
+    assert_match "Le quitó el acceso total", AuditLog.recent.first.summary
+  end
+
+  test "a joven never gets full access, and only the superadmin can give it" do
+    joven_user = User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan))
+    sign_in_as(@admin)
+    post access_full_access_grants_path, params: { user_id: joven_user.id }
+    assert_not joven_user.reload.full_access_granted?
+
+    joven_user.update_column(:full_access_granted, true)
+    assert_not joven_user.full_access?, "a forced flag on a joven still gives nothing"
+
+    sign_out
+    sign_in_as(@counselor_user)
+    post access_full_access_grants_path, params: { user_id: @counselor_user.id }
+    assert_not @counselor_user.reload.full_access_granted?
+  end
 end

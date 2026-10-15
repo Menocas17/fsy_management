@@ -21,7 +21,7 @@ class CheckinsController < ApplicationController
   def roster
     return render json: { error: @window.closed_reason }, status: :forbidden unless @window.open?
 
-    people = expected_scope.includes(:company).order(:first_name, :last_name)
+    people = expected_scope.includes(:company, :logistics_area).order(:first_name, :last_name)
     already = registered_ids
 
     render json: {

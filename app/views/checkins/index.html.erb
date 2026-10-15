@@ -48,9 +48,12 @@
 
       <%# El visor ocupa casi toda la pantalla del teléfono (vertical, como se sostiene). El resultado se pinta
           encima del video, porque quien registra mira la cámara, y se va solo a los 5 segundos (o al tocarlo)
-          para no tapar al siguiente; el último queda anotado debajo. %>
-      <div class="relative bg-primary-950 aspect-[3/4] sm:aspect-[4/3] max-h-[72dvh] w-full flex items-center justify-center">
-        <video data-checkin-scanner-target="video" data-no-pull-refresh class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
+          para no tapar al siguiente; el último queda anotado debajo.
+          En el teléfono se abre en pantalla completa (data-fullscreen, .scan-viewer en application.css): solo la
+          cámara, cuántos van, el resultado y el código a mano; la ✕ o «atrás» lo devuelven a la página. %>
+      <div data-checkin-scanner-target="viewer" data-no-pull-refresh
+           class="scan-viewer relative bg-primary-950 aspect-[3/4] sm:aspect-[4/3] max-h-[72dvh] w-full flex items-center justify-center">
+        <video data-checkin-scanner-target="video" class="absolute inset-0 w-full h-full object-cover" muted playsinline></video>
         <canvas data-checkin-scanner-target="canvas" class="hidden"></canvas>
         <%# El recuadro guía vive en la zona de arriba (todo menos la franja de 96px de abajo), así la tarjeta
             del resultado nunca lo tapa, sea cual sea el alto de la pantalla. %>
@@ -70,6 +73,36 @@
         <div hidden data-checkin-scanner-target="card" role="status" aria-live="polite" aria-atomic="true"
              data-action="click->checkin-scanner#dismissCard"
              class="absolute inset-x-3 bottom-3 z-10"></div>
+
+        <%# Con la cámara prendida en el teléfono: volver a la pantalla completa después de salir. %>
+        <button type="button" hidden data-checkin-scanner-target="expand" data-action="checkin-scanner#expand"
+                aria-label="Pantalla completa"
+                class="md:hidden absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-black/55 text-label font-bold text-white backdrop-blur-sm active:scale-[0.97] cursor-pointer transition">
+          <%= icon "maximize", class: "w-4 h-4" %>
+          Pantalla completa
+        </button>
+
+        <%# Barra de arriba, solo en pantalla completa: salir, cuántos van y escribir el código a mano. %>
+        <div data-fullscreen-only
+             class="absolute inset-x-0 top-0 z-10 flex items-center gap-2 px-3 pb-6 pt-[max(env(safe-area-inset-top),12px)] bg-gradient-to-b from-black/60 to-transparent">
+          <button type="button" data-action="checkin-scanner#collapse" aria-label="Salir de pantalla completa"
+                  class="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/55 text-white backdrop-blur-sm active:scale-[0.95] cursor-pointer transition">
+            <%= icon "x", class: "w-5 h-5" %>
+          </button>
+          <div class="min-w-0 flex-1 flex flex-col items-center text-center text-white">
+            <span class="text-body font-extrabold leading-tight">
+              <span class="tabular-nums" data-checkin-scanner-target="arrived"><%= @registered %></span>
+              <span class="font-semibold text-white/80">de <%= @expected %></span>
+            </span>
+            <span hidden data-checkin-scanner-target="pending"
+                  class="mt-0.5 inline-flex items-center h-5 px-2 rounded-full text-meta font-bold bg-surface text-cat-amber-ink"></span>
+          </div>
+          <button type="button" data-action="checkin-scanner#askCode"
+                  class="shrink-0 inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full bg-black/55 text-label font-bold text-white backdrop-blur-sm active:scale-[0.97] cursor-pointer transition">
+            <%= icon "keyboard", class: "w-4 h-4" %>
+            Código
+          </button>
+        </div>
       </div>
 
       <div class="p-4 space-y-3">
@@ -86,6 +119,29 @@
           Funciona sin señal: el padrón queda guardado en este dispositivo y lo escaneado se envía solo al volver el internet.
         </p>
       </div>
+
+      <%# El código del gafete a mano, desde la pantalla completa (el gafete no se lee o la cámara no enfoca). %>
+      <dialog data-checkin-scanner-target="codeDialog" data-code-dialog aria-labelledby="code-title"
+              data-action="click->checkin-scanner#closeCodeOutside"
+              class="app-dialog p-0 mx-auto mt-[max(env(safe-area-inset-top),4rem)] w-[calc(100%-2rem)] max-w-md rounded-panel shadow-lg backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+        <%= form_with url: "#", method: :get, data: { action: "submit->checkin-scanner#typed" }, class: "p-5 bg-surface rounded-panel" do %>
+          <div class="flex items-start gap-3">
+            <%= render IconTileComponent.new(icon: "keyboard", size: :md) %>
+            <div class="min-w-0">
+              <h2 id="code-title" class="text-title font-bold text-ink-900">Escribir el código</h2>
+              <p class="mt-0.5 text-label text-ink-500">El que viene en el gafete, debajo del QR.</p>
+            </div>
+          </div>
+          <%= text_field_tag :code, nil, id: "code_dialog_input", placeholder: "Ej. P-0421 o 421", autocomplete: "off", inputmode: "text",
+                aria: { label: "Código del gafete" }, class: "#{field_input_classes} mt-4 font-mono" %>
+          <div class="mt-4 flex gap-2.5 justify-end">
+            <button type="button" data-action="checkin-scanner#closeCode" class="<%= button_classes(:secondary) %>">Cancelar</button>
+            <%= tag.button type: "submit", class: button_classes(:primary) do %>
+              Registrar
+            <% end %>
+          </div>
+        <% end %>
+      </dialog>
 
       <%# Anular un registro: llegó alguien con el gafete de otra persona o se escaneó el que no era. El motivo
           es de una lista; el detalle, opcional. Va en la misma cola que los escaneos (sirve sin señal). %>

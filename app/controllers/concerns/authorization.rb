@@ -15,7 +15,7 @@ module Authorization
                   :can_take_night_attendance?,
                   :can_view_infirmary?, :can_operate_infirmary?, :can_announce_infirmary?, :can_read_infirmary_notes?,
                   :can_cancel_infirmary_visit?, :can_read_emotional_information?, :can_filter_emotional_information?,
-                  :can_import_staffing?
+                  :can_import_staffing?, :can_view_rooms?, :can_manage_rooms?, :can_suggest_company?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -183,6 +183,22 @@ module Authorization
     night_attendance_gender_for(company) == gender.to_s
   end
 
+  # Quien puede ponerle compañía a un joven (acceso total, registro y el director de logística) ve las sugeridas.
+  def can_suggest_company?
+    allowed_participant_attributes(Participant.new(rol: "joven")).include?(:company_id)
+  end
+
+  # Cuartos -------------------------------------------------------------------
+  # El tablero de cuartos lo ve todo el staff; ordenarlos y configurar el hotel, el acceso total y el director
+  # de logística.
+  def can_view_rooms?
+    Current.user&.rooms_viewer? || false
+  end
+
+  def can_manage_rooms?
+    Current.user&.rooms_manager? || false
+  end
+
   # Enfermería ----------------------------------------------------------------
   # El tablero lo ve todo el staff. Ingresar, confirmar la entrada, dar de alta y escribir la ficha es de
   # enfermería (el área con la bandera nursing); el consejero o el auxiliar del joven solo avisan que lo llevan.
@@ -299,8 +315,9 @@ module Authorization
     full_company_access? || Current.user&.participant&.director_logistica? || false
   end
 
+  # La carga masiva: acceso total y el director de logística (el registro ya no: crea fichas de a una).
   def can_import_participants?
-    full_company_access? || Current.user&.checkin_member? || false
+    full_company_access? || Current.user&.participant&.director_logistica? || false
   end
 
   # Compañías y consejeros por archivo: arman el personal de las compañías, que es de acceso total.
@@ -366,6 +383,14 @@ module Authorization
 
     def require_finance_configurator!
       redirect_to finances_path, alert: "El presupuesto lo definen el director de logística y la dirección" unless can_configure_finances?
+    end
+
+    def require_rooms_viewer!
+      redirect_to dashboard_path, alert: "Los cuartos son solo para el staff" unless can_view_rooms?
+    end
+
+    def require_rooms_manager!
+      redirect_to rooms_path, alert: "Los cuartos los ordenan la dirección y el director de logística" unless can_manage_rooms?
     end
 
     def require_infirmary_viewer!

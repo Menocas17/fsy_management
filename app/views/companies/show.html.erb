@@ -71,12 +71,28 @@
       <section class="<%= card_classes("p-6") %>">
         <%= section_heading "Cuartos asignados", "door-open" %>
         <% if @rooms.any? %>
+          <%# Rosa las de mujeres y azul los de hombres, para ver de un vistazo cómo quedó repartida la compañía. %>
           <div class="grid grid-cols-2 gap-2">
-            <% @rooms.each do |room, count| %>
-              <div class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-tile bg-sunken border border-line-soft" data-room="<%= room %>">
-                <span class="text-sm font-extrabold text-ink-900"><%= room %></span>
-                <span class="text-label font-semibold text-ink-500"><%= count %> jóv.</span>
-              </div>
+            <% @rooms.each do |room, genders| %>
+              <% gender = genders.keys.one? ? genders.keys.first : nil %>
+              <% link = can_view_rooms? && @hotel_rooms.include?(room) %>
+              <%= content_tag(link ? :a : :div, href: (room_path(room, return_to: request.fullpath) if link),
+                    title: gender ? "Cuarto de #{Hallway::GENDER_LABELS[gender].downcase}" : "Cuarto con hombres y mujeres",
+                    class: "flex items-center justify-between gap-2 px-3 py-2.5 rounded-tile border #{RoomsHelper::TILE_TONES.fetch(gender || :mixed)}#{" hover:brightness-95 dark:hover:brightness-110 transition" if link}",
+                    data: { room: room, room_gender: gender }) do %>
+                <span class="flex items-center gap-1.5 text-sm font-extrabold">
+                  <%= icon(gender == "H" ? "mars" : "venus", class: "size-3.5 shrink-0") if gender %>
+                  <%= room %>
+                </span>
+                <span class="text-label font-semibold"><%= genders.values.sum %> jóv.</span>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-label font-semibold text-ink-500">
+            <% Hallway::GENDER_LABELS.each do |key, label| %>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="size-3 rounded-[3px] border <%= RoomsHelper::TILE_TONES.fetch(key) %>" aria-hidden="true"></span><%= label %>
+              </span>
             <% end %>
           </div>
         <% else %>
@@ -125,7 +141,7 @@
         <%# @participants como parte de la llave: una consulta da cuántos son y su última edición (la página,
             sin cargarlos); si nada cambió, la lista sale de la caché sin cargar ni dibujar sus fotos. El día va en
             la llave porque la lista muestra la edad, que sube sola el día del cumpleaños sin que nadie edite la ficha. %>
-        <% cache [ "company-jovenes", @company.id, request.fullpath, @pagy.count, @participants, Date.current ] do %>
+        <% cache [ "company-jovenes", @company.id, request.fullpath, @pagy.count, @participants, Date.current, phone_hint? ] do %>
           <%= render "companies/participants", participants: @participants, pagy: @pagy %>
         <% end %>
       <% end %>

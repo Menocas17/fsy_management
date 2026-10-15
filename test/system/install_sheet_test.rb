@@ -2,7 +2,7 @@ require "application_system_test_case"
 
 # La hoja de instalar la app sale sola en el navegador del teléfono: en iPhone con los pasos, en Android con el
 # botón de verdad cuando Chrome da permiso, y desde Facebook o Instagram pide abrirla afuera. En la
-# computadora no sale, y «Ahora no» la calla.
+# computadora no sale (salvo la demo de «Ver como» a ancho de teléfono), y «Ahora no» la calla.
 class InstallSheetTest < ApplicationSystemTestCase
   IPHONE_SAFARI_26 = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1".freeze
   IPHONE_CHROME = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/140.0.0.0 Mobile/15E148 Safari/604.1".freeze
@@ -120,6 +120,32 @@ class InstallSheetTest < ApplicationSystemTestCase
     Rails.configuration.x.tutorial_autostart = false
   end
 
+  test "in Ver como the superadmin sees it on the computer at phone width as a demo, and it saves nothing" do
+    sign_in_as(users(:one))
+    visit participant_path(participants(:maria))
+    find("[data-view-as-participant]").click
+    assert_text "Viendo como"
+    assert_no_selector "dialog.install-sheet[open]", wait: 0.5
+
+    resize_to_mobile
+    visit dashboard_path
+    within_sheet do
+      assert_text "Instala FSY en tu iPhone"
+      click_on "Android"
+      assert_text "Instala FSY en tu teléfono"
+      click_on "Instalar"
+      assert_text "¡Listo!"
+      click_on "Entendido"
+    end
+    assert_nil evaluate_script("localStorage.getItem('fsy:install-snooze')"), "la demo no calla la hoja de verdad"
+
+    visit dashboard_path
+    assert_no_selector "dialog.install-sheet[open]", wait: 0.5
+    visit settings_path
+    click_on "Instalar en este teléfono"
+    within_sheet { assert_text "Instala FSY en tu iPhone" }
+  end
+
   private
     def phone(user_agent)
       cdp("Emulation.setUserAgentOverride", userAgent: user_agent)
@@ -127,8 +153,15 @@ class InstallSheetTest < ApplicationSystemTestCase
       cdp("Emulation.setTouchEmulationEnabled", enabled: true, maxTouchPoints: 1)
     end
 
+    # La hoja sube deslizándose: un clic a medio camino cae debajo del botón y no hace nada (en el CI pasaba
+    # con «Android»). Se toca cuando ya llegó.
     def within_sheet(&block)
-      within("dialog.install-sheet[open]", &block)
+      sheet = find("dialog.install-sheet[open]")
+      sheet.synchronize do
+        settled = sheet.evaluate_script("this.getAnimations().length == 0 && Math.abs(this.getBoundingClientRect().bottom - innerHeight) < 1")
+        raise Capybara::ExpectationNotMet, "la hoja sigue subiendo" unless settled
+      end
+      within(sheet, &block)
     end
 
     def cdp(command, **params)

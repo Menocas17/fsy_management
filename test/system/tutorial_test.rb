@@ -99,8 +99,8 @@ class TutorialTest < ApplicationSystemTestCase
     expect "¡Listo para la semana!"
     within(".tour-coach") { click_on "Cerrar" }
     assert_no_selector ".tour-coach"
-    assert_predicate @counselor.reload.tutorial_completed_at, :present?
-    assert_not Alert.source_tutorial.exists?, "la alerta de práctica se va al terminar"
+    assert_eventually("queda como visto") { @counselor.reload.tutorial_completed_at.present? }
+    assert_eventually("la alerta de práctica se va al terminar") { !Alert.source_tutorial.exists? }
   end
 
   test "the director practices deleting a training and sending an alert, and neither is saved" do
@@ -163,7 +163,7 @@ class TutorialTest < ApplicationSystemTestCase
     expect "Hola, María"
     within(".tour-coach") { click_on "Saltar" }
     assert_no_selector ".tour-coach"
-    assert_predicate @counselor.reload.tutorial_completed_at, :present?
+    assert_eventually("queda como visto") { @counselor.reload.tutorial_completed_at.present? }
 
     visit dashboard_path
     assert_no_selector ".tour-coach"

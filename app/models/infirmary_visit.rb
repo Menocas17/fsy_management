@@ -50,28 +50,44 @@ class InfirmaryVisit < ApplicationRecord
   end
 
   # Guarda la visita y, si ya está adentro (ingreso directo), avisa a sus consejeros y auxiliares.
+  # El aviso a los consejeros va fuera del rescate: si fallara, la visita ya quedó guardada y no se le dice a
+  # nadie «ya está en enfermería».
   def start
-    save!
+    begin
+      save!
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
+      errors.add(:base, "#{participant.full_name} ya está en enfermería") if errors.empty?
+      return false
+    end
     InfirmaryNotifier.admitted(self) if adentro?
     true
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-    errors.add(:base, "#{participant.full_name} ya está en enfermería") if errors.empty?
-    false
   end
 
-  # Enfermería confirma que el joven del aviso llegó.
+  # Enfermería confirma que el joven del aviso llegó. Con la fila bloqueada: dos toques a «Confirmar entrada»
+  # (o dos enfermeros a la vez) daban dos entradas y dos avisos. false si ya no venía en camino.
   def admit!(by:)
-    update!(status: :adentro, admitted_at: Time.current, admitted_by: by, admitted_by_name: self.class.name_of(by))
-    InfirmaryNotifier.admitted(self)
+    admitted = with_lock do
+      next false unless en_camino?
+
+      update!(status: :adentro, admitted_at: Time.current, admitted_by: by, admitted_by_name: self.class.name_of(by))
+    end
+    InfirmaryNotifier.admitted(self) if admitted
+    admitted
   end
 
   def discharge(by:, disposition:, notes: nil)
-    assign_attributes(status: :alta, discharged_at: Time.current, discharged_by: by, discharged_by_name: self.class.name_of(by),
-                      disposition: (disposition if self.class.dispositions.key?(disposition.to_s)), discharge_notes: notes)
-    return false unless save
-
-    InfirmaryNotifier.discharged(self)
-    true
+    discharged = with_lock do
+      if adentro?
+        assign_attributes(status: :alta, discharged_at: Time.current, discharged_by: by, discharged_by_name: self.class.name_of(by),
+                          disposition: (disposition if self.class.dispositions.key?(disposition.to_s)), discharge_notes: notes)
+        save
+      else
+        errors.add(:base, "Esa visita ya no está abierta")
+        false
+      end
+    end
+    InfirmaryNotifier.discharged(self) if discharged
+    discharged
   end
 
   # Desde cuándo cuenta: la entrada, o el aviso mientras viene en camino.

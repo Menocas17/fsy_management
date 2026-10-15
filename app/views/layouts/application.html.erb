@@ -3,13 +3,18 @@
   <head>
     <title><%= content_for(:title) || "Fsy Management" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%# El fondo que el navegador pinta donde la página todavía no dibujó (al abrirse el teclado, al cambiar de
+        tamaño): sin esto era blanco también en modo oscuro. El script de abajo lo pasa a dark. %>
+    <meta name="color-scheme" content="light">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Fsy Management">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
+    <%# application.js le recuerda al servidor el permiso de notificaciones de este teléfono (una vez por sesión). %>
+    <% if Current.user && !Current.viewing_as %><meta name="push-subscription-url" content="<%= push_subscription_notifications_path %>"><% end %>
     <%= csp_meta_tag %>
     <%= yield :head %>
-    <script>
+    <script nonce="<%= content_security_policy_nonce %>">
       (function () {
         try {
           // Sin elección guardada, el teléfono arranca en oscuro y la computadora en claro. Teléfono: pantalla
@@ -19,6 +24,7 @@
           var phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 768;
           if (theme === 'dark' || (theme === null && phone)) {
             document.documentElement.classList.add('dark');
+            document.querySelector('meta[name="color-scheme"]').content = 'dark';
           }
           if (localStorage.getItem('fsy:reduce-motion') === 'true') {
             document.documentElement.classList.add('reduce-motion');
@@ -95,12 +101,13 @@
     <%= render "shared/confirmation_modal"%>
     <%# Instalar la app (install_controller.js): sube sola en el navegador del teléfono; va antes del tutorial,
         que espera a que se cierre. %>
-    <%= render "shared/install_sheet" unless Current.viewing_as? %>
+    <%= render "shared/install_sheet" %>
     <%# El tutorial (Tutorial, tour_controller.js): arranca solo la primera vez en el teléfono, o desde
-        Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página. %>
-    <% if !Current.viewing_as? && Tutorial.available_to?(Current.user) %>
-      <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path,
-            tour_autostart_value: Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
+        Configuración → Ver el tutorial. Pide sus pasos al empezar, así no le cuesta nada a ninguna otra página.
+        En «Ver como» solo desde Configuración: es una vista previa y no arranca sola. %>
+    <% if Tutorial.available_to?(Current.user) %>
+      <%= tag.div hidden: true, data: { controller: "tour", tour_url_value: tutorial_path, tour_owner_value: Current.user.participant_id,
+            tour_autostart_value: !Current.viewing_as? && Rails.configuration.x.tutorial_autostart && Current.user.tutorial_completed_at.nil?, tour_home_value: dashboard_path } %>
     <% end %>
   </body>
 </html>
