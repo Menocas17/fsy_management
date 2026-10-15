@@ -37,8 +37,22 @@ Anota la IP pública.
 `APP_HOST` es el dominio con el que se entra a la app; Let's Encrypt necesita que apunte a la IP del droplet
 **antes** del primer deploy.
 
-- Con dominio propio: un registro **A** de `fsy.tudominio.com` → la IP.
+- Con dominio propio (el de la app es `fsynicaragua.com`, comprado en Namecheap): en Namecheap → Domain List →
+  **Manage** → **Advanced DNS**, con los nameservers en *Namecheap BasicDNS*, borra el `CNAME www` y el
+  `URL Redirect` de la página de estacionamiento y deja:
+
+  | Type | Host | Value |
+  |---|---|---|
+  | A Record | `@` | la IP del droplet |
+  | CNAME Record | `www` | `fsynicaragua.com.` |
+
+  `dig +short fsynicaragua.com` y `dig +short www.fsynicaragua.com` tienen que devolver la IP antes de
+  desplegar. El proxy atiende el dominio, su `www` y la dirección de sslip.io; la app manda las dos últimas al
+  dominio con un 301 (`config/routes.rb`).
 - Sin dominio: `<ip-con-guiones>.sslip.io` funciona solo (para `164.90.1.2` es `164-90-1-2.sslip.io`).
+
+Para pasar de sslip.io a un dominio ya desplegado: el DNS primero, después `APP_HOST` en tu terminal y en la
+variable del repo (`gh variable set APP_HOST --body fsynicaragua.com`), el CORS del bucket (4b) y un deploy.
 
 Es otra dirección que la de Render: quien tenga la app instalada en el teléfono tiene que abrir la nueva e
 instalarla de nuevo.
