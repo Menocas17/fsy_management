@@ -54,7 +54,9 @@
         <p class="text-label font-semibold text-ink-500"><%= pluralize(@staff.size, "persona") %> · una columna por capacitación</p>
       </div>
     </div>
-    <div class="overflow-x-auto">
+    <%# relative: los «Asistió»/«Faltó» para lectores de pantalla (sr-only) son absolute; sin un ancestro posicionado
+        aquí se ubicaban fuera de <main>, agrandaban la página del teléfono y al abrir «Más» todo se corría. %>
+    <div class="relative overflow-x-auto">
       <table class="w-full">
         <thead>
           <tr class="border-b border-line-soft">
