@@ -1,0 +1,50 @@
+<%# Modo simple del joven, solo en el teléfono: en vez de las cifras de un rol, su compañía y el último aviso. %>
+<% joven = Current.user.participant %>
+<% company = joven.company %>
+<% latest = Alert.inbox_for(Current.user).recent.first %>
+<div class="md:hidden flex flex-col gap-5" data-entrance="kpis" data-joven-home>
+  <% if company %>
+    <% counselors = company.counselors_in_order %>
+    <%= link_to my_company_path, class: card_classes("p-5 flex flex-col gap-3.5 transition-transform active:scale-[0.98]"), data: { joven_company: true } do %>
+      <div class="flex items-center gap-3">
+        <span aria-hidden="true" class="size-[52px] shrink-0 rounded-tile bg-cat-green-solid text-white flex items-center justify-center text-display font-extrabold"><%= company.number || "–" %></span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-meta font-bold tracking-[.07em] uppercase text-ink-500">Mi compañía</span>
+          <span class="block text-title font-bold text-ink-900 truncate"><%= [ company.name, company.nickname.presence ].compact.join(" · ") %></span>
+        </span>
+        <%= icon "chevron-right", class: "size-[18px] shrink-0 text-ink-500" %>
+      </div>
+      <% if counselors.any? %>
+        <span class="flex items-center gap-3">
+          <span class="flex -space-x-1.5 shrink-0">
+            <% counselors.each do |counselor| %><%= render AvatarComponent.new(participant: counselor, size: :sm) %><% end %>
+          </span>
+          <span class="min-w-0">
+            <span class="block text-label font-semibold text-ink-500">Tus consejeros</span>
+            <span class="block text-body font-bold text-ink-900 truncate"><%= counselors.map { |counselor| counselor.first_name.to_s.split.first }.to_sentence(two_words_connector: " y ", last_word_connector: " y ") %></span>
+          </span>
+        </span>
+      <% end %>
+      <span class="flex flex-wrap gap-1.5">
+        <% if company.dining_hall_label %><%= render ChipComponent.new(label: company.dining_hall_label, tone: :amber, icon: "utensils") %><% end %>
+        <% if joven.room.present? %><%= render ChipComponent.new(label: "Cuarto #{joven.room}", tone: :indigo, icon: "bed-double") %><% end %>
+      </span>
+    <% end %>
+  <% else %>
+    <%= render EmptyStateComponent.new(title: "Todavía no tienes compañía", icon: "building-2", tone: :green,
+          text: "Te la asignan antes del evento o al llegar. Aquí verás a tus consejeros, tu comedor y tu cuarto.") %>
+  <% end %>
+
+  <section class="<%= card_classes("p-5") %>" data-joven-latest-alert>
+    <%= section_heading "Último aviso", "megaphone", tone: :rose do %>
+      <%= link_to "Ver todos", notifications_path, class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
+    <% end %>
+    <% if latest %>
+      <p class="text-body font-bold text-ink-900"><%= latest.title %></p>
+      <p class="mt-0.5 text-body text-ink-700 line-clamp-3"><%= latest.body %></p>
+      <p class="mt-1.5 text-label font-semibold text-ink-500"><%= latest.sender_name %> · <%= latest.created_at.strftime("%d/%m · %H:%M") %></p>
+    <% else %>
+      <p class="text-body text-ink-500">Aquí te llegarán los avisos de dirección y de tus consejeros.</p>
+    <% end %>
+  </section>
+</div>

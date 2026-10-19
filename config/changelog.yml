@@ -7,6 +7,24 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
+- id: 2026-10-19-version-jovenes
+  date: 2026-10-19
+  title: La app para los jóvenes
+  summary: En el teléfono, los jóvenes tienen su propia barra de abajo con su compañía, la agenda y su QR.
+  changes:
+    - El inicio muestra lo que sigue, tu compañía con tus consejeros, tu comedor y tu cuarto, y el último aviso.
+    - «Mi compañía» reúne a tus consejeros y a tus compañeros.
+    - En «Más» están tu ficha, los avisos, las novedades y la configuración.
+  roles: [ joven ]
+- id: 2026-10-19-companias-consejeros
+  date: 2026-10-19
+  title: Dirección abre las compañías
+  summary: Hasta que dirección abra las compañías, cada consejero ve la suya en cifras, sin nombres.
+  changes:
+    - Con las compañías cerradas sabes que tu compañero(a) ya está asignado y ves cuántos jóvenes tienes, sus edades, estacas y barrios.
+    - Cuando dirección las abra te llegará un aviso y verás a tu compañero(a) y a tus jóvenes.
+    - Dirección y los coordinadores lo cambian en Configuración › Compañías de los consejeros.
+  roles: [ consejero, director, coordinador ]
 - id: 2026-10-14-fsynicaragua
   date: 2026-10-14
   title: La app ahora es fsynicaragua.com

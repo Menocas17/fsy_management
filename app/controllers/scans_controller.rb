@@ -1,6 +1,8 @@
 # El lector de QR del panel. Los gafetes llevan la URL de la ficha y las cajas el código del artículo;
 # aquí se decide a dónde lleva lo que se leyó.
 class ScansController < ApplicationController
+  before_action :require_company_revealed!
+
   def show
   end
 

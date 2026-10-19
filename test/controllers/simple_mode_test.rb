@@ -112,14 +112,23 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     assert @counselor.reload.simple_mode?
   end
 
-  test "jóvenes don't have it yet" do
+  test "the joven gets their own bar: their company, their QR, the agenda and only their things in Más" do
     sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
 
     get dashboard_path
-    assert_select "nav[data-bottom-nav]", false
+    assert_select "nav[data-bottom-nav]" do
+      assert_select "a[data-bottom-nav-item='Mi compañía'][href='#{my_company_path}']"
+      assert_select "button[data-bottom-nav-item='Mi QR']"
+    end
+    assert_equal [ "Mi ficha", "Avisos", "Novedades", "Configuración" ],
+                 css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
+    # Su inicio: su compañía y el último aviso, no las cifras de un rol ni las gráficas del evento.
+    assert_select "[data-joven-home] [data-joven-company][href='#{my_company_path}']", text: /Compañía 7/
+    assert_select "[data-simple-kpis]", false
 
     get settings_path
-    assert_select "#settings-simple", false
+    assert_select "#settings-simple"
+    assert_select "#settings-companies", false
   end
 
   test "viewing as someone doesn't change their setting" do

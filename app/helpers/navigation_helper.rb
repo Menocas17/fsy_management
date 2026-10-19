@@ -47,11 +47,16 @@ module NavigationHelper
     ]
     # Cada quien ve solo lo que puede abrir: un módulo sin acceso no aparece en gris, se omite. "Mi perfil"
     # vive en el menú de cuenta de la barra superior; un grupo que queda sin opciones se omite entero.
+    hidden = Current.user&.company_hidden? ? HIDDEN_COMPANY_ITEMS : []
     sections.filter_map do |section|
-      items = section[:items].compact.map { |item| item.merge(is_nav: true) }
+      items = section[:items].compact.reject { |item| hidden.include?(item[:text]) }.map { |item| item.merge(is_nav: true) }
       section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
     end
   end
+
+  # Lo que el consejero no abre mientras dirección no le muestre su compañía (CompanyReveal): ahí saldrían los
+  # nombres de sus jóvenes o de su compañero(a). Su compañía en cifras sigue en «Mi compañía».
+  HIDDEN_COMPANY_ITEMS = [ "Jóvenes", "Staff", "Compañías", "Organigrama", "Cuartos", "Conteo" ].freeze
 
   # Modo simple (User#simple_mode?): en el teléfono la barra inferior reemplaza al menú lateral.
   def simple_mode?
@@ -72,6 +77,9 @@ module NavigationHelper
   def simple_own_item
     participant = Current.user.participant
     case participant&.rol
+    when "joven"
+      return { text: "Mi compañía", url: my_company_path, icon: "building-2" } if participant.company_id
+      return { text: "Mi ficha", url: myprofile_participants_path, icon: "id-card" }
     when "consejero"
       company = participant.counselor_scope.first
       return { text: "Mi compañía", url: company_path(company), icon: "building-2" } if company
@@ -114,6 +122,8 @@ module NavigationHelper
   # escáner de gafetes; para acceso total y el consejero, solo su lista. Configuración, Mi perfil y Cerrar
   # sesión siguen en el menú de la foto.
   def simple_more_items
+    return joven_more_items if Current.user.participant&.joven?
+
     in_bar = simple_bar_items.map { |item| URI.parse(item[:url]).path }
     in_bar << checkins_path if simple_center == :checkin
     items = nav_items.reject { |item| in_bar.include?(URI.parse(item[:url]).path) }
@@ -122,7 +132,20 @@ module NavigationHelper
     elsif Current.user.participant&.consejero? then COUNSELOR_MORE_ITEMS
     end
     items = only.filter_map { |text| items.find { |item| item[:text] == text } } if only
+    # El gafete abre una ficha: el consejero con la compañía cerrada no tiene a dónde ir con él.
+    return items if Current.user.company_hidden?
+
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
+  end
+
+  # «Más» del joven: lo suyo (su ficha, avisos, novedades y configuración), no las listas del staff.
+  def joven_more_items
+    [
+      ({ text: "Mi ficha", url: myprofile_participants_path, icon: "id-card" } if Current.user.participant.company_id),
+      { text: "Avisos", url: notifications_path, icon: "bell" },
+      { text: "Novedades", url: changelog_path, icon: "sparkles" },
+      { text: "Configuración", url: settings_path, icon: "settings" }
+    ].compact
   end
 
   # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.

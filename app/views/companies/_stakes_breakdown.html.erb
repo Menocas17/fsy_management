@@ -1,0 +1,30 @@
+<%# De dónde vienen los jóvenes de una compañía (CompanySummary#stakes): cada estaca con su barra y sus barrios. %>
+<% tones = %i[blue indigo teal amber green rose] %>
+<% top = summary.stakes.map(&:count).max.to_i %>
+<section class="<%= card_classes("p-5 md:p-6") %>" data-company-stakes>
+  <%= section_heading "Estacas y barrios", "church", tone: :blue %>
+  <% if summary.stakes.any? %>
+    <p class="-mt-2 mb-3 text-label font-semibold text-ink-500"><%= pluralize(summary.stakes.size, "estaca") %> · <%= pluralize(summary.wards_count, "barrio") %></p>
+    <ul class="divide-y divide-line-soft">
+      <% summary.stakes.each_with_index do |stake, index| %>
+        <% tone = tones[index % tones.size] %>
+        <li class="py-3 first:pt-0 last:pb-0 flex flex-col gap-2">
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="min-w-0 text-body font-bold text-ink-900"><%= stake.name %></span>
+            <span class="shrink-0 text-label font-semibold text-ink-500 tabular-nums"><%= stake.count %></span>
+          </div>
+          <span class="block h-1.5 rounded-full bg-sunken overflow-hidden" aria-hidden="true">
+            <span class="block h-full rounded-full <%= Tones::SOLID.fetch(tone).split.first %>" style="width: <%= (stake.count * 100.0 / top).round %>%"></span>
+          </span>
+          <div class="flex flex-wrap gap-1.5">
+            <% stake.wards.each do |ward, count| %>
+              <%= render ChipComponent.new(label: count > 1 ? "#{ward} · #{count}" : ward, tone: tone) %>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= render EmptyStateComponent.new(title: "Todavía sin jóvenes", text: "Cuando les asignen jóvenes, aquí verás de qué estacas y barrios vienen.", icon: "church", tone: :blue) %>
+  <% end %>
+</section>

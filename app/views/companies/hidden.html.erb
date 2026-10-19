@@ -1,0 +1,54 @@
+<%# La compañía del consejero mientras dirección no la abre (CompanyReveal): sabe que ya tiene compañero(a) y la ve
+    en cifras, sin un solo nombre ni ficha. %>
+<% content_for :title, @company.name %>
+<% content_for :eyebrow, "Mi compañía" %>
+<% content_for :heading, @company.name %>
+<% back_to "Inicio", dashboard_path %>
+<%= render PageComponent.new(width: :form, data: { company_hidden: true }) do |page| %>
+  <% page.with_intro do %>
+    <span class="flex flex-wrap items-center gap-2">
+      <%= render ChipComponent.new(label: "Nombres ocultos por dirección", tone: :amber, icon: "lock") %>
+      <% if @company.dining_hall_label %>
+        <%= render ChipComponent.new(label: @company.dining_hall_label, tone: :neutral, icon: "utensils") %>
+      <% end %>
+    </span>
+  <% end %>
+
+  <%= render "companies/summary_stats", summary: @summary %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-companion>
+    <%= section_heading "Tu compañero(a)", "user-check" %>
+    <div class="flex items-center gap-3">
+      <span class="size-14 shrink-0 rounded-tile border-[1.5px] border-dashed border-line bg-sunken text-ink-500 flex items-center justify-center">
+        <%= icon(@companion_assigned ? "user-round-check" : "user-round", class: "size-6") %>
+      </span>
+      <div class="min-w-0">
+        <p class="text-body font-bold text-ink-900"><%= @companion_assigned ? "Ya está asignado" : "Todavía sin asignar" %></p>
+        <p class="text-label text-ink-500 text-pretty">
+          <%= @companion_assigned ? "Sabrás quién es cuando dirección abra las compañías." : "Dirección todavía no te asigna compañero(a)." %>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <%= render "companies/stakes_breakdown", summary: @summary %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-hidden-jovenes>
+    <%= section_heading "Tus jóvenes", "users", tone: :green do %>
+      <span class="text-label font-semibold text-ink-500 tabular-nums"><%= @summary.total %></span>
+    <% end %>
+    <ul class="mb-4 divide-y divide-line-soft" aria-hidden="true">
+      <% [ "w-3/5", "w-1/2", "w-2/3" ].each do |width| %>
+        <li class="flex items-center gap-3 py-2.5 first:pt-0">
+          <span class="size-10 shrink-0 rounded-avatar border-[1.5px] border-dashed border-line bg-sunken text-ink-500 flex items-center justify-center"><%= icon "lock", class: "size-4" %></span>
+          <span class="flex-1 flex flex-col gap-1.5">
+            <span class="block h-2.5 <%= width %> rounded-full bg-sunken"></span>
+            <span class="block h-2 w-1/3 rounded-full bg-sunken"></span>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+    <%= render EmptyStateComponent.new(title: "Nombres ocultos por ahora", icon: "eye-off", tone: :amber, name: "hidden-jovenes",
+          text: "Dirección abrirá los nombres y las fichas de tus jóvenes antes del evento. Te llegará un aviso.") %>
+  </section>
+<% end %>

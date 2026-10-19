@@ -137,10 +137,13 @@ Rails.application.routes.draw do
   get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
+  # «Mi compañía» del joven; al consejero y al auxiliar los lleva a la suya (DashboardHelper#my_company_link).
+  get "mi-compania" => "my_companies#show", as: :my_company
   get "instalar-app" => "install_sheets#show", as: :install_sheet
   resource :settings, only: [ :show ] do
     patch :scan_windows
     patch :simple_mode
+    patch :company_reveal
   end
   resources :auxiliar_companies do
     member do

@@ -3,6 +3,7 @@
 # el hotel (HallwaysController) es de la dirección y el director de logística.
 class RoomsController < ApplicationController
   before_action :require_rooms_viewer!
+  before_action :require_company_revealed!
 
   def index
     @hallways = Hallway.ordered.includes(:rooms).to_a

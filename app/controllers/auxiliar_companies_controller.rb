@@ -1,5 +1,6 @@
 class AuxiliarCompaniesController < ApplicationController
   before_action :set_auxiliar_company, only: %i[show edit update destroy assign_staff remove_staff]
+  before_action :require_company_revealed!
   before_action :require_full_company_access!, only: %i[new create destroy]
   before_action :require_company_edit!, only: %i[edit update assign_staff remove_staff]
   before_action :require_company_staffing!, only: %i[assign_staff remove_staff]
