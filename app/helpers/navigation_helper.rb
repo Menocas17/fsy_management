@@ -8,7 +8,29 @@ module NavigationHelper
   end
 
   def build_nav_sections
-    sections = [
+    sections = Current.user&.participant&.joven? ? joven_nav_sections : staff_nav_sections
+    # Cada quien ve solo lo que puede abrir: un módulo sin acceso no aparece en gris, se omite. "Mi perfil"
+    # vive en el menú de cuenta de la barra superior; un grupo que queda sin opciones se omite entero.
+    hidden = Current.user&.company_hidden? ? HIDDEN_COMPANY_ITEMS : []
+    sections.filter_map do |section|
+      items = section[:items].compact.reject { |item| hidden.include?(item[:text]) }.map { |item| item.merge(is_nav: true) }
+      section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
+    end
+  end
+
+  # El joven no abre los módulos del staff (JovenAccess): su menú es su inicio, su compañía y la agenda.
+  def joven_nav_sections
+    [
+      { id: nil, label: nil, items: [
+        { text: "Inicio", url: dashboard_path, lucide_icon: "house" },
+        ({ text: "Mi compañía", url: my_company_path, lucide_icon: "building-2" } if Current.user.participant.company_id),
+        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path ] }
+      ] }
+    ]
+  end
+
+  def staff_nav_sections
+    [
       { id: nil, label: nil, items: [
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" }
       ] },
@@ -45,13 +67,6 @@ module NavigationHelper
         ({ text: "Historial", url: audit_logs_path, lucide_icon: "clipboard-clock" } if Current.user&.admin_or_staff_manager?)
       ] }
     ]
-    # Cada quien ve solo lo que puede abrir: un módulo sin acceso no aparece en gris, se omite. "Mi perfil"
-    # vive en el menú de cuenta de la barra superior; un grupo que queda sin opciones se omite entero.
-    hidden = Current.user&.company_hidden? ? HIDDEN_COMPANY_ITEMS : []
-    sections.filter_map do |section|
-      items = section[:items].compact.reject { |item| hidden.include?(item[:text]) }.map { |item| item.merge(is_nav: true) }
-      section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
-    end
   end
 
   # Lo que el consejero no abre mientras dirección no le muestre su compañía (CompanyReveal): ahí saldrían los

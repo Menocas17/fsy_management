@@ -50,6 +50,10 @@
           <%= icon "info", class: "size-4 shrink-0 mt-0.5" %>
           Si te sientes mal o necesitas algo, búscalos primero: ellos te llevan a enfermería.
         </p>
+        <%= link_to organigrama_path, class: button_classes(:secondary, extra: "mt-3 w-full") do %>
+          <%= icon "network", class: "w-4 h-4" %>
+          Ver quién dirige tu compañía
+        <% end %>
       <% else %>
         <%= render EmptyStateComponent.new(title: "Todavía sin consejeros", text: "Pronto sabrás quiénes te van a acompañar en la semana.", icon: "user-check") %>
       <% end %>

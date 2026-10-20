@@ -1,4 +1,5 @@
 class SettingsController < ApplicationController
+  allow_jovenes only: %i[show simple_mode]
   before_action :require_scan_manager!, only: :scan_windows
   before_action :require_company_reveal_manager!, only: :company_reveal
   # Tiene su propio aviso viendo como otro (abajo).

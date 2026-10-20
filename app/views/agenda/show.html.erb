@@ -29,8 +29,8 @@
       <%= render SegmentedToggleComponent.new(label: "Vista de la agenda", items: [
             { text: "Semana", icon: "calendar-days", href: agenda_path(date: @selected_day, view: "semana"), active: @view == "semana", data: { agenda_view: "semana" } },
             { text: "Día", icon: "list", href: agenda_path(date: @selected_day, view: "dia"), active: @view == "dia", data: { agenda_view: "dia" } },
-            { text: "Capacitaciones", icon: "graduation-cap", href: agenda_trainings_path, data: { agenda_view: "capacitaciones" } }
-          ]) %>
+            ({ text: "Capacitaciones", icon: "graduation-cap", href: agenda_trainings_path, data: { agenda_view: "capacitaciones" } } unless Current.user.participant&.joven?)
+          ].compact) %>
       <% if can_manage_agenda? %>
         <%= link_to new_activity_path(date: @selected_day), class: button_classes do %>
           <%= icon "plus", class: "w-4 h-4" %>

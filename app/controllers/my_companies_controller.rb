@@ -1,6 +1,7 @@
 # «Mi compañía» del joven: su número y nombre elegido, sus consejeros, su comedor y cuarto, y sus compañeros
 # solo por nombre (sus fichas son de sus consejeros). A los demás los lleva a la página de la suya.
 class MyCompaniesController < ApplicationController
+  allow_jovenes
   def show
     @participant = Current.user.participant
     return redirect_to(helpers.my_company_link || dashboard_path) unless @participant&.joven?

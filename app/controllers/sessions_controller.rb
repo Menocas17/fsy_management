@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  allow_jovenes
   layout "auth"
   allow_unauthenticated_access only: %i[ new create ]
   skip_before_action :block_writes_while_viewing_as, only: :destroy

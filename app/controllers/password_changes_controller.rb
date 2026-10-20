@@ -1,6 +1,7 @@
 # Cambiar la contraseña desde adentro, con la actual. Al guardarla se cierran las demás sesiones de la
 # cuenta: si alguien más la tenía abierta, ahí la pierde.
 class PasswordChangesController < ApplicationController
+  allow_jovenes
   rate_limit to: 10, within: 3.minutes, only: :update,
              with: -> { redirect_to edit_password_change_path, alert: "Intenta de nuevo más tarde." }
   # En «Ver como» la cuenta es de otra persona: su contraseña no se toca desde aquí.

@@ -8,7 +8,7 @@
       <div class="<%= card_classes("p-5 md:p-6 max-w-lg mx-auto") %>">
         <%= render EmptyStateComponent.new(title: "Tu cuenta no está asignada a ninguna compañía", icon: "target", name: "my-company",
               text: "Consulta la estructura completa en la vista general.") do |empty| %>
-          <% empty.with_action { link_to "Ver organigrama general", organigrama_path, class: button_classes(:secondary) } %>
+          <% empty.with_action { link_to "Ver organigrama general", organigrama_path, class: button_classes(:secondary) } unless Current.user.participant&.joven? %>
         <% end %>
       </div>
     <% else %>
