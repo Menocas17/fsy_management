@@ -1,5 +1,6 @@
 class OrganigramaController < ApplicationController
   VIEWS = %w[todo logistica mi_compania].freeze
+  before_action :require_company_revealed!
 
   def show
     @view = VIEWS.include?(params[:scope]) ? params[:scope] : "todo"

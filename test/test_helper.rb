@@ -11,6 +11,10 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # Las pruebas parten con las compañías abiertas a los consejeros (CompanyReveal), como estaban antes del
+    # interruptor; las que prueban la compañía cerrada la cierran ellas mismas.
+    setup { CompanyReveal.open! }
+
     # Add more helper methods to be used by all tests here...
   end
 end

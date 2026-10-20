@@ -87,17 +87,20 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
   test "before the event it lists the trainings that are left and the start" do
     seed_trainings
 
-    get dashboard_path
+    # Un día fijo antes de la primera capacitación: con la fecha real, la prueba se rompía el 17 de octubre.
+    travel_to Date.new(2026, 10, 1) do
+      get dashboard_path
 
-    assert_select "[data-next-up]", 1
-    assert_select "[data-next-item='training-2026-10-17']", text: /17 de octubre/
-    assert_select "[data-next-item='training-2026-11-17']", text: /17 de noviembre/
-    assert_select "[data-next-item='event']", text: /Comienza el evento/
-    # El banner del teléfono lleva las mismas fechas en «Lo que sigue», en el mismo orden.
-    assert_select "[data-hero-next] [data-hero-next-item]", 3 do |rows|
-      assert_equal %w[training-2026-10-17 training-2026-11-17 event], rows.map { |row| row["data-hero-next-item"] }
+      assert_select "[data-next-up]", 1
+      assert_select "[data-next-item='training-2026-10-17']", text: /17 de octubre/
+      assert_select "[data-next-item='training-2026-11-17']", text: /17 de noviembre/
+      assert_select "[data-next-item='event']", text: /Comienza el evento/
+      # El banner del teléfono lleva las mismas fechas en «Lo que sigue», en el mismo orden.
+      assert_select "[data-hero-next] [data-hero-next-item]", 3 do |rows|
+        assert_equal %w[training-2026-10-17 training-2026-11-17 event], rows.map { |row| row["data-hero-next-item"] }
+      end
+      assert_select "[data-next-item='training-2026-12-17']", 0, "solo las dos próximas capacitaciones"
     end
-    assert_select "[data-next-item='training-2026-12-17']", 0, "solo las dos próximas capacitaciones"
   end
 
   test "a training that already happened drops off the list" do

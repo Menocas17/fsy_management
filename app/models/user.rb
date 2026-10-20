@@ -94,9 +94,24 @@ class User < ApplicationRecord
   end
 
   # Modo simple (solo en el teléfono): barra inferior en vez del menú lateral y un inicio con las cifras de
-  # cada rol. Encendido por defecto; cada quien lo apaga en Configuración. Los jóvenes todavía no lo tienen.
+  # cada rol (el joven, el suyo: su compañía y lo que sigue). Encendido por defecto; cada quien lo apaga en
+  # Configuración.
   def simple_mode?
-    simple_mode && !participant&.joven?
+    simple_mode
+  end
+
+  # Quién abre o cierra a los consejeros su compañía (CompanyReveal): el superadmin, el matrimonio director y
+  # los coordinadores. El acceso total dado a dedo no alcanza.
+  def company_reveal_manager?
+    full_access_by_role?
+  end
+
+  # Un consejero cuya compañía dirección todavía no abrió: la ve en cifras y nada más (CompanyReveal).
+  # Con acceso total dado a dedo ve todo como siempre.
+  def company_hidden?
+    return @company_hidden if defined?(@company_hidden)
+
+    @company_hidden = participant&.consejero? && !full_access? && !CompanyReveal.open? || false
   end
 
   # La búsqueda global ocupa el botón central de la barra inferior (en vez de «Mi QR») para quien ve todo

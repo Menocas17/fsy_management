@@ -3,6 +3,7 @@
 # auxiliar de ese género de la rama, y solo la de esta noche.
 class NightAttendancesController < ApplicationController
   before_action :require_night_attendance_viewer!, only: :index
+  before_action :require_company_revealed!
   before_action :set_company, :set_gender, :set_night, only: %i[show update]
 
   def index

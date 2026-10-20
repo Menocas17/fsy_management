@@ -1,0 +1,81 @@
+<%# «Mi compañía» del joven (MyCompaniesController): su compañía, sus consejeros, dónde come y duerme, y sus
+    compañeros solo por nombre. %>
+<% content_for :title, "Mi compañía" %>
+<% content_for :eyebrow, "Mi compañía" %>
+<% content_for :heading, @company ? (@company.nickname.presence || @company.name) : "Mi compañía" %>
+<% back_to "Inicio", dashboard_path %>
+<%= render PageComponent.new(width: :form, data: { my_company: true }) do %>
+  <% if @company %>
+    <section class="<%= card_classes("p-5 md:p-6 flex flex-col gap-4") %>">
+      <div class="flex items-center gap-4">
+        <span aria-hidden="true" class="size-16 shrink-0 rounded-card shadow-md bg-cat-green-solid text-white flex flex-col items-center justify-center">
+          <span class="text-meta font-bold tracking-[.08em] uppercase opacity-80">Comp.</span>
+          <span class="text-display font-extrabold leading-none"><%= @company.number || "–" %></span>
+        </span>
+        <div class="min-w-0">
+          <p class="text-title font-bold text-ink-900"><%= @company.name %></p>
+          <% if @company.nickname.present? %>
+            <p class="text-body font-bold text-primary-600 dark:text-primary-300 break-words" data-company-nickname><%= @company.nickname %></p>
+          <% end %>
+          <p class="text-label font-semibold text-ink-500">
+            <%= pluralize(@summary.total, "joven", plural: "jóvenes") %> · <%= pluralize(@summary.women, "mujer", plural: "mujeres") %> y <%= pluralize(@summary.men, "hombre") %>
+          </p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <% [ [ "utensils", "Comedor", @company.dining_hall_label ], [ "bed-double", "Tu cuarto", @participant.room.presence && "Cuarto #{@participant.room}" ] ].each do |icon_name, label, value| %>
+          <div class="min-w-0 rounded-tile bg-sunken px-3 py-2.5">
+            <p class="flex items-center gap-1.5 text-label font-semibold text-ink-500"><%= icon icon_name, class: "size-3.5" %><%= label %></p>
+            <p class="text-body font-bold leading-tight text-ink-900 [overflow-wrap:anywhere]"><%= value || "Por asignar" %></p>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-my-counselors>
+      <%= section_heading "Tus consejeros", "user-check" %>
+      <% if @counselors.any? %>
+        <ul class="divide-y divide-line-soft">
+          <% @counselors.each do |counselor| %>
+            <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+              <%= render AvatarComponent.new(participant: counselor) %>
+              <div class="min-w-0">
+                <p class="text-body font-bold text-ink-900 truncate"><%= counselor.full_name %></p>
+                <p class="text-label font-semibold text-ink-500 truncate"><%= [ counselor.gender == "M" ? "Consejera" : "Consejero", counselor.ward_name ].compact.join(" · ") %></p>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+        <p class="mt-4 flex items-start gap-2 rounded-tile bg-cat-blue/15 text-cat-blue-ink px-3 py-2.5 text-label font-semibold">
+          <%= icon "info", class: "size-4 shrink-0 mt-0.5" %>
+          Si te sientes mal o necesitas algo, búscalos primero: ellos te llevan a enfermería.
+        </p>
+      <% else %>
+        <%= render EmptyStateComponent.new(title: "Todavía sin consejeros", text: "Pronto sabrás quiénes te van a acompañar en la semana.", icon: "user-check") %>
+      <% end %>
+    </section>
+
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-my-companions>
+      <%= section_heading "Tus compañeros", "users", tone: :green do %>
+        <span class="text-label font-semibold text-ink-500 tabular-nums"><%= @companions.size %></span>
+      <% end %>
+      <% if @companions.any? %>
+        <ul class="grid grid-cols-2 gap-2">
+          <% @companions.each do |companion| %>
+            <li class="min-w-0 flex items-center gap-2.5 rounded-tile bg-sunken px-2.5 py-2">
+              <%= render AvatarComponent.new(participant: companion, size: :sm) %>
+              <span class="min-w-0 text-body font-semibold text-ink-900 truncate"><%= companion.first_name.to_s.split.first %> <%= companion.last_name.to_s.first %>.</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= render EmptyStateComponent.new(title: "Todavía no hay más jóvenes", text: "Cuando asignen a tus compañeros los verás aquí.", icon: "users", tone: :green) %>
+      <% end %>
+    </section>
+  <% else %>
+    <%= render EmptyStateComponent.new(title: "Todavía no tienes compañía", icon: "building-2", tone: :green, name: "no-company",
+          text: "Te la asignan antes del evento o al llegar. Mientras, revisa que tu ficha esté completa.") do |empty| %>
+      <% empty.with_action { link_to "Ver mi ficha", myprofile_participants_path, class: button_classes(:secondary) } %>
+    <% end %>
+  <% end %>
+<% end %>

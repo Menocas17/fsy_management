@@ -13,7 +13,7 @@ class AuditLog < ApplicationRecord
   # qué y a quién) ya viene en summary; esto solo la agrupa. Las acciones que no estén aquí caen en «Otro».
   ACTION_KINDS = {
     "creo" => { label: "Creó", icon: "plus", tone: "bg-cat-green/15 text-cat-green-ink", actions: %w[created imported] },
-    "edito" => { label: "Editó", icon: "pencil", tone: "bg-cat-blue/15 text-cat-blue-ink", actions: %w[updated reset] },
+    "edito" => { label: "Editó", icon: "pencil", tone: "bg-cat-blue/15 text-cat-blue-ink", actions: %w[updated reset companies_opened companies_closed] },
     "elimino" => { label: "Eliminó", icon: "trash-2", tone: "bg-cat-rose/15 text-cat-rose-ink", actions: %w[destroyed deleted] },
     "anulo" => { label: "Anuló", icon: "undo-2", tone: "bg-cat-amber/20 text-cat-amber-ink", actions: %w[voided] },
     "staff" => { label: "Movió staff", icon: "users", tone: "bg-cat-indigo/15 text-cat-indigo-ink", actions: %w[assigned_staff removed_staff] },

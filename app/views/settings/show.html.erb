@@ -36,29 +36,67 @@
             action: "toggleTheme", target: "themeToggle")) %>
     </section>
 
-    <% unless Current.user.participant&.joven? %>
-      <%# Se guarda en la cuenta (no en el dispositivo): el servidor arma la barra inferior y el inicio. %>
-      <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-simple" aria-labelledby="settings-simple-title">
-        <h2 id="settings-simple-title" class="<%= card_heading %>">
-          <%= icon "smartphone", class: "w-[17px] h-[17px]" %>
-          Modo simple
+    <% if Current.user.company_reveal_manager? %>
+      <%# Dirección abre o cierra a los consejeros su compañía (CompanyReveal). Abrirla pide confirmar: avisa a todos. %>
+      <% revealed = CompanyReveal.open? %>
+      <% last_change = CompanyReveal.last_change %>
+      <% counselors = Participant.consejero.count %>
+      <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-companies" aria-labelledby="settings-companies-title">
+        <h2 id="settings-companies-title" class="<%= card_heading %>">
+          <%= icon "building-2", class: "w-[17px] h-[17px]" %>
+          Compañías de los consejeros
         </h2>
-        <% simple = Current.user.simple_mode? %>
         <div class="flex items-center justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-body font-semibold text-ink-900">Barra inferior en el teléfono</p>
+            <p class="text-body font-semibold text-ink-900">Mostrar compañero(a) y jóvenes</p>
             <p class="mt-0.5 text-label leading-relaxed text-ink-500">
-              El menú queda abajo, a mano del pulgar, y el inicio muestra solo tus cifras. Apágalo para volver al menú completo. En la computadora no cambia nada.
+              Cada consejero ve quién es su compañero(a) y los nombres y fichas de los jóvenes de su compañía.
             </p>
           </div>
-          <%= button_to simple_mode_settings_path, method: :patch, params: { simple_mode: simple ? "0" : "1" },
-                role: "switch", aria: { checked: simple, label: "Modo simple: #{simple ? "apagar" : "encender"}" },
-                class: "relative shrink-0 w-[42px] h-6 rounded-full cursor-pointer transition-colors #{simple ? "bg-primary-600" : "bg-line"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
-            <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if simple %>"></span>
+          <%= button_to company_reveal_settings_path, method: :patch, params: { abrir: revealed ? "0" : "1" },
+                form: { data: (revealed ? {} : { turbo_confirm: "¿Abrir las compañías?",
+                                                 turbo_confirm_detail: "Los #{counselors} consejeros verán a su compañero(a) y los nombres, fotos y fichas de sus jóvenes. Les llegará un aviso.",
+                                                 turbo_confirm_button: "Abrir compañías" }) },
+                role: "switch", aria: { checked: revealed, label: "Compañías de los consejeros: #{revealed ? "cerrar" : "abrir"}" },
+                class: "relative shrink-0 w-[42px] h-6 rounded-full cursor-pointer transition-colors #{revealed ? "bg-primary-600" : "bg-line"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
+            <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if revealed %>"></span>
           <% end %>
         </div>
+        <p class="mt-4 flex items-start gap-2 rounded-tile px-3 py-2.5 text-label font-semibold <%= revealed ? Tones.tint(:green) : Tones.tint(:amber) %>" data-company-reveal-state="<%= revealed ? "abiertas" : "cerradas" %>">
+          <%= icon(revealed ? "eye" : "eye-off", class: "size-4 shrink-0 mt-0.5") %>
+          <% if revealed %>
+            Abiertas: los consejeros ven a su compañero(a) y a sus jóvenes.
+          <% else %>
+            Cerradas: los consejeros solo saben que su compañero(a) ya está asignado y ven su compañía en cifras (cuántos jóvenes, edades, estacas y barrios), sin nombres.
+          <% end %>
+        </p>
+        <% if last_change %>
+          <p class="mt-2 text-label font-semibold text-ink-500">Último cambio: <%= last_change.actor_name %> · <%= SpanishDates.short_with_time(last_change.created_at) %></p>
+        <% end %>
       </section>
     <% end %>
+
+    <%# Se guarda en la cuenta (no en el dispositivo): el servidor arma la barra inferior y el inicio. %>
+    <section class="<%= card_classes("px-5 py-6 md:px-[26px]") %>" id="settings-simple" aria-labelledby="settings-simple-title">
+      <h2 id="settings-simple-title" class="<%= card_heading %>">
+        <%= icon "smartphone", class: "w-[17px] h-[17px]" %>
+        Modo simple
+      </h2>
+      <% simple = Current.user.simple_mode? %>
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <p class="text-body font-semibold text-ink-900">Barra inferior en el teléfono</p>
+          <p class="mt-0.5 text-label leading-relaxed text-ink-500">
+            El menú queda abajo, a mano del pulgar, y el inicio muestra solo tus cifras. Apágalo para volver al menú completo. En la computadora no cambia nada.
+          </p>
+        </div>
+        <%= button_to simple_mode_settings_path, method: :patch, params: { simple_mode: simple ? "0" : "1" },
+              role: "switch", aria: { checked: simple, label: "Modo simple: #{simple ? "apagar" : "encender"}" },
+              class: "relative shrink-0 w-[42px] h-6 rounded-full cursor-pointer transition-colors #{simple ? "bg-primary-600" : "bg-line"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500" do %>
+          <span class="absolute top-[2px] left-[2px] size-5 rounded-full bg-white shadow-sm <%= "translate-x-[18px]" if simple %>"></span>
+        <% end %>
+      </div>
+    </section>
 
     <% if Tutorial.available_to?(Current.user) %>
       <%# El tutorial recorre la barra de abajo: solo existe en el teléfono con el modo simple. %>

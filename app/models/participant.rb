@@ -289,8 +289,8 @@ class Participant < ApplicationRecord
     date.year - birth_date.year - ((date.month > birth_date.month || (date.month == birth_date.month && date.day >= birth_date.day)) ? 0 : 1)
   end
 
-  # Los roles que el superadmin puede probar con «Ver como» (el joven todavía no tiene su propia vista).
-  VIEW_AS_ROLES = %w[director coordinador director_logistica logistica auxiliar consejero].freeze
+  # Los roles que el superadmin puede probar con «Ver como».
+  VIEW_AS_ROLES = %w[director coordinador director_logistica logistica auxiliar consejero joven].freeze
 
   # Una ficha que muestre bien el rol: primero las que ya tienen cuenta, y entre ellas las que tienen a quién
   # mandar (el consejero su compañía, el auxiliar su rama, logística su área).
@@ -300,6 +300,7 @@ class Participant < ApplicationRecord
       when "consejero" then participant.counselor_scope.any?
       when "auxiliar"  then participant.auxiliar_companies.any?
       when "logistica" then participant.logistics_area.present?
+      when "joven"     then participant.company_id.present?
       else true
       end
       [ participant.user ? 0 : 1, in_place ? 0 : 1 ]

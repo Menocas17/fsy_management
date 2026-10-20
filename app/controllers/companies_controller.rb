@@ -1,5 +1,6 @@
 class CompaniesController < ApplicationController
   before_action :set_company, only: %i[show edit update destroy assign_staff remove_staff]
+  before_action :require_company_revealed!, only: %i[index overview edit update]
   before_action :require_full_company_access!, only: %i[new create destroy]
   before_action :require_company_edit!, only: %i[edit update assign_staff remove_staff]
   before_action :require_company_staffing!, only: %i[assign_staff remove_staff]
@@ -15,6 +16,8 @@ class CompaniesController < ApplicationController
   end
 
   def show
+    return show_hidden if company_hidden_here?
+
     load_leaders
     @rooms = @company.room_occupancy_by_gender
     @hotel_rooms = Room.where(number: @rooms.keys).pluck(:number).to_set
@@ -108,6 +111,16 @@ class CompaniesController < ApplicationController
   end
 
   private
+    # Con la compañía cerrada (CompanyReveal), el consejero ve la suya en cifras y ninguna otra.
+    def show_hidden
+      me = Current.user.participant
+      return redirect_to(dashboard_path, alert: HIDDEN_NOTICE) unless me.counselor_scope.include?(@company)
+
+      @summary = CompanySummary.new(@company)
+      @companion_assigned = @company.counselors.where.not(id: me.id).exists?
+      render :hidden
+    end
+
     # Dos pestañas asignando el mismo lugar a la vez: la validación pasa en las dos y la base frena a la segunda.
     def save_membership(membership)
       membership.save

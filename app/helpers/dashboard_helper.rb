@@ -33,6 +33,8 @@ module DashboardHelper
     when "consejero"
       company = participant.counselor_scope.first
       company && company_path(company, return_to: dashboard_path)
+    when "joven"
+      participant.company_id && my_company_path
     else
       participant.company && company_path(participant.company, return_to: dashboard_path)
     end
