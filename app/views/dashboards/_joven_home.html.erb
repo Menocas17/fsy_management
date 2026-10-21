@@ -1,8 +1,8 @@
-<%# Modo simple del joven, solo en el teléfono: en vez de las cifras de un rol, su compañía y el último aviso. %>
+<%# El inicio del joven (teléfono y computadora): en vez de las cifras del evento, su compañía y el último aviso. %>
 <% joven = Current.user.participant %>
 <% company = joven.company %>
 <% latest = Alert.inbox_for(Current.user).recent.first %>
-<div class="md:hidden flex flex-col gap-5" data-entrance="kpis" data-joven-home>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start" data-entrance="kpis" data-joven-home>
   <% if company %>
     <% counselors = company.counselors_in_order %>
     <%= link_to my_company_path, class: card_classes("p-5 flex flex-col gap-3.5 transition-transform active:scale-[0.98]"), data: { joven_company: true } do %>

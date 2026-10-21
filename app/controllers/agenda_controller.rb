@@ -1,4 +1,5 @@
 class AgendaController < ApplicationController
+  allow_jovenes only: %i[show activity]
   # The agenda only ever shows the days of the event: there is nowhere else to navigate to.
   def show
     @view = params[:view] == "dia" ? "dia" : "semana"

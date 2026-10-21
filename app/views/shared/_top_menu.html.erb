@@ -32,11 +32,14 @@
     </div>
 
     <div class="flex items-center gap-2 md:gap-[18px] shrink-0">
+      <%# La lista de participantes no es del joven ni del consejero con la compañía cerrada: no les sale. %>
+      <% unless Current.user.participant&.joven? || Current.user.company_hidden? %>
       <%= form_with url: participants_path, method: :get, role: "search", class: "hidden lg:block relative" do %>
         <%= icon "search", class: "absolute left-[13px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-ink-500 pointer-events-none" %>
         <%= search_field_tag :query, (params[:query] if controller_name == "participants" && action_name == "index"),
               placeholder: "Buscar participante…", aria: { label: "Buscar participante" },
               class: "w-[220px] h-10 rounded-control pl-[38px] pr-3 text-body bg-canvas border border-line text-ink-900 placeholder:text-ink-300 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30" %>
+      <% end %>
       <% end %>
 
       <%= render "shared/notifications_bell" %>

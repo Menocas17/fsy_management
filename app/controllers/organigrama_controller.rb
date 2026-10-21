@@ -1,9 +1,12 @@
 class OrganigramaController < ApplicationController
   VIEWS = %w[todo logistica mi_compania].freeze
   before_action :require_company_revealed!
+  # El joven ve solo la cadena de su compañía (sus consejeros, auxiliares y la dirección), no el evento entero.
+  allow_jovenes
 
   def show
     @view = VIEWS.include?(params[:scope]) ? params[:scope] : "todo"
+    @view = "mi_compania" if joven_signed_in?
 
     if @view == "mi_compania"
       @directors = Participant.director.with_attached_avatar.order(:gender, :first_name)

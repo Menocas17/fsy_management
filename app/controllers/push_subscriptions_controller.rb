@@ -1,6 +1,7 @@
 # Guarda y borra el permiso que da cada navegador para recibir notificaciones.
 # Habla JSON con el controlador Stimulus, no renderiza pantallas.
 class PushSubscriptionsController < ApplicationController
+  allow_jovenes
   skip_forgery_protection only: :create, if: -> { request.headers["X-Service-Worker"].present? }
 
   def create

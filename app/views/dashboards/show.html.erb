@@ -117,11 +117,13 @@
             </div>
           <% end %>
           <%# Ver la ficha de cualquiera escaneando su gafete (un consejero con un joven que no conoce). Solo
-              abre la ficha: registrar llegadas sigue siendo del registro. %>
+              abre la ficha: registrar llegadas sigue siendo del registro. El joven no abre fichas ajenas. %>
+          <% unless Current.user.participant&.joven? %>
           <%= link_to scan_path, data: { shortcut: "qr" },
                 class: "#{shortcut_base} border border-white/25 bg-white/10 text-white hover:bg-white/20" do %>
             <%= icon "scan-qr-code", class: "w-4 h-4" %>
             Escanear gafete
+          <% end %>
           <% end %>
         <% end %>
       </div>
@@ -131,12 +133,11 @@
   <%# Modo simple en el teléfono: las cifras del rol y solo dos gráficas; lo demás queda en la computadora,
       donde el panel sigue completo (o apagando el modo simple en Configuración). %>
   <% only_full = @simple ? "max-md:hidden md:contents" : "contents" %>
-  <% joven_home = @simple && Current.user.participant&.joven? %>
-  <% if joven_home %>
+  <%# El joven ve su inicio en el teléfono y en la computadora: las cifras y gráficas del evento son del staff. %>
+  <% if Current.user.participant&.joven? %>
     <%= render "joven_home" %>
-  <% elsif @simple %>
-    <%= render "simple_kpis", kpis: @dashboard.simple_kpis %>
-  <% end %>
+  <% else %>
+  <%= render "simple_kpis", kpis: @dashboard.simple_kpis if @simple %>
   <%= tag.div class: only_full do %>
     <%= render "main_kpis", total_jovenes: @dashboard.total_jovenes, total_participants: @dashboard.total_participants, total_staff: @dashboard.total_staff %>
     <%# Primero lo que viene y lo que la cocina necesita saber; después el análisis. %>
@@ -145,11 +146,9 @@
       <%= render "care", special_care: @dashboard.special_care, dining_halls: @dashboard.jovenes_by_dining_hall %>
     <% end %>
   <% end %>
-  <%# Las gráficas del evento no son del joven: en su teléfono quedan fuera. %>
-  <%= tag.div class: (joven_home ? only_full : "contents") do %>
-    <%= render "main_charts", count_by_stake: @dashboard.count_by_stake, count_by_role: @dashboard.count_by_role %>
-  <% end %>
+  <%= render "main_charts", count_by_stake: @dashboard.count_by_stake, count_by_role: @dashboard.count_by_role %>
   <%= tag.div class: only_full do %>
     <%= render "secondary_charts", data_by_age: @dashboard.participants_by_age, shirt_counts: @dashboard.shirt_count, male_count: @dashboard.male_count, female_count: @dashboard.female_count %>
+  <% end %>
   <% end %>
 <% end %>

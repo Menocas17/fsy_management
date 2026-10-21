@@ -1,4 +1,5 @@
 class AlertsController < ApplicationController
+  allow_jovenes only: %i[show]
   before_action :require_alert_manager!, only: %i[index new create destroy]
   before_action :set_alert, only: %i[show destroy]
 

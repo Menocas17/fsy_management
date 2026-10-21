@@ -1,4 +1,5 @@
 class PasswordsController < ApplicationController
+  allow_jovenes
   layout "auth"
   allow_unauthenticated_access
   before_action :require_password_reset_emails, only: %i[ new create ]

@@ -3,6 +3,7 @@
 # Participant.view_as_sample) o una ficha concreta desde su perfil. Mientras tanto solo mira: las escrituras
 # las frena ViewAsReadOnly, para que nada quede a nombre de esa persona.
 class ViewAsController < ApplicationController
+  allow_jovenes
   before_action :require_superadmin
   skip_before_action :block_writes_while_viewing_as
 

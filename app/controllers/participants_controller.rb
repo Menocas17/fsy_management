@@ -1,7 +1,9 @@
 class ParticipantsController < ApplicationController
+  allow_jovenes only: %i[myprofile show edit update]
   before_action :set_participant, only: %i[show edit update destroy]
   before_action :require_company_revealed!, only: %i[index staff]
   before_action :require_company_revealed_for_participant!, only: %i[show edit update]
+  before_action :require_own_ficha_for_jovenes!, only: %i[show edit update]
   before_action :require_participant_delete!, only: [ :destroy ]
   before_action :require_participant_create!, only: %i[new create]
   before_action :require_participant_edit!, only: %i[edit update]
@@ -122,6 +124,11 @@ class ParticipantsController < ApplicationController
   def set_participant
     # En el tutorial, la ficha de un joven de práctica se puede ver (solo ver: no hay quien la edite).
     @participant = (practice_participant(params[:id]) if action_name == "show") || Participant.find(params[:id])
+  end
+
+  # El joven abre solo su propia ficha (JovenAccess): las de los demás, con sus datos médicos, son del staff.
+  def require_own_ficha_for_jovenes!
+    redirect_to dashboard_path, alert: JovenAccess::NOTICE if joven_signed_in? && @participant != Current.user.participant
   end
 
   # Con la compañía cerrada, el consejero solo abre su propia ficha (CompanyRevealGate).

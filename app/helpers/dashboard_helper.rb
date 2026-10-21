@@ -51,7 +51,8 @@ module DashboardHelper
           url: agenda_path(date: activity.starts_at.to_date, activity_id: activity.id) }
       end
     else
-      trainings = next_trainings.map do |training|
+      # Las capacitaciones son del staff: al joven solo le queda el inicio del evento.
+      trainings = (Current.user&.participant&.joven? ? [] : next_trainings).map do |training|
         { key: "training-#{training.held_on}", eyebrow: "Capacitación", title: SpanishDates.long(training.held_on),
           meta: "#{training.name} · #{training.held_on.year}", days: days_until(training.held_on),
           icon: "graduation-cap", tone: :amber,

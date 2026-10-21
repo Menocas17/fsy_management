@@ -1,5 +1,8 @@
+<%# El joven solo tiene la vista de su compañía (OrganigramaController): no le sale el selector. %>
+<% unless Current.user.participant&.joven? %>
 <%= render SegmentedToggleComponent.new(label: "Vista del organigrama", floating: local_assigns.fetch(:floating, false), items: [
       { text: "Todo", icon: "network", href: organigrama_path, active: @view == "todo", data: { org_view: "todo" } },
       { text: "Logística", icon: "truck", href: organigrama_path(scope: "logistica"), active: @view == "logistica", data: { org_view: "logistica" } },
       { text: "Mi compañía", icon: "target", href: organigrama_path(scope: "mi_compania"), active: @view == "mi_compania", data: { org_view: "mi_compania" } }
     ]) %>
+<% end %>

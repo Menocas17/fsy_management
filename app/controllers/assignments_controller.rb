@@ -1,6 +1,8 @@
 # Delegar asignaciones desde la ficha (new/create/update/destroy, con can_assign_to?), confirmarlas quien las
 # recibe (confirm) y seguir las delegadas (index): las propias o, con acceso total, todas.
 class AssignmentsController < ApplicationController
+  # El joven confirma desde su ficha lo que le delegaron; lo demás de las asignaciones es del staff.
+  allow_jovenes only: %i[confirm]
   before_action :set_participant, only: %i[new create]
   before_action :set_assignment, only: %i[update destroy confirm]
   before_action :require_assign_permission!, except: %i[index confirm]
