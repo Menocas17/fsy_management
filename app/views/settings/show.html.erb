@@ -37,7 +37,7 @@
     </section>
 
     <% if Current.user.company_reveal_manager? %>
-      <%# Dirección abre o cierra a los consejeros su compañía (CompanyReveal). Abrirla pide confirmar: avisa a todos. %>
+      <%# Dirección abre o cierra las compañías al staff (CompanyReveal). Abrirla pide confirmar: avisa a los consejeros. %>
       <% revealed = CompanyReveal.open? %>
       <% last_change = CompanyReveal.last_change %>
       <% counselors = Participant.consejero.count %>
@@ -50,7 +50,7 @@
           <div class="min-w-0">
             <p class="text-body font-semibold text-ink-900">Mostrar compañero(a) y jóvenes</p>
             <p class="mt-0.5 text-label leading-relaxed text-ink-500">
-              Cada consejero ve quién es su compañero(a) y los nombres y fichas de los jóvenes de su compañía.
+              El staff ve las compañías y los jóvenes, y cada consejero quién es su compañero(a) y los nombres y fichas de los jóvenes de su compañía.
             </p>
           </div>
           <%= button_to company_reveal_settings_path, method: :patch, params: { abrir: revealed ? "0" : "1" },
@@ -65,9 +65,9 @@
         <p class="mt-4 flex items-start gap-2 rounded-tile px-3 py-2.5 text-label font-semibold <%= revealed ? Tones.tint(:green) : Tones.tint(:amber) %>" data-company-reveal-state="<%= revealed ? "abiertas" : "cerradas" %>">
           <%= icon(revealed ? "eye" : "eye-off", class: "size-4 shrink-0 mt-0.5") %>
           <% if revealed %>
-            Abiertas: los consejeros ven a su compañero(a) y a sus jóvenes.
+            Abiertas: el staff ve las compañías y los jóvenes, y los consejeros a su compañero(a) y a sus jóvenes.
           <% else %>
-            Cerradas: los consejeros solo saben que su compañero(a) ya está asignado y ven su compañía en cifras (cuántos jóvenes, edades, estacas y barrios), sin nombres.
+            Cerradas: solo el acceso total ve las compañías y los jóvenes. Los consejeros saben que su compañero(a) ya está asignado y ven su compañía en cifras (cuántos jóvenes, mujeres y hombres, su comedor, estacas y barrios), sin nombres.
           <% end %>
         </p>
         <% if last_change %>

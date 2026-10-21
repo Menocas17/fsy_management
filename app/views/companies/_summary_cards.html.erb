@@ -1,0 +1,30 @@
+<%# Una compañía en cifras, sin nombres (CompanySummary), en tarjetas como las de Capacitaciones que ocupan todo el
+    ancho: cuántos jóvenes, mujeres y hombres, y su comedor. %>
+<%
+  cards = [
+    { key: "jovenes", label: "Jóvenes", sub: "en total", value: summary.total, icon: "users", tone: "bg-cat-green-solid" },
+    { key: "mujeres", label: "Mujeres", sub: "de #{summary.total}", value: summary.women, icon: "venus", tone: "bg-cat-rose-solid" },
+    { key: "hombres", label: "Hombres", sub: "de #{summary.total}", value: summary.men, icon: "mars", tone: "bg-cat-blue-solid" },
+    { key: "comedor", label: "Comedor", sub: "asignado", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
+  ]
+%>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-company-summary-cards>
+  <% cards.each do |card| %>
+    <article class="<%= card_classes("h-full min-w-0 p-4 flex flex-col gap-3") %>" data-summary-card="<%= card[:key] %>">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 shrink-0 rounded-control text-white flex items-center justify-center <%= card[:tone] %>">
+          <%= icon card[:icon], class: "w-[19px] h-[19px]" %>
+        </span>
+        <div class="min-w-0">
+          <p class="text-title font-bold text-ink-900 truncate"><%= card[:label] %></p>
+          <p class="text-label font-semibold text-ink-500 truncate"><%= card[:sub] %></p>
+        </div>
+      </div>
+      <% if card[:text] %>
+        <p class="text-title font-extrabold leading-tight text-ink-900 [overflow-wrap:anywhere]"><%= card[:value] %></p>
+      <% else %>
+        <p class="text-display font-extrabold tabular-nums text-ink-900"><%= card[:value] %></p>
+      <% end %>
+    </article>
+  <% end %>
+</div>

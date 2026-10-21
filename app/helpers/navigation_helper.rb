@@ -11,7 +11,10 @@ module NavigationHelper
     sections = Current.user&.participant&.joven? ? joven_nav_sections : staff_nav_sections
     # Cada quien ve solo lo que puede abrir: un módulo sin acceso no aparece en gris, se omite. "Mi perfil"
     # vive en el menú de cuenta de la barra superior; un grupo que queda sin opciones se omite entero.
-    hidden = Current.user&.company_hidden? ? HIDDEN_COMPANY_ITEMS : []
+    hidden = if Current.user&.counselor_company_hidden? then HIDDEN_COMPANY_ITEMS_FOR_COUNSELORS
+    elsif Current.user&.company_hidden? then HIDDEN_COMPANY_ITEMS
+    else []
+    end
     sections.filter_map do |section|
       items = section[:items].compact.reject { |item| hidden.include?(item[:text]) }.map { |item| item.merge(is_nav: true) }
       section.merge(items: items, active: items.any? { |item| nav_item_active?(**item) }) if items.any?
@@ -75,9 +78,12 @@ module NavigationHelper
     ]
   end
 
-  # Lo que el consejero no abre mientras dirección no le muestre su compañía (CompanyReveal): ahí saldrían los
-  # nombres de sus jóvenes o de su compañero(a). Su compañía en cifras sigue en «Mi compañía».
-  HIDDEN_COMPANY_ITEMS = [ "Jóvenes", "Staff", "Compañías", "Organigrama", "Cuartos", "Conteo" ].freeze
+  # Lo que el staff sin acceso total no abre mientras dirección no abra las compañías (CompanyReveal): ahí
+  # saldrían compañías o jóvenes. El organigrama se queda: les muestra solo la rama de logística.
+  HIDDEN_COMPANY_ITEMS = [ "Jóvenes", "Compañías", "Cuartos", "Conteo" ].freeze
+  # El consejero, además, ni el staff ni el organigrama: ahí saldría su compañero(a). Su compañía en cifras
+  # sigue en «Mi compañía».
+  HIDDEN_COMPANY_ITEMS_FOR_COUNSELORS = [ *HIDDEN_COMPANY_ITEMS, "Staff", "Organigrama" ].freeze
 
   # Modo simple (User#simple_mode?): en el teléfono la barra inferior reemplaza al menú lateral.
   def simple_mode?
@@ -106,13 +112,16 @@ module NavigationHelper
       return { text: "Mi compañía", url: company_path(company), icon: "building-2" } if company
     when "auxiliar"
       auxiliar_company = participant.auxiliar_scope[:auxiliar_company]
-      return { text: "Compañías", url: auxiliar_company_path(auxiliar_company), icon: "building-2" } if auxiliar_company
+      return { text: "Compañías", url: auxiliar_company_path(auxiliar_company), icon: "building-2" } if auxiliar_company && !Current.user.company_hidden?
     when "director_logistica"
       return { text: "Logística", url: logistics_areas_path, icon: "layout-grid", active_paths: [ logistics_areas_path ] }
     when "logistica"
       # Registro ya va en el botón central (simple_center): aquí queda el siguiente módulo de su área.
       return simple_area_item(participant.logistics_area, skip_checkin: true)
     end
+    # Con las compañías cerradas (CompanyReveal) no hay compañías que abrir: queda su perfil.
+    return { text: "Mi perfil", url: myprofile_participants_path, icon: "id-card" } if Current.user.company_hidden?
+
     { text: "Compañías", url: companies_path, icon: "building-2", active_paths: [ companies_path, auxiliar_companies_path ] }
   end
 
@@ -154,7 +163,7 @@ module NavigationHelper
     end
     items = only.filter_map { |text| items.find { |item| item[:text] == text } } if only
     # El gafete abre una ficha: el consejero con la compañía cerrada no tiene a dónde ir con él.
-    return items if Current.user.company_hidden?
+    return items if Current.user.counselor_company_hidden?
 
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
   end

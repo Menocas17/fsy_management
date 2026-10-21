@@ -111,10 +111,11 @@ class CompaniesController < ApplicationController
   end
 
   private
-    # Con la compañía cerrada (CompanyReveal), el consejero ve la suya en cifras y ninguna otra.
+    # Con las compañías cerradas (CompanyReveal), el consejero ve la suya en cifras y ninguna otra; el resto del
+    # staff sin acceso total, ninguna.
     def show_hidden
       me = Current.user.participant
-      return redirect_to(dashboard_path, alert: HIDDEN_NOTICE) unless me.counselor_scope.include?(@company)
+      return redirect_to(dashboard_path, alert: STAFF_HIDDEN_NOTICE) unless me.consejero? && me.counselor_scope.include?(@company)
 
       @summary = CompanySummary.new(@company)
       @companion_assigned = @company.counselors.where.not(id: me.id).exists?

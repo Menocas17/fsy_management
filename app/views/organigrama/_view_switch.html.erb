@@ -1,5 +1,6 @@
-<%# El joven solo tiene la vista de su compañía (OrganigramaController): no le sale el selector. %>
-<% unless Current.user.participant&.joven? %>
+<%# El joven solo tiene la vista de su compañía, y el staff con las compañías cerradas solo la de logística
+    (OrganigramaController): a ninguno le sale el selector. %>
+<% unless Current.user.participant&.joven? || Current.user.company_hidden? %>
 <%= render SegmentedToggleComponent.new(label: "Vista del organigrama", floating: local_assigns.fetch(:floating, false), items: [
       { text: "Todo", icon: "network", href: organigrama_path, active: @view == "todo", data: { org_view: "todo" } },
       { text: "Logística", icon: "truck", href: organigrama_path(scope: "logistica"), active: @view == "logistica", data: { org_view: "logistica" } },

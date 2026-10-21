@@ -1,7 +1,8 @@
 class ParticipantsController < ApplicationController
   allow_jovenes only: %i[myprofile show edit update]
   before_action :set_participant, only: %i[show edit update destroy]
-  before_action :require_company_revealed!, only: %i[index staff]
+  before_action :require_company_revealed!, only: :index
+  before_action :require_counselor_company_revealed!, only: :staff
   before_action :require_company_revealed_for_participant!, only: %i[show edit update]
   before_action :require_own_ficha_for_jovenes!, only: %i[show edit update]
   before_action :require_participant_delete!, only: [ :destroy ]
@@ -131,9 +132,12 @@ class ParticipantsController < ApplicationController
     redirect_to dashboard_path, alert: JovenAccess::NOTICE if joven_signed_in? && @participant != Current.user.participant
   end
 
-  # Con la compañía cerrada, el consejero solo abre su propia ficha (CompanyRevealGate).
+  # Con las compañías cerradas (CompanyRevealGate), el staff sin acceso total no abre fichas de jóvenes, y el
+  # consejero ninguna ajena.
   def require_company_revealed_for_participant!
-    require_company_revealed! unless @participant == Current.user&.participant
+    return if @participant == Current.user&.participant
+
+    require_company_revealed! if @participant.joven? || Current.user&.participant&.consejero?
   end
 
   def participant_params
