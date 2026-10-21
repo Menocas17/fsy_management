@@ -120,11 +120,24 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[data-bottom-nav-item='Mi compañía'][href='#{my_company_path}']"
       assert_select "button[data-bottom-nav-item='Mi QR']"
     end
-    assert_equal [ "Mi ficha", "Avisos", "Novedades", "Configuración" ],
+    # Los avisos los trae la campanita: «Más» no los repite, y al pie está Cerrar sesión.
+    assert_equal [ "Mi perfil", "Novedades", "Configuración" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
-    # Su inicio: su compañía y el último aviso, no las cifras de un rol ni las gráficas del evento.
+    assert_select "dialog[data-dialog-name='mas'] form[action='#{session_path}'] button[data-more-sign-out]", text: /Cerrar sesión/
+    # Su inicio: su compañía, no el último aviso, ni las cifras de un rol ni las gráficas del evento.
     assert_select "[data-joven-home] [data-joven-company][href='#{my_company_path}']", text: /Compañía 7/
+    assert_select "[data-joven-latest-alert]", false
     assert_select "[data-simple-kpis]", false
+    # Sin menú de cuenta: la foto lleva a su perfil, junto a la campanita.
+    assert_select "button[aria-label='Menú de cuenta']", false
+    assert_select "header a[data-profile-link][href='#{myprofile_participants_path}']"
+    # En la computadora lo del menú de cuenta pasa al menú lateral, con Cerrar sesión al pie.
+    assert_select "aside" do
+      assert_select "a[href='#{myprofile_participants_path}']", text: /Mi perfil/
+      assert_select "a[href='#{changelog_path}']", text: /Novedades/
+      assert_select "a[href='#{settings_path}']", text: /Configuración/
+      assert_select "button[data-aside-sign-out]", text: /Cerrar sesión/
+    end
 
     get settings_path
     assert_select "#settings-simple"

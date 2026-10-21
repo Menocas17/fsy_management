@@ -44,6 +44,18 @@
 
       <%= render "shared/notifications_bell" %>
 
+      <%# El joven no tiene menú de cuenta: su foto lo lleva a su perfil; lo demás está en «Más» (teléfono) o en el
+          menú lateral (computadora), con Cerrar sesión. %>
+      <% if Current.user.participant&.joven? %>
+        <%= link_to myprofile_participants_path, aria: { label: "Mi perfil" }, data: { profile_link: true },
+              class: "relative ml-1 md:ml-0 flex items-center gap-2.5 rounded-tile after:absolute after:-inset-1.5 md:after:hidden md:py-1.5 md:pl-1.5 md:pr-3 hover:bg-muted transition" do %>
+          <%= current_user_avatar_tag(class: "w-8 h-8 md:w-9 md:h-9 text-label md:text-body") %>
+          <span class="hidden md:block text-left leading-tight">
+            <span class="block text-body font-bold text-ink-900"><%= Current.user.full_name %></span>
+            <span class="block text-label font-medium text-ink-500"><%= Current.user.role_label %></span>
+          </span>
+        <% end %>
+      <% else %>
       <%# En el teléfono la foto sola no parecía botón: lleva colgada de su esquina una insignia redonda con la
           flecha hacia abajo (como WhatsApp o Gmail). En escritorio, el nombre y la flecha van al lado. %>
       <div data-controller="dropdown" class="relative ml-1 md:ml-0">
@@ -120,6 +132,7 @@
           <% end %>
         </div>
       </div>
+      <% end %>
     </div>
   </header>
 

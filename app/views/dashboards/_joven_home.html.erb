@@ -1,7 +1,6 @@
-<%# El inicio del joven (teléfono y computadora): en vez de las cifras del evento, su compañía y el último aviso. %>
+<%# El inicio del joven (teléfono y computadora): en vez de las cifras del evento, su compañía (los avisos los trae la campanita). %>
 <% joven = Current.user.participant %>
 <% company = joven.company %>
-<% latest = Alert.inbox_for(Current.user).recent.first %>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start" data-entrance="kpis" data-joven-home>
   <% if company %>
     <% counselors = company.counselors_in_order %>
@@ -34,17 +33,4 @@
     <%= render EmptyStateComponent.new(title: "Todavía no tienes compañía", icon: "building-2", tone: :green,
           text: "Te la asignan antes del evento o al llegar. Aquí verás a tus consejeros, tu comedor y tu cuarto.") %>
   <% end %>
-
-  <section class="<%= card_classes("p-5") %>" data-joven-latest-alert>
-    <%= section_heading "Último aviso", "megaphone", tone: :rose do %>
-      <%= link_to "Ver todos", notifications_path, class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
-    <% end %>
-    <% if latest %>
-      <p class="text-body font-bold text-ink-900"><%= latest.title %></p>
-      <p class="mt-0.5 text-body text-ink-700 line-clamp-3"><%= latest.body %></p>
-      <p class="mt-1.5 text-label font-semibold text-ink-500"><%= latest.sender_name %> · <%= latest.created_at.strftime("%d/%m · %H:%M") %></p>
-    <% else %>
-      <p class="text-body text-ink-500">Aquí te llegarán los avisos de dirección y de tus consejeros.</p>
-    <% end %>
-  </section>
 </div>
