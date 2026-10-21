@@ -1,11 +1,9 @@
 <%# Una compañía en cifras, sin nombres (CompanySummary): una tarjeta por fila a todo el ancho, el ícono y el
-    nombre a la izquierda y la cifra a la derecha. Cuántos jóvenes, mujeres y hombres, y su comedor. %>
+    nombre a la izquierda y la cifra a la derecha: cuántos jóvenes tiene y su comedor. %>
 <%
   cards = [
     { key: "jovenes", label: "Jóvenes", sub: "En tu compañía", value: summary.total, icon: "users", tone: "bg-cat-green-solid" },
-    { key: "mujeres", label: "Mujeres", sub: "De tus jóvenes", value: summary.women, of: summary.total, icon: "venus", tone: "bg-cat-rose-solid" },
-    { key: "hombres", label: "Hombres", sub: "De tus jóvenes", value: summary.men, of: summary.total, icon: "mars", tone: "bg-cat-blue-solid" },
-    { key: "comedor", label: "Comedor", sub: "Donde come tu compañía", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
+    { key: "comedor", label: "Comedor", sub: "Asignado", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
   ]
 %>
 <div class="flex flex-col gap-4" data-company-summary-cards>
@@ -21,9 +19,7 @@
       <% if card[:text] %>
         <p class="shrink-0 max-w-[55%] text-right text-title font-extrabold leading-tight text-ink-900"><%= card[:value] %></p>
       <% else %>
-        <p class="shrink-0 text-display font-extrabold tabular-nums text-ink-900">
-          <%= card[:value] %><% if card[:of] %> <span class="text-label font-bold text-ink-500">de <%= card[:of] %></span><% end %>
-        </p>
+        <p class="shrink-0 text-display font-extrabold tabular-nums text-ink-900"><%= card[:value] %></p>
       <% end %>
     </article>
   <% end %>

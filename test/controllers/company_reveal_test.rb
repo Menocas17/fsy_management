@@ -22,10 +22,8 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
     assert_select "[data-company-stakes]", text: /Estaca Bello Horizonte/
     assert_select "[data-company-stakes]", text: /Barrio La Rotonda/
     assert_select "[data-summary-card='jovenes']", text: /1/
-    assert_select "[data-summary-card='hombres']", text: /1/
-    assert_select "[data-summary-card='mujeres']", text: /0/
     assert_select "[data-summary-card='comedor']", text: /Salón Las Américas/
-    assert_select "[data-summary-card]", 4
+    assert_select "[data-summary-card]", 2
     assert_not_includes response.body, "Juan"
     assert_not_includes response.body, "José Martínez"
   end

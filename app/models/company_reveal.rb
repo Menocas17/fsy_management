@@ -1,6 +1,6 @@
 # El interruptor de Configuración con el que dirección abre o cierra las compañías: mientras están cerradas solo
 # el acceso total ve compañías y jóvenes (User#company_hidden?), y cada consejero sabe que ya tiene compañero(a)
-# y ve su compañía en cifras (cuántos jóvenes, mujeres y hombres, su comedor, estacas y barrios), pero no los
+# y ve su compañía en cifras (cuántos jóvenes, su comedor, estacas y barrios), pero no los
 # nombres ni las fichas de nadie. Lo mueven el superadmin, el
 # matrimonio director y los coordinadores (User#company_reveal_manager?). Vive en AppSetting, sin tabla.
 module CompanyReveal
