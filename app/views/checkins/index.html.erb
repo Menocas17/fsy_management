@@ -4,6 +4,7 @@
 <%# Vuelve a donde se abrió (una capacitación, la lista de capacitaciones); si no, al inicio. %>
 <% back_to_origin "Inicio", dashboard_path %>
 <% open = @window.open? %>
+<%= turbo_stream_from recent_stream if open %>
 <%= render PageComponent.new(width: :page,
             data: (open ? { controller: "checkin-scanner",
                             checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id, return_to: params[:return_to].presence),
@@ -204,32 +205,20 @@
     <% end %>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", tone: :green %>
-      <% if @recent.any? %>
-        <ul class="divide-y divide-line-soft" data-recent-checkins>
-          <% @recent.each do |record| %>
-            <li class="flex items-center gap-3 py-2.5 first:pt-0" data-recent-record="<%= record.id %>">
-              <span class="text-label font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
-              <span class="min-w-0 flex-1">
-                <span class="block text-body font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
-                <span class="block text-label font-semibold text-ink-500">
-                  <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
-                </span>
-              </span>
-              <% if open %>
-                <button type="button" data-action="checkin-scanner#askVoid"
-                        data-record-id="<%= record.id %>" data-participant-id="<%= record.participant_id %>"
-                        data-name="<%= record.participant.full_name %>"
-                        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-label font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
-                  Anular
-                </button>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "recent-checkins") %>
+      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", tone: :green do %>
+        <%= link_to "Ver todos", registered_checkins_path(training_id: @training&.id), data: { all_checkins: true },
+              class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
       <% end %>
+      <%# Siempre está la lista (aunque vacía), para que lo que se registra suba solo (recent_stream); el estado
+          vacío se oculta en cuanto tiene una fila, y nunca se ven más de 10 (application.css). %>
+      <ul id="recent_checkins" class="recent-checkins divide-y divide-line-soft" data-recent-checkins>
+        <% @recent.each do |record| %>
+          <%= render "checkins/record", record: record, voidable: open %>
+        <% end %>
+      </ul>
+      <div data-recent-checkins-empty>
+        <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "recent-checkins") %>
+      </div>
 
       <% if @training %>
         <%= link_to agenda_trainings_path, class: "mt-4 inline-flex items-center gap-2 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>

@@ -2,10 +2,13 @@
 class CheckinsController < ApplicationController
   # Por qué se anula un registro hecho en la fila (ver #void).
   VOID_REASONS = { "otra_persona" => "No era la persona", "escaneo_incorrecto" => "Escaneo incorrecto", "otro" => "Otro" }.freeze
+  # Los últimos que se ven bajo el escáner: más empujaría «Finalizar registro» hasta el fondo; el resto, en «Ver todos».
+  RECENT_LIMIT = 10
 
   before_action :require_checkin_access!
   before_action :require_scan_manager!, only: %i[finish reopen]
   before_action :set_mode, except: %i[finish reopen]
+  helper_method :recent_stream
 
   def index
     # Sin nada elegido se entra directo al registro activo, si es una capacitación.
@@ -15,7 +18,12 @@ class CheckinsController < ApplicationController
 
     @expected = expected_scope.count
     @registered = registered_count
-    @recent = recent_registrations
+    @recent = registrations.limit(RECENT_LIMIT)
+  end
+
+  # Todos los registrados, del último al primero (la página de Registro muestra solo los RECENT_LIMIT últimos).
+  def registered
+    @pagy, @records = pagy(registrations, limit: 25)
   end
 
   # El padrón que el teléfono guarda para reconocer a quien escanea aunque no haya internet.
@@ -86,12 +94,19 @@ class CheckinsController < ApplicationController
       @training ? @training.attendances.pluck(:participant_id).to_set : Checkin.arrived_ids
     end
 
-    def recent_registrations
-      if @training
-        @training.attendances.recent.includes(participant: :company).limit(12)
-      else
-        Checkin.recent.includes(participant: :company).limit(12)
-      end
+    # «Últimos registrados» se llena solo: lo que entra (de este teléfono o de otro que registra lo mismo) sube a
+    # la lista de quien tenga abierta la página, y lo anulado se va. Cada registro, su propia transmisión.
+    def recent_stream
+      @training ? [ @training, :checkins ] : :arrival_checkins
+    end
+
+    def broadcast_recent(record)
+      Turbo::StreamsChannel.broadcast_prepend_later_to(recent_stream, target: "recent_checkins",
+                                                       partial: "checkins/record", locals: { record: record, voidable: true })
+    end
+
+    def registrations
+      (@training ? @training.attendances : Checkin).recent.includes(participant: :company)
     end
 
     def register(scan)
@@ -103,6 +118,7 @@ class CheckinsController < ApplicationController
       return { client_token: scan[:client_token], status: "unknown" } if participant.nil?
 
       record, status = record_for(participant, scan)
+      broadcast_recent(record) if status == :registered
 
       { client_token: scan[:client_token], status: status.to_s, participant: card(participant),
         recorded_at: record&.recorded_at&.iso8601 }
@@ -128,6 +144,7 @@ class CheckinsController < ApplicationController
       participant = record.participant
       detail = scan[:detail].to_s.squish.first(300).presence
       record.destroy!
+      Turbo::StreamsChannel.broadcast_remove_to(recent_stream, target: helpers.dom_id(record))
       record_audit!(category: :registro, action: "voided", target: participant,
                     summary: "Anuló #{@training ? "la asistencia a #{@training.name}" : "la llegada"} de #{participant.full_name} " \
                              "(#{[ reason, detail ].compact.join(": ")})")

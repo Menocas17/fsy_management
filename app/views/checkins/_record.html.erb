@@ -1,0 +1,19 @@
+<%# Un registro (llegada o asistencia a una capacitación): la hora, quién y quién lo registró. «Anular» solo bajo
+    el escáner abierto (checkin-scanner#askVoid); la lista completa (checkins#registered) solo se lee. %>
+<li id="<%= dom_id(record) %>" class="flex items-center gap-3 py-2.5 first:pt-0" data-recent-record="<%= record.id %>">
+  <span class="text-label font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
+  <span class="min-w-0 flex-1">
+    <span class="block text-body font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
+    <span class="block text-label font-semibold text-ink-500">
+      <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
+    </span>
+  </span>
+  <% if voidable %>
+    <button type="button" data-action="checkin-scanner#askVoid"
+            data-record-id="<%= record.id %>" data-participant-id="<%= record.participant_id %>"
+            data-name="<%= record.participant.full_name %>"
+            class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-label font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
+      Anular
+    </button>
+  <% end %>
+</li>

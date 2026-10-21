@@ -73,6 +73,7 @@ Rails.application.routes.draw do
   # Registro de llegadas: la pantalla de escaneo, el padrón que se guarda en el dispositivo y la sincronización.
   get "registro" => "checkins#index", as: :checkins
   get "registro/padron" => "checkins#roster", as: :checkins_roster
+  get "registro/registrados" => "checkins#registered", as: :registered_checkins
   post "registro" => "checkins#create", as: :register_checkins
   patch "registro/finalizar" => "checkins#finish", as: :finish_checkins
   delete "registro/finalizar" => "checkins#reopen"

@@ -1,0 +1,31 @@
+<%# Todos los registrados de este registro (la llegada o una capacitación), del último al primero. Carga más al
+    bajar. Anular sigue en la página del escáner. %>
+<% content_for :title, @training ? "Asistencia · #{@training.name}" : "Registrados" %>
+<% content_for :eyebrow, "Registro" %>
+<% content_for :heading, @training ? "Asistencia a #{@training.name}" : "Todos los registrados" %>
+<% back_to "Registro", checkins_path(training_id: @training&.id) %>
+<%= render PageComponent.new(width: :form, data: { all_checkins_page: true }) do |page| %>
+  <% page.with_intro { pluralize(@pagy.count, @training ? "asistencia registrada" : "joven registrado", plural: @training ? "asistencias registradas" : "jóvenes registrados") } %>
+  <section class="<%= card_classes("p-5 md:p-6") %>">
+    <% if @records.any? %>
+      <%= turbo_frame_tag "checkins_page_#{@pagy.page}" do %>
+        <%# Cada página llega en su propio marco: desde la segunda, la raya y el aire de arriba siguen a la anterior. %>
+        <ul class="divide-y divide-line-soft <%= "border-t border-line-soft [&>li:first-child]:pt-2.5" if @pagy.page > 1 %>" data-all-checkins>
+          <% @records.each do |record| %>
+            <%= render "checkins/record", record: record, voidable: false %>
+          <% end %>
+        </ul>
+        <% if @pagy.next %>
+          <%= turbo_frame_tag "checkins_page_#{@pagy.next}", src: @pagy.page_url(:next), loading: :lazy do %>
+            <div class="flex items-center justify-center gap-2.5 py-3">
+              <span class="w-4 h-4 rounded-full border-2 border-line border-t-primary-500 animate-spin"></span>
+              <span class="text-label font-semibold text-ink-500">Cargando más…</span>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "all-checkins") %>
+    <% end %>
+  </section>
+<% end %>
