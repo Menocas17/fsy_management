@@ -1,31 +1,94 @@
-<%# Todos los registrados de este registro (la llegada o una capacitación), del último al primero. Carga más al
-    bajar. Anular sigue en la página del escáner. %>
+<%# Todos los registrados de este registro (la llegada o una capacitación), del último al primero, con búsqueda
+    por nombre. En la compu, tabla con páginas; en el teléfono, la lista que carga más al bajar. Anular sigue en
+    la página del escáner. %>
 <% content_for :title, @training ? "Asistencia · #{@training.name}" : "Registrados" %>
 <% content_for :eyebrow, "Registro" %>
 <% content_for :heading, @training ? "Asistencia a #{@training.name}" : "Todos los registrados" %>
 <% back_to "Registro", checkins_path(training_id: @training&.id) %>
-<%= render PageComponent.new(width: :form, data: { all_checkins_page: true }) do |page| %>
+<%= render PageComponent.new(width: :page, data: { all_checkins_page: true }) do |page| %>
   <% page.with_intro { pluralize(@pagy.count, @training ? "asistencia registrada" : "joven registrado", plural: @training ? "asistencias registradas" : "jóvenes registrados") } %>
-  <section class="<%= card_classes("p-5 md:p-6") %>">
-    <% if @records.any? %>
-      <%= turbo_frame_tag "checkins_page_#{@pagy.page}" do %>
-        <%# Cada página llega en su propio marco: desde la segunda, la raya y el aire de arriba siguen a la anterior. %>
-        <ul class="divide-y divide-line-soft <%= "border-t border-line-soft [&>li:first-child]:pt-2.5" if @pagy.page > 1 %>" data-all-checkins>
-          <% @records.each do |record| %>
-            <%= render "checkins/record", record: record, voidable: false %>
-          <% end %>
-        </ul>
-        <% if @pagy.next %>
-          <%= turbo_frame_tag "checkins_page_#{@pagy.next}", src: @pagy.page_url(:next), loading: :lazy do %>
-            <div class="flex items-center justify-center gap-2.5 py-3">
-              <span class="w-4 h-4 rounded-full border-2 border-line border-t-primary-500 animate-spin"></span>
-              <span class="text-label font-semibold text-ink-500">Cargando más…</span>
+  <%= form_with url: registered_checkins_path, method: :get, data: { turbo_frame: "checkins_table", turbo_action: "advance", controller: "auto-submit" },
+        class: "md:max-w-80" do |f| %>
+    <%= hidden_field_tag :training_id, @training.id if @training %>
+    <div class="relative">
+      <%= icon "search", class: "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" %>
+      <%= f.search_field :query, value: params[:query], placeholder: "Buscar por nombre…", aria: { label: "Buscar por nombre" }, autocomplete: "off",
+            class: "w-full h-10 pl-10 pr-3 rounded-control bg-surface border border-line text-body text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500",
+            data: { action: "input->auto-submit#typed" } %>
+    </div>
+  <% end %>
+
+  <%= turbo_frame_tag "checkins_table" do %>
+    <% if preload_thumbs(@records.map(&:participant)).any? %>
+      <% if render_desktop_layout? %>
+        <div class="hidden md:block" data-all-checkins-table>
+          <div class="bg-surface border border-line-soft rounded-card shadow-md overflow-hidden">
+            <div class="relative overflow-x-auto px-7">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-line-soft">
+                    <% [ "Hora", "Nombre completo", @training ? "Rol / Área" : "Compañía", "Estaca / Distrito", "Registró" ].each do |header| %>
+                      <th scope="col" class="pt-5 pb-3 pr-5 text-meta font-bold tracking-[.07em] uppercase text-ink-500"><%= header %></th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-line-soft">
+                  <% @records.each do |record| %>
+                    <% person = record.participant %>
+                    <tr class="hover:bg-primary-50/60 dark:hover:bg-muted/40 transition-colors" data-checkin-row="<%= record.id %>">
+                      <td class="py-3.5 pr-5 text-body font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></td>
+                      <td class="py-3.5 pr-5 text-body text-ink-700">
+                        <div class="flex items-center gap-3">
+                          <%= render AvatarComponent.new(participant: person) %>
+                          <%= link_to person.full_name, participant_path(person, return_to: request.fullpath), data: { turbo_frame: "_top" },
+                                class: "font-semibold text-ink-900 hover:text-primary-600 dark:hover:text-primary-300" %>
+                        </div>
+                      </td>
+                      <td class="py-3.5 pr-5 text-body text-ink-700"><%= person.company&.name || person.logistics_area&.name || person.role_label %></td>
+                      <td class="py-3.5 pr-5 text-body text-ink-700"><%= render StakeSpanComponent.new(stake: person.stake, name: person.stake_name) %></td>
+                      <td class="py-3.5 pr-5 text-body text-ink-700"><%= record.recorded_by_name %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
             </div>
+          </div>
+          <div class="flex items-center justify-between gap-4 mt-4 px-1">
+            <p class="text-label font-medium text-ink-500">Mostrando <%= @pagy.from %>–<%= @pagy.to %> de <%= @pagy.count %></p>
+            <% if @pagy.last > 1 %>
+              <%== @pagy.series_nav(anchor_string: 'data-turbo-action="advance"') %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%# Teléfono: cada página en su marco; la siguiente se pide sola al llegar a ella. %>
+      <div class="<%= layout_split("md:hidden") %> <%= card_classes("p-5") %>">
+        <%= turbo_frame_tag "checkins_page_#{@pagy.page}" do %>
+          <%# Desde la segunda página, la raya y el aire de arriba siguen a la anterior. %>
+          <ul class="divide-y divide-line-soft <%= "border-t border-line-soft [&>li:first-child]:pt-2.5" if @pagy.page > 1 %>" data-all-checkins>
+            <% @records.each do |record| %>
+              <%= render "checkins/record", record: record, voidable: false %>
+            <% end %>
+          </ul>
+          <% if @pagy.next %>
+            <%= turbo_frame_tag "checkins_page_#{@pagy.next}", src: @pagy.page_url(:next), loading: :lazy do %>
+              <div class="flex items-center justify-center gap-2.5 py-3">
+                <span class="w-4 h-4 rounded-full border-2 border-line border-t-primary-500 animate-spin"></span>
+                <span class="text-label font-semibold text-ink-500">Cargando más…</span>
+              </div>
+            <% end %>
           <% end %>
         <% end %>
-      <% end %>
+      </div>
     <% else %>
-      <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "all-checkins") %>
+      <div class="<%= card_classes("p-5 md:p-6") %>">
+        <% if params[:query].present? %>
+          <%= render EmptyStateComponent.new(title: "Nadie con ese nombre", text: "Prueba con otra búsqueda. Si no ha llegado, todavía no aparece aquí.", icon: "search-x", name: "all-checkins") %>
+        <% else %>
+          <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "all-checkins") %>
+        <% end %>
+      </div>
     <% end %>
-  </section>
+  <% end %>
 <% end %>

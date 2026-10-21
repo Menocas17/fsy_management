@@ -21,9 +21,12 @@ class CheckinsController < ApplicationController
     @recent = registrations.limit(RECENT_LIMIT)
   end
 
-  # Todos los registrados, del último al primero (la página de Registro muestra solo los RECENT_LIMIT últimos).
+  # Todos los registrados, del último al primero (la página de Registro muestra solo los RECENT_LIMIT últimos),
+  # con búsqueda por nombre (sin importar tildes).
   def registered
-    @pagy, @records = pagy(registrations, limit: 25)
+    records = registrations
+    records = records.joins(:participant).merge(Participant.search_full_name(params[:query])) if params[:query].present?
+    @pagy, @records = pagy(records, limit: 25)
   end
 
   # El padrón que el teléfono guarda para reconocer a quien escanea aunque no haya internet.

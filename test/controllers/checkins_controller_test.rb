@@ -35,6 +35,16 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-all-checkins] li", 12
     assert_select "[data-all-checkins] [data-action*='askVoid']", false
+    assert_select "[data-all-checkins-table] tbody tr", 12
+
+    # La búsqueda, sin importar tildes ni mayúsculas.
+    jovenes.first.update!(first_name: "Sofía")
+    get registered_checkins_path(query: "sofia prue")
+    assert_select "[data-all-checkins-table] tbody tr", 1
+    assert_select "[data-all-checkins-table]", text: /Sofía Prueba/
+
+    get registered_checkins_path(query: "nadie así")
+    assert_select "[data-empty-state='all-checkins']", text: /Nadie con ese nombre/
   end
 
   test "what gets registered goes up to everyone's list on its own, and what gets voided leaves it" do
