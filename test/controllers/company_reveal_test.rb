@@ -96,6 +96,7 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
   end
 
   test "the joven sees their company: counselors by name and companions by first name only" do
+    CompanyReveal.open_to_jovenes!
     Participant.create!(first_name: "Valeria", last_name: "Gutiérrez", age: 16, gender: "M", rol: "joven",
                         stake: "las_americas", ward: "las_mercedes", shirt_number: "s", company: @company)
     participants(:juan).update!(room: "214")
@@ -113,6 +114,7 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
   end
 
   test "a joven without company is told what comes next" do
+    CompanyReveal.open_to_jovenes!
     participants(:juan).update!(company: nil)
     sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
 

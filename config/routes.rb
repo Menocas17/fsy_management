@@ -74,6 +74,8 @@ Rails.application.routes.draw do
   get "registro" => "checkins#index", as: :checkins
   get "registro/padron" => "checkins#roster", as: :checkins_roster
   post "registro" => "checkins#create", as: :register_checkins
+  patch "registro/finalizar" => "checkins#finish", as: :finish_checkins
+  delete "registro/finalizar" => "checkins#reopen"
   # Áreas de logística: sus banderas (Registro, Finanzas, Alimentación) y sus miembros.
   resources :logistics_areas, path: "areas", path_names: { new: "nueva", edit: "editar" } do
     resources :members, only: %i[create destroy], controller: "logistics_area_members", path: "miembros"

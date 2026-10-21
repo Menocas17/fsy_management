@@ -113,6 +113,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
   end
 
   test "the joven gets their own bar: their company, their QR, the agenda and only their things in Más" do
+    CompanyReveal.open_to_jovenes!
     sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
 
     get dashboard_path

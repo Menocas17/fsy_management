@@ -114,6 +114,14 @@ class User < ApplicationRecord
     @company_hidden = participant&.consejero? && !full_access? && !CompanyReveal.open? || false
   end
 
+  # Un joven antes de que se finalice el registro (CompanyReveal.open_to_jovenes?): ve «Próximamente» en vez
+  # de su compañía, sus consejeros, su comedor, su cuarto y sus compañeros.
+  def company_coming_soon?
+    return @company_coming_soon if defined?(@company_coming_soon)
+
+    @company_coming_soon = participant&.joven? && !CompanyReveal.open_to_jovenes? || false
+  end
+
   # La búsqueda global ocupa el botón central de la barra inferior (en vez de «Mi QR») para quien ve todo
   # el evento: dirección, coordinadores y el director de logística.
   def global_searcher?

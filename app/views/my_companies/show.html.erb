@@ -1,11 +1,43 @@
 <%# «Mi compañía» del joven (MyCompaniesController): su compañía, sus consejeros, dónde come y duerme, y sus
-    compañeros solo por nombre. %>
+    compañeros solo por nombre. Antes de que se finalice el registro, «Próximamente». %>
 <% content_for :title, "Mi compañía" %>
 <% content_for :eyebrow, "Mi compañía" %>
 <% content_for :heading, @company ? (@company.nickname.presence || @company.name) : "Mi compañía" %>
 <% back_to "Inicio", dashboard_path %>
 <%= render PageComponent.new(width: :form, data: { my_company: true }) do %>
-  <% if @company %>
+  <% if @coming_soon %>
+    <%# Antes de que se finalice el registro: ni un dato, solo lo que va a ver aquí cuando se abra. %>
+    <section class="<%= card_classes("p-5 md:p-6 flex flex-col gap-5") %>" data-company-coming-soon data-tour="coming-soon">
+      <div class="flex items-center gap-4">
+        <span aria-hidden="true" class="size-16 shrink-0 rounded-card bg-cat-green/15 text-cat-green-ink flex items-center justify-center">
+          <%= icon "hourglass", class: "size-7" %>
+        </span>
+        <div class="min-w-0">
+          <p class="text-meta font-bold tracking-[.07em] uppercase text-cat-green-ink">Próximamente</p>
+          <p class="text-title font-bold text-ink-900 text-balance">Tu compañía se abre cuando termine el registro</p>
+          <p class="mt-0.5 text-label font-semibold text-ink-500">El día del evento, al terminar la llegada, te llega un aviso.</p>
+        </div>
+      </div>
+      <div>
+        <p class="mb-2.5 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Lo que verás aquí</p>
+        <ul class="flex flex-col gap-2" data-coming-soon-preview>
+          <% [ [ "building-2", "Tu compañía", "Su número y el nombre que elijan juntos." ],
+               [ "user-check", "Tus consejeros", "Quiénes te acompañan en la semana. Si necesitas algo, los buscas a ellos." ],
+               [ "utensils", "Tu comedor", "Dónde come tu compañía." ],
+               [ "bed-double", "Tu cuarto", "El número de tu cuarto en el hotel." ],
+               [ "users", "Tus compañeros", "Los jóvenes de tu compañía." ] ].each do |icon_name, title, text| %>
+            <li class="flex items-start gap-3 rounded-tile bg-sunken px-3 py-2.5">
+              <span class="size-[34px] shrink-0 rounded-control bg-surface text-ink-500 flex items-center justify-center"><%= icon icon_name, class: "size-4" %></span>
+              <span class="min-w-0">
+                <span class="block text-body font-bold text-ink-900"><%= title %></span>
+                <span class="block text-label font-medium text-ink-500"><%= text %></span>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </section>
+  <% elsif @company %>
     <section class="<%= card_classes("p-5 md:p-6 flex flex-col gap-4") %>">
       <div class="flex items-center gap-4">
         <span aria-hidden="true" class="size-16 shrink-0 rounded-card shadow-md bg-cat-green-solid text-white flex flex-col items-center justify-center">

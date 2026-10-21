@@ -4,7 +4,8 @@ class CheckinsController < ApplicationController
   VOID_REASONS = { "otra_persona" => "No era la persona", "escaneo_incorrecto" => "Escaneo incorrecto", "otro" => "Otro" }.freeze
 
   before_action :require_checkin_access!
-  before_action :set_mode
+  before_action :require_scan_manager!, only: %i[finish reopen]
+  before_action :set_mode, except: %i[finish reopen]
 
   def index
     # Sin nada elegido se entra directo al registro activo, si es una capacitación.
@@ -38,7 +39,34 @@ class CheckinsController < ApplicationController
     render json: { results: results, arrived: registered_count, total: expected_scope.count }
   end
 
+  # «Finalizar registro»: los jóvenes ya pueden ver su compañía (CompanyReveal) y les llega un aviso a todos.
+  # El escáner sigue abierto para quien llegue tarde.
+  def finish
+    unless CompanyReveal.open_to_jovenes?
+      CompanyReveal.open_to_jovenes!
+      record_audit!(category: :registro, action: "registro_finished", target: nil,
+                    summary: "Finalizó el registro de llegadas: los jóvenes ya ven su compañía")
+      sender = Current.user.participant
+      CompanyReveal.announce_to_jovenes!(sender: sender, sender_name: sender&.full_name || "Logística")
+    end
+    redirect_to checkins_path, notice: "Registro finalizado: los jóvenes ya ven su compañía y les llegó el aviso."
+  end
+
+  # Deshacerlo (se finalizó antes de tiempo): los jóvenes vuelven a ver «Próximamente». No les avisa nada.
+  def reopen
+    if CompanyReveal.open_to_jovenes?
+      CompanyReveal.close_to_jovenes!
+      record_audit!(category: :registro, action: "registro_reopened", target: nil,
+                    summary: "Reabrió el registro de llegadas: los jóvenes vuelven a ver «Próximamente» en su compañía")
+    end
+    redirect_to checkins_path, notice: "Registro reabierto: los jóvenes vuelven a ver «Próximamente»."
+  end
+
   private
+    def require_scan_manager!
+      redirect_to checkins_path, alert: "Solo el director de logística o dirección finalizan el registro." unless Current.user.scan_manager?
+    end
+
     # El modo llega como "llegada" o como el id de una capacitación.
     def set_mode
       @training = Training.find_by(id: params[:training_id]) if params[:training_id].present?

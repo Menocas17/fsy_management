@@ -1,10 +1,21 @@
-<%# El inicio del joven (teléfono y computadora): en vez de las cifras del evento, su compañía (los avisos los trae la campanita). %>
+<%# El inicio del joven (teléfono y computadora): en vez de las cifras del evento, su compañía (los avisos los trae la campanita), o «Próximamente» hasta que se finaliza el registro. %>
 <% joven = Current.user.participant %>
 <% company = joven.company %>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start" data-entrance="kpis" data-joven-home>
-  <% if company %>
+  <%# Hasta que se finaliza el registro (CompanyReveal) la tarjeta queda, pero sin ningún dato. %>
+  <% if Current.user.company_coming_soon? %>
+    <%= link_to my_company_path, class: card_classes("p-5 flex items-center gap-3 transition-transform active:scale-[0.98]"), data: { joven_company: true, company_coming_soon: true, tour: "joven-company" } do %>
+      <span aria-hidden="true" class="size-[52px] shrink-0 rounded-tile bg-cat-green/15 text-cat-green-ink flex items-center justify-center"><%= icon "hourglass", class: "size-6" %></span>
+      <span class="min-w-0 flex-1">
+        <span class="block text-meta font-bold tracking-[.07em] uppercase text-ink-500">Mi compañía</span>
+        <span class="block text-title font-bold text-ink-900">Próximamente</span>
+        <span class="block text-label font-semibold text-ink-500">Se abre cuando termine el registro.</span>
+      </span>
+      <%= icon "chevron-right", class: "size-[18px] shrink-0 text-ink-500" %>
+    <% end %>
+  <% elsif company %>
     <% counselors = company.counselors_in_order %>
-    <%= link_to my_company_path, class: card_classes("p-5 flex flex-col gap-3.5 transition-transform active:scale-[0.98]"), data: { joven_company: true } do %>
+    <%= link_to my_company_path, class: card_classes("p-5 flex flex-col gap-3.5 transition-transform active:scale-[0.98]"), data: { joven_company: true, tour: "joven-company" } do %>
       <div class="flex items-center gap-3">
         <span aria-hidden="true" class="size-[52px] shrink-0 rounded-tile bg-cat-green-solid text-white flex items-center justify-center text-display font-extrabold"><%= company.number || "–" %></span>
         <span class="min-w-0 flex-1">

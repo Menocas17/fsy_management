@@ -33,6 +33,7 @@ class JovenAccessTest < ActionDispatch::IntegrationTest
   end
 
   test "the organigrama only shows the joven their own company's chain" do
+    CompanyReveal.open_to_jovenes!
     sign_in_as(@joven)
 
     get organigrama_path

@@ -19,6 +19,35 @@ module CompanyReveal
 
   ACTIONS = %w[companies_opened companies_closed].freeze
 
+  # Los jóvenes, aparte: no ven su compañía (número, consejeros, comedor, cuarto, compañeros) hasta que el
+  # director de logística da por finalizado el registro de llegadas (CheckinsController#finish); mientras, ven
+  # «Próximamente». Al finalizarlo les llega un aviso a todos.
+  JOVENES_KEY = "registro_finalizado".freeze
+  JOVENES_ACTIONS = %w[registro_finished registro_reopened].freeze
+
+  def self.open_to_jovenes?
+    AppSetting[JOVENES_KEY] == "1"
+  end
+
+  def self.open_to_jovenes!
+    AppSetting[JOVENES_KEY] = "1"
+  end
+
+  def self.close_to_jovenes!
+    AppSetting[JOVENES_KEY] = "0"
+  end
+
+  def self.last_jovenes_change
+    AuditLog.where(action: JOVENES_ACTIONS).recent.first
+  end
+
+  def self.announce_to_jovenes!(sender:, sender_name:)
+    Alert.create!(title: "¡Ya puedes conocer a tu compañía!",
+                  body: "Terminó el registro: ya ves tu compañía, tus consejeros, tu comedor y tu cuarto.",
+                  audience: :por_roles, target_roles: [ "joven" ], priority: :importante,
+                  sender: sender, sender_name: sender_name, link_path: "/mi-compania")
+  end
+
   # Quién lo movió por última vez y cuándo (su entrada de Historial), para la línea de Configuración.
   def self.last_change
     AuditLog.where(action: ACTIONS).recent.first

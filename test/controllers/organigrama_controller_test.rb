@@ -97,6 +97,7 @@ class OrganigramaControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "mi compañía works for a joven through their assigned company" do
+    CompanyReveal.open_to_jovenes!
     sign_out
     sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
 
