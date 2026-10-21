@@ -102,4 +102,15 @@ class AgendaControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Sin actividades este día"
   end
+
+  test "only whoever edits the agenda sees that its alert was sent" do
+    get agenda_activity_path(@activity)
+    assert_includes response.body, "Alerta enviada"
+
+    sign_out
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
+    get agenda_activity_path(@activity)
+    assert_response :success
+    assert_not_includes response.body, "Alerta enviada"
+  end
 end
