@@ -15,4 +15,9 @@ module CompanyRevealGate
     def require_company_revealed!
       redirect_to my_company_path, alert: HIDDEN_NOTICE if company_hidden_here?
     end
+
+    # El joven, hasta que se finaliza el registro (User#company_coming_soon?): su «Mi compañía» dice «Próximamente».
+    def require_joven_company_open!
+      redirect_to my_company_path, alert: "Tu compañía se abre cuando termine el registro." if Current.user&.company_coming_soon?
+    end
 end

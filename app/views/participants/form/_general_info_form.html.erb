@@ -21,10 +21,13 @@
               { include_blank: "Sin área" }, class: field_select_classes, disabled: !committee %>
       <% end %>
     <% end %>
+    <%# El joven no ve su cuarto hasta que se finaliza el registro (CompanyReveal). %>
+    <% unless form.object.joven? && Current.user.company_coming_soon? %>
     <div>
       <%= form.label :room, "Cuarto", class: field_label_classes %>
       <%= form.text_field :room, class: field_input_classes, placeholder: "Ej. 204" %>
     </div>
+    <% end %>
     <% if admin %>
       <%# Cada estaca ofrece solo sus barrios (stake-ward). «Otra» es para el staff de una estaca que no participa. %>
       <% wards = stake_ward_options.fetch(form.object.stake.to_s, []) %>

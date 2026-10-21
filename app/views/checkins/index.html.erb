@@ -4,6 +4,7 @@
 <%# Vuelve a donde se abrió (una capacitación, la lista de capacitaciones); si no, al inicio. %>
 <% back_to_origin "Inicio", dashboard_path %>
 <% open = @window.open? %>
+<%= turbo_stream_from recent_stream if open %>
 <%= render PageComponent.new(width: :page,
             data: (open ? { controller: "checkin-scanner",
                             checkin_scanner_roster_url_value: checkins_roster_path(training_id: @training&.id, return_to: params[:return_to].presence),
@@ -204,32 +205,20 @@
     <% end %>
 
     <section class="<%= card_classes("p-5 md:p-6") %>">
-      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", tone: :green %>
-      <% if @recent.any? %>
-        <ul class="divide-y divide-line-soft" data-recent-checkins>
-          <% @recent.each do |record| %>
-            <li class="flex items-center gap-3 py-2.5 first:pt-0" data-recent-record="<%= record.id %>">
-              <span class="text-label font-bold tabular-nums text-ink-500"><%= record.recorded_at.strftime("%H:%M") %></span>
-              <span class="min-w-0 flex-1">
-                <span class="block text-body font-bold text-ink-900 truncate"><%= record.participant.full_name %></span>
-                <span class="block text-label font-semibold text-ink-500">
-                  <%= record.participant.company&.name || record.participant.role_label %> · registró <%= record.recorded_by_name %>
-                </span>
-              </span>
-              <% if open %>
-                <button type="button" data-action="checkin-scanner#askVoid"
-                        data-record-id="<%= record.id %>" data-participant-id="<%= record.participant_id %>"
-                        data-name="<%= record.participant.full_name %>"
-                        class="shrink-0 inline-flex items-center min-h-11 md:min-h-0 px-1 text-label font-bold text-cat-rose-ink hover:underline underline-offset-2 cursor-pointer">
-                  Anular
-                </button>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "recent-checkins") %>
+      <%= section_heading @training ? "Últimos en llegar" : "Últimos registrados", "clipboard-check", tone: :green do %>
+        <%= link_to "Ver todos", registered_checkins_path(training_id: @training&.id), data: { all_checkins: true },
+              class: "text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" %>
       <% end %>
+      <%# Siempre está la lista (aunque vacía), para que lo que se registra suba solo (recent_stream); el estado
+          vacío se oculta en cuanto tiene una fila, y nunca se ven más de 10 (application.css). %>
+      <ul id="recent_checkins" class="recent-checkins divide-y divide-line-soft" data-recent-checkins>
+        <% @recent.each do |record| %>
+          <%= render "checkins/record", record: record, voidable: open %>
+        <% end %>
+      </ul>
+      <div data-recent-checkins-empty>
+        <%= render EmptyStateComponent.new(title: "Todavía no hay nadie registrado", text: "Lo que se escanee aparece aquí, con la hora y quién lo registró.", icon: "clipboard-check", tone: :green, name: "recent-checkins") %>
+      </div>
 
       <% if @training %>
         <%= link_to agenda_trainings_path, class: "mt-4 inline-flex items-center gap-2 text-label font-bold text-primary-600 dark:text-primary-300 hover:underline" do %>
@@ -239,4 +228,50 @@
       <% end %>
     </section>
   </div>
+
+  <%# Finalizar el registro de llegadas abre a los jóvenes su compañía (CompanyReveal) y les avisa. Se puede
+      deshacer si se hizo antes de tiempo. El escáner sigue abierto para quien llegue tarde. %>
+  <% if @training.nil? && Current.user.scan_manager? %>
+    <% finished = CompanyReveal.open_to_jovenes? %>
+    <% last_change = CompanyReveal.last_jovenes_change %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-registro-finish="<%= finished ? "finalizado" : "abierto" %>">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="min-w-0 flex-1 flex items-start gap-3">
+          <%= render IconTileComponent.new(icon: finished ? "circle-check-big" : "flag", tone: finished ? :green : :primary, size: :md) %>
+          <div class="min-w-0">
+            <h2 class="text-title font-bold text-ink-900"><%= finished ? "Registro finalizado" : "Finalizar el registro" %></h2>
+            <p class="mt-0.5 text-label leading-relaxed text-ink-500">
+              <% if finished %>
+                Los jóvenes ya ven su compañía: sus consejeros, su comedor, su cuarto y sus compañeros. El escáner sigue abierto para quien llegue tarde.
+              <% else %>
+                Hasta que lo finalices, los jóvenes ven «Próximamente» en su compañía. Al finalizarlo la ven completa y les llega un aviso.
+              <% end %>
+            </p>
+            <% if last_change %>
+              <p class="mt-1 text-label font-semibold text-ink-500">Último cambio: <%= last_change.actor_name %> · <%= SpanishDates.short_with_time(last_change.created_at) %></p>
+            <% end %>
+          </div>
+        </div>
+        <% if finished %>
+          <%= button_to finish_checkins_path, method: :delete, form_class: "shrink-0",
+                form: { data: { turbo_confirm: "¿Reabrir el registro?",
+                                turbo_confirm_detail: "Los jóvenes vuelven a ver «Próximamente» en su compañía. No les llega ningún aviso.",
+                                turbo_confirm_button: "Sí, reabrir" } },
+                class: button_classes(:secondary, extra: "w-full sm:w-auto") do %>
+            <%= icon "undo-2", class: "w-4 h-4" %>
+            Reabrir
+          <% end %>
+        <% else %>
+          <%= button_to finish_checkins_path, method: :patch, form_class: "shrink-0",
+                form: { data: { turbo_confirm: "¿Finalizar el registro?",
+                                turbo_confirm_detail: "Los #{@expected} jóvenes verán su compañía, sus consejeros, su comedor y su cuarto, y les llegará un aviso.",
+                                turbo_confirm_button: "Sí, finalizar" } },
+                class: button_classes(:primary, extra: "w-full sm:w-auto") do %>
+            <%= icon "flag", class: "w-4 h-4" %>
+            Finalizar registro
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
 <% end %>

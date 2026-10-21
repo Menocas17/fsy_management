@@ -105,7 +105,7 @@
           <%= icon "graduation-cap", class: "w-[17px] h-[17px]" %>
           Tutorial
         </h2>
-        <p class="text-label leading-relaxed text-ink-500">Un recorrido de 5 minutos por la app, para repasar lo que vas a usar. Lo que practiques no se guarda.</p>
+        <p class="text-label leading-relaxed text-ink-500"><%= Current.user.participant&.joven? ? "Un recorrido de 2 minutos por la app: tu compañía, tu QR, la agenda y los avisos." : "Un recorrido de 5 minutos por la app, para repasar lo que vas a usar. Lo que practiques no se guarda." %></p>
         <%= link_to dashboard_path(tutorial: "ver"), class: button_classes(:secondary, extra: "mt-3 w-full") do %>
           <%= icon "play", class: "w-4 h-4" %>
           Ver el tutorial

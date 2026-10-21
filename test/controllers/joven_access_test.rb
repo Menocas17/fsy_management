@@ -33,6 +33,7 @@ class JovenAccessTest < ActionDispatch::IntegrationTest
   end
 
   test "the organigrama only shows the joven their own company's chain" do
+    CompanyReveal.open_to_jovenes!
     sign_in_as(@joven)
 
     get organigrama_path
@@ -57,7 +58,7 @@ class JovenAccessTest < ActionDispatch::IntegrationTest
     sign_in_as(@joven)
     get dashboard_path
 
-    assert_equal [ "Inicio", "Mi compañía", "Agenda" ],
+    assert_equal [ "Inicio", "Mi compañía", "Agenda", "Mi perfil", "Novedades", "Configuración" ],
                  css_select("nav[aria-label='Navegación principal'] a").map { |link| link.text.squish }.uniq
     assert_select "[data-joven-home]"
     assert_select "[data-stat-tile]", false

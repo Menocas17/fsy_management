@@ -1,6 +1,7 @@
 class OrganigramaController < ApplicationController
   VIEWS = %w[todo logistica mi_compania].freeze
   before_action :require_company_revealed!
+  before_action :require_joven_company_open!
   # El joven ve solo la cadena de su compañía (sus consejeros, auxiliares y la dirección), no el evento entero.
   allow_jovenes
 

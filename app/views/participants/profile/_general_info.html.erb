@@ -1,12 +1,18 @@
 <section class="<%= card_classes("p-6 2xl:order-1") %>">
   <%= section_heading "Información general", "layers" %>
   <div>
+    <%# El joven, en su propia ficha, no ve su compañía, su cuarto ni sus consejeros hasta que se finaliza el registro. %>
+    <% coming_soon = participant.joven? && Current.user.company_coming_soon? %>
+    <% if coming_soon %>
+      <%= info_row "Compañía asignada", "building-2", "Próximamente" %>
+    <% else %>
     <%= info_row "Compañía asignada", "building-2", participant.company&.name, href: (company_path(participant.company, return_to: return_here) if participant.company) %>
+    <% end %>
     <%= info_row "Área de logística", "truck", participant.logistics_area&.name if participant.logistica? %>
     <%= info_row "Cuarto", "door-open", participant.room,
-          href: (room_path(participant.room, return_to: request.fullpath) if participant.room.present? && can_view_rooms? && Room.exists?(number: participant.room)) %>
+          href: (room_path(participant.room, return_to: request.fullpath) if participant.room.present? && can_view_rooms? && Room.exists?(number: participant.room)) unless coming_soon %>
     <%# Los de su compañía hoy (el personal asignado), no lo que se copió en la ficha al importarla; cada uno lleva a su perfil. %>
-    <% if participant.joven? %>
+    <% if participant.joven? && !coming_soon %>
       <% counselors = participant.company&.counselors_in_order.to_a %>
       <%= info_row "Consejeros a cargo", "users",
             participant.company ? nil : [ participant.m_person_in_charge, participant.h_person_in_charge ],

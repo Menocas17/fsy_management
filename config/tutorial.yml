@@ -129,3 +129,36 @@ push:
 done:
   title: ¡Listo para la semana!
   text: "Eso es todo. Si quieres repasarlo, está en Configuración → Ver el tutorial."
+
+# El tutorial del joven (Tutorial#joven_steps): lo de arriba que comparte (la agenda, la alerta de bienvenida,
+# «Más», el modo oscuro y las notificaciones) y esto, que es solo suyo.
+joven_welcome:
+  title: "Hola, %{name}"
+  text: "En 2 minutos te mostramos la app del FSY: dónde está tu compañía, tu código QR, la agenda y los avisos. Puedes saltarlo y verlo después desde Configuración."
+joven_company:
+  title: Tu compañía
+  text: "Aquí vas a ver tu compañía. Tócala."
+joven_coming_soon:
+  title: Próximamente
+  text: "Tu compañía se abre el día del evento, cuando termine el registro. Te llega un aviso y aquí aparecen tus consejeros, tu comedor, tu cuarto y tus compañeros."
+joven_my_company:
+  title: Tus consejeros
+  text: "Ellos te acompañan toda la semana. Si te sientes mal o necesitas algo, búscalos primero. Abajo están tus compañeros."
+joven_center_qr:
+  title: Tu código QR
+  text: "El botón amarillo. Lo muestras al llegar al evento para registrar tu llegada."
+joven_bell:
+  title: La campanita
+  text: "Aquí te llegan los avisos de dirección y de tus consejeros, y los cambios de la agenda. Tócala."
+joven_photo:
+  title: Tu perfil
+  text: "Tu foto te lleva a tu perfil: tus datos, tu contacto de emergencia y tu información médica."
+joven_sheet:
+  title: Lo demás
+  text: "Aquí está tu perfil, las novedades de la app y Configuración. Abajo está «Cerrar sesión»: te pide confirmar, para que no salgas por un toque de más."
+joven_sheet_settings:
+  title: Configuración
+  text: "Toca «Configuración»."
+joven_done:
+  title: ¡Listo!
+  text: "Eso es todo. Nos vemos en el FSY. Si quieres repasarlo, está en Configuración → Ver el tutorial."

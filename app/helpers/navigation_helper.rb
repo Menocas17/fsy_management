@@ -25,6 +25,12 @@ module NavigationHelper
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" },
         ({ text: "Mi compañía", url: my_company_path, lucide_icon: "building-2" } if Current.user.participant.company_id),
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path ] }
+      ] },
+      # Sin menú de cuenta en la barra superior: lo suyo va aquí, y Cerrar sesión al pie del menú.
+      { id: "cuenta", label: "Mi cuenta", items: [
+        { text: "Mi perfil", url: myprofile_participants_path, lucide_icon: "id-card" },
+        { text: "Novedades", url: changelog_path, lucide_icon: "sparkles" },
+        { text: "Configuración", url: settings_path, lucide_icon: "settings" }
       ] }
     ]
   end
@@ -94,7 +100,7 @@ module NavigationHelper
     case participant&.rol
     when "joven"
       return { text: "Mi compañía", url: my_company_path, icon: "building-2" } if participant.company_id
-      return { text: "Mi ficha", url: myprofile_participants_path, icon: "id-card" }
+      return { text: "Mi perfil", url: myprofile_participants_path, icon: "id-card" }
     when "consejero"
       company = participant.counselor_scope.first
       return { text: "Mi compañía", url: company_path(company), icon: "building-2" } if company
@@ -135,7 +141,7 @@ module NavigationHelper
 
   # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
   # escáner de gafetes; para acceso total y el consejero, solo su lista. Configuración, Mi perfil y Cerrar
-  # sesión siguen en el menú de la foto.
+  # sesión siguen en el menú de la foto (el joven no lo tiene: joven_more_items).
   def simple_more_items
     return joven_more_items if Current.user.participant&.joven?
 
@@ -153,14 +159,21 @@ module NavigationHelper
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
   end
 
-  # «Más» del joven: lo suyo (su ficha, avisos, novedades y configuración), no las listas del staff.
+  # «Más» del joven: lo suyo (su perfil, novedades y configuración), no las listas del staff. Los avisos los
+  # trae la campanita; Cerrar sesión va al pie de la hoja (shared/_bottom_nav).
   def joven_more_items
     [
-      ({ text: "Mi ficha", url: myprofile_participants_path, icon: "id-card" } if Current.user.participant.company_id),
-      { text: "Avisos", url: notifications_path, icon: "bell" },
+      ({ text: "Mi perfil", url: myprofile_participants_path, icon: "id-card" } if Current.user.participant.company_id),
       { text: "Novedades", url: changelog_path, icon: "sparkles" },
       { text: "Configuración", url: settings_path, icon: "settings" }
     ].compact
+  end
+
+  # Un toque de más en «Cerrar sesión» no debe sacar al joven de la app: lo confirma antes (shared/_confirmation_modal).
+  def joven_sign_out_confirm
+    { turbo_confirm: "¿Cerrar sesión?",
+      turbo_confirm_detail: "Para volver a entrar necesitarás tu correo y tu contraseña.",
+      turbo_confirm_button: "Sí, cerrar sesión" }
   end
 
   # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.

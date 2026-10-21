@@ -65,6 +65,14 @@
           <% end %>
         <% end %>
       </div>
+      <%# El joven no tiene menú de cuenta en la barra superior: sale desde aquí. %>
+      <% if me&.joven? %>
+        <%= button_to session_path, method: :delete, form_class: "mt-3", data: { more_sign_out: true }, form: { data: joven_sign_out_confirm },
+              class: "w-full flex items-center justify-center gap-2 h-11 rounded-control border border-line text-body font-bold text-cat-rose-ink hover:border-cat-rose cursor-pointer transition" do %>
+          <%= icon "log-out", class: "w-4 h-4" %>
+          Cerrar sesión
+        <% end %>
+      <% end %>
     </div>
   </dialog>
 </div>

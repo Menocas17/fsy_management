@@ -1,6 +1,8 @@
 require "test_helper"
+require "turbo/broadcastable/test_helper"
 
 class CheckinsControllerTest < ActionDispatch::IntegrationTest
+  include Turbo::Broadcastable::TestHelper
   setup do
     sign_in_as(users(:one))
     @company = Company.create!(number: 3)
@@ -16,6 +18,57 @@ class CheckinsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-arrived]", text: "0"
     assert_includes response.body, "de 1 jóvenes registrados"
+  end
+
+  test "only the last 10 show under the scanner, with a link to all of them" do
+    jovenes = 12.times.map do |i|
+      Participant.create!(first_name: "Joven#{i}", last_name: "Prueba", age: 16, gender: "H", rol: "joven",
+                          stake: "las_americas", ward: "las_mercedes", shirt_number: "m")
+    end
+    jovenes.each_with_index { |joven, i| Checkin.create!(participant: joven, recorded_at: i.minutes.ago, recorded_by_name: "Admin") }
+
+    get checkins_path
+    assert_select "[data-recent-checkins] li", 10
+    assert_select "a[data-all-checkins][href='#{registered_checkins_path}']", text: "Ver todos"
+
+    get registered_checkins_path
+    assert_response :success
+    assert_select "[data-all-checkins] li", 12
+    assert_select "[data-all-checkins] [data-action*='askVoid']", false
+    assert_select "[data-all-checkins-table] tbody tr", 12
+
+    # La búsqueda, sin importar tildes ni mayúsculas.
+    jovenes.first.update!(first_name: "Sofía")
+    get registered_checkins_path(query: "sofia prue")
+    assert_select "[data-all-checkins-table] tbody tr", 1
+    assert_select "[data-all-checkins-table]", text: /Sofía Prueba/
+
+    get registered_checkins_path(query: "nadie así")
+    assert_select "[data-empty-state='all-checkins']", text: /Nadie con ese nombre/
+  end
+
+  test "what gets registered goes up to everyone's list on its own, and what gets voided leaves it" do
+    get checkins_path
+    assert_select "turbo-cable-stream-source"
+    assert_select "ul#recent_checkins[data-recent-checkins]"
+
+    # Escanear dos veces a la misma persona solo la sube una vez: la segunda es «ya estaba».
+    streams = perform_enqueued_jobs do
+      capture_turbo_stream_broadcasts(:arrival_checkins) do
+        2.times do |i|
+          post register_checkins_path, params: { checkins: [ { client_token: "a#{i}", participant_id: @joven.id, recorded_at: Time.current.iso8601 } ] }, as: :json
+        end
+      end
+    end
+    assert_equal 1, streams.size
+    assert_equal [ "prepend", "recent_checkins" ], [ streams.first["action"], streams.first["target"] ]
+    assert_includes streams.first.to_html, @joven.full_name
+
+    checkin = Checkin.sole
+    assert_turbo_stream_broadcasts :arrival_checkins, count: 1 do
+      post register_checkins_path, params: { checkins: [ { kind: "void", client_token: "v1", record_id: checkin.id, reason: "otro" } ] }, as: :json
+    end
+    assert_not Checkin.exists?(checkin.id)
   end
 
   test "the scanner keeps a spot below the camera for the last scan" do

@@ -157,6 +157,53 @@ class TutorialTest < ApplicationSystemTestCase
     expect "Tu cuenta"
   end
 
+  test "a joven walks their own short tutorial, with Próximamente while their company is closed" do
+    joven = User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan))
+    emulate_phone
+    sign_in_as(joven, password: "Joven1234!")
+
+    expect "Hola, Juan"
+    go_on
+    expect "Tu compañía"
+    tap_target
+    expect "Próximamente"
+    assert_selector "[data-company-coming-soon]"
+    go_on
+    expect "Tu código QR"
+    go_on
+    expect "La agenda"
+    tap_target
+    expect "Despliega una actividad"
+    tap_target
+    expect "Todo lo de esa actividad"
+    go_on
+
+    expect "La campanita"
+    tap_target
+    expect "Desliza para borrar"
+    within("[data-alert-tutorial]") { find("[data-alert-swipe-delete]", visible: :all).execute_script("this.click()") }
+    expect "Esta sí se borró"
+    go_on
+
+    expect "Tu perfil"
+    go_on
+    expect "Más opciones"
+    tap_target
+    expect "Lo demás"
+    go_on
+    expect "Configuración"
+    tap_target
+    expect "Modo oscuro"
+    go_on
+    expect "Activa las notificaciones"
+    go_on
+
+    expect "¡Listo!"
+    within(".tour-coach") { click_on "Cerrar" }
+    assert_no_selector ".tour-coach"
+    assert_eventually("queda como visto") { joven.reload.tutorial_completed_at.present? }
+  end
+
   test "skipping closes it for good" do
     emulate_phone
     sign_in_as(@counselor, password: "Consejera1!")

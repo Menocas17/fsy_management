@@ -21,8 +21,9 @@ class Tutorial
     body: "Te la envió el tutorial, solo a ti, para practicar cómo se borra una alerta deslizándola. Puedes borrarla sin problema."
   }.freeze
 
+  # El staff y los jóvenes, cada uno con su recorrido (#steps, #joven_steps).
   def self.available_to?(user)
-    user.present? && user.simple_mode? && user.participant&.staff_member? || false
+    user.present? && user.simple_mode? && (user.participant&.staff_member? || user.participant&.joven?) || false
   end
 
   # La alerta con la que se practica borrar: una por persona, y se va al terminar el tutorial.
@@ -46,6 +47,8 @@ class Tutorial
   end
 
   def steps
+    return joven_steps if @participant.joven?
+
     [
       step(:welcome, dashboard_path),
       step(:kpis, dashboard_path, target: "[data-simple-kpis]"),
@@ -67,6 +70,28 @@ class Tutorial
       step(:simple_mode, settings_path, target: "#settings-simple", action: :locked),
       step(:push, settings_path, target: "[data-tour='push']", action: :play),
       step(:done, dashboard_path)
+    ]
+  end
+
+  # El del joven, más corto: su compañía (o «Próximamente» hasta que se finaliza el registro), su QR, la agenda,
+  # la campanita, su foto y «Más», donde está Configuración.
+  def joven_steps
+    [
+      step(:joven_welcome, dashboard_path),
+      step(:joven_company, dashboard_path, target: "[data-tour='joven-company']", action: :tap),
+      @user.company_coming_soon? ? step(:joven_coming_soon, my_company_path, target: "[data-tour='coming-soon']") :
+                              step(:joven_my_company, my_company_path, target: "[data-my-counselors]"),
+      step(:joven_center_qr, dashboard_path, target: "[data-tour='center']"),
+      *agenda_steps,
+      step(:joven_bell, dashboard_path, target: "[data-tour='bell']", action: :tap),
+      notification_step,
+      step(:joven_photo, dashboard_path, target: "[data-profile-link]"),
+      step(:more, dashboard_path, target: "[data-tour='more']", action: :tap),
+      step(:joven_sheet, dashboard_path, target: "dialog[data-dialog-name='mas'] [data-controller='sheet-drag']"),
+      step(:joven_sheet_settings, dashboard_path, target: "[data-more-items] a[href='#{settings_path}']", action: :tap),
+      step(:theme, settings_path, target: "[data-tour='theme']", action: :play),
+      step(:push, settings_path, target: "[data-tour='push']", action: :play),
+      step(:joven_done, dashboard_path)
     ]
   end
 
@@ -171,6 +196,6 @@ class Tutorial
 
     def role_notes
       { "consejero" => "consejeros", "auxiliar" => "auxiliares", "logistica" => "logística",
-        "director_logistica" => "logística" }.fetch(@participant.rol, "cada rol")
+        "director_logistica" => "logística", "joven" => "jóvenes" }.fetch(@participant.rol, "cada rol")
     end
 end
