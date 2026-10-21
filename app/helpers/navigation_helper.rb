@@ -169,6 +169,13 @@ module NavigationHelper
     ].compact
   end
 
+  # Un toque de más en «Cerrar sesión» no debe sacar al joven de la app: lo confirma antes (shared/_confirmation_modal).
+  def joven_sign_out_confirm
+    { turbo_confirm: "¿Cerrar sesión?",
+      turbo_confirm_detail: "Para volver a entrar necesitarás tu correo y tu contraseña.",
+      turbo_confirm_button: "Sí, cerrar sesión" }
+  end
+
   # El panel para quienes lo siguen; al consejero lo lleva directo a la lista de su compañía.
   def night_attendance_nav_item
     if Current.user&.night_attendance_viewer?

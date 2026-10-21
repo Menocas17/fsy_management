@@ -123,7 +123,8 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     # Los avisos los trae la campanita: «Más» no los repite, y al pie está Cerrar sesión.
     assert_equal [ "Mi perfil", "Novedades", "Configuración" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
-    assert_select "dialog[data-dialog-name='mas'] form[action='#{session_path}'] button[data-more-sign-out]", text: /Cerrar sesión/
+    # Y lo confirma antes: un toque de más no lo saca de la app.
+    assert_select "dialog[data-dialog-name='mas'] form[action='#{session_path}'][data-turbo-confirm='¿Cerrar sesión?'] button[data-more-sign-out]", text: /Cerrar sesión/
     # Su inicio: su compañía, no el último aviso, ni las cifras de un rol ni las gráficas del evento.
     assert_select "[data-joven-home] [data-joven-company][href='#{my_company_path}']", text: /Compañía 7/
     assert_select "[data-joven-latest-alert]", false
@@ -136,7 +137,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[href='#{myprofile_participants_path}']", text: /Mi perfil/
       assert_select "a[href='#{changelog_path}']", text: /Novedades/
       assert_select "a[href='#{settings_path}']", text: /Configuración/
-      assert_select "button[data-aside-sign-out]", text: /Cerrar sesión/
+      assert_select "form[data-turbo-confirm='¿Cerrar sesión?'] button[data-aside-sign-out]", text: /Cerrar sesión/
     end
 
     get settings_path
