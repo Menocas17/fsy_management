@@ -1,29 +1,29 @@
-<%# Una compañía en cifras, sin nombres (CompanySummary), en tarjetas como las de Capacitaciones que ocupan todo el
-    ancho: cuántos jóvenes, mujeres y hombres, y su comedor. %>
+<%# Una compañía en cifras, sin nombres (CompanySummary): una tarjeta por fila a todo el ancho, el ícono y el
+    nombre a la izquierda y la cifra a la derecha. Cuántos jóvenes, mujeres y hombres, y su comedor. %>
 <%
   cards = [
-    { key: "jovenes", label: "Jóvenes", sub: "en total", value: summary.total, icon: "users", tone: "bg-cat-green-solid" },
-    { key: "mujeres", label: "Mujeres", sub: "de #{summary.total}", value: summary.women, icon: "venus", tone: "bg-cat-rose-solid" },
-    { key: "hombres", label: "Hombres", sub: "de #{summary.total}", value: summary.men, icon: "mars", tone: "bg-cat-blue-solid" },
-    { key: "comedor", label: "Comedor", sub: "asignado", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
+    { key: "jovenes", label: "Jóvenes", sub: "En tu compañía", value: summary.total, icon: "users", tone: "bg-cat-green-solid" },
+    { key: "mujeres", label: "Mujeres", sub: "De tus jóvenes", value: summary.women, of: summary.total, icon: "venus", tone: "bg-cat-rose-solid" },
+    { key: "hombres", label: "Hombres", sub: "De tus jóvenes", value: summary.men, of: summary.total, icon: "mars", tone: "bg-cat-blue-solid" },
+    { key: "comedor", label: "Comedor", sub: "Donde come tu compañía", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
   ]
 %>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-company-summary-cards>
+<div class="flex flex-col gap-4" data-company-summary-cards>
   <% cards.each do |card| %>
-    <article class="<%= card_classes("h-full min-w-0 p-4 flex flex-col gap-3") %>" data-summary-card="<%= card[:key] %>">
-      <div class="flex items-center gap-3">
-        <span class="w-10 h-10 shrink-0 rounded-control text-white flex items-center justify-center <%= card[:tone] %>">
-          <%= icon card[:icon], class: "w-[19px] h-[19px]" %>
-        </span>
-        <div class="min-w-0">
-          <p class="text-title font-bold text-ink-900 truncate"><%= card[:label] %></p>
-          <p class="text-label font-semibold text-ink-500 truncate"><%= card[:sub] %></p>
-        </div>
+    <article class="<%= card_classes("p-4 md:p-5 flex items-center gap-3.5") %>" data-summary-card="<%= card[:key] %>">
+      <span class="size-11 shrink-0 rounded-tile text-white flex items-center justify-center <%= card[:tone] %>">
+        <%= icon card[:icon], class: "size-5" %>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-title font-bold text-ink-900"><%= card[:label] %></p>
+        <p class="text-label font-semibold text-ink-500"><%= card[:sub] %></p>
       </div>
       <% if card[:text] %>
-        <p class="text-title font-extrabold leading-tight text-ink-900 [overflow-wrap:anywhere]"><%= card[:value] %></p>
+        <p class="shrink-0 max-w-[55%] text-right text-title font-extrabold leading-tight text-ink-900"><%= card[:value] %></p>
       <% else %>
-        <p class="text-display font-extrabold tabular-nums text-ink-900"><%= card[:value] %></p>
+        <p class="shrink-0 text-display font-extrabold tabular-nums text-ink-900">
+          <%= card[:value] %><% if card[:of] %> <span class="text-label font-bold text-ink-500">de <%= card[:of] %></span><% end %>
+        </p>
       <% end %>
     </article>
   <% end %>
