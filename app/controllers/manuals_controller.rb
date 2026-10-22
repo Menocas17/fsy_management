@@ -2,14 +2,24 @@
 # manual y los enlaces; el staff también el de líderes. Subir, reemplazar o quitar un PDF es del acceso total;
 # cambiar los enlaces, solo del superadmin.
 class ManualsController < ApplicationController
-  allow_jovenes only: %i[show]
-  before_action :set_manual, only: %i[upload remove]
+  allow_jovenes only: %i[show read]
+  before_action :set_manual, only: %i[read upload remove]
   before_action :require_manual_uploader!, only: %i[upload remove]
   before_action :require_superadmin_for_links!, only: %i[links update_links]
 
   def show
     @manuals = Manual.kinds_for(Current.user).map { |kind| Manual.for(kind) }
     @links = ManualLinks.all
+  end
+
+  # El lector dentro de la app (pdf_reader_controller.js, con PDF.js): el joven solo abre el suyo.
+  def read
+    unless Manual.kinds_for(Current.user).include?(@manual.kind)
+      return redirect_to(manuals_path, alert: "Ese manual es para el staff.")
+    end
+    return redirect_to(manuals_path, alert: "#{@manual.title} todavía no está disponible.") unless @manual.available?
+
+    @pdf_url = pdf_source(@manual)
   end
 
   def upload
@@ -54,6 +64,16 @@ class ManualsController < ApplicationController
   private
     def set_manual
       @manual = Manual.for(params[:kind])
+    end
+
+    # Con R2 público el lector baja el PDF directo del bucket (pide CORS en R2, docs/deploy_render.md); sin él,
+    # Rails lo pasa por su propia dirección, del mismo origen.
+    def pdf_source(manual)
+      if Rails.configuration.x.public_storage_url.present?
+        helpers.storage_url(manual.file)
+      else
+        rails_storage_proxy_path(manual.file)
+      end
     end
 
     def require_manual_uploader!

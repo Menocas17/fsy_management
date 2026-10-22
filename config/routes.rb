@@ -146,6 +146,7 @@ Rails.application.routes.draw do
     patch :links, action: :update_links, path: "enlaces"
   end
   constraints(kind: /joven|lideres/) do
+    get "manuales/:kind/leer" => "manuals#read", as: :read_manual
     patch "manuales/:kind" => "manuals#upload", as: :upload_manual
     delete "manuales/:kind" => "manuals#remove", as: :remove_manual
   end

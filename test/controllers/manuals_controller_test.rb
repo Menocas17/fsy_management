@@ -19,7 +19,7 @@ class ManualsControllerTest < ActionDispatch::IntegrationTest
 
     get manuals_path
     assert_response :success
-    assert_select "[data-manual='joven'] a[data-manual-link='joven'][target='_blank']"
+    assert_select "[data-manual='joven'] a[data-manual-link='joven'][href='#{read_manual_path(:joven)}']"
     assert_select "[data-manual='lideres']", false
     assert_select "[data-manual-library='predicad'][href^='https://www.churchofjesuschrist.org']"
     assert_select "[data-manual-library='fortaleza']"
@@ -100,5 +100,30 @@ class ManualsControllerTest < ActionDispatch::IntegrationTest
     patch links_manuals_path, params: { links: { musica: "https://example.com" } }
     assert_redirected_to manuals_path
     assert_equal "https://www.churchofjesuschrist.org/study/music/fsy-2026?lang=spa", ManualLinks.url("musica")
+  end
+
+  test "a manual is read inside the app, and the joven only opens theirs" do
+    Manual.for(:joven).tap { |manual| manual.file.attach(fixture_file_upload("manual.pdf", "application/pdf")) }.save!
+    Manual.for(:lideres).tap { |manual| manual.file.attach(fixture_file_upload("manual.pdf", "application/pdf")) }.save!
+    sign_in_as(@joven)
+
+    get read_manual_path(:joven)
+    assert_response :success
+    assert_select "[data-controller='pdf-reader'][data-manual-reader='joven']" do |reader|
+      assert_match %r{/rails/active_storage/blobs/proxy/}, reader.first["data-pdf-reader-url-value"]
+      assert_match "pdfjs-worker", reader.first["data-pdf-reader-worker-value"]
+    end
+    assert_select "nav[data-bottom-nav]", false, "el lector lleva su propia barra"
+
+    get read_manual_path(:lideres)
+    assert_redirected_to manuals_path
+  end
+
+  test "a manual without its PDF can't be opened" do
+    sign_in_as(@counselor)
+
+    get read_manual_path(:lideres)
+    assert_redirected_to manuals_path
+    assert_match "todavía no está disponible", flash[:alert]
   end
 end
