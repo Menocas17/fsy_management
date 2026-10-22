@@ -1,6 +1,8 @@
 class OrganigramaController < ApplicationController
   VIEWS = %w[todo logistica mi_compania].freeze
-  before_action :require_company_revealed!
+  # Con las compañías cerradas el consejero no entra (ahí está su compañero(a)); el resto del staff sin acceso
+  # total ve solo la rama de logística, que no lleva compañías.
+  before_action :require_counselor_company_revealed!
   before_action :require_joven_company_open!
   # El joven ve solo la cadena de su compañía (sus consejeros, auxiliares y la dirección), no el evento entero.
   allow_jovenes
@@ -8,6 +10,7 @@ class OrganigramaController < ApplicationController
   def show
     @view = VIEWS.include?(params[:scope]) ? params[:scope] : "todo"
     @view = "mi_compania" if joven_signed_in?
+    @view = "logistica" if company_hidden_here?
 
     if @view == "mi_compania"
       @directors = Participant.director.with_attached_avatar.order(:gender, :first_name)

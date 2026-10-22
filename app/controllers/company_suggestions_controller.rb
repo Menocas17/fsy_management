@@ -3,6 +3,7 @@
 # con lo guardado y «Asignar» la guarda.
 class CompanySuggestionsController < ApplicationController
   before_action -> { head :forbidden unless can_suggest_company? }
+  before_action :require_company_revealed!
 
   def show
     @participant = Participant.joven.find_by(id: params[:participant_id]) if params[:participant_id].present?

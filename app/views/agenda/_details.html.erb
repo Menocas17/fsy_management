@@ -1,13 +1,16 @@
 <%# The body of an activity: shown in the side panel on desktop and inside the accordion on phones. %>
 <% notes = activity.notes_for(Current.user&.participant) %>
-<% last_alert = activity.alerts.recent.first %>
+<%# Las alertas de la actividad son de quien edita la agenda: los demás no ven «Alerta enviada» (la caché de la
+    agenda ya lleva can_manage_agenda? en su llave). %>
+<% manager = can_manage_agenda? %>
+<% last_alert = activity.alerts.recent.first if manager %>
 
 <%# Sin gap: cada info_row ya trae su relleno y su línea; con gap el aire de abajo doblaba al de arriba. %>
 <div class="flex flex-col">
   <%= info_row "Horario", "clock", "#{spanish_date(activity.day)} · #{activity.time_range}" %>
   <%= info_row "Lugar", "map-pin", activity.location %>
   <%= info_row "Responsables", "user-check", activity.responsible_names.presence %>
-  <%= info_row "Alerta enviada a", "megaphone", activity.audience_label %>
+  <%= info_row "Alerta enviada a", "megaphone", activity.audience_label if manager %>
 </div>
 
 <% if activity.description.present? %>
@@ -42,7 +45,7 @@
   </div>
 <% end %>
 
-<% if can_manage_agenda? %>
+<% if manager %>
   <div class="mt-4 flex gap-2.5">
     <%= link_to edit_activity_path(activity), class: button_classes(:primary, extra: "flex-1") do %>
       <%= icon "square-pen", class: "w-4 h-4" %>

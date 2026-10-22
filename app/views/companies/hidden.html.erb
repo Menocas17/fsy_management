@@ -6,15 +6,10 @@
 <% back_to "Inicio", dashboard_path %>
 <%= render PageComponent.new(width: :form, data: { company_hidden: true }) do |page| %>
   <% page.with_intro do %>
-    <span class="flex flex-wrap items-center gap-2">
-      <%= render ChipComponent.new(label: "Nombres ocultos por dirección", tone: :amber, icon: "lock") %>
-      <% if @company.dining_hall_label %>
-        <%= render ChipComponent.new(label: @company.dining_hall_label, tone: :neutral, icon: "utensils") %>
-      <% end %>
-    </span>
+    <%= render ChipComponent.new(label: "Nombres ocultos por dirección", tone: :amber, icon: "lock") %>
   <% end %>
 
-  <%= render "companies/summary_stats", summary: @summary %>
+  <%= render "companies/summary_cards", summary: @summary, company: @company %>
 
   <section class="<%= card_classes("p-5 md:p-6") %>" data-companion>
     <%= section_heading "Tu compañero(a)", "user-check" %>

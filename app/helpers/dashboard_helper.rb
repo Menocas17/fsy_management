@@ -28,6 +28,9 @@ module DashboardHelper
 
     case participant.rol.to_s
     when "auxiliar"
+      # Con las compañías cerradas (CompanyReveal) no tiene compañía que abrir.
+      return nil if Current.user.company_hidden?
+
       auxiliar_company = participant.auxiliar_scope[:auxiliar_company]
       auxiliar_company && auxiliar_company_path(auxiliar_company, return_to: dashboard_path)
     when "consejero"

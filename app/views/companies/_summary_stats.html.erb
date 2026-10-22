@@ -1,6 +1,0 @@
-<%# Las tres cifras de una compañía sin nombres (CompanySummary): jóvenes, mujeres y hombres, y edades. %>
-<div class="grid grid-cols-3 gap-2.5" data-company-summary-stats>
-  <%= render StatTileComponent.new(value: summary.total, label: "jóvenes", icon: "users", tone: :green, size: :sm) %>
-  <%= render StatTileComponent.new(value: "#{summary.women}·#{summary.men}", label: "mujeres · hombres", icon: "venus-and-mars", tone: :rose, size: :sm) %>
-  <%= render StatTileComponent.new(value: summary.age_range || "—", label: "años", icon: "cake", tone: :amber, size: :sm) %>
-</div>

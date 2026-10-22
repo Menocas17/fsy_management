@@ -24,12 +24,19 @@ class GlobalSearch
     @query.length >= MIN_LENGTH
   end
 
+  # Con las compañías cerradas (User#company_hidden?), el staff sin acceso total no encuentra jóvenes ni compañías,
+  # ni estacas o barrios (llevan a la lista de jóvenes).
   def people
-    @people ||= group(Participant.search_full_name(@query).includes(:company, Participant::AVATAR_PRELOAD).order(:first_name, :last_name))
+    @people ||= begin
+      scope = Participant.search_full_name(@query).includes(:company, Participant::AVATAR_PRELOAD).order(:first_name, :last_name)
+      group(@user.company_hidden? ? scope.staff : scope)
+    end
   end
 
   # Las compañías (por número, nombre, nombre elegido o consejero) y las compañías auxiliares por su nombre.
   def companies
+    return @companies ||= Group.new([], 0) if @user.company_hidden?
+
     @companies ||= begin
       companies = Company.search(@query).includes(:auxiliar_company).by_number
       auxiliars = AuxiliarCompany.where("name ILIKE ?", "%#{AuxiliarCompany.sanitize_sql_like(@query)}%").order(:name)
@@ -44,6 +51,8 @@ class GlobalSearch
 
   # Estacas y barrios por su nombre: [:stake | :ward, clave, nombre].
   def places
+    return @places ||= Group.new([], 0) if @user.company_hidden?
+
     @places ||= begin
       term = self.class.normalize(@query)
       matches = Participant::STAKE_LABELS.map { |key, label| [ :stake, key, label ] } +

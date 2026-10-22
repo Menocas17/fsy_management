@@ -21,7 +21,9 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
     assert_select "[data-companion]", text: /Ya está asignado/
     assert_select "[data-company-stakes]", text: /Estaca Bello Horizonte/
     assert_select "[data-company-stakes]", text: /Barrio La Rotonda/
-    assert_select "[data-company-summary-stats]", text: /1\s*jóvenes/
+    assert_select "[data-summary-card='jovenes']", text: /1/
+    assert_select "[data-summary-card='comedor']", text: /Salón Las Américas/
+    assert_select "[data-summary-card]", 2
     assert_not_includes response.body, "Juan"
     assert_not_includes response.body, "José Martínez"
   end
@@ -120,5 +122,76 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
 
     get my_company_path
     assert_select "[data-empty-state='no-company']"
+  end
+
+  test "with the companies closed logística doesn't see companies nor jóvenes, but keeps its own tools" do
+    area = LogisticsArea.create!(name: "Tecnología")
+    logistics = Participant.create!(first_name: "Sergio", last_name: "Prueba", age: 30, gender: "H", rol: "logistica",
+                                    stake: "bello_horizonte", ward: "la_rotonda", shirt_number: "m", logistics_area: area)
+    sign_in_as(User.create!(email_address: "sergio@fsy.com", password: "Logistica1!", participant: logistics))
+
+    [ participants_path, participant_path(participants(:juan)), companies_path, company_path(@company), overview_companies_path,
+      auxiliar_companies_path, company_night_attendance_path(@company) ].each do |path|
+      get path
+      assert_redirected_to dashboard_path, "#{path} debería estar cerrado para logística"
+    end
+
+    get staff_participants_path
+    assert_response :success
+    get participant_path(@partner)
+    assert_response :success
+
+    get organigrama_path(scope: "todo")
+    assert_response :success
+    assert_select "[data-org-view]", false
+    assert_not_includes response.body, "Compañía 12"
+
+    get search_path(q: "Juan")
+    assert_response :success
+    assert_not_includes response.body, "Juan Pérez"
+
+    get dashboard_path
+    nav = css_select("nav[aria-label='Navegación principal'] a").map { |link| link.text.squish }
+    assert_not_includes nav, "Jóvenes"
+    assert_not_includes nav, "Compañías"
+    assert_includes nav, "Staff"
+  end
+
+  test "with the companies closed the auxiliar doesn't open their branch either" do
+    auxiliar_company = AuxiliarCompany.create!(name: "Auxiliar Alfa")
+    @company.update!(auxiliar_company: auxiliar_company)
+    auxiliar = Participant.create!(first_name: "Byron", last_name: "Prueba", age: 30, gender: "H", rol: "auxiliar",
+                                   stake: "bello_horizonte", ward: "la_rotonda", shirt_number: "m")
+    Membership.create!(associable: auxiliar_company, participant: auxiliar)
+    sign_in_as(User.create!(email_address: "byron@fsy.com", password: "Auxiliar1!", participant: auxiliar))
+
+    get auxiliar_company_path(auxiliar_company)
+    assert_redirected_to dashboard_path
+    get my_company_path
+    assert_redirected_to dashboard_path
+  end
+
+  test "full access sees every company and joven with the companies closed" do
+    sign_in_as(users(:one))
+
+    [ participants_path, participant_path(participants(:juan)), companies_path, company_path(@company) ].each do |path|
+      get path
+      assert_response :success, "#{path} debería abrir para el acceso total"
+    end
+    assert_select "[data-company-hidden]", false
+  end
+
+  test "opening the companies gives logística its pages back" do
+    CompanyReveal.open!
+    logistics = Participant.create!(first_name: "Sergio", last_name: "Prueba", age: 30, gender: "H", rol: "logistica",
+                                    stake: "bello_horizonte", ward: "la_rotonda", shirt_number: "m")
+    sign_in_as(User.create!(email_address: "sergio@fsy.com", password: "Logistica1!", participant: logistics))
+
+    [ participants_path, participant_path(participants(:juan)), companies_path, company_path(@company) ].each do |path|
+      get path
+      assert_response :success, "#{path} debería abrir con las compañías abiertas"
+    end
+    get search_path(q: "Juan")
+    assert_includes response.body, "Juan Pérez"
   end
 end

@@ -8,8 +8,9 @@
   <% if @view == "mi_compania" %>
     <%= render "organigrama/mine" %>
   <% else %>
-    <%# Igual para todos: en caché, y sus datos se cargan solo si hace falta dibujarlo. %>
-    <% cache [ "organigrama", @view, @organigrama_version, phone_hint? ] do %>
+    <%# Igual para todos: en caché, y sus datos se cargan solo si hace falta dibujarlo. Con las compañías cerradas
+        el selector de vistas no sale (organigrama/_view_switch): eso también va en la llave. %>
+    <% cache [ "organigrama", @view, @organigrama_version, phone_hint?, Current.user.company_hidden? ] do %>
       <% load_general_organigrama %>
       <%= render "organigrama/general" %>
     <% end %>

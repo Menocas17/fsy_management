@@ -1,0 +1,26 @@
+<%# Una compañía en cifras, sin nombres (CompanySummary): una tarjeta por fila a todo el ancho, el ícono y el
+    nombre a la izquierda y la cifra a la derecha: cuántos jóvenes tiene y su comedor. %>
+<%
+  cards = [
+    { key: "jovenes", label: "Jóvenes", sub: "En tu compañía", value: summary.total, icon: "users", tone: "bg-cat-green-solid" },
+    { key: "comedor", label: "Comedor", sub: "Asignado", value: company.dining_hall_label || "Por asignar", icon: "utensils", tone: "bg-cat-amber-solid", text: true }
+  ]
+%>
+<div class="flex flex-col gap-4" data-company-summary-cards>
+  <% cards.each do |card| %>
+    <article class="<%= card_classes("p-4 md:p-5 flex items-center gap-3.5") %>" data-summary-card="<%= card[:key] %>">
+      <span class="size-11 shrink-0 rounded-tile text-white flex items-center justify-center <%= card[:tone] %>">
+        <%= icon card[:icon], class: "size-5" %>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-title font-bold text-ink-900"><%= card[:label] %></p>
+        <p class="text-label font-semibold text-ink-500"><%= card[:sub] %></p>
+      </div>
+      <% if card[:text] %>
+        <p class="shrink-0 max-w-[55%] text-right text-title font-extrabold leading-tight text-ink-900"><%= card[:value] %></p>
+      <% else %>
+        <p class="shrink-0 text-display font-extrabold tabular-nums text-ink-900"><%= card[:value] %></p>
+      <% end %>
+    </article>
+  <% end %>
+</div>

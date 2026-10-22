@@ -106,12 +106,19 @@ class User < ApplicationRecord
     full_access_by_role?
   end
 
-  # Un consejero cuya compañía dirección todavía no abrió: la ve en cifras y nada más (CompanyReveal).
-  # Con acceso total dado a dedo ve todo como siempre.
+  # Staff sin acceso total mientras dirección no abra las compañías (CompanyReveal): no ve compañías ni jóvenes.
+  # El consejero, además, ve la suya en cifras y no sabe quién es su compañero(a). Con acceso total, aunque sea
+  # dado a dedo, ve todo como siempre; el joven tiene sus propias reglas (JovenAccess, company_coming_soon?).
   def company_hidden?
     return @company_hidden if defined?(@company_hidden)
 
-    @company_hidden = participant&.consejero? && !full_access? && !CompanyReveal.open? || false
+    @company_hidden = participant&.staff_member? && !full_access? && !CompanyReveal.open? || false
+  end
+
+  # El consejero con las compañías cerradas: tampoco abre el staff, fichas ajenas ni el escáner, donde saldría
+  # su compañero(a).
+  def counselor_company_hidden?
+    company_hidden? && participant.consejero?
   end
 
   # Un joven antes de que se finalice el registro (CompanyReveal.open_to_jovenes?): ve «Próximamente» en vez

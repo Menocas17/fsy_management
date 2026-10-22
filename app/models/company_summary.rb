@@ -1,6 +1,6 @@
-# Una compañía en cifras, sin nombres: cuántos jóvenes, mujeres y hombres, de qué edades y de qué estacas y
-# barrios vienen. Es lo que ve el consejero mientras dirección no abra las compañías (CompanyReveal) y la
-# cabecera de «Mi compañía» del joven.
+# Una compañía en cifras, sin nombres: cuántos jóvenes, mujeres y hombres, y de qué estacas y barrios vienen. Es
+# lo que ve el consejero mientras dirección no abra las compañías (CompanyReveal) y la cabecera de «Mi compañía»
+# del joven.
 class CompanySummary
   Stake = Struct.new(:name, :count, :wards, keyword_init: true)
 
@@ -8,8 +8,8 @@ class CompanySummary
 
   def initialize(company)
     @company = company
-    # Una compañía tiene una veintena de jóvenes: se cargan una vez y se cuenta en Ruby (la edad es la de hoy).
-    @jovenes = company.participants.select(:id, :gender, :birth_date, :age, :stake, :ward, :other_stake, :other_ward).to_a
+    # Una compañía tiene una veintena de jóvenes: se cargan una vez y se cuenta en Ruby.
+    @jovenes = company.participants.select(:id, :gender, :stake, :ward, :other_stake, :other_ward).to_a
   end
 
   def total
@@ -22,14 +22,6 @@ class CompanySummary
 
   def men
     @jovenes.count { |joven| joven.gender == "H" }
-  end
-
-  # «14–17», «15» o nil si nadie tiene edad.
-  def age_range
-    ages = @jovenes.filter_map(&:age)
-    return if ages.empty?
-
-    ages.min == ages.max ? ages.min.to_s : "#{ages.min}–#{ages.max}"
   end
 
   # Las estacas de más jóvenes primero, cada una con sus barrios (y cuántos de cada uno).
