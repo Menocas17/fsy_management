@@ -49,15 +49,25 @@
           </div>
         <% end %>
         <% if uploader %>
-          <%# El acceso total lo sube o reemplaza aquí mismo: un PDF de hasta 25 MB. %>
+          <%# El acceso total lo sube o reemplaza aquí mismo: un PDF de hasta 25 MB, con su barra mientras sube
+              (manual_upload_controller.js). %>
           <div class="flex flex-wrap items-center gap-2 px-1">
-            <%= form_with url: upload_manual_path(manual.kind), method: :patch, multipart: true, class: "flex flex-wrap items-center gap-2", data: { manual_upload: manual.kind, controller: "auto-submit" } do %>
-              <label class="<%= button_classes(:secondary, size: :sm) %> cursor-pointer">
+            <%= form_with url: upload_manual_path(manual.kind), method: :patch, multipart: true, class: "contents",
+                  data: { manual_upload: manual.kind, controller: "manual-upload",
+                          manual_upload_direct_upload_url_value: direct_uploads_path, manual_upload_max_bytes_value: Manual::MAX_BYTES } do %>
+              <label class="<%= button_classes(:secondary, size: :sm) %> cursor-pointer" data-manual-upload-target="picker">
                 <%= icon "file-up", class: "w-4 h-4" %>
                 <%= manual.available? ? "Reemplazar PDF" : "Subir PDF" %>
                 <%= file_field_tag :file, accept: "application/pdf", required: true, class: "sr-only",
-                      aria: { label: "PDF del #{manual.title.downcase}" }, data: { action: "change->auto-submit#changed" } %>
+                      aria: { label: "PDF del #{manual.title.downcase}" },
+                      data: { manual_upload_target: "input", action: "change->manual-upload#pick" } %>
               </label>
+              <div hidden data-manual-upload-target="status" class="order-last basis-full flex flex-col gap-1.5 pt-1" role="status" aria-live="polite">
+                <p data-manual-upload-target="message" class="text-label font-semibold text-ink-700"></p>
+                <span data-manual-upload-target="bar" class="group block h-1.5 rounded-full bg-sunken overflow-hidden">
+                  <span data-manual-upload-target="fill" class="block h-full rounded-full bg-primary-600 transition-[width] duration-200 group-data-[indeterminate=true]:animate-pulse" style="width: 0%"></span>
+                </span>
+              </div>
             <% end %>
             <% if manual.available? %>
               <%= button_to remove_manual_path(manual.kind), method: :delete,

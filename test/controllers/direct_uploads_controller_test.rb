@@ -21,7 +21,7 @@ class DirectUploadsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "only images of a reasonable size" do
-    sign_in_as(users(:one))
+    sign_in_as(User.create!(email_address: "maria@fsy.com", password: "Consejera1!", participant: participants(:maria)))
 
     assert_no_difference "ActiveStorage::Blob.count" do
       post direct_uploads_path, params: { blob: blob_params(content_type: "application/pdf") }, as: :json
@@ -29,6 +29,18 @@ class DirectUploadsControllerTest < ActionDispatch::IntegrationTest
       post direct_uploads_path, params: { blob: blob_params(byte_size: 16.megabytes) }, as: :json
       assert_response :unprocessable_content
     end
+  end
+
+  test "full access also uploads a manual's PDF, up to its limit" do
+    sign_in_as(users(:one))
+
+    assert_difference "ActiveStorage::Blob.count", 1 do
+      post direct_uploads_path, params: { blob: blob_params(content_type: "application/pdf", byte_size: 20.megabytes) }, as: :json
+    end
+    assert_response :success
+
+    post direct_uploads_path, params: { blob: blob_params(content_type: "application/pdf", byte_size: 26.megabytes) }, as: :json
+    assert_response :unprocessable_content
   end
 
   private
