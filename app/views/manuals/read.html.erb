@@ -1,7 +1,8 @@
 <%# El lector de un manual dentro de la app (pdf_reader_controller.js dibuja cada página con PDF.js): las páginas una
     tras otra, el zoom, ir a una página, el índice del PDF si lo trae y, en la computadora, las miniaturas. Recuerda
     en el dispositivo la página donde ibas. Ocupa toda la altura de <main>; en el teléfono su barra de abajo
-    reemplaza a la del modo simple. %>
+    reemplaza a la del modo simple. Fuera del jalar para recargar (data-no-pull-refresh): el lector se desplaza en su
+    propio recuadro y <main> se queda siempre arriba, así que el gesto se tragaba cada arrastre para volver a subir. %>
 <% content_for :title, @manual.title %>
 <% content_for :eyebrow, "Manuales" %>
 <% content_for :hide_bottom_nav, true %>
@@ -9,7 +10,7 @@
 <% tool = "size-10 shrink-0 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted flex items-center justify-center cursor-pointer transition disabled:opacity-40 disabled:cursor-default" %>
 <% zoom_button = "size-9 rounded-inner text-ink-700 hover:bg-surface text-title font-bold cursor-pointer" %>
 <%= tag.div class: "h-full flex flex-col", data: {
-      controller: "pdf-reader", manual_reader: @manual.kind,
+      controller: "pdf-reader", manual_reader: @manual.kind, no_pull_refresh: true,
       pdf_reader_url_value: @pdf_url, pdf_reader_worker_value: asset_path("pdfjs-worker.js"),
       pdf_reader_storage_key_value: manual_progress_key(@manual) } do %>
   <div class="shrink-0 flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2.5 bg-surface border-b border-line-soft">
