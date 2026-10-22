@@ -9,6 +9,9 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "apexcharts", preload: false # @7.3.0
 pin "apexcharts/core", to: "apexcharts--core.js", preload: false # @7.3.0
 pin "jsqr", preload: false # @1.4.0
+# El lector de manuales (pdf_reader_controller.js): la versión legacy de PDF.js, que funciona en teléfonos viejos.
+# Su worker (vendor/javascript/pdfjs-worker.js) se sirve aparte, como archivo propio (ManualsController#read).
+pin "pdfjs-dist", preload: false # @4.10.38
 # La subida directa de la foto de perfil (avatar_preview_controller.js); viene con Rails.
 pin "@rails/activestorage", to: "activestorage.esm.js", preload: false
 pin_all_from "app/javascript/lib", under: "lib"

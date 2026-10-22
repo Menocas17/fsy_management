@@ -90,7 +90,8 @@ Se guardan 7 días en el disco del droplet y 30 en R2. El registro queda en `/va
 
 Las fotos de perfil se suben desde el teléfono directo al bucket `fsy-management`
 (`avatar_preview_controller.js`, `DirectUploadsController`), sin pasar por el servidor. Para que el navegador
-pueda hacerlo, el bucket tiene que aceptar subidas desde el dominio de la app: Cloudflare → R2 →
+pueda hacerlo, el bucket tiene que aceptar subidas desde el dominio de la app; la segunda regla deja que el lector
+de Manuales (`pdf_reader_controller.js`) baje el PDF directo del bucket. Cloudflare → R2 →
 `fsy-management` → **Settings → CORS Policy → Edit**:
 
 ```json
@@ -99,6 +100,13 @@ pueda hacerlo, el bucket tiene que aceptar subidas desde el dominio de la app: C
     "AllowedOrigins": ["https://<APP_HOST>"],
     "AllowedMethods": ["PUT"],
     "AllowedHeaders": ["Content-Type", "Content-MD5", "Content-Disposition"],
+    "MaxAgeSeconds": 3600
+  },
+  {
+    "AllowedOrigins": ["https://<APP_HOST>"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": ["Range"],
+    "ExposeHeaders": ["Accept-Ranges", "Content-Range", "Content-Length"],
     "MaxAgeSeconds": 3600
   }
 ]

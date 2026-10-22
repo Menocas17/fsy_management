@@ -27,7 +27,8 @@ module NavigationHelper
       { id: nil, label: nil, items: [
         { text: "Inicio", url: dashboard_path, lucide_icon: "house" },
         ({ text: "Mi compañía", url: my_company_path, lucide_icon: "building-2" } if Current.user.participant.company_id),
-        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path ] }
+        { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path ] },
+        { text: "Manuales", url: manuals_path, lucide_icon: "book-open", active_paths: [ manuals_path ] }
       ] },
       # Sin menú de cuenta en la barra superior: lo suyo va aquí, y Cerrar sesión al pie del menú.
       { id: "cuenta", label: "Mi cuenta", items: [
@@ -53,6 +54,7 @@ module NavigationHelper
       ] },
       { id: "evento", label: "Evento", items: [
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
+        { text: "Manuales", url: manuals_path, lucide_icon: "book-open", active_paths: [ manuals_path ] },
         # El registro de llegadas solo aparece para el comité que lo hace.
         ({ text: "Registro", url: checkins_path, lucide_icon: "scan-line", active_paths: [ checkins_path ] } if Current.user&.checkin_registrar?),
         ({ text: "Alertas", url: alerts_path, lucide_icon: "megaphone", active_paths: [ alerts_path ] } if Current.user&.alert_manager?)
@@ -144,9 +146,9 @@ module NavigationHelper
   end
 
   # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
-  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial" ].freeze
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial", "Manuales" ].freeze
   # El consejero, lo que usa con su compañía en la semana, en este orden (tras el escáner).
-  COUNSELOR_MORE_ITEMS = [ "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes" ].freeze
+  COUNSELOR_MORE_ITEMS = [ "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes", "Manuales" ].freeze
 
   # «Más»: el resto del menú que la persona puede abrir (lo que ya está en la barra no se repite) y el
   # escáner de gafetes; para acceso total y el consejero, solo su lista. Configuración, Mi perfil y Cerrar
@@ -173,6 +175,7 @@ module NavigationHelper
   def joven_more_items
     [
       ({ text: "Mi perfil", url: myprofile_participants_path, icon: "id-card" } if Current.user.participant.company_id),
+      { text: "Manuales", url: manuals_path, icon: "book-open" },
       { text: "Novedades", url: changelog_path, icon: "sparkles" },
       { text: "Configuración", url: settings_path, icon: "settings" }
     ].compact

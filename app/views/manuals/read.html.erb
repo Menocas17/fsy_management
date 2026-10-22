@@ -1,0 +1,90 @@
+<%# El lector de un manual dentro de la app (pdf_reader_controller.js dibuja cada página con PDF.js): las páginas una
+    tras otra, el zoom, ir a una página, el índice del PDF si lo trae y, en la computadora, las miniaturas. Recuerda
+    en el dispositivo la página donde ibas. Ocupa toda la altura de <main>; en el teléfono su barra de abajo
+    reemplaza a la del modo simple. %>
+<% content_for :title, @manual.title %>
+<% content_for :eyebrow, "Manuales" %>
+<% content_for :hide_bottom_nav, true %>
+<% back_to "Manuales", manuals_path %>
+<% tool = "size-10 shrink-0 rounded-control border border-line bg-surface text-ink-700 hover:bg-muted flex items-center justify-center cursor-pointer transition disabled:opacity-40 disabled:cursor-default" %>
+<% zoom_button = "size-9 rounded-inner text-ink-700 hover:bg-surface text-title font-bold cursor-pointer" %>
+<%= tag.div class: "h-full flex flex-col", data: {
+      controller: "pdf-reader", manual_reader: @manual.kind,
+      pdf_reader_url_value: @pdf_url, pdf_reader_worker_value: asset_path("pdfjs-worker.js"),
+      pdf_reader_storage_key_value: manual_progress_key(@manual) } do %>
+  <div class="shrink-0 flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2.5 bg-surface border-b border-line-soft">
+    <p class="min-w-0 flex-1 text-label font-semibold text-ink-500" aria-live="polite">
+      Página <span data-pdf-reader-target="current" class="text-ink-900 font-bold tabular-nums">1</span>
+      de <span data-pdf-reader-target="total" class="tabular-nums">…</span>
+    </p>
+    <div class="relative" data-pdf-reader-target="outline" hidden>
+      <button type="button" class="<%= tool %>" aria-label="Índice del manual" aria-expanded="false"
+              data-pdf-reader-target="outlineButton" data-action="pdf-reader#toggleOutline">
+        <%= icon "list", class: "w-[18px] h-[18px]" %>
+      </button>
+      <div data-pdf-reader-target="outlinePanel" hidden
+           class="absolute right-0 top-12 z-30 w-72 max-h-[60vh] overflow-y-auto rounded-card bg-surface border border-line-soft shadow-lg p-2">
+        <p class="px-2.5 pt-1.5 pb-2 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Índice</p>
+        <ul data-pdf-reader-target="outlineList" class="flex flex-col"></ul>
+      </div>
+    </div>
+    <div class="max-md:hidden flex items-center gap-1 p-1 rounded-control bg-sunken">
+      <button type="button" class="<%= zoom_button %>" aria-label="Alejar" data-action="pdf-reader#zoomOut">−</button>
+      <span data-pdf-reader-target="zoom" class="min-w-12 text-center text-label font-bold tabular-nums">100 %</span>
+      <button type="button" class="<%= zoom_button %>" aria-label="Acercar" data-action="pdf-reader#zoomIn">+</button>
+    </div>
+    <div class="max-md:hidden flex items-center gap-1.5">
+      <button type="button" class="<%= tool %>" aria-label="Página anterior" data-pdf-reader-target="prev" data-action="pdf-reader#previous">
+        <%= icon "chevron-left", class: "w-[18px] h-[18px]" %>
+      </button>
+      <label for="manual-page" class="sr-only">Ir a la página</label>
+      <input id="manual-page" type="text" inputmode="numeric" value="1" data-pdf-reader-target="input" data-action="change->pdf-reader#jump"
+             class="w-14 h-10 rounded-control border border-line bg-surface text-center text-body font-bold tabular-nums text-ink-900 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30">
+      <button type="button" class="<%= tool %>" aria-label="Página siguiente" data-pdf-reader-target="next" data-action="pdf-reader#next">
+        <%= icon "chevron-right", class: "w-[18px] h-[18px]" %>
+      </button>
+    </div>
+    <%= link_to rails_blob_path(@manual.file, disposition: "inline"), target: "_blank", rel: "noopener",
+          class: tool, aria: { label: "Abrir el PDF" }, title: "Abrir el PDF" do %>
+      <%= icon "external-link", class: "w-[18px] h-[18px]" %>
+    <% end %>
+  </div>
+  <div class="shrink-0 h-1 bg-line-soft" aria-hidden="true">
+    <div class="h-full bg-sun transition-[width] duration-200" style="width: 0%" data-pdf-reader-target="progress"></div>
+  </div>
+
+  <div class="flex-1 min-h-0 flex">
+    <aside class="max-md:hidden w-[188px] shrink-0 overflow-y-auto border-r border-line-soft bg-canvas px-4 py-4" aria-label="Páginas">
+      <p class="mb-3 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Páginas</p>
+      <div data-pdf-reader-target="thumbs" class="flex flex-col items-center gap-4"></div>
+    </aside>
+    <div data-pdf-reader-target="viewport" class="relative flex-1 min-w-0 overflow-auto overscroll-contain bg-sunken" tabindex="0" aria-label="<%= @manual.title %>">
+      <div data-pdf-reader-target="pages" class="min-w-full w-max flex flex-col items-center gap-4 p-3 md:p-6"></div>
+      <div data-pdf-reader-target="status" class="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+        <span class="size-10 rounded-full border-[3px] border-line border-t-primary-600 animate-spin" aria-hidden="true"></span>
+        <p class="text-body font-semibold text-ink-500">Abriendo el manual…</p>
+      </div>
+      <div data-pdf-reader-target="error" hidden class="absolute inset-0 flex items-center justify-center p-6">
+        <%= render EmptyStateComponent.new(title: "No se pudo abrir aquí", icon: "file-text", tone: :amber, name: "manual-error",
+              text: "Revisa tu conexión o ábrelo como PDF.") do |empty| %>
+          <% empty.with_action { link_to "Abrir el PDF", rails_blob_path(@manual.file, disposition: "inline"), target: "_blank", rel: "noopener", class: button_classes(:secondary) } %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# En el teléfono: pasar páginas y el zoom, a mano del pulgar. %>
+  <div class="md:hidden shrink-0 flex items-center justify-between gap-2 px-4 pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] bg-surface border-t border-line-soft">
+    <button type="button" class="<%= tool %> size-11" aria-label="Página anterior" data-pdf-reader-target="prev" data-action="pdf-reader#previous">
+      <%= icon "chevron-left", class: "w-5 h-5" %>
+    </button>
+    <div class="flex items-center gap-1 p-1 rounded-control bg-sunken">
+      <button type="button" class="<%= zoom_button %> size-10" aria-label="Alejar" data-action="pdf-reader#zoomOut">−</button>
+      <span data-pdf-reader-target="zoom" class="min-w-14 text-center text-label font-bold tabular-nums">100 %</span>
+      <button type="button" class="<%= zoom_button %> size-10" aria-label="Acercar" data-action="pdf-reader#zoomIn">+</button>
+    </div>
+    <button type="button" class="size-11 shrink-0 rounded-control bg-primary-700 text-white flex items-center justify-center cursor-pointer disabled:opacity-40" aria-label="Página siguiente" data-pdf-reader-target="next" data-action="pdf-reader#next">
+      <%= icon "chevron-right", class: "w-5 h-5" %>
+    </button>
+  </div>
+<% end %>

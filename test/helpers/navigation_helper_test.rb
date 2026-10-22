@@ -2,7 +2,7 @@ require "test_helper"
 
 class NavigationHelperTest < ActionView::TestCase
   test "lists the sections in sidebar order" do
-    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda" ],
+    assert_equal [ "Inicio", "Jóvenes", "Staff", "Compañías", "Organigrama", "Agenda", "Manuales" ],
                  nav_items.map { |item| item[:text] }
   end
 
@@ -40,7 +40,7 @@ class NavigationHelperTest < ActionView::TestCase
     groups = nav_sections.to_h { |section| [ section[:label], section[:items].map { |item| item[:text] } ] }
     assert_equal({ nil => [ "Inicio" ],
                    "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
-                   "Evento" => [ "Agenda", "Registro", "Alertas" ],
+                   "Evento" => [ "Agenda", "Manuales", "Registro", "Alertas" ],
                    "Logística" => [ "Áreas", "Inventario", "Finanzas", "Cuartos" ],
                    "Seguimiento" => [ "Reportes", "Conteo", "Asignaciones", "Enfermería", "Historial" ] }, groups)
   ensure

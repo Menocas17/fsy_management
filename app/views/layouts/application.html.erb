@@ -95,7 +95,8 @@
           <%= yield %>
         </main>
         <%# Modo simple: en el teléfono el menú vive abajo, a mano del pulgar (NavigationHelper#simple_bar_items). %>
-        <%= render "shared/bottom_nav" if simple_mode? %>
+        <%# El lector de manuales lleva su propia barra abajo (manuals/read). %>
+        <%= render "shared/bottom_nav" if simple_mode? && !content_for?(:hide_bottom_nav) %>
       </div>
     </div>
     <%= render "shared/confirmation_modal"%>

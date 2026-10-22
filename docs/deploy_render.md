@@ -70,8 +70,10 @@ Por qué así y no todo en Render:
    puede abrir esa foto. Sin `R2_PUBLIC_URL` la app funciona igual, con enlaces firmados.
    R2.dev tiene límite de velocidad: para el evento conviene el dominio propio.
 6. **CORS**, para que las fotos de perfil se suban desde el teléfono directo al bucket, sin pasar por el
-   servidor (`avatar_preview_controller.js`, `DirectUploadsController`). En el bucket → **Settings → CORS
-   Policy → Edit**, con la dirección de la app:
+   servidor (`avatar_preview_controller.js`, `DirectUploadsController`), y para que el lector de Manuales
+   (`pdf_reader_controller.js`) baje el PDF directo del bucket. En el bucket → **Settings → CORS
+   Policy → Edit**, con la dirección de la app (la primera regla es la subida de fotos; la segunda, la lectura
+   de los manuales, que pide el PDF por partes con `Range`):
 
    ```json
    [
@@ -80,12 +82,23 @@ Por qué así y no todo en Render:
        "AllowedMethods": ["PUT"],
        "AllowedHeaders": ["Content-Type", "Content-MD5", "Content-Disposition"],
        "MaxAgeSeconds": 3600
+     },
+     {
+       "AllowedOrigins": ["https://<la-app>.onrender.com"],
+       "AllowedMethods": ["GET", "HEAD"],
+       "AllowedHeaders": ["Range"],
+       "ExposeHeaders": ["Accept-Ranges", "Content-Range", "Content-Length"],
+       "MaxAgeSeconds": 3600
      }
    ]
    ```
 
-   Sin esta regla no se rompe nada: la subida directa falla y la foto viaja con el formulario como antes.
-   Para comprobarlo, al elegir una foto en una ficha debe aparecer «Subiendo foto… %» y luego «Foto lista».
+   Con dominio propio, pon esa dirección en `AllowedOrigins` (`https://fsynicaragua.com`), o las dos mientras
+   convivan. Sin la primera regla no se rompe nada: la subida directa falla y la foto viaja con el formulario
+   como antes. Para comprobarlo, al elegir una foto en una ficha debe aparecer «Subiendo foto… %» y luego «Foto
+   lista». Sin la segunda, el lector de un manual dice «No se pudo abrir aquí» y ofrece abrir el PDF aparte
+   (sin `R2_PUBLIC_URL` no hace falta: el PDF pasa por Rails). Para comprobarla, abre Manuales y un manual: deben
+   aparecer sus páginas.
 
 ## 3. Gmail por Apps Script (correo)
 
