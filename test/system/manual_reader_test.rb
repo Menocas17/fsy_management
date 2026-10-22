@@ -31,4 +31,16 @@ class ManualReaderTest < ApplicationSystemTestCase
     find("[data-manual-link='lideres']").click
     assert_selector "[data-pdf-reader-target='current']", text: "2"
   end
+
+  test "uploading a PDF shows its progress and then the manual is there" do
+    sign_in_as(users(:one))
+    visit manuals_path
+
+    within "[data-manual='joven']" do
+      attach_file "PDF del manual del joven", file_fixture("manual.pdf"), make_visible: true
+    end
+    assert_text "Manual del joven subido."
+    assert_selector "[data-manual-link='joven']"
+    assert Manual.for(:joven).available?
+  end
 end

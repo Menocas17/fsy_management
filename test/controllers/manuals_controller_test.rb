@@ -58,6 +58,15 @@ class ManualsControllerTest < ActionDispatch::IntegrationTest
     assert_not Manual.for(:lideres).reload.available?
   end
 
+  test "a PDF already uploaded straight to the bucket is saved by its signed reference" do
+    sign_in_as(users(:one))
+    blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture("manual.pdf").open, filename: "manual.pdf", content_type: "application/pdf")
+
+    patch upload_manual_path(:joven), params: { file: blob.signed_id }
+    assert_redirected_to manuals_path
+    assert_equal blob, Manual.for(:joven).file.blob
+  end
+
   test "only a PDF is taken" do
     sign_in_as(users(:one))
 
