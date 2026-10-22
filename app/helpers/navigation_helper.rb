@@ -33,7 +33,6 @@ module NavigationHelper
       # Sin menú de cuenta en la barra superior: lo suyo va aquí, y Cerrar sesión al pie del menú.
       { id: "cuenta", label: "Mi cuenta", items: [
         { text: "Mi perfil", url: myprofile_participants_path, lucide_icon: "id-card" },
-        { text: "Novedades", url: changelog_path, lucide_icon: "sparkles" },
         { text: "Configuración", url: settings_path, lucide_icon: "settings" }
       ] }
     ]
@@ -83,9 +82,9 @@ module NavigationHelper
   # Lo que el staff sin acceso total no abre mientras dirección no abra las compañías (CompanyReveal): ahí
   # saldrían compañías o jóvenes. El organigrama se queda: les muestra solo la rama de logística.
   HIDDEN_COMPANY_ITEMS = [ "Jóvenes", "Compañías", "Cuartos", "Conteo" ].freeze
-  # El consejero, además, ni el staff ni el organigrama: ahí saldría su compañero(a). Su compañía en cifras
-  # sigue en «Mi compañía».
-  HIDDEN_COMPANY_ITEMS_FOR_COUNSELORS = [ *HIDDEN_COMPANY_ITEMS, "Staff", "Organigrama" ].freeze
+  # El consejero, además, no abre el staff: ahí saldría su compañero(a). El organigrama sí, solo la parte de
+  # arriba (OrganigramaController); su compañía en cifras sigue en «Mi compañía».
+  HIDDEN_COMPANY_ITEMS_FOR_COUNSELORS = [ *HIDDEN_COMPANY_ITEMS, "Staff" ].freeze
 
   # Modo simple (User#simple_mode?): en el teléfono la barra inferior reemplaza al menú lateral.
   def simple_mode?
@@ -170,13 +169,12 @@ module NavigationHelper
     [ { text: "Escanear gafete", url: scan_path, icon: "scan-qr-code" }, *items ]
   end
 
-  # «Más» del joven: lo suyo (su perfil, novedades y configuración), no las listas del staff. Los avisos los
+  # «Más» del joven: lo suyo (su perfil, los manuales y configuración), no las listas del staff. Los avisos los
   # trae la campanita; Cerrar sesión va al pie de la hoja (shared/_bottom_nav).
   def joven_more_items
     [
       ({ text: "Mi perfil", url: myprofile_participants_path, icon: "id-card" } if Current.user.participant.company_id),
       { text: "Manuales", url: manuals_path, icon: "book-open" },
-      { text: "Novedades", url: changelog_path, icon: "sparkles" },
       { text: "Configuración", url: settings_path, icon: "settings" }
     ].compact
   end

@@ -58,7 +58,7 @@ class JovenAccessTest < ActionDispatch::IntegrationTest
     sign_in_as(@joven)
     get dashboard_path
 
-    assert_equal [ "Inicio", "Mi compañía", "Agenda", "Manuales", "Mi perfil", "Novedades", "Configuración" ],
+    assert_equal [ "Inicio", "Mi compañía", "Agenda", "Manuales", "Mi perfil", "Configuración" ],
                  css_select("nav[aria-label='Navegación principal'] a").map { |link| link.text.squish }.uniq
     assert_select "[data-joven-home]"
     assert_select "[data-stat-tile]", false

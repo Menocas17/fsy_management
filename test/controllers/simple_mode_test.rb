@@ -122,7 +122,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "button[data-bottom-nav-item='Mi QR']"
     end
     # Los avisos los trae la campanita: «Más» no los repite, y al pie está Cerrar sesión.
-    assert_equal [ "Mi perfil", "Manuales", "Novedades", "Configuración" ],
+    assert_equal [ "Mi perfil", "Manuales", "Configuración" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     # Y lo confirma antes: un toque de más no lo saca de la app.
     assert_select "dialog[data-dialog-name='mas'] form[action='#{session_path}'][data-turbo-confirm='¿Cerrar sesión?'] button[data-more-sign-out]", text: /Cerrar sesión/
@@ -136,7 +136,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     # En la computadora lo del menú de cuenta pasa al menú lateral, con Cerrar sesión al pie.
     assert_select "aside" do
       assert_select "a[href='#{myprofile_participants_path}']", text: /Mi perfil/
-      assert_select "a[href='#{changelog_path}']", text: /Novedades/
+      assert_select "a[href='#{changelog_path}']", false
       assert_select "a[href='#{settings_path}']", text: /Configuración/
       assert_select "form[data-turbo-confirm='¿Cerrar sesión?'] button[data-aside-sign-out]", text: /Cerrar sesión/
     end
