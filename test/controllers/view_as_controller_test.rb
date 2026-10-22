@@ -125,6 +125,72 @@ class ViewAsControllerTest < ActionDispatch::IntegrationTest
     assert_nil session[:view_as_participant_id]
   end
 
+  test "the superadmin lends «Ver como» per group from Configuración, and it stays in Historial" do
+    sign_in_as @admin
+    get settings_path
+    assert_select "#settings-view-as [data-view-as-group]", 3
+
+    patch view_as_access_settings_path, params: { rol: "director_logistica", activar: "1" }
+    assert_redirected_to settings_path(anchor: "settings-view-as")
+    assert ViewAsAccess.enabled?("director_logistica")
+    assert_not ViewAsAccess.enabled?("director")
+    assert_equal "Le dio «Ver como» a: Matrimonio director de logística", AuditLog.last.summary
+
+    patch view_as_access_settings_path, params: { rol: "consejero", activar: "1" }
+    assert_not ViewAsAccess.enabled?("consejero")
+  end
+
+  test "only the superadmin sees or moves the switches" do
+    ViewAsAccess.set!("director", true)
+    sign_in_as User.create!(email_address: "dir@fsy.com", password: "Prueba123!", participant: @director)
+    get settings_path
+    assert_select "#settings-view-as", false
+
+    patch view_as_access_settings_path, params: { rol: "coordinador", activar: "1" }
+    assert_not ViewAsAccess.enabled?("coordinador")
+  end
+
+  test "a lent «Ver como» works for any role, only looks, and ends when it's taken away" do
+    lalo = User.create!(email_address: "lalo@fsy.com", password: "Prueba123!", participant: @logistics_director)
+    sign_in_as lalo
+    post view_as_path, params: { rol: "consejero" }
+    assert_redirected_to dashboard_path
+    assert_nil session[:view_as_participant_id]
+    get dashboard_path
+    assert_select "[data-view-as-roles]", false
+
+    ViewAsAccess.set!("director_logistica", true)
+    get dashboard_path
+    assert_select "[data-view-as-roles]"
+    post view_as_path, params: { rol: "director" }
+    get dashboard_path
+    assert_select "[data-view-as-banner]", text: /Volver a tu vista/
+    get participant_path(@nurse)
+    assert_select "[data-view-as-participant]"
+
+    assert_no_difference -> { AuditLog.count } do
+      patch participant_path(participants(:juan)), params: { participant: { first_name: "Cambiado" } }
+    end
+    assert_equal "Juan", participants(:juan).reload.first_name
+
+    ViewAsAccess.set!("director_logistica", false)
+    get dashboard_path
+    assert_select "[data-view-as-banner]", false
+    assert_nil session[:view_as_participant_id]
+  end
+
+  test "nobody but the superadmin views as the superadmin's account" do
+    @admin.update!(participant: person("Admin", "consejero", "H"))
+    ViewAsAccess.set!("coordinador", true)
+    sign_in_as User.create!(email_address: "cora@fsy.com", password: "Prueba123!", participant: @coordinator)
+
+    get participant_path(@admin.participant)
+    assert_select "[data-view-as-participant]", false
+    post view_as_path, params: { participant_id: @admin.participant.id }
+    get dashboard_path
+    assert_select "[data-view-as-banner]", false
+  end
+
   test "the password can't be changed while viewing as someone" do
     sign_in_as @admin
     post view_as_path, params: { participant_id: @registrar.id }

@@ -1,10 +1,10 @@
-# «Ver como»: el superadmin recorre la app con el menú y los permisos de otra persona, para probarla o
-# presentarla sin cambiar de cuenta. Elige un rol (se toma una ficha que lo muestre bien,
+# «Ver como»: el superadmin (y a quien él se lo preste, ViewAsAccess) recorre la app con el menú y los permisos
+# de otra persona, para probarla o presentarla sin cambiar de cuenta. Elige un rol (se toma una ficha que lo muestre bien,
 # Participant.view_as_sample) o una ficha concreta desde su perfil. Mientras tanto solo mira: las escrituras
 # las frena ViewAsReadOnly, para que nada quede a nombre de esa persona.
 class ViewAsController < ApplicationController
   allow_jovenes
-  before_action :require_superadmin
+  before_action :require_view_as_allowed
   skip_before_action :block_writes_while_viewing_as
 
   def create
@@ -14,6 +14,10 @@ class ViewAsController < ApplicationController
       Participant.view_as_sample(params[:rol])
     end
     return redirect_back_or_to(dashboard_path, alert: "No hay ninguna ficha con ese rol para ver la app como ella.") unless participant
+    # La cuenta del superadmin solo la ve él mismo.
+    if participant.user&.superadmin? && !Current.real_user.superadmin?
+      return redirect_back_or_to(dashboard_path, alert: "No puedes ver la app como la cuenta del superadmin.")
+    end
 
     session[:view_as_participant_id] = participant.id
     redirect_to dashboard_path, notice: "Ahora ves la app como #{participant.full_name} (#{participant.role_label})."
@@ -21,11 +25,11 @@ class ViewAsController < ApplicationController
 
   def destroy
     session.delete(:view_as_participant_id)
-    redirect_to dashboard_path, notice: "Volviste a tu vista de superadmin."
+    redirect_to dashboard_path, notice: "Volviste a tu vista."
   end
 
   private
-    def require_superadmin
-      redirect_to dashboard_path, alert: "Solo el superadmin puede ver la app como otra persona." unless Current.real_user&.superadmin?
+    def require_view_as_allowed
+      redirect_to dashboard_path, alert: "Solo el superadmin puede ver la app como otra persona." unless Current.real_user&.view_as_allowed?
     end
 end

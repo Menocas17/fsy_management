@@ -2,6 +2,7 @@ class SettingsController < ApplicationController
   allow_jovenes only: %i[show simple_mode]
   before_action :require_scan_manager!, only: :scan_windows
   before_action :require_company_reveal_manager!, only: :company_reveal
+  before_action :require_superadmin!, only: :view_as_access
   # Tiene su propio aviso viendo como otro (abajo).
   skip_before_action :block_writes_while_viewing_as, only: :simple_mode
 
@@ -49,7 +50,27 @@ class SettingsController < ApplicationController
     redirect_to settings_path(anchor: "settings-companies"), notice: notice
   end
 
+  # Prestar o quitar «Ver como» a un grupo (ViewAsAccess). Queda en Historial.
+  def view_as_access
+    rol = params[:rol].to_s
+    return redirect_to(settings_path(anchor: "settings-view-as"), alert: "Ese grupo no existe.") unless ViewAsAccess::GROUPS.key?(rol)
+
+    group = ViewAsAccess::GROUPS.fetch(rol)
+    enabled = params[:activar] == "1"
+    if enabled != ViewAsAccess.enabled?(rol)
+      ViewAsAccess.set!(rol, enabled)
+      record_audit!(category: :cuentas, action: "updated", target: nil,
+                    summary: enabled ? "Le dio «Ver como» a: #{group}" : "Le quitó «Ver como» a: #{group}")
+    end
+    notice = enabled ? "#{group}: ya puede usar «Ver como»." : "#{group}: ya no puede usar «Ver como»."
+    redirect_to settings_path(anchor: "settings-view-as"), notice: notice
+  end
+
   private
+    def require_superadmin!
+      redirect_to settings_path, alert: "Solo el superadmin presta «Ver como»." unless Current.user.superadmin?
+    end
+
     def require_company_reveal_manager!
       redirect_to settings_path, alert: "Solo dirección y los coordinadores abren o cierran las compañías." unless Current.user.company_reveal_manager?
     end

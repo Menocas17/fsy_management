@@ -3,6 +3,11 @@ module NavigationHelper
   # desplegables (shared/_nav_sections + nav_groups_controller). Cada grupo tiene un id estable: con él se
   # recuerda en el dispositivo si la persona lo dejó abierto o cerrado.
   # Se arma una vez por petición: lo usan el menú lateral, el cajón y el «Más» del modo simple.
+  # El botón que sale de «Ver como»: el superadmin vuelve a la suya; a quien se lo prestó, a su propia vista.
+  def view_as_return_label
+    Current.real_user&.superadmin? ? "Volver a superadmin" : "Volver a tu vista"
+  end
+
   def nav_sections
     @nav_sections ||= build_nav_sections
   end
