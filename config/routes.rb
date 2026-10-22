@@ -140,6 +140,15 @@ Rails.application.routes.draw do
   get "agenda/actividades/:id" => "agenda#activity", as: :agenda_activity
   resources :activities, only: [ :new, :create, :edit, :update, :destroy ], path: "actividades"
   get "novedades" => "changelog#index", as: :changelog
+  # Manuales: los PDF del FSY (subirlos o quitarlos, por clase) y los enlaces a la Biblioteca del Evangelio.
+  resource :manuals, only: :show, path: "manuales" do
+    get :links, path: "enlaces"
+    patch :links, action: :update_links, path: "enlaces"
+  end
+  constraints(kind: /joven|lideres/) do
+    patch "manuales/:kind" => "manuals#upload", as: :upload_manual
+    delete "manuales/:kind" => "manuals#remove", as: :remove_manual
+  end
   # «Mi compañía» del joven; al consejero y al auxiliar los lleva a la suya (DashboardHelper#my_company_link).
   get "mi-compania" => "my_companies#show", as: :my_company
   get "instalar-app" => "install_sheets#show", as: :install_sheet

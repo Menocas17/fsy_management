@@ -19,7 +19,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "a[data-bottom-nav-item='Agenda'][href='#{agenda_path}']"
       assert_select "[data-bottom-nav-item='Buscar']", false
     end
-    assert_equal [ "Escanear gafete", "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes" ],
+    assert_equal [ "Escanear gafete", "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes", "Manuales" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     # Sin menú lateral en el teléfono: la barra lo reemplaza, y el cajón ni se dibuja.
     assert_select "button[aria-label='Abrir menú']", false
@@ -74,7 +74,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
     assert_select "a[data-bottom-nav-item='Compañías'][href='#{companies_path}']"
     assert_select "[data-bottom-nav-item='Mi QR']", false
     assert_select "dialog[data-dialog-name='mas'] button[data-dialog-name='qr']", text: /Mi QR/
-    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Conteo", "Historial" ],
+    assert_equal [ "Mi QR", "Escanear gafete", "Alertas", "Enfermería", "Conteo", "Historial", "Manuales" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     assert_select "[data-simple-kpi='Jóvenes']"
     assert_select "[data-simple-kpi='Staff']"
@@ -122,7 +122,7 @@ class SimpleModeTest < ActionDispatch::IntegrationTest
       assert_select "button[data-bottom-nav-item='Mi QR']"
     end
     # Los avisos los trae la campanita: «Más» no los repite, y al pie está Cerrar sesión.
-    assert_equal [ "Mi perfil", "Novedades", "Configuración" ],
+    assert_equal [ "Mi perfil", "Manuales", "Novedades", "Configuración" ],
                  css_select("dialog[data-dialog-name='mas'] [data-more-items] > *").map { |item| item.text.squish }
     # Y lo confirma antes: un toque de más no lo saca de la app.
     assert_select "dialog[data-dialog-name='mas'] form[action='#{session_path}'][data-turbo-confirm='¿Cerrar sesión?'] button[data-more-sign-out]", text: /Cerrar sesión/

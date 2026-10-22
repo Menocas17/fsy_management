@@ -1,0 +1,92 @@
+<%# Manuales (ManualsController): los PDF del FSY y los enlaces a la Biblioteca del Evangelio, cada uno una
+    tarjeta a todo el ancho que abre en una pestaña nueva. %>
+<% content_for :title, "Manuales" %>
+<% content_for :eyebrow, "Evento" %>
+<% uploader = Current.user.full_access? %>
+<% joven = Current.user.participant&.joven? %>
+<% card_link = card_classes("p-4 md:p-5 flex items-center gap-3.5 transition-transform active:scale-[0.98] hover:border-primary-300 dark:hover:border-primary-300") %>
+<% section_title = "text-meta font-bold tracking-[.07em] uppercase text-ink-500" %>
+<% manual_styles = { "joven" => [ "book-open", "bg-cat-green-solid", "FSY 2026 · PDF" ], "lideres" => [ "shield-check", "bg-primary-700", "Para el staff · PDF" ] } %>
+<%= render PageComponent.new(width: :form, data: { manuals: true }) do |page| %>
+  <% page.with_intro do %>
+    <%= joven ? "Lo que necesitas para la semana." : "Los manuales del FSY y lo que leen los jóvenes." %> Cada uno se abre en una pestaña nueva.
+  <% end %>
+  <% if Current.user.superadmin? %>
+    <% page.with_actions do %>
+      <%= link_to links_manuals_path, class: button_classes(:secondary) do %>
+        <%= icon "link", class: "w-4 h-4" %>
+        Editar enlaces
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <section class="flex flex-col gap-3" data-manuals-section>
+    <h2 class="<%= section_title %>"><%= joven ? "Tu manual" : "Manuales del FSY" %></h2>
+    <% @manuals.each do |manual| %>
+      <% icon_name, tone, subtitle = manual_styles.fetch(manual.kind) %>
+      <div class="flex flex-col gap-2" data-manual="<%= manual.kind %>">
+        <% if manual.available? %>
+          <%= link_to rails_blob_path(manual.file, disposition: "inline"), target: "_blank", rel: "noopener", class: card_link, data: { manual_link: manual.kind } do %>
+            <span class="size-11 shrink-0 rounded-tile text-white flex items-center justify-center <%= tone %>"><%= icon icon_name, class: "size-5" %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-title font-bold text-ink-900"><%= manual.title %></span>
+              <span class="block text-label font-semibold text-ink-500"><%= subtitle %></span>
+            </span>
+            <%= icon "external-link", class: "size-[18px] shrink-0 text-ink-500" %>
+          <% end %>
+        <% else %>
+          <div class="p-4 md:p-5 flex items-center gap-3.5 rounded-card border-[1.5px] border-dashed border-line" data-manual-missing>
+            <span class="size-11 shrink-0 rounded-tile bg-sunken text-ink-500 flex items-center justify-center"><%= icon icon_name, class: "size-5" %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-title font-bold text-ink-900"><%= manual.title %></span>
+              <span class="block text-label font-semibold text-ink-500">Todavía no está disponible</span>
+            </span>
+          </div>
+        <% end %>
+        <% if uploader %>
+          <%# El acceso total lo sube o reemplaza aquí mismo: un PDF de hasta 25 MB. %>
+          <div class="flex flex-wrap items-center gap-2 px-1">
+            <%= form_with url: upload_manual_path(manual.kind), method: :patch, multipart: true, class: "flex flex-wrap items-center gap-2", data: { manual_upload: manual.kind, controller: "auto-submit" } do %>
+              <label class="<%= button_classes(:secondary, size: :sm) %> cursor-pointer">
+                <%= icon "file-up", class: "w-4 h-4" %>
+                <%= manual.available? ? "Reemplazar PDF" : "Subir PDF" %>
+                <%= file_field_tag :file, accept: "application/pdf", required: true, class: "sr-only",
+                      aria: { label: "PDF del #{manual.title.downcase}" }, data: { action: "change->auto-submit#changed" } %>
+              </label>
+            <% end %>
+            <% if manual.available? %>
+              <%= button_to remove_manual_path(manual.kind), method: :delete,
+                    form: { data: { turbo_confirm: "¿Quitar el #{manual.title.downcase}?", turbo_confirm_detail: "Nadie lo podrá abrir hasta que se suba otro.", turbo_confirm_button: "Sí, quitar" } },
+                    class: "inline-flex items-center gap-1.5 h-8 px-2 text-label font-bold text-cat-rose-ink hover:underline cursor-pointer" do %>
+                <%= icon "trash-2", class: "w-4 h-4" %>
+                Quitar
+              <% end %>
+              <span class="text-meta font-semibold text-ink-500">Subido por <%= manual.uploaded_by_name %> · <%= manual.file.blob.created_at.strftime("%d/%m/%Y") %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <% if @links.any? %>
+    <section class="flex flex-col gap-3" data-manual-links>
+      <div class="flex items-baseline justify-between gap-3">
+        <h2 class="<%= section_title %>">Biblioteca del Evangelio</h2>
+        <span class="max-sm:hidden text-label font-semibold text-ink-500">Se abre en la Biblioteca</span>
+      </div>
+      <div class="<%= card_classes("flex flex-col divide-y divide-line-soft") %>">
+        <% @links.each do |link| %>
+          <%= link_to link[:url], target: "_blank", rel: "noopener", class: "px-4 py-3.5 md:px-5 flex items-center gap-3.5 first:rounded-t-card last:rounded-b-card hover:bg-muted transition", data: { manual_library: link[:key] } do %>
+            <%= render IconTileComponent.new(icon: link[:icon], tone: link[:tone], size: :md) %>
+            <span class="min-w-0 flex-1">
+              <span class="block text-body font-bold text-ink-900"><%= link[:title] %></span>
+              <span class="block text-label font-semibold text-ink-500"><%= link[:subtitle] %></span>
+            </span>
+            <%= icon "external-link", class: "size-[18px] shrink-0 text-ink-500" %>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+<% end %>

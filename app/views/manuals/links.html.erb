@@ -1,0 +1,18 @@
+<%# Los enlaces a la Biblioteca del Evangelio de la página de Manuales: solo el superadmin los cambia (ManualLinks). %>
+<% content_for :title, "Editar enlaces" %>
+<% content_for :eyebrow, "Manuales" %>
+<% back_to "Manuales", manuals_path %>
+<%= render PageComponent.new(width: :form) do |page| %>
+  <% page.with_intro { "Pega la dirección de cada uno en la Biblioteca del Evangelio. Vacío, no sale en la página." } %>
+  <%= form_with url: links_manuals_path, method: :patch, class: card_classes("p-5 md:p-6 flex flex-col gap-4"), data: { manual_links_form: true } do %>
+    <% @links.each do |link| %>
+      <div class="flex flex-col gap-1.5">
+        <%= label_tag "links_#{link[:key]}", link[:title], class: field_label_classes %>
+        <%= url_field_tag "links[#{link[:key]}]", link[:url], id: "links_#{link[:key]}", placeholder: "https://www.churchofjesuschrist.org/study/…", class: field_input_classes %>
+      </div>
+    <% end %>
+    <div class="flex justify-end">
+      <%= submit_tag "Guardar enlaces", class: button_classes %>
+    </div>
+  <% end %>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_231000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -347,6 +347,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_231000) do
     t.boolean "food", default: false, null: false
     t.boolean "nursing", default: false, null: false
     t.index ["name"], name: "index_logistics_areas_on_name", unique: true
+  end
+
+  create_table "manuals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.integer "kind", null: false
+    t.string "uploaded_by_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind"], name: "index_manuals_on_kind", unique: true
   end
 
   create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
