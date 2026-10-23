@@ -53,6 +53,16 @@ class JovenAccessTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test "the joven's home has a shortcut to their manual, in the app's reader" do
+    sign_in_as(@joven)
+    get dashboard_path
+    assert_select "[data-joven-home] [data-joven-manual='pronto'][href='#{manuals_path}']", text: /Muy pronto/
+
+    Manual.for(:joven).tap { |manual| manual.file.attach(fixture_file_upload("manual.pdf", "application/pdf")) }.save!
+    get dashboard_path
+    assert_select "[data-joven-home] [data-joven-manual][href='#{read_manual_path("joven")}']", text: /Leer el manual/
+  end
+
   test "the joven's menu and home only show their own things" do
     @joven.update!(simple_mode: false)
     sign_in_as(@joven)
