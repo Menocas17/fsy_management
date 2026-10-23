@@ -1,6 +1,6 @@
 # Mientras dirección no abra las compañías (CompanyReveal), solo el acceso total ve compañías y jóvenes. El resto del
 # staff no entra a la lista de jóvenes, sus fichas, las compañías, el conteo ni los cuartos, y vuelve a su inicio.
-# El consejero tampoco a la lista del staff, las fichas ajenas, el organigrama, la búsqueda ni el escáner (ahí
+# El consejero tampoco a la lista del staff, las fichas ajenas, la búsqueda ni el escáner (ahí
 # saldría su compañero(a)), y va a «Mi compañía», que se la muestra en cifras.
 module CompanyRevealGate
   extend ActiveSupport::Concern

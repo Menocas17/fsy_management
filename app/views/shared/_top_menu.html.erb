@@ -103,14 +103,14 @@
               Accesos
             <% end %>
           <% end %>
-          <%# «Ver como» (ViewAsController): el superadmin prueba el menú y los permisos de cada rol. %>
-          <% if Current.real_user.superadmin? %>
+          <%# «Ver como» (ViewAsController): el superadmin, o a quien él se lo prestó, prueba el menú y los permisos de cada rol. %>
+          <% if Current.real_user.view_as_allowed? %>
             <div class="border-t border-line-soft my-1.5"></div>
             <% if Current.viewing_as? %>
               <%= button_to view_as_path, method: :delete, form_class: "mx-1.5",
                     class: "w-full flex items-center gap-2.5 px-3 py-2 rounded-inner text-left text-body font-medium text-ink-700 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-muted dark:hover:text-ink-900 cursor-pointer transition" do %>
                 <%= icon "undo-2", class: "w-4 h-4" %>
-                Volver a superadmin
+                <%= view_as_return_label %>
               <% end %>
             <% end %>
             <p class="mx-1.5 px-3 pt-1.5 pb-1 text-meta font-bold tracking-[.07em] uppercase text-ink-500">Ver como</p>

@@ -33,13 +33,17 @@ module Authentication
       Current.session
     end
 
-    # «Ver como» (ViewAsController): solo vale para el superadmin; si la ficha ya no existe, se olvida.
+    # «Ver como» (ViewAsController): solo vale para quien lo tiene (User#view_as_allowed?: si el superadmin se lo
+    # quita, se acaba en la siguiente página); si la ficha ya no existe, se olvida. Nadie más que el superadmin
+    # ve como su cuenta.
     def view_as_user
       participant_id = session[:view_as_participant_id]
       return if participant_id.blank?
 
-      participant = Participant.find_by(id: participant_id) if Current.session.user.superadmin?
-      return User.stand_in_for(participant) if participant
+      real_user = Current.session.user
+      participant = Participant.find_by(id: participant_id) if real_user.view_as_allowed?
+      stand_in = User.stand_in_for(participant) if participant
+      return stand_in if stand_in && (real_user.superadmin? || !stand_in.superadmin?)
 
       session.delete(:view_as_participant_id)
       nil

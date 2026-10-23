@@ -102,6 +102,11 @@ class User < ApplicationRecord
 
   # Quién abre o cierra a los consejeros su compañía (CompanyReveal): el superadmin, el matrimonio director y
   # los coordinadores. El acceso total dado a dedo no alcanza.
+  # «Ver como» (ViewAsController): el superadmin, y los grupos a los que él se lo prestó (ViewAsAccess).
+  def view_as_allowed?
+    superadmin? || (participant.present? && ViewAsAccess.enabled?(participant.rol))
+  end
+
   def company_reveal_manager?
     full_access_by_role?
   end

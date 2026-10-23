@@ -1,4 +1,4 @@
-<%# «Ver como» (ViewAsController): mientras el superadmin usa la vista de otra persona, una franja lo recuerda
+<%# «Ver como» (ViewAsController): mientras el superadmin (o a quien se lo prestó) usa la vista de otra persona, una franja lo recuerda
     en todas las páginas y lo regresa a la suya con un toque. %>
 <% if Current.viewing_as? %>
   <div data-view-as-banner class="shrink-0 flex items-center justify-between gap-3 px-3.5 md:px-8 py-2 bg-cat-amber/15 border-b border-line-soft">
@@ -11,7 +11,7 @@
       <%= icon "undo-2", class: "w-4 h-4" %>
       <%# En el teléfono el botón corto deja leer a quién se está viendo. %>
       <span class="sm:hidden">Salir</span>
-      <span class="hidden sm:inline">Volver a superadmin</span>
+      <span class="hidden sm:inline"><%= view_as_return_label %></span>
     <% end %>
   </div>
 <% end %>

@@ -13,18 +13,21 @@ module OrganigramaHelper
 
   # Los datos de organigrama/_general, cargados desde la vista (dentro de su bloque de caché) para que una
   # visita con la caché llena no consulte nada de esto. Ambas ramas cuelgan de la pareja de directores; la
-  # vista de logística deja solo esa rama.
+  # vista de logística deja solo esa rama, y «arriba» (el consejero con las compañías cerradas) quita las compañías
+  # y sus consejeros pero deja la coordinación y las compañías auxiliares.
   def load_general_organigrama
     @directors = Participant.director.with_attached_avatar.order(:gender, :first_name)
     @jovenes_counts = Participant.jovenes.where.not(company_id: nil).group(:company_id).count
     @show_companies = @view == "todo"
+    @show_coordination = @show_companies || @view == "arriba"
     @show_logistics = true
 
-    if @show_companies
+    if @show_coordination
       @coordinators = Participant.coordinador.with_attached_avatar.order(:gender, :first_name)
-      @auxiliar_companies = AuxiliarCompany.includes(auxiliars: Participant::AVATAR_PRELOAD, companies: { counselors: Participant::AVATAR_PRELOAD })
+      companies = @show_companies ? { companies: { counselors: Participant::AVATAR_PRELOAD } } : :companies
+      @auxiliar_companies = AuxiliarCompany.includes({ auxiliars: Participant::AVATAR_PRELOAD }, companies)
                                            .sort_by { |auxiliar_company| [ auxiliar_company.first_company_number || Float::INFINITY, auxiliar_company.name ] }
-      @orphan_companies = Company.where(auxiliar_company_id: nil).includes(counselors: Participant::AVATAR_PRELOAD).by_number
+      @orphan_companies = @show_companies ? Company.where(auxiliar_company_id: nil).includes(counselors: Participant::AVATAR_PRELOAD).by_number : Company.none
     end
 
     @logistics_directors = Participant.director_logistica.with_attached_avatar.order(:gender, :first_name)

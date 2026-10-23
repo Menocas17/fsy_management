@@ -32,7 +32,7 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
     sign_in_as(@counselor)
 
     [ participants_path, staff_participants_path, participant_path(participants(:juan)), participant_path(@partner),
-      companies_path, organigrama_path, company_night_attendance_path(@company), search_path(q: "Juan"), scan_path ].each do |path|
+      companies_path, company_night_attendance_path(@company), search_path(q: "Juan"), scan_path ].each do |path|
       get path
       assert_redirected_to my_company_path, "#{path} debería estar cerrado"
     end
@@ -43,8 +43,25 @@ class CompanyRevealTest < ActionDispatch::IntegrationTest
     get dashboard_path
     nav = css_select("nav a, dialog[data-dialog-name='mas'] a").map { |link| link.text.squish }
     assert_not_includes nav, "Jóvenes"
-    assert_not_includes nav, "Organigrama"
+    assert_includes nav, "Organigrama"
     assert_not_includes nav, "Escanear gafete"
+  end
+
+  test "with the companies closed the counselor's organigrama shows only the top: no companies nor counselors" do
+    auxiliar_company = AuxiliarCompany.create!(name: "Rama Norte")
+    @company.update!(auxiliar_company: auxiliar_company)
+    sign_in_as(@counselor)
+
+    get organigrama_path(scope: "todo")
+    assert_response :success
+    assert_select "[data-org-view]", false
+    assert_select "[data-node='coordinacion']"
+    assert_select "[data-node='auxiliar']", text: /Rama Norte/
+    assert_select "[data-company-id]", false
+    assert_select "a[href^='#{auxiliar_company_path(auxiliar_company)}']", false
+    assert_select "[data-org-branches-target='toggleAllButton']", false
+    assert_not_includes response.body, "Compañía 12"
+    assert_not_includes response.body, "José Martínez"
   end
 
   test "«Mi compañía» takes the counselor to their own company" do

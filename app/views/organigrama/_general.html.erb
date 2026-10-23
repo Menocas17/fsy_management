@@ -1,7 +1,9 @@
 <%
   logistics = @logistics.any? || @logistics_directors.any?
   # The logistica view never loads the company branch, so guard before touching those.
-  company_branch =@show_companies && (@coordinators.any? || @auxiliar_companies.any? || @orphan_companies.any?)
+  company_branch = @show_coordination && (@coordinators.any? || @auxiliar_companies.any? || @orphan_companies.any?)
+  # «arriba» (el consejero con las compañías cerradas): las compañías auxiliares sin sus compañías.
+  bare = !@show_companies
   branches = company_branch || logistics
   by_number = ->(companies) { companies.sort_by { |company| [ company.number || Float::INFINITY, company.name ] } }
   logistics_title = @logistics_directors.map(&:full_name).join(" · ").presence || "Logística"
@@ -38,8 +40,8 @@
                             <% @auxiliar_companies.each do |auxiliar_company| %>
                               <% branch_id = "branch-#{auxiliar_company.id}" %>
                               <li>
-                                <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company, branch_id: branch_id %>
-                                <% if auxiliar_company.companies.any? %>
+                                <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company, branch_id: branch_id, bare: bare %>
+                                <% if !bare && auxiliar_company.companies.any? %>
                                   <ul class="org-stack" id="<%= branch_id %>" data-org-chart-target="branch" hidden>
                                     <% by_number.(auxiliar_company.companies).each do |company| %>
                                       <li><%= company_node.(company) %></li>
@@ -143,8 +145,8 @@
                 <% @auxiliar_companies.each do |auxiliar_company| %>
                   <% mobile_branch_id = "branch-mobile-#{auxiliar_company.id}" %>
                   <div>
-                    <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company, branch_id: mobile_branch_id, toggle_controller: "org-branches" %>
-                    <% if auxiliar_company.companies.any? %>
+                    <%= render "organigrama/auxiliar_node", auxiliar_company: auxiliar_company, branch_id: mobile_branch_id, toggle_controller: "org-branches", bare: bare %>
+                    <% if !bare && auxiliar_company.companies.any? %>
                       <div class="mt-2 ml-3 pl-3.5 border-l-2 border-line-soft space-y-2" id="<%= mobile_branch_id %>" data-org-branches-target="branch" hidden>
                         <% by_number.(auxiliar_company.companies).each do |company| %>
                           <%= company_node.(company) %>

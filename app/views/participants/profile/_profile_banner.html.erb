@@ -51,8 +51,10 @@
             Editar
           <% end %>
         <% end %>
-        <%# «Ver como» esta persona (ViewAsController): el superadmin prueba su menú y sus permisos. %>
-        <% if Current.real_user&.superadmin? && !participant.joven? && Current.user.participant != participant %>
+        <%# «Ver como» esta persona (ViewAsController): el superadmin, o a quien él se lo prestó, prueba su menú y sus
+            permisos; la cuenta del superadmin solo la ve él. %>
+        <% if Current.real_user&.view_as_allowed? && !participant.joven? && Current.user.participant != participant &&
+              (Current.real_user.superadmin? || !participant.user&.superadmin?) %>
           <%= button_to view_as_path, params: { participant_id: participant.id }, form_class: "col-span-full sm:col-auto",
                 class: button_classes(:secondary, extra: "w-full whitespace-nowrap"), data: { view_as_participant: true } do %>
             <%= icon "eye", class: "w-4 h-4" %>

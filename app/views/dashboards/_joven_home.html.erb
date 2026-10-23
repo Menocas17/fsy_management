@@ -44,4 +44,34 @@
     <%= render EmptyStateComponent.new(title: "Todavía no tienes compañía", icon: "building-2", tone: :green,
           text: "Te la asignan antes del evento o al llegar. Aquí verás a tus consejeros, tu comedor y tu cuarto.") %>
   <% end %>
+
+  <%# Acceso directo a su manual, en el lector de la app; «Seguir leyendo» si ya lo empezó en este dispositivo
+      (manual_progress_controller.js). Mientras dirección no lo sube, lleva a Manuales (los enlaces siguen ahí). %>
+  <% manual = Manual.with_attached_file.find_by(kind: :joven) %>
+  <% tile = capture do %>
+    <span aria-hidden="true" class="size-[52px] shrink-0 rounded-tile bg-cat-indigo/15 text-cat-indigo-ink flex items-center justify-center"><%= icon "book-open", class: "size-6" %></span>
+  <% end %>
+  <% if manual&.available? %>
+    <%= link_to read_manual_path(manual.kind), class: card_classes("p-5 flex items-center gap-3 transition-transform active:scale-[0.98]"),
+          data: { joven_manual: true, controller: "manual-progress", manual_progress_key_value: manual_progress_key(manual) } do %>
+      <%= tile %>
+      <span class="min-w-0 flex-1">
+        <span class="block text-meta font-bold tracking-[.07em] uppercase text-ink-500">Manual del joven</span>
+        <span class="block text-title font-bold text-ink-900" data-manual-progress-target="action">Leer el manual</span>
+        <span class="block text-label font-semibold text-ink-500">Léelo aquí, sin salir de la app.</span>
+        <span hidden data-manual-progress-target="chip" class="mt-1.5 inline-flex items-center h-6 px-2.5 rounded-full text-label font-bold bg-sun/25 text-sun-ink"></span>
+      </span>
+      <%= icon "chevron-right", class: "size-[18px] shrink-0 text-ink-500" %>
+    <% end %>
+  <% else %>
+    <%= link_to manuals_path, class: card_classes("p-5 flex items-center gap-3 transition-transform active:scale-[0.98]"), data: { joven_manual: "pronto" } do %>
+      <%= tile %>
+      <span class="min-w-0 flex-1">
+        <span class="block text-meta font-bold tracking-[.07em] uppercase text-ink-500">Manual del joven</span>
+        <span class="block text-title font-bold text-ink-900">Muy pronto</span>
+        <span class="block text-label font-semibold text-ink-500">Aquí lo vas a poder leer sin salir de la app.</span>
+      </span>
+      <%= icon "chevron-right", class: "size-[18px] shrink-0 text-ink-500" %>
+    <% end %>
+  <% end %>
 </div>

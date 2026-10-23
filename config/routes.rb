@@ -157,6 +157,7 @@ Rails.application.routes.draw do
     patch :scan_windows
     patch :simple_mode
     patch :company_reveal
+    patch :view_as_access
   end
   resources :auxiliar_companies do
     member do
