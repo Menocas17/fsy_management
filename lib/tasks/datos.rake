@@ -19,6 +19,31 @@ namespace :datos do
     EventReset.new.run
   end
 
+  desc "Muestra (y con APLICAR=1 borra) la información médica, de dieta o emocional que solo dice que todo está bien"
+  task depurar_atencion: :environment do
+    database = ActiveRecord::Base.connection_db_config.configuration_hash
+    puts "Base: #{database[:host] || "local"} / #{database[:database]} (#{Rails.env})", ""
+
+    cleanup = CareNoteCleanup.new
+    CareNote::FIELDS.each do |field, label|
+      puts "#{label}: se borra en #{cleanup.cleared[field].values.sum} fichas"
+      cleanup.cleared_in(field).each { |text, count| puts format("  %4d  %s", count, text) }
+      # Si alguna de estas también dice «todo bien», se agrega a CareNote::PATTERNS.
+      short = cleanup.short_kept(field)
+      puts "  Se quedan (las cortas, por si se escapó alguna):" if short.any?
+      short.each { |text, count| puts format("  %4d  · %s", count, text) }
+      puts ""
+    end
+
+    if cleanup.changes.empty?
+      puts "No hay nada que borrar."
+    elsif ENV["APLICAR"] == "1"
+      puts "Listo: #{cleanup.run} fichas depuradas."
+    else
+      puts "No se borró nada. Para borrarlo: APLICAR=1 bin/rails datos:depurar_atencion"
+    end
+  end
+
   desc "Borra todo como datos:reiniciar y carga la foto db/seed_data/evento.json, exactamente como quedó (conserva superadmins)"
   task sembrar: :environment do
     confirm_wipe!("sembrar", "SEMBRAR",

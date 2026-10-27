@@ -224,6 +224,14 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal "logistica", Participant.find_by(first_name: "Lía").rol
   end
 
+  test "«todo bien» in the medical, diet or emotional information comes in blank; real notes stay" do
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Información médica,Información alimentaria,Información emocional",
+                 "Ana,Ruiz,15,Mujer,S,Bello Horizonte,Todo bien,Como de todo,Asma leve" ]
+
+    ana = Participant.find_by(first_name: "Ana")
+    assert_equal [ nil, nil, "Asma leve" ], [ ana.medical_information, ana.diet, ana.emotional_information ]
+  end
+
   test "a size out of the list says which, and blocks" do
     import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla", "Ana,Ruiz,15,Mujer,XX-Large" ]
 
