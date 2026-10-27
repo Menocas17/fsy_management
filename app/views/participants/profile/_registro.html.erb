@@ -2,6 +2,8 @@
   <%= section_heading "Registro", "calendar", tone: :indigo %>
   <div>
     <%= info_row "Fecha de inscripción", "calendar", participant.inscription_date&.strftime("%d/%m/%Y") %>
+    <%# Como vino en el archivo de la Iglesia («Aprobado», «Pendiente»…). %>
+    <%= info_row "Estado de inscripción", "badge-check", participant.registration_status if participant.registration_status.present? %>
     <%= info_row "Última actualización", "clock", participant.updated_at&.strftime("%d/%m/%Y") %>
   </div>
 </section>

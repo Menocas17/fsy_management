@@ -12,12 +12,14 @@ class ParticipantImporter
   class UnreadableFile < StandardError; end
 
   HEADERS = {
-    "nombre" => :first_name, "nombres" => :first_name, "primer nombre" => :first_name,
+    "nombre" => :first_name, "nombres" => :first_name, "primer nombre" => :first_name, "nombre de pila" => :first_name,
     "apellido" => :last_name, "apellidos" => :last_name, "segundo nombre" => :last_name,
     "nombre que se prefiere" => :preferred_name, "nombre preferido" => :preferred_name,
     "edad" => :age,
     "cumpleanos" => :birth_date, "fecha de nacimiento" => :birth_date,
-    "fecha de inscripcion" => :date_of_inscription,
+    # «Fecha» es la de inscripción en el archivo de la Iglesia: «7/2/2026, 12:43:05 PM», mes primero.
+    "fecha de inscripcion" => :date_of_inscription, "fecha" => :date_of_inscription,
+    "estado" => :registration_status, "estado de inscripcion" => :registration_status,
     "genero" => :gender, "sexo" => :gender,
     "estaca" => :stake, "nombre de la estaca o distrito" => :stake, "estaca o distrito" => :stake,
     "barrio" => :ward, "rama" => :ward, "nombre del barrio o rama" => :ward, "barrio o rama" => :ward,
@@ -25,7 +27,8 @@ class ParticipantImporter
     "correo electronico del obispo" => :bishop_email, "correo del obispo" => :bishop_email,
     "camisa" => :shirt_number, "talla" => :shirt_number, "talla de camisa" => :shirt_number,
     "talla de camiseta" => :shirt_number, "camiseta" => :shirt_number,
-    "rol" => :rol,
+    # «Tipo» («Participante») del archivo de la Iglesia: el rol solo si no viene la columna «Rol».
+    "rol" => :rol, "tipo" => :participant_type,
     "cedula" => :identity_document, "identificacion" => :identity_document, "documento" => :identity_document,
     "cuarto" => :room, "habitacion" => :room,
     "compania" => :company_number, "numero de compania" => :company_number,

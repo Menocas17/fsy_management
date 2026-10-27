@@ -247,10 +247,10 @@ class Participant < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
-  # Como le gusta que le digan, si no es su mismo nombre.
+  # Como le gusta que le digan, si no es su mismo nombre (el archivo de la Iglesia trae el nombre completo).
   def nickname
-    preferred = preferred_name.to_s.strip
-    preferred if preferred.present? && ImportRowEvaluator.normalize(preferred) != ImportRowEvaluator.normalize(first_name)
+    preferred = ImportRowEvaluator.normalize(preferred_name)
+    preferred_name.strip if preferred.present? && [ first_name, full_name ].none? { ImportRowEvaluator.normalize(_1) == preferred }
   end
 
   # «Otra» llega del formulario como una estaca más: deja la estaca vacía y cuenta la escrita a mano.
