@@ -150,6 +150,8 @@ class ParticipantTest < ActiveSupport::TestCase
     assert_nil juan.nickname
     juan.preferred_name = "Juancho"
     assert_equal "Juancho", juan.nickname
+    juan.preferred_name = juan.full_name.upcase
+    assert_nil juan.nickname, "the Church's file writes the full name there"
   end
 
   test "deleting a ficha that someone's records point to releases them instead of failing" do
