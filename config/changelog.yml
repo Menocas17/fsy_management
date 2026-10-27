@@ -7,14 +7,6 @@
 #   summary: una o dos frases, el cuerpo de la notificación
 #   changes: lo que cambió, una línea por cosa, en palabras de quien usa la app
 #   roles:   opcional; sin roles le llega a todos, con roles solo a esos (participants.rol)
-- id: 2026-10-27-agenda-manual
-  date: 2026-10-27
-  title: La agenda del FSY, del manual
-  summary: La agenda ahora trae el horario real del manual del consejero, con quién está a cargo de cada actividad.
-  changes:
-    - Cada actividad dice su responsable y lo que le toca a cada rol, según el manual.
-    - El staff ve desde el domingo 10 (su día de preparación); los jóvenes, del lunes 11 al viernes 15.
-    - La vista de semana muestra desde la reunión de la madrugada hasta que se apagan las luces.
 - id: 2026-10-14-fsynicaragua
   date: 2026-10-14
   title: La app ahora es fsynicaragua.com
