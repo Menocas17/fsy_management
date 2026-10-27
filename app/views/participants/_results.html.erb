@@ -1,4 +1,7 @@
 <% list_path = is_staff ? staff_participants_path : participants_path %>
+<%# Las tarjetas vuelven a la lista con sus filtros (sin la página: el scroll infinito la pide en su propio frame). %>
+<% filters = request.query_parameters.except("page", "from", "return_to") %>
+<% return_path = filters.any? ? "#{list_path}?#{filters.to_query}" : list_path %>
 <%= render "participants/active_filters", is_staff: is_staff, pagy: pagy %>
 <% if preload_thumbs(participants.load).any? %>
   <%# Tabla en la compu y tarjetas en el teléfono; al teléfono que lo dice (DeviceHelper) solo le va la suya. %>
@@ -20,7 +23,7 @@
   <div class="<%= layout_split("md:hidden") %>">
     <%= turbo_frame_tag "participants_page_#{pagy.page}" do %>
       <%= render partial: "participants/participant_card", collection: participants, as: :participant,
-                 locals: { is_staff: is_staff, list_path: list_path } %>
+                 locals: { is_staff: is_staff, list_path: return_path } %>
       <% if pagy.next %>
         <%= turbo_frame_tag "participants_page_#{pagy.next}", src: pagy.page_url(:next), loading: :lazy do %>
           <div class="flex items-center justify-center gap-2.5 py-3">

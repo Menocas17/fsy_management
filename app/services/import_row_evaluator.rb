@@ -110,8 +110,9 @@ class ImportRowEvaluator
         emergency_contact_2_name: values[:emergency_contact_2_name],
         emergency_contact_2_number: values[:emergency_contact_2_number]&.to_s,
         emergency_contact_2_email: values[:emergency_contact_2_email],
-        medical_information: medical_information, emotional_information: values[:emotional_information],
-        diet: values[:diet],
+        # «Todo bien», «Como de todo»… no es nada que atender: entra en blanco (CareNote).
+        medical_information: medical_information, emotional_information: CareNote.clean(values[:emotional_information]),
+        diet: CareNote.clean(values[:diet]),
         additional_instructions: values[:additional_instructions]
       }.compact
     end
@@ -324,14 +325,14 @@ class ImportRowEvaluator
 
     # La información médica tal cual; las planillas viejas traen alergias y medicinas aparte y se juntan.
     def medical_information
-      parts = [ values[:medical_information] ]
+      parts = [ CareNote.clean(values[:medical_information]) ]
       parts << "Alergias: #{values[:allergies]}" if medical_value?(values[:allergies])
       parts << "Medicinas: #{values[:medicines]}" if medical_value?(values[:medicines])
       parts.compact_blank.map(&:to_s).join("\n").presence
     end
 
     def medical_value?(value)
-      value.present? && !Participant::MEDICAL_NONE.include?(normalize(value))
+      value.present? && !Participant::MEDICAL_NONE.include?(normalize(value)) && !CareNote.nothing_to_attend?(value)
     end
 
     def shirt_key
