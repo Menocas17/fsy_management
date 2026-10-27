@@ -12,7 +12,18 @@ class ImportRowEvaluator
     "directora" => "director", "coordinadora" => "coordinador", "consejera" => "consejero",
     "directora de logistica" => "director_logistica", "jovenes" => "joven",
     # El rol registrador ya no existe: quien registra es de logística, con la bandera Registro en su área.
-    "registrador" => "logistica", "registradora" => "logistica"
+    "registrador" => "logistica", "registradora" => "logistica",
+    # El archivo de la Iglesia: «Tipo: Participante» es un joven.
+    "participante" => "joven", "participantes" => "joven"
+  }.freeze
+
+  # Las tallas en inglés del archivo de la Iglesia («X-Large») y en español.
+  SHIRT_ALIASES = {
+    "x-small" => "xs", "x small" => "xs", "extra small" => "xs", "extra pequena" => "xs",
+    "small" => "s", "pequena" => "s", "chica" => "s",
+    "medium" => "m", "mediana" => "m",
+    "large" => "l", "grande" => "l",
+    "x-large" => "xl", "x large" => "xl", "extra large" => "xl", "extra grande" => "xl"
   }.freeze
 
   # «M» es mujer, como en la app (H/M); «F» (femenino) también, porque así vienen muchos formularios.
@@ -78,12 +89,13 @@ class ImportRowEvaluator
       {
         first_name: values[:first_name], last_name: values[:last_name], preferred_name: values[:preferred_name],
         age: whole_number(values[:age]), birth_date: birth_date, date_of_inscription: date(values[:date_of_inscription]),
+        registration_status: values[:registration_status]&.to_s,
         gender: GENDERS[normalize(values[:gender])],
         stake: stake_key, ward: (ward_key if stake_key),
         # El staff puede venir de una estaca que no participa: queda escrita tal cual.
         other_stake: (values[:stake]&.to_s if stake_key.nil?), other_ward: (values[:ward]&.to_s if stake_key.nil?),
         bishop_name: values[:bishop_name], bishop_email: values[:bishop_email],
-        shirt_number: enum_key(Participant.shirt_numbers, values[:shirt_number]),
+        shirt_number: shirt_key,
         rol: role_key || "joven",
         identity_document: values[:identity_document]&.to_s,
         room: values[:room]&.to_s,
@@ -98,8 +110,9 @@ class ImportRowEvaluator
         emergency_contact_2_name: values[:emergency_contact_2_name],
         emergency_contact_2_number: values[:emergency_contact_2_number]&.to_s,
         emergency_contact_2_email: values[:emergency_contact_2_email],
-        medical_information: medical_information, emotional_information: values[:emotional_information],
-        diet: values[:diet],
+        # «Todo bien», «Como de todo»… no es nada que atender: entra en blanco (CareNote).
+        medical_information: medical_information, emotional_information: CareNote.clean(values[:emotional_information]),
+        diet: CareNote.clean(values[:diet]),
         additional_instructions: values[:additional_instructions]
       }.compact
     end
@@ -127,6 +140,7 @@ class ImportRowEvaluator
     def check_dates
       add("La fecha de nacimiento «#{values[:birth_date]}» no se entiende (usa día/mes/año)", blocking: true) if values[:birth_date].present? && birth_date.nil?
       add("La fecha de inscripción «#{values[:date_of_inscription]}» no se entiende: se ignora", blocking: false) if values[:date_of_inscription].present? && date(values[:date_of_inscription]).nil?
+      add("La talla «#{values[:shirt_number]}» no existe (XS a XL)", blocking: true) if values[:shirt_number].present? && shirt_key.nil?
     end
 
     # Un barrio que no está en la lista: el joven tiene que ser de uno de los que participan; al staff se le deja sin barrio.
@@ -204,7 +218,7 @@ class ImportRowEvaluator
     end
 
     def check_role_and_company
-      add("El rol «#{values[:rol]}» no existe: entraría como joven", blocking: false) if values[:rol].present? && role_key.nil?
+      add("El rol «#{role_value}» no existe: entraría como joven", blocking: false) if role_value.present? && role_key.nil?
       return if values[:company_number].blank?
 
       if staff? && !participant.consejero? && !participant.auxiliar?
@@ -242,8 +256,12 @@ class ImportRowEvaluator
       (role_key || "joven") != "joven"
     end
 
+    def role_value
+      values[:rol].presence || values[:participant_type]
+    end
+
     def role_key
-      value = values[:rol]
+      value = role_value
       return nil if value.blank?
 
       enum_key(Participant.rols, value) || ROLE_ALIASES[normalize(value)] ||
@@ -307,17 +325,22 @@ class ImportRowEvaluator
 
     # La información médica tal cual; las planillas viejas traen alergias y medicinas aparte y se juntan.
     def medical_information
-      parts = [ values[:medical_information] ]
+      parts = [ CareNote.clean(values[:medical_information]) ]
       parts << "Alergias: #{values[:allergies]}" if medical_value?(values[:allergies])
       parts << "Medicinas: #{values[:medicines]}" if medical_value?(values[:medicines])
       parts.compact_blank.map(&:to_s).join("\n").presence
     end
 
     def medical_value?(value)
-      value.present? && !Participant::MEDICAL_NONE.include?(normalize(value))
+      value.present? && !Participant::MEDICAL_NONE.include?(normalize(value)) && !CareNote.nothing_to_attend?(value)
     end
 
-    # 2010-03-14 (Excel, ya convertida), 14/03/2010 o 14-03-2010 (día primero, como se escribe aquí).
+    def shirt_key
+      enum_key(Participant.shirt_numbers, values[:shirt_number]) || SHIRT_ALIASES[normalize(values[:shirt_number])]
+    end
+
+    # 2010-03-14 (Excel, ya convertida), 14/03/2010 o 14-03-2010 (día primero, como se escribe aquí). Con la
+    # hora en AM/PM («7/2/2026, 12:43:05 PM», la inscripción del archivo de la Iglesia) es gringa: mes primero.
     def date(value)
       return value.to_date if value.respond_to?(:to_date) && !value.is_a?(String)
 
@@ -326,6 +349,8 @@ class ImportRowEvaluator
 
       if (match = text.match(/\A(\d{4})-(\d{1,2})-(\d{1,2})/))
         Date.new(match[1].to_i, match[2].to_i, match[3].to_i)
+      elsif (match = text.match(%r{\A(\d{1,2})/(\d{1,2})/(\d{4}),?\s+\d{1,2}:\d{2}(:\d{2})?\s*[ap]\.?\s?m\.?\z}i))
+        Date.new(match[3].to_i, match[1].to_i, match[2].to_i)
       elsif (match = text.match(%r{\A(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\z}))
         year = match[3].to_i
         year += year < 30 ? 2000 : 1900 if year < 100

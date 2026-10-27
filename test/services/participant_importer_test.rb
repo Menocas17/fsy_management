@@ -208,6 +208,36 @@ class ParticipantImporterTest < ActiveSupport::TestCase
 
     assert_equal [ "El barrio «Altamira» no es de la Estaca Villa Flor" ], import.rows.pending.sole.issues.map { |i| i["text"] }
   end
+  test "the Church's file: «Nombre de pila», sizes in English, «Participante», the US inscription date and its status" do
+    import = import_csv [ "Nombre de pila,Apellido,Cumpleaños,Sexo,Talla de camiseta,Nombre de la estaca o distrito,Fecha,Estado,Tipo",
+                          "Jhon,Smith,2009-01-03,Hombre,X-Large,Managua Nicaragua Bello Horizonte Stake,\"7/2/2026, 12:43:05 PM\",Aprobado,Participante" ]
+
+    assert_equal 1, import.count_of(:imported)
+    jhon = Participant.find_by(first_name: "Jhon")
+    assert_equal [ "xl", "joven", Date.new(2026, 7, 2), "Aprobado" ],
+                 [ jhon.shirt_number, jhon.rol, jhon.date_of_inscription, jhon.registration_status ]
+  end
+
+  test "«Rol» wins over the Church's «Tipo» when a file brings both" do
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Tipo,Rol", "Lía,Rocha,30,Mujer,M,Bello Horizonte,Participante,Logística" ]
+
+    assert_equal "logistica", Participant.find_by(first_name: "Lía").rol
+  end
+
+  test "«todo bien» in the medical, diet or emotional information comes in blank; real notes stay" do
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Información médica,Información alimentaria,Información emocional",
+                 "Ana,Ruiz,15,Mujer,S,Bello Horizonte,Todo bien,Como de todo,Asma leve" ]
+
+    ana = Participant.find_by(first_name: "Ana")
+    assert_equal [ nil, nil, "Asma leve" ], [ ana.medical_information, ana.diet, ana.emotional_information ]
+  end
+
+  test "a size out of the list says which, and blocks" do
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla", "Ana,Ruiz,15,Mujer,XX-Large" ]
+
+    assert_includes import.rows.first.issues.map { |issue| issue["text"] }, "La talla «XX-Large» no existe (XS a XL)"
+  end
+
   private
     def import_csv(lines)
       Tempfile.create([ "carga", ".csv" ]) do |file|

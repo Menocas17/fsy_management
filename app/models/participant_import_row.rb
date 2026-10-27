@@ -13,7 +13,7 @@ class ParticipantImportRow < ApplicationRecord
   # información emocional no: es privada, y quien carga el archivo no siempre puede leerla.
   EDITABLE = {
     first_name: "Nombres", last_name: "Apellidos", preferred_name: "Nombre que se prefiere",
-    birth_date: "Fecha de nacimiento", age: "Edad", gender: "Sexo", stake: "Estaca / Distrito", ward: "Barrio / Rama",
+    birth_date: "Fecha de nacimiento", date_of_inscription: "Fecha de inscripción", registration_status: "Estado de inscripción", age: "Edad", gender: "Sexo", stake: "Estaca / Distrito", ward: "Barrio / Rama",
     shirt_number: "Talla", rol: "Rol", identity_document: "Cédula", company_number: "Compañía",
     auxiliar_company: "Compañía auxiliar", logistics_area: "Área de logística", room: "Cuarto", phone_number: "Teléfono", email_address: "Correo",
     emergency_contact_name: "Contacto de emergencia", emergency_contact_number: "Teléfono de emergencia",
