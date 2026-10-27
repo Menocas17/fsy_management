@@ -192,9 +192,8 @@ class ParticipantImporterTest < ActiveSupport::TestCase
 
   test "the counselors' upload makes every row a counselor, who may come from another stake" do
     import = ParticipantImporter.new(Rails.root.join("test/fixtures/files/formato_iglesia.xlsx").to_s, role: "consejero").call.import
-    assert_equal [ "Consejero sin compañía: se puede aprobar y asignarlo después" ], import.rows.pending.flat_map { |row| row.issues.map { |i| i["text"] } }.uniq
+    assert_empty import.rows.pending, "the Church's file has no company column: counselors enter and get one later"
 
-    import.rows.pending.each { |row| assert row.approve!("Admin") }
     luis = Participant.find_by!(first_name: "Luis")
 
     assert luis.consejero?
@@ -232,6 +231,37 @@ class ParticipantImporterTest < ActiveSupport::TestCase
     assert_equal [ nil, nil, "Asma leve" ], [ ana.medical_information, ana.diet, ana.emotional_information ]
   end
 
+  test "a counselor waits for want of a company only when the file has a company column" do
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Compañía", "Eva,Paz,25,Mujer,M,Villa Flor," ], role: "consejero"
+    assert_equal [ "Consejero sin compañía: se puede aprobar y asignarlo después" ], import.rows.pending.sole.issues.map { |i| i["text"] }
+
+    import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca", "Ivy,Paz,25,Mujer,M,Villa Flor" ], role: "consejero"
+    assert_equal 1, import.count_of(:imported)
+  end
+
+  test "a cancelled inscription waits for someone to decide" do
+    import = import_csv [ "Nombre de pila,Apellido,Edad,Sexo,Talla de camiseta,Nombre de la estaca o distrito,Estado", "Keysha,Lacayo,20,Mujer,X-Small,Puerto Cabezas Nicaragua District,Cancelado" ], role: "consejero"
+
+    assert_equal [ "Su inscripción está cancelada: revisa si de verdad viene antes de aprobarla" ], import.rows.pending.sole.issues.map { |i| i["text"] }
+    refute import.rows.sole.blocking?
+  end
+
+  test "a counselor's emotional information comes in only when there is something to attend" do
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Información emocional,Información médica,Información alimentaria",
+                 "Uno,Paz,25,Hombre,M,Villa Flor,Alegre premium 4K,None.,De todo se come", "Dos,Paz,25,Hombre,M,Villa Flor,Soltero,.,Whatever",
+                 "Tres,Paz,25,Hombre,M,Villa Flor,Ansiedad leve,Asma,No como mariscos", "Cuatro,Paz,25,Hombre,M,Villa Flor,timida,-,-" ], role: "consejero"
+
+    notes = %w[Uno Dos Tres Cuatro].map { |name| Participant.find_by!(first_name: name).then { [ _1.emotional_information, _1.medical_information, _1.diet ] } }
+    assert_equal [ [ nil, nil, nil ], [ nil, nil, nil ], [ "Ansiedad leve", "Asma", "No como mariscos" ], [ "timida", nil, nil ] ], notes
+  end
+
+  test "a joven's emotional information keeps whatever isn't just «todo bien»" do
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Información emocional", "Ana,Ruiz,15,Mujer,S,Bello Horizonte,Me cuesta hacer amigos",
+                 "Bea,Ruiz,15,Mujer,S,Bello Horizonte,Feliz" ]
+
+    assert_equal [ "Me cuesta hacer amigos", nil ], %w[Ana Bea].map { Participant.find_by!(first_name: _1).emotional_information }
+  end
+
   test "a size out of the list says which, and blocks" do
     import = import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla", "Ana,Ruiz,15,Mujer,XX-Large" ]
 
@@ -239,11 +269,11 @@ class ParticipantImporterTest < ActiveSupport::TestCase
   end
 
   private
-    def import_csv(lines)
+    def import_csv(lines, role: nil)
       Tempfile.create([ "carga", ".csv" ]) do |file|
         file.write(lines.join("\n"))
         file.flush
-        ParticipantImporter.new(file.path).call.import
+        ParticipantImporter.new(file.path, role: role).call.import
       end
     end
 end
