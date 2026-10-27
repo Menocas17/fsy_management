@@ -165,6 +165,8 @@ Rails.application.routes.draw do
       delete :remove_staff
     end
   end
+  # El reparto de jóvenes en compañías (CompanyPlanner): la propuesta (?modo=todos, ?companias=, ?semilla=) y aplicarla.
+  resource :company_plan, only: %i[show create], path: "companias/repartir"
   resources :companies do
     collection do
       get :overview

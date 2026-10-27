@@ -20,6 +20,10 @@
         Vista general
       <% end %>
       <% if full_company_access? %>
+        <%= link_to company_plan_path, class: button_classes(:secondary), data: { company_plan_link: true } do %>
+          <%= icon "shuffle", class: "w-4 h-4" %>
+          Repartir jóvenes
+        <% end %>
         <%= link_to new_company_path, class: button_classes do %>
           <%= icon "plus", class: "w-4 h-4" %>
           Nueva compañía
