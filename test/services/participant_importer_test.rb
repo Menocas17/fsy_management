@@ -219,7 +219,7 @@ class ParticipantImporterTest < ActiveSupport::TestCase
   end
 
   test "«Rol» wins over the Church's «Tipo» when a file brings both" do
-    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Tipo,Rol", "Lía,Rocha,30,Mujer,M,Participante,Logística" ]
+    import_csv [ "Nombres,Apellidos,Edad,Sexo,Talla,Estaca,Tipo,Rol", "Lía,Rocha,30,Mujer,M,Bello Horizonte,Participante,Logística" ]
 
     assert_equal "logistica", Participant.find_by(first_name: "Lía").rol
   end
