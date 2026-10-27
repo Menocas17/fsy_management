@@ -35,7 +35,7 @@ gem "bootsnap", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 2.1"
+gem "image_processing", "~> 2.2"
 # image_processing 2.x ya no trae ruby-vips; sin esto Active Storage no puede generar variantes.
 # Se carga al procesar la primera imagen, como antes, no al arrancar la app.
 gem "ruby-vips", "~> 2.3", require: false
