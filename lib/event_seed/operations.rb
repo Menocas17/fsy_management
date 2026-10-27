@@ -175,20 +175,20 @@ class EventSeed::Operations
       activity = ->(title) { Activity.find_by!(title: title) }
       jovenes = Participant.joven.order(:code).to_a
 
-      Assignment.create!(participant: jovenes[0], activity: activity.("Devocional de apertura"), status: :confirmada,
+      Assignment.create!(participant: jovenes[0], activity: activity.("Noche de hogar"), status: :confirmada,
                          details: "Primera oración. Llega diez minutos antes con tu consejero.", **assigner)
-      Assignment.create!(participant: jovenes[1], activity: activity.("Devocional de apertura"), status: :pendiente,
+      Assignment.create!(participant: jovenes[1], activity: activity.("Noche de hogar"), status: :pendiente,
                          details: "Última oración.", **assigner)
       jovenes[2, 3].each_with_index do |joven, index|
-        Assignment.create!(participant: joven, activity: activity.("Noche de talentos"), status: :pendiente,
+        Assignment.create!(participant: joven, activity: activity.("Espectáculo de variedades"), status: :pendiente,
                            details: "Presentación #{index + 1} de la noche.", **assigner)
       end
       Participant.consejero.order(:code).first(4).each_with_index do |counselor, index|
-        Assignment.create!(participant: counselor, activity: activity.("Olimpiadas FSY"), status: :confirmada,
+        Assignment.create!(participant: counselor, activity: activity.("Actividad deportiva"), status: :confirmada,
                            details: "Juez de la estación #{index + 1}.", **assigner)
       end
       Participant.logistica.joins(:logistics_area).merge(LogisticsArea.where(checkin: true)).first(2).each do |member|
-        Assignment.create!(participant: member, activity: activity.("Llegada y registro"), status: :confirmada,
+        Assignment.create!(participant: member, activity: activity.("Recibir a los participantes y distribución de habitaciones"), status: :confirmada,
                            details: "Mesa de registro de la estaca Bello Horizonte.", **assigner)
       end
       Participant.auxiliar.order(:code).first(2).each do |auxiliar|

@@ -197,21 +197,21 @@ class DemoSeed
 
     # A few assignments so the profiles don't look empty; the alerts for these go out from the app itself.
     def create_assignments
-      olympics = Activity.find_by(title: "Olimpiadas FSY")
-      talents = Activity.find_by(title: "Noche de talentos")
+      sports = Activity.find_by(title: "Actividad deportiva")
+      talents = Activity.find_by(title: "Espectáculo de variedades")
       assigner = @demo["coordinador"]
       assigner_name = assigner&.full_name || "Administrador del sistema"
       jovenes = Participant.joven.order(:first_name, :last_name).limit(3).to_a
 
       jovenes.each_with_index do |joven, index|
-        Assignment.create!(participant: joven, activity: olympics, assigned_by: assigner, assigned_by_name: assigner_name,
+        Assignment.create!(participant: joven, activity: sports, assigned_by: assigner, assigned_by_name: assigner_name,
                            status: index.zero? ? :confirmada : :pendiente,
-                           details: "Capitán del equipo #{index + 1} en los relevos.")
+                           details: "Capitán del equipo #{index + 1} de voleibol.")
       end
 
       Assignment.create!(participant: jovenes.first, assigned_by: assigner, assigned_by_name: assigner_name,
-                         title: "Primera oración en el devocional", status: :confirmada,
-                         starts_at: (Rails.configuration.x.event_start_on + 1).in_time_zone.change(hour: 8), location: "Auditorio",
+                         title: "Primera oración en el devocional matutino", status: :confirmada,
+                         starts_at: (Rails.configuration.x.event_start_on + 1).in_time_zone.change(hour: 9), location: "Salón general",
                          details: "Llega diez minutos antes con el consejero de tu compañía.")
 
       Assignment.create!(participant: @owner, activity: talents, assigned_by: assigner, assigned_by_name: assigner_name,

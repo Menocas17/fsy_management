@@ -63,11 +63,12 @@ class AgendaController < ApplicationController
       nil
     end
 
-    # The grid spans the event's own hours, never less than 7:00–21:00.
+    # The grid spans the event's own hours (the staff meets before 5:00 and the lights go out at 23:30), never
+    # less than 7:00–21:00. An activity ending at midnight ends at hour 0 of the next day: that's the 24.
     def grid_hours
       times = activities_by_day.values.flatten.flat_map { |activity| [ activity.starts_at, activity.ends_at ] }
-      first_hour = [ times.map(&:hour).min || 7, 6 ].max
-      last_hour = [ times.map { |time| time.min.positive? ? time.hour + 1 : time.hour }.max || 21, 22 ].min
+      first_hour = times.map(&:hour).min || 7
+      last_hour = [ times.map { |time| time.hour.zero? ? 24 : time.hour + (time.min.positive? ? 1 : 0) }.max || 21, 24 ].min
 
       ([ first_hour, 7 ].min...[ last_hour, 21 ].max).to_a
     end
