@@ -1,6 +1,7 @@
 class AgendaController < ApplicationController
   allow_jovenes only: %i[show activity]
-  # The agenda only ever shows the days of the event: there is nowhere else to navigate to.
+  # The agenda only ever shows the days of the event: there is nowhere else to navigate to. A joven's starts on
+  # Monday; the staff's on Sunday (día 0).
   def show
     @view = params[:view] == "dia" ? "dia" : "semana"
     @days = event_days
@@ -17,7 +18,7 @@ class AgendaController < ApplicationController
   # En el teléfono cada actividad se abre en su lugar, y su detalle se pide recién al abrirla: dibujar el de
   # las ~55 actividades de la semana en cada visita era la mitad del tiempo de la página.
   def activity
-    activity = Activity.includes(responsibles: Participant::AVATAR_PRELOAD).find(params[:id])
+    activity = Activity.visible_to(Current.user.participant).includes(responsibles: Participant::AVATAR_PRELOAD).find(params[:id])
     render partial: "agenda/details_frame", locals: { activity: activity }
   end
 
@@ -42,7 +43,7 @@ class AgendaController < ApplicationController
     end
 
     def event_days
-      (Rails.configuration.x.event_start_on..Rails.configuration.x.event_end_on).to_a
+      Activity.days_for(Current.user.participant).to_a
     end
 
     def default_day
@@ -51,7 +52,7 @@ class AgendaController < ApplicationController
 
     # La del panel de detalle: la pedida, o la primera del día, o la primera del evento.
     def selected_activity
-      activities = Activity.includes(responsibles: Participant::AVATAR_PRELOAD)
+      activities = Activity.visible_to(Current.user.participant).includes(responsibles: Participant::AVATAR_PRELOAD)
       return activities.find_by(id: params[:activity_id]) if params[:activity_id].present?
 
       activities.between(@selected_day, @selected_day).first || activities.between(@days.first, @days.last).first

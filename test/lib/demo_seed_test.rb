@@ -21,10 +21,10 @@ class DemoSeedTest < ActiveSupport::TestCase
       assert_equal %w[H M], auxiliar_company.auxiliars.map(&:gender).sort
     end
 
-    assert Activity.count >= 25, "days 1 to 5 of the counselors' manual should be on the agenda"
-    assert_equal [ Rails.configuration.x.event_start_on, Rails.configuration.x.event_start_on + 4 ],
+    assert Activity.count >= 25, "days 0 to 5 of the counselors' manual should be on the agenda"
+    assert_equal [ Rails.configuration.x.staff_start_on, Rails.configuration.x.agenda_end_on ],
                  [ Activity.chronological.first.day, Activity.chronological.last.day ],
-                 "the manual's Monday falls on the event's first day"
+                 "the staff's Sunday to Friday"
 
     sports = Activity.find_by!(title: "Actividad deportiva")
     assert_equal Rails.configuration.x.event_start_on + 2, sports.day

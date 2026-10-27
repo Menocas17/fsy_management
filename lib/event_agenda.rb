@@ -1,7 +1,7 @@
-# La agenda del evento tal como la trae el Manual del consejero FSY 2026 (Día 1 lunes a Día 5 viernes): cada día
-# cae en el día del evento que le toca, del primero en adelante. No van los traslados de 5 a 20 minutos entre una
-# actividad y otra (llenarían la cuadrícula de bloques sueltos), y lo que el manual pone en la misma fila a la
-# misma hora va en una sola actividad. El Día 0 (domingo, solo personal) queda fuera de los días del evento.
+# La agenda del evento tal como la trae el Manual del consejero FSY 2026, del Día 0 (domingo, solo el staff: los
+# jóvenes no lo ven, Activity.days_for) al Día 5 (viernes): cada día cae en el de la agenda que le toca, del primero
+# en adelante. No van los traslados de 5 a 20 minutos entre una actividad y otra (llenarían la cuadrícula de bloques
+# sueltos), y lo que el manual pone en la misma fila a la misma hora va en una sola actividad.
 # La usan bin/rails agenda:manual, los datos de prueba (EventSeed) y los de demo (DemoSeed).
 #
 # Borra la agenda que hubiera (y con ella sus responsables) antes de crearla.
@@ -19,6 +19,16 @@ class EventAgenda
 
   # [inicio, fin, título, categoría, lugar], un arreglo por día del manual.
   DAYS = [
+    # Día 0: domingo, solo el staff
+    [ [ "12:00", "13:30", "Almuerzo", :comida, DINING ],
+      [ "14:00", "15:00", "Distribución de áreas para dormir", :actividad, ROOMS ],
+      [ "15:10", "16:00", "Recorrido por las instalaciones y el recinto", :actividad, nil ],
+      [ "16:10", "16:40", "Orientación para consejeros", :especial, HALL ],
+      [ "16:40", "17:20", "Sesión de grupo de auxiliares y consejeros / Reunión del matrimonio director con los coordinadores", :actividad, nil ],
+      [ "17:30", "18:50", "Cena", :comida, DINING ],
+      [ "19:00", "20:00", "Devocional del matrimonio director de sesión", :devocional, HALL ],
+      [ "20:05", "20:50", "Entrevistas y planificación con los consejeros", :actividad, nil ],
+      [ "21:00", "21:30", "Lectura de El Libro de Mormón", :devocional, ROOMS ] ],
     # Día 1: lunes
     [ [ "06:00", "07:00", "Desayuno", :comida, DINING ],
       [ "07:10", "07:50", STAFF_MEETING, :actividad, nil ],
@@ -117,6 +127,33 @@ class EventAgenda
 
   # Lo que dice el manual de cada una: quién la tiene a cargo y qué hace cada rol.
   NOTES = {
+    "Almuerzo" => {
+      description: "Responsable: coordinador de alimentos."
+    },
+    "Distribución de áreas para dormir" => {
+      description: "Responsable: coordinador auxiliar.",
+      counselors_notes: "Sigan las instrucciones de su coordinador auxiliar. Cada uno es responsable de sus pertenencias."
+    },
+    "Recorrido por las instalaciones y el recinto" => {
+      description: "Responsable: coordinador de logística. Todo el personal conoce dónde serán las actividades para saber a dónde llevar a los jóvenes.",
+      counselors_notes: "Sigan las indicaciones de su coordinador auxiliar y fíjense en las salidas de emergencia."
+    },
+    "Orientación para consejeros" => {
+      description: "Responsable: coordinador. La función y las responsabilidades del consejero en la conferencia.",
+      counselors_notes: "Sean puntuales y lleven su cuaderno para tomar notas."
+    },
+    "Sesión de grupo de auxiliares y consejeros / Reunión del matrimonio director con los coordinadores" => {
+      description: "Responsable: coordinadores auxiliares y coordinador. Cada auxiliar se reúne con sus consejeros mientras el matrimonio director de sesión se reúne con los coordinadores.",
+      counselors_notes: "Lleven estudiadas las actividades de cada día y sus dudas escritas para resolverlas en grupo."
+    },
+    "Devocional del matrimonio director de sesión" => {
+      description: "Responsable: matrimonio director de sesión. Reunión obligatoria para todo el personal, en preparación para la sesión.",
+      counselors_notes: "Ropa de domingo, puntualidad y cuaderno para tomar notas."
+    },
+    "Entrevistas y planificación con los consejeros" => {
+      description: "Responsable: consejeros.",
+      counselors_notes: "Conozcan a su consejero adjunto, intercambien teléfonos, reciban las asignaciones de la compañía, ubiquen su punto de reunión y fijen metas para la semana."
+    },
     "Desayuno" => {
       description: "Responsable: coordinador de alimentos.",
       counselors_notes: "Buen momento para comer con tu compañero y ultimar los detalles del día."
@@ -182,7 +219,7 @@ class EventAgenda
       counselors_notes: "Sigan con el atuendo de la conferencia."
     },
     "Lectura de El Libro de Mormón" => {
-      description: "Cada joven lee en su habitación."
+      description: "Cada uno lee en su habitación."
     },
     BOOK_OF_MORMON => {
       description: "Cada joven estudia en su habitación."

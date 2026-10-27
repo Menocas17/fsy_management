@@ -4,6 +4,10 @@ Rails.application.config.x.event_name = "FSY 2026"
 Rails.application.config.x.event_region = "Managua-Caribe"
 Rails.application.config.x.event_start_on = Date.new(2027, 1, 11)
 Rails.application.config.x.event_end_on = Date.new(2027, 1, 16)
+# La agenda: el staff llega el domingo (Día 0 del manual) y los jóvenes el lunes; termina el viernes (Día 5),
+# porque el sábado solo es la salida.
+Rails.application.config.x.staff_start_on = Date.new(2027, 1, 10)
+Rails.application.config.x.agenda_end_on = Date.new(2027, 1, 15)
 Rails.application.config.x.event_start_hour = 7
 
 # Quién firma las notificaciones push ante el servidor del navegador: un mailto: o https: real, que es a donde

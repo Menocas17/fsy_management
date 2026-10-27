@@ -56,7 +56,7 @@
       <%# La cuadrícula de la semana necesita unos 680px más el panel de detalle: solo cabe desde xl.
           Por debajo (teléfono, tablet, portátil chica con la barra lateral) cada actividad se abre en su lugar. %>
       <%# En caché: es la misma para todos (menos el «Agregar» de quien maneja la agenda). %>
-      <% cache [ "agenda", @agenda_version, @view, @selected_day, @activity&.id, params[:activity_id].present?, can_manage_agenda? ] do %>
+      <% cache [ "agenda", @agenda_version, @days.first, @view, @selected_day, @activity&.id, params[:activity_id].present?, can_manage_agenda? ] do %>
         <div class="hidden xl:block"><%= render "agenda/week", days: @visible_days %></div>
         <div class="xl:hidden"><%= render "agenda/day_list", days: @visible_days %></div>
       <% end %>

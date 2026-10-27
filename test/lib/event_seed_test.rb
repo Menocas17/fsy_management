@@ -30,9 +30,10 @@ class EventSeedTest < ActiveSupport::TestCase
     assert Participant.consejero.all? { |counselor| counselor.room.present? }
     assert Participant.joven.with_medical_note(:emotional_information).exists?
 
-    assert_equal [ Rails.configuration.x.event_start_on, Rails.configuration.x.event_start_on + 4 ],
-                 [ Activity.chronological.first.day, Activity.chronological.last.day ], "días 1 a 5 del manual"
-    assert_equal "06:00", Activity.chronological.first.starts_at.strftime("%H:%M")
+    assert_equal [ Rails.configuration.x.staff_start_on, Rails.configuration.x.agenda_end_on ],
+                 [ Activity.chronological.first.day, Activity.chronological.last.day ], "días 0 a 5 del manual"
+    assert_equal "12:00", Activity.chronological.first.starts_at.strftime("%H:%M")
+    assert Activity.for_day(Rails.configuration.x.staff_start_on).all?(&:audience_por_roles?), "el domingo es del staff"
     assert_equal "Lectura de El Libro de Mormón", Activity.for_day(Rails.configuration.x.event_start_on).last.title
     assert InventoryItem.medicines.exists?, "nursing has medicines to give"
     assert Inventory.exists?(name: "Utensilios")

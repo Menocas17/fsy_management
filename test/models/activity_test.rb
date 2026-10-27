@@ -20,10 +20,31 @@ class ActivityTest < ActiveSupport::TestCase
     assert_not build_activity(start_time: "10:00", end_time: "09:00").valid?
   end
 
-  test "refuses a day outside the event" do
-    assert_not build_activity(date: (@first_day - 1).to_s).valid?
-    assert_not build_activity(date: (Rails.configuration.x.event_end_on + 1).to_s).valid?
+  test "refuses a day outside the agenda: from the staff's Sunday to Friday" do
+    assert_not build_activity(date: (Rails.configuration.x.staff_start_on - 1).to_s).valid?
+    assert_not build_activity(date: (Rails.configuration.x.agenda_end_on + 1).to_s).valid?
+    assert build_activity(date: Rails.configuration.x.staff_start_on.to_s).valid?
     assert build_activity(date: @first_day.to_s).valid?
+  end
+
+  test "what happens before the jóvenes arrive is for the staff only" do
+    sunday = create_activity(date: Rails.configuration.x.staff_start_on.to_s)
+    assert sunday.audience_por_roles?
+    assert_equal Activity::STAFF_ROLES, sunday.target_roles
+
+    narrowed = create_activity(date: Rails.configuration.x.staff_start_on.to_s, audience: :por_roles, target_roles: %w[consejero joven])
+    assert_equal %w[consejero], narrowed.target_roles
+    assert create_activity(date: @first_day.to_s).audience_todos?, "from Monday on it stays as written"
+  end
+
+  test "a joven's agenda starts on Monday, the staff's on Sunday" do
+    sunday = create_activity(date: Rails.configuration.x.staff_start_on.to_s)
+    monday = create_activity(date: @first_day.to_s)
+
+    assert_equal @first_day, Activity.days_for(participants(:juan)).first
+    assert_equal Rails.configuration.x.staff_start_on, Activity.days_for(participants(:maria)).first
+    assert_equal [ monday ], Activity.visible_to(participants(:juan)).to_a
+    assert_equal [ sunday, monday ], Activity.visible_to(participants(:maria)).chronological.to_a
   end
 
   test "role activities need at least one role" do

@@ -32,7 +32,7 @@
           <div>
             <%= form.label :date, "Fecha", class: field_label_classes %>
             <%= date_input form.field_name(:date), form.object.date, id: form.field_id(:date), required: true, min: Activity.event_days.first, max: Activity.event_days.last %>
-            <p class="<%= hint %>">Del <%= Activity.event_days.first.day %> al <%= Activity.event_days.last.day %> de <%= SpanishDates.month(Activity.event_days.last) %>.</p>
+            <p class="<%= hint %>">Del <%= Activity.event_days.first.day %> al <%= Activity.event_days.last.day %> de <%= SpanishDates.month(Activity.event_days.last) %>. El <%= Activity.event_days.first.day %> es solo del staff: los jóvenes no lo ven.</p>
           </div>
           <div>
             <%= form.label :start_time, "Inicio", class: field_label_classes %>

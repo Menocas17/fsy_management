@@ -33,6 +33,7 @@ class Activity < ApplicationRecord
   attr_accessor :date, :start_time, :end_time
 
   before_validation :compose_schedule
+  before_validation :keep_staff_days_for_staff
 
   validates :title, presence: true, length: { maximum: 120 }
   validates :starts_at, :ends_at, presence: true
@@ -40,9 +41,24 @@ class Activity < ApplicationRecord
   validate :within_the_event_days
   validate :roles_listed_for_role_activities
 
+  STAFF_ROLES = (Participant.rols.keys - %w[joven]).freeze
+
+  # Every day of the agenda: from the staff's Sunday (día 0) to Friday.
   def self.event_days
-    Rails.configuration.x.event_start_on..Rails.configuration.x.event_end_on
+    Rails.configuration.x.staff_start_on..Rails.configuration.x.agenda_end_on
   end
+
+  # A joven's agenda starts when they arrive, on Monday: the days before it are the staff's alone.
+  def self.days_for(participant)
+    first = participant&.joven? ? Rails.configuration.x.event_start_on : event_days.first
+    first..event_days.last
+  end
+
+  def self.staff_day?(day)
+    day < Rails.configuration.x.event_start_on
+  end
+
+  scope :visible_to, ->(participant) { participant&.joven? ? where(starts_at: Rails.configuration.x.event_start_on.beginning_of_day..) : all }
 
   scope :chronological, -> { order(:starts_at, :id) }
   scope :for_day, ->(day) { where(starts_at: day.all_day).chronological }
@@ -108,6 +124,15 @@ class Activity < ApplicationRecord
 
       self.starts_at = Time.zone.parse("#{date} #{start_time}")
       self.ends_at = Time.zone.parse("#{date} #{end_time}")
+    end
+
+    # What happens before the jóvenes arrive is for the staff, so its alert never reaches a joven.
+    def keep_staff_days_for_staff
+      return if starts_at.blank? || !self.class.staff_day?(starts_at.to_date)
+
+      roles = audience_todos? ? [] : target_roles - %w[joven]
+      self.audience = :por_roles
+      self.target_roles = roles.presence || STAFF_ROLES
     end
 
     def ends_after_it_starts
