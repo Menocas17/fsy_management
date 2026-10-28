@@ -60,8 +60,7 @@ class Tutorial
       step(:bell, dashboard_path, target: "[data-tour='bell']", action: :tap),
       notification_step,
       step(:more, dashboard_path, target: "[data-tour='more']", action: :tap),
-      step(:sheet_scan, dashboard_path, target: "[data-more-items] a[href='#{scan_path}']", action: :tap),
-      step(:scan, scan_path, target: "[data-controller~='qr-scanner']"),
+      *more_steps,
       *conteo_steps,
       *alert_steps,
       step(:account, dashboard_path, target: "[data-tour='account']", action: :tap),
@@ -149,6 +148,23 @@ class Tutorial
       [
         step(:trainings_tab, agenda_path, target: "a[href='#{agenda_trainings_path}']", action: :tap),
         step(:training_swipe, agenda_trainings_path, target: "[data-controller~='alert-item']:has([data-training-card])", action: :practice)
+      ]
+    end
+
+    # Lo que se abre desde «Más»: el escáner de gafetes (si lo tiene: NavigationHelper#simple_more_items) y los
+    # manuales, que tiene todo el staff.
+    def more_steps
+      manuals = [
+        step(:sheet_manuals, dashboard_path, target: "[data-more-items] a[href='#{manuals_path}']", action: :tap),
+        step(:manuals, manuals_path, target: "[data-manuals-section]")
+      ]
+      return manuals if @user.counselor_company_hidden?
+
+      [
+        step(:sheet_scan, dashboard_path, target: "[data-more-items] a[href='#{scan_path}']", action: :tap),
+        step(:scan, scan_path, target: "[data-controller~='qr-scanner']"),
+        step(:more_manuals, dashboard_path, target: "[data-tour='more']", action: :tap),
+        *manuals
       ]
     end
 

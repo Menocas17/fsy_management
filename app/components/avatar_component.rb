@@ -21,7 +21,7 @@ class AvatarComponent < ViewComponent::Base
   end
 
   def initials
-    "#{@participant.first_name&.chr}#{@participant.last_name&.chr}".upcase
+    @participant.initials
   end
 
   def css_classes

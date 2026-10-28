@@ -1,6 +1,6 @@
 <%
   participant = form.object
-  initials = "#{participant.first_name&.first}#{participant.last_name&.first}".upcase
+  initials = participant.initials
   saved_avatar = participant.avatar_attachment&.persisted?
 %>
 <section class="<%= card_classes("p-6 md:p-7") %>" data-controller="avatar-preview"

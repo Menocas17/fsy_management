@@ -17,6 +17,11 @@ class ParticipantTest < ActiveSupport::TestCase
     assert participant.valid?, "El participante debería ser válido con todos sus datos"
   end
 
+  test "las iniciales son del primer nombre y el primer apellido, no de los dos nombres" do
+    participant = Participant.new(first_name: "Ana Lucía", last_name: "Gómez Ruiz")
+    assert_equal "AG", participant.initials
+  end
+
   test "es inválido sin nombre (first_name)" do
     participant = Participant.new(last_name: "Pérez", age: 20)
 
