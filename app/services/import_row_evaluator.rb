@@ -45,6 +45,7 @@ class ImportRowEvaluator
     @issues = []
     @participant = Participant.new(attributes)
     check_duplicate
+    check_cancelled
     check_dates
     check_ward
     check_validity
@@ -111,7 +112,7 @@ class ImportRowEvaluator
         emergency_contact_2_number: values[:emergency_contact_2_number]&.to_s,
         emergency_contact_2_email: values[:emergency_contact_2_email],
         # «Todo bien», «Como de todo»… no es nada que atender: entra en blanco (CareNote).
-        medical_information: medical_information, emotional_information: CareNote.clean(values[:emotional_information]),
+        medical_information: medical_information, emotional_information: emotional_information,
         diet: CareNote.clean(values[:diet]),
         additional_instructions: values[:additional_instructions]
       }.compact
@@ -135,6 +136,13 @@ class ImportRowEvaluator
                             age: participant.age, stake: participant.stake)
       end
       add("Duplicado: esta persona ya existe", blocking: true, match: existing) if existing
+    end
+
+    # El archivo de la Iglesia trae también a quien canceló su inscripción: que alguien decida si viene.
+    def check_cancelled
+      return unless normalize(values[:registration_status]).start_with?("cancelad")
+
+      add("Su inscripción está cancelada: revisa si de verdad viene antes de aprobarla", blocking: false)
     end
 
     def check_dates
@@ -168,8 +176,9 @@ class ImportRowEvaluator
     def check_staffing
       case participant.rol
       when "consejero"
+        # El consolidado de la Iglesia no trae compañía: sin esa columna el consejero entra y se asigna después.
         if values[:company_number].blank?
-          add("Consejero sin compañía: se puede aprobar y asignarlo después", blocking: false)
+          add("Consejero sin compañía: se puede aprobar y asignarlo después", blocking: false) if values.key?(:company_number)
         elsif company.nil?
           add("La compañía #{values[:company_number]} no existe", blocking: true)
         else
@@ -329,6 +338,13 @@ class ImportRowEvaluator
       parts << "Alergias: #{values[:allergies]}" if medical_value?(values[:allergies])
       parts << "Medicinas: #{values[:medicines]}" if medical_value?(values[:medicines])
       parts.compact_blank.map(&:to_s).join("\n").presence
+    end
+
+    # «Todo bien» no entra. Del staff, además, solo lo que haya que atender: muchos escriben ahí cómo se
+    # sienten, su estado civil o un comentario («Soltero», «Muy emocionado»); el informe guarda el original.
+    def emotional_information
+      text = CareNote.clean(values[:emotional_information])
+      text if text && (!staff? || CareNote.concern?(text))
     end
 
     def medical_value?(value)

@@ -26,19 +26,36 @@ class AgendaControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-activity-id='#{@activity.id}']"
     assert_select "[data-activity-title]", "Servicio comunitario"
     assert_select "[data-role-note='logistica']", text: /30 galones/
-    assert_includes response.body, "11 – 16 de enero, 2027"
+    assert_includes response.body, "10 – 15 de enero, 2027"
   end
 
   test "there is nowhere to navigate outside the event: other dates land inside it" do
     get agenda_path(date: "2026-12-01", view: "dia")
 
     assert_response :success
-    assert_includes response.body, "Lunes 11 de enero"
+    assert_includes response.body, "Domingo 10 de enero"
     assert_select "a[aria-label='Día anterior']", 0, "the first day has no previous day"
 
     get agenda_path(date: "2027-05-20", view: "dia")
-    assert_includes response.body, "Sábado 16 de enero"
+    assert_includes response.body, "Viernes 15 de enero"
     assert_select "a[aria-label='Día siguiente']", 0
+  end
+
+  test "a joven's agenda starts on Monday: the staff's Sunday is not theirs" do
+    sunday = Activity.create!(title: "Orientación para consejeros", category: :especial, date: Rails.configuration.x.staff_start_on.to_s,
+                              start_time: "16:10", end_time: "16:40")
+    sign_in_as(User.create!(email_address: "juan@fsy.com", password: "Joven1234!", participant: participants(:juan)))
+
+    get agenda_path(date: Rails.configuration.x.staff_start_on, view: "dia")
+    assert_includes response.body, "Lunes 11 de enero"
+    assert_select "a[aria-label='Día anterior']", 0
+
+    get agenda_path(view: "semana")
+    assert_includes response.body, "11 – 15 de enero, 2027"
+    assert_select "a[data-activity-id='#{sunday.id}']", 0
+
+    get agenda_activity_path(sunday)
+    assert_response :not_found
   end
 
   test "the arrows move one day at a time in the day view" do

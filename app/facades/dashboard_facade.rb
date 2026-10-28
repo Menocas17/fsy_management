@@ -74,7 +74,7 @@ class DashboardFacade
 
   # Lo que sigue en la agenda: durante el evento son las dos próximas del día.
   def next_activities(limit = 2)
-    @next_activities ||= Activity.where(starts_at: Time.current..).order(:starts_at).limit(limit).to_a
+    @next_activities ||= Activity.visible_to(@user&.participant).where(starts_at: Time.current..).order(:starts_at).limit(limit).to_a
   end
 
   # Modo simple: las tres cifras del inicio de cada rol. Cada una es { label:, value:, sub:, badge:, icon:, tone:, link: };

@@ -21,15 +21,15 @@ class DemoSeedTest < ActiveSupport::TestCase
       assert_equal %w[H M], auxiliar_company.auxiliars.map(&:gender).sort
     end
 
-    assert Activity.count >= 25, "the six event days should be on the agenda"
-    assert_equal [ Rails.configuration.x.event_start_on, Rails.configuration.x.event_end_on ],
+    assert Activity.count >= 25, "days 0 to 5 of the counselors' manual should be on the agenda"
+    assert_equal [ Rails.configuration.x.staff_start_on, Rails.configuration.x.agenda_end_on ],
                  [ Activity.chronological.first.day, Activity.chronological.last.day ],
-                 "the agenda covers only the days of the event"
+                 "the staff's Sunday to Friday"
 
-    olympics = Activity.find_by!(title: "Olimpiadas FSY")
-    assert_equal Rails.configuration.x.event_start_on + 1, olympics.day
-    assert olympics.logistics_notes.present?, "the big activities carry notes for each role"
-    assert Activity.find_by!(title: "Noche de talentos").responsibles.any?
+    sports = Activity.find_by!(title: "Actividad deportiva")
+    assert_equal Rails.configuration.x.event_start_on + 2, sports.day
+    assert sports.logistics_notes.present?, "the big activities carry notes for each role"
+    assert Activity.find_by!(title: "Espectáculo de variedades").responsibles.any?
 
     assert Assignment.count >= 4, "some profiles start with assignments"
     assert Assignment.where.not(activity_id: nil).any?, "taken from the agenda"

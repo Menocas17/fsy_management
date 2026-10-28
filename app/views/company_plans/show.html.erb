@@ -1,0 +1,98 @@
+<% content_for :title, "Repartir jóvenes" %>
+<% content_for :eyebrow, "Compañías" %>
+<% back_to "Compañías", companies_path %>
+<% rebuild = @plan.mode == "todos" %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro { "Propuesta sin guardar: nada cambia hasta que la apliques. Reparte por edad primero, después balancea hombres y mujeres, separa a los del mismo barrio y evita al consejero de su barrio, como las compañías sugeridas." } %>
+  <% if @plan.buckets.any? %>
+    <% page.with_actions do %>
+      <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+        <%= link_to company_plan_path(plan_options.merge(semilla: rand(1..999_999))),
+              class: button_classes(:secondary, extra: "grow sm:grow-0"), data: { turbo_action: "replace", company_plan_action: "reordenar" } do %>
+          <%= icon "shuffle", class: "size-4" %>
+          Reordenar
+        <% end %>
+        <%= button_to company_plan_path, params: plan_options.merge(huella: @fingerprint),
+              form_class: "grow sm:grow-0 flex", class: button_classes(extra: "w-full"),
+              form: { data: { turbo_confirm: rebuild ? "¿Rehacer todas las compañías?" : "¿Repartir a los jóvenes sin compañía?",
+                              turbo_confirm_detail: rebuild ? "#{pluralize(@plan.moves.size, "joven cambia", plural: "jóvenes cambian")} de compañía#{" y se crean #{pluralize(@plan.new_companies.size, "compañía nueva", plural: "compañías nuevas")}" if @plan.new_companies.any?}. Lo asignado a mano se reemplaza." : "#{pluralize(@plan.placed_count, "joven queda", plural: "jóvenes quedan")} en su compañía. Nadie que ya tenga compañía se mueve.",
+                              turbo_confirm_button: "Sí, aplicar" } },
+              disabled: @plan.moves.empty?, data: { company_plan_action: "aplicar" } do %>
+          <%= icon "check-check", class: "size-4" %>
+          Aplicar
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render SegmentedToggleComponent.new(label: "Qué se reparte", items: [
+        { text: "Solo los sin compañía · #{@pending_count}", href: company_plan_path, active: !rebuild, icon: "user-plus" },
+        { text: "Rehacer todo", href: company_plan_path(modo: "todos"), active: rebuild, icon: "rotate-ccw" }
+      ]) %>
+
+  <% if rebuild %>
+    <%= form_with url: company_plan_path, method: :get, class: "#{card_classes("p-4 md:p-5")} flex flex-wrap items-end gap-3", data: { company_plan_form: true } do |form| %>
+      <%= form.hidden_field :modo, value: "todos" %>
+      <div>
+        <%= form.label :companias, "Compañías", class: field_label_classes %>
+        <%= form.number_field :companias, value: @plan.buckets.size, min: 1, max: 200, class: "#{field_input_classes} w-28" %>
+      </div>
+      <%= form.submit "Ver propuesta", class: button_classes(:secondary) %>
+      <p class="basis-full text-label text-ink-500">Rehace el reparto de todos los jóvenes. Si pides más compañías de las que hay, se crean las que faltan (sin auxiliar ni comedor todavía); si pides menos, las últimas quedan sin jóvenes.</p>
+    <% end %>
+  <% end %>
+
+  <% if @plan.buckets.any? %>
+    <section class="grid grid-cols-3 gap-3 md:gap-4" aria-label="Resumen de la propuesta">
+      <%= render StatTileComponent.new(value: rebuild ? @plan.moves.size : @plan.placed_count, label: rebuild ? "Jóvenes que cambian" : "Jóvenes por ubicar",
+            short_label: rebuild ? "Cambian" : "Por ubicar", icon: "users", tone: :green, value_data: { figure: "movidos" }) %>
+      <%= render StatTileComponent.new(value: @plan.repeated_wards, label: "Comparten barrio en su compañía", short_label: "Mismo barrio",
+            icon: "map-pin", tone: :amber, hint: "Con muchos de un barrio, algunos se repiten sí o sí.", value_data: { figure: "barrio" }) %>
+      <%= render StatTileComponent.new(value: @plan.counselor_ward_conflicts, label: "Con un consejero de su barrio", short_label: "Consejero",
+            icon: "triangle-alert", tone: :rose, value_data: { figure: "consejero" }) %>
+    </section>
+  <% end %>
+
+  <% if @plan.warnings.any? %>
+    <section class="<%= card_classes("p-5 md:p-6") %>" data-plan-warnings>
+      <%= section_heading "Para revisar", "triangle-alert", tone: :amber %>
+      <ul class="space-y-2 text-body text-ink-700">
+        <% @plan.warnings.each do |warning| %>
+          <li class="flex gap-2"><%= icon "triangle-alert", class: "size-4 mt-0.5 shrink-0 text-cat-amber-ink" %><span><%= warning %></span></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if @plan.buckets.any? %>
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4" aria-label="Compañías de la propuesta">
+      <% @plan.buckets.each do |bucket| %>
+        <% range = bucket.age_range %>
+        <% arriving = @plan.moves.count { |_, target| target.equal?(bucket) } %>
+        <article class="<%= card_classes("p-4") %>" data-plan-company="<%= bucket.number %>">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <h2 class="text-title font-extrabold text-ink-900 truncate"><%= bucket.name %></h2>
+            <% if bucket.new? %>
+              <%= render ChipComponent.new(label: "Nueva", tone: :green) %>
+            <% end %>
+          </div>
+          <p class="text-body font-semibold text-ink-700">
+            <%= pluralize(bucket.size, "joven", plural: "jóvenes") %> · <%= bucket.women %> M · <%= bucket.men %> H
+            <% if range %> · <%= range.first == range.last ? "#{range.first} años" : "#{range.first} a #{range.last} años" %><% end %>
+          </p>
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <% if arriving.positive? %>
+              <%= render ChipComponent.new(label: rebuild ? "#{arriving} cambian" : "+#{arriving} sin compañía", tone: :primary) %>
+            <% end %>
+            <% if bucket.repeated_wards.positive? %>
+              <%= render ChipComponent.new(label: "#{bucket.repeated_wards} comparten barrio", tone: :amber) %>
+            <% end %>
+            <% if bucket.counselor_ward_conflicts.positive? %>
+              <%= render ChipComponent.new(label: "#{bucket.counselor_ward_conflicts} con consejero de su barrio", tone: :rose) %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </section>
+  <% end %>
+<% end %>
