@@ -89,6 +89,15 @@ sheet_scan:
 scan:
   title: La ficha de cualquier joven
   text: "Activas la cámara y apuntas al QR del gafete de cualquier joven: se abre su ficha con alergias, contacto de emergencia y compañía. Sirve si encuentras a alguien solo."
+more_manuals:
+  title: Los manuales
+  text: "Los manuales del FSY se leen dentro de la app. Abre «Más» otra vez."
+sheet_manuals:
+  title: Manuales
+  text: "Toca «Manuales»."
+manuals:
+  title: Los manuales del FSY
+  text: "Aquí están el manual de los jóvenes y el de líderes. Se leen dentro de la app y recuerdan en qué página ibas. Abajo están los enlaces a la Biblioteca del Evangelio."
 more_conteo:
   title: El Conteo
   text: "Cada noche se pasa lista. Abre «Más» otra vez."
@@ -155,7 +164,7 @@ joven_photo:
   text: "Tu foto te lleva a tu perfil: tus datos, tu contacto de emergencia y tu información médica."
 joven_sheet:
   title: Lo demás
-  text: "Aquí está tu perfil, las novedades de la app y Configuración. Abajo está «Cerrar sesión»: te pide confirmar, para que no salgas por un toque de más."
+  text: "Aquí está tu perfil, los manuales del FSY y Configuración. Abajo está «Cerrar sesión»: te pide confirmar, para que no salgas por un toque de más."
 joven_sheet_settings:
   title: Configuración
   text: "Toca «Configuración»."

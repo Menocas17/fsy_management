@@ -247,6 +247,11 @@ class Participant < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  # Primer nombre + primer apellido, como en todos los avatares sin foto.
+  def initials
+    "#{first_name.to_s.strip.first}#{last_name.to_s.strip.first}".upcase
+  end
+
   # Como le gusta que le digan, si no es su mismo nombre (el archivo de la Iglesia trae el nombre completo).
   def nickname
     preferred = ImportRowEvaluator.normalize(preferred_name)

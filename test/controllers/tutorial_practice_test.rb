@@ -87,6 +87,21 @@ class TutorialPracticeTest < ActionDispatch::IntegrationTest
     assert_not Alert.source_tutorial.exists?
   end
 
+  test "every step from «Más» points at something the sheet has: no scanner while the companies are closed" do
+    post tutorial_path, as: :json
+    ids = response.parsed_body["steps"].map { |step| step["id"] }
+    assert_equal %w[more sheet_scan scan more_manuals sheet_manuals manuals], ids[ids.index("more"), 6]
+
+    CompanyReveal.close!
+    get dashboard_path
+    assert_select "[data-more-items] a[href='#{manuals_path}']"
+    assert_select "[data-more-items] a[href='#{scan_path}']", count: 0
+    post tutorial_path, as: :json
+    ids = response.parsed_body["steps"].map { |step| step["id"] }
+    assert_not_includes ids, "sheet_scan", "el consejero ya no tiene el escáner en «Más»"
+    assert_equal %w[more sheet_manuals manuals], ids[ids.index("more"), 3]
+  end
+
   test "the superadmin previews someone's tutorial in Ver como without touching their account" do
     sign_in_as users(:one)
     post view_as_path, params: { participant_id: participants(:maria).id }

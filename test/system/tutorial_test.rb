@@ -67,6 +67,12 @@ class TutorialTest < ApplicationSystemTestCase
     tap_target
     expect "La ficha de cualquier joven"
     go_on
+    expect "Los manuales"
+    tap_target
+    expect "Manuales"
+    tap_target
+    expect "Los manuales del FSY"
+    go_on
 
     expect "El Conteo"
     tap_target
@@ -144,6 +150,12 @@ class TutorialTest < ApplicationSystemTestCase
     expect "Escanear gafete"
     tap_target
     expect "La ficha de cualquier joven"
+    go_on
+    expect "Los manuales"
+    tap_target
+    expect "Manuales"
+    tap_target
+    expect "Los manuales del FSY"
     go_on
 
     expect "Enviar una alerta"
