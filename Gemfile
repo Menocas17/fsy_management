@@ -78,7 +78,7 @@ gem "hotwire-livereload", "~> 2.1", group: :development
 
 gem "view_component"
 
-gem "rails_icons", "~> 1.9"
+gem "rails_icons", "~> 1.10"
 
 gem "pagy", "~> 43.6"
 
