@@ -3,9 +3,9 @@
 class ParticipantImportsController < ApplicationController
   before_action :require_participant_import!
 
-  # Tres pestañas, en el orden en que se cargan: compañías, consejeros (que se sientan en ellas) y jóvenes.
-  # Las dos primeras arman el personal de las compañías: solo con acceso total.
-  TABS = %w[companias consejeros jovenes].freeze
+  # Cuatro pestañas, en el orden en que se cargan: compañías, consejeros (que se sientan en ellas), el resto
+  # del staff y jóvenes. Las tres primeras arman el personal: solo con acceso total.
+  TABS = %w[companias consejeros staff jovenes].freeze
 
   def new
     @tab = current_tab
@@ -15,12 +15,15 @@ class ParticipantImportsController < ApplicationController
   def create
     file = params[:file]
     counselors = params[:tipo] == "consejeros" && can_import_staffing?
+    staff = params[:tipo] == "staff" && can_import_staffing?
     return redirect_to(new_participant_import_path(tipo: params[:tipo]), alert: "Elige un archivo para cargar.") if file.blank?
 
     # Sin acceso total (el registro), todas las filas entran como jóvenes, diga lo que diga la columna «Rol»:
     # un Excel no puede crear staff que el formulario no deja crear.
+    # El staff toma el rol de su columna «Rol»; la fila que no lo trae es de logística, no un joven.
     role = counselors ? "consejero" : ("joven" unless can_import_staffing?)
-    importer = ParticipantImporter.new(file, uploaded_by: Current.user.participant, role: role).call
+    importer = ParticipantImporter.new(file, uploaded_by: Current.user.participant, role: role,
+                                       default_role: ("logistica" if staff)).call
     if importer.fatal
       @tab = current_tab
       @imports = ParticipantImport.recent.limit(10)
@@ -30,7 +33,7 @@ class ParticipantImportsController < ApplicationController
 
     import = importer.import
     record_audit!(category: :participantes, action: "imported", target: nil,
-                  summary: "Cargó #{counselors ? "consejeros desde " : ""}«#{import.filename}»: #{import.entered_count} entraron, #{import.pending_count} por resolver")
+                  summary: "Cargó #{"consejeros desde " if counselors}#{"staff desde " if staff}«#{import.filename}»: #{import.entered_count} entraron, #{import.pending_count} por resolver")
     redirect_to participant_import_path(import), notice: import.pending_count.positive? ? "Carga lista: hay filas por resolver a mano." : "Carga lista."
   end
 
