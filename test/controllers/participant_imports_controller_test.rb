@@ -96,10 +96,10 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "with full access the page has three tabs: companies, counselors and jóvenes" do
+  test "with full access the page has four tabs: companies, counselors, staff and jóvenes" do
     get new_participant_import_path(tipo: "companias")
 
-    assert_select "[data-import-tab]", 3
+    assert_select "[data-import-tab]", 4
     assert_select "[data-import-form='companias'] form[action='#{company_imports_path}']"
   end
 
@@ -119,6 +119,19 @@ class ParticipantImportsControllerTest < ActionDispatch::IntegrationTest
     luis = Participant.find_by!(first_name: "Luis")
     assert luis.consejero?
     assert_equal [ 3 ], luis.companies.pluck(:number)
+  end
+
+  test "staff uploaded from its tab takes its Rol column, and a row without one is logística" do
+    salud = LogisticsArea.create!(name: "Salud", nursing: true)
+    file = csv_upload("Nombre,Apellido,Edad,Sexo,Estaca,Talla de camiseta,Rol,Área\n" \
+                      "Luis,Uno,25,Masculino,Managua,L,,Salud\nCarla,Dos,40,Femenino,Managua,M,Coordinadora,\n")
+
+    post participant_imports_path, params: { file: file, tipo: "staff" }
+
+    luis = Participant.find_by!(first_name: "Luis")
+    assert luis.logistica?
+    assert_equal salud, luis.logistics_area
+    assert Participant.find_by!(first_name: "Carla").coordinador?
   end
 
   test "registration (logística) can't open nor use the bulk upload anymore" do

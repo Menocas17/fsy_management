@@ -5,7 +5,8 @@
   tabs = {
     "companias" => { label: "1 · Compañías", icon: "building-2", button: "Cargar compañías", url: company_imports_path, tone: :green },
     "consejeros" => { label: "2 · Consejeros", icon: "user-check", button: "Cargar consejeros", url: participant_imports_path, tone: :indigo },
-    "jovenes" => { label: "3 · Jóvenes", icon: "users", button: "Cargar jóvenes", url: participant_imports_path, tone: :primary }
+    "staff" => { label: "3 · Staff", icon: "id-card", button: "Cargar staff", url: participant_imports_path, tone: :teal },
+    "jovenes" => { label: "4 · Jóvenes", icon: "users", button: "Cargar jóvenes", url: participant_imports_path, tone: :primary }
   }
   tab = tabs.fetch(@tab)
   church_columns = [ "Nombre", "Apellido", "Nombre que se prefiere", "Cumpleaños", "Edad", "Sexo", "Teléfono", "Correo electrónico",
@@ -13,12 +14,12 @@
                      "Contacto 1 y 2 (nombre, correo, teléfono)", "Nombre de la estaca o distrito", "Nombre del barrio o rama", "Obispo (nombre y correo)" ]
 %>
 <%= render PageComponent.new(width: :page) do %>
-  <%# Compañías y consejeros arman el personal: esas pestañas solo las ve quien tiene acceso total. %>
+  <%# Compañías, consejeros y staff arman el personal: esas pestañas solo las ve quien tiene acceso total. %>
   <% if can_import_staffing? %>
     <div class="flex flex-col gap-2">
       <%= render SegmentedToggleComponent.new(label: "Qué cargar", items: tabs.map { |key, meta|
             { text: meta[:label], icon: meta[:icon], href: new_participant_import_path(tipo: key), active: key == @tab, data: { import_tab: key } } }) %>
-      <p class="text-label font-medium text-ink-500">En este orden: las compañías primero, luego los consejeros (que se sientan en su compañía) y al final los jóvenes.</p>
+      <p class="text-label font-medium text-ink-500">En este orden: las compañías primero, luego los consejeros (que se sientan en su compañía), el resto del staff y al final los jóvenes.</p>
     </div>
   <% end %>
 
@@ -52,6 +53,7 @@
       <% columns, extras = case @tab
            when "companias" then [ [ "Número", "Compañía auxiliar", "Comedor" ], [] ]
            when "consejeros" then [ church_columns, [ "Compañía" ] ]
+           when "staff" then [ church_columns, [ "Rol", "Área", "Compañía", "Compañía auxiliar", "Cuarto", "Cédula", "Notas" ] ]
            else [ church_columns, [ "Compañía", "Compañía auxiliar", "Área", "Cuarto", "Cédula", "Rol", "Notas" ] ]
            end %>
       <div class="flex flex-wrap gap-1.5">
@@ -75,6 +77,11 @@
           <li>Si la compañía no existe o el lugar ya está ocupado, la fila <strong>queda en espera</strong> para resolverla en el informe. Sin la columna Compañía entran directo y se sientan después desde la compañía.</li>
           <li>Quien tiene la inscripción <strong>cancelada</strong> queda en espera: se aprueba solo si de verdad viene.</li>
           <li>De la información emocional solo entra lo que hay que atender (ansiedad, un tratamiento…); «Feliz», «Soltero» o un comentario quedan fuera, y el informe guarda lo que escribieron.</li>
+          <li>Pueden ser de una estaca que no participa: queda escrita tal cual.</li>
+        <% when "staff" %>
+          <li>Cada fila entra con el rol de su columna <strong>Rol</strong> (Coordinador, Auxiliar, Logística…); sin Rol, entra como <strong>logística</strong>.</li>
+          <li>Logística con una columna <strong>Área</strong> con el nombre como está en Áreas (Registro, Salud…) entra ya en la suya; sus banderas le dan permisos. Si el área no existe, la fila queda en espera.</li>
+          <li>Un auxiliar con <strong>Compañía auxiliar</strong> queda sentado en ella; un tercer director o coordinador queda en espera.</li>
           <li>Pueden ser de una estaca que no participa: queda escrita tal cual.</li>
         <% else %>
           <li>Sin <strong>Rol</strong>, la fila entra como joven.</li>
