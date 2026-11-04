@@ -151,7 +151,7 @@ module NavigationHelper
   end
 
   # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
-  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial", "Manuales", "Reserva" ].freeze
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial", "Manuales" ].freeze
   # El consejero, lo que usa con su compañía en la semana, en este orden (tras el escáner).
   COUNSELOR_MORE_ITEMS = [ "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes", "Manuales" ].freeze
 
