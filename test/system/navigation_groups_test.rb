@@ -22,7 +22,7 @@ class NavigationGroupsTest < ApplicationSystemTestCase
     assert_current_path logistics_areas_path
     within("aside") do
       assert_no_link "Jóvenes" # sigue cerrado después de navegar
-      assert_selector "[data-nav-group='participantes'][data-open='false']", text: "4"
+      assert_selector "[data-nav-group='participantes'][data-open='false']", text: "5"
       assert_link "Áreas"
     end
     save_screenshot(File.join(ENV["SCREENSHOTS"], "areas-escritorio.png")) if ENV["SCREENSHOTS"]
