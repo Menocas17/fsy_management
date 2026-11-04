@@ -89,7 +89,7 @@ gem "prawn-table", "~> 0.2.2"
 
 # Lectura de los Excel para la carga masiva de participantes
 # csv salió de la librería estándar en Ruby 3.4 y roo lo necesita.
-gem "roo", "~> 3.0"
+gem "roo", "~> 4.0"
 gem "csv", "~> 3.3"
 # json 3.0 rompe ActiveSupport::JSON.decode (y con él todas las columnas jsonb): nos quedamos en la 2.x parcheada.
 gem "json", "~> 2.21", ">= 2.21.2"
