@@ -15,7 +15,8 @@ module Authorization
                   :can_take_night_attendance?,
                   :can_view_infirmary?, :can_operate_infirmary?, :can_announce_infirmary?, :can_read_infirmary_notes?,
                   :can_cancel_infirmary_visit?, :can_read_emotional_information?, :can_filter_emotional_information?,
-                  :can_import_staffing?, :can_view_rooms?, :can_manage_rooms?, :can_suggest_company?
+                  :can_import_staffing?, :can_view_rooms?, :can_manage_rooms?, :can_suggest_company?,
+                  :can_manage_reserve?, :can_reserve_participant?
   end
 
   # Todo el mundo ve el sistema completo; quién edita qué se decide ficha por ficha más abajo.
@@ -186,6 +187,16 @@ module Authorization
   # Quien puede ponerle compañía a un joven (acceso total, registro y el director de logística) ve las sugeridas.
   def can_suggest_company?
     allowed_participant_attributes(Participant.new(rol: "joven")).include?(:company_id)
+  end
+
+  # Reserva -------------------------------------------------------------------
+  # Mandar consejeros a la reserva, devolverlos o borrarlos de ahí: solo acceso total.
+  def can_manage_reserve?
+    Current.user&.reserve_manager? || false
+  end
+
+  def can_reserve_participant?(participant)
+    can_manage_reserve? && participant&.reservable? || false
   end
 
   # Cuartos -------------------------------------------------------------------

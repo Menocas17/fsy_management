@@ -14,7 +14,9 @@ class Participant < ApplicationRecord
 
   # Los jóvenes de práctica del tutorial (ver practice_jovenes) no existen para el resto de la app: ni listas,
   # ni cifras, ni reportes, ni búsquedas, ni Conteo. Solo el tutorial los carga, con Participant.unscoped.
-  default_scope { where(practice: false) }
+  # Lo mismo los consejeros en reserva (reserve!): no se borran, pero no salen en ninguna lista, cifra ni tabla;
+  # solo el módulo Reserva (ReservesController, acceso total) los carga, con Participant.in_reserve.
+  default_scope { where(practice: false, reserved_at: nil) }
 
   enum :rol, { director: 0, coordinador: 1, auxiliar: 2, consejero: 3, logistica: 5, joven: 6, director_logistica: 7 }
 
@@ -158,6 +160,38 @@ class Participant < ApplicationRecord
     when "consejero" then counselor_scope.first
     when "auxiliar"  then auxiliar_scope[:companies].first
     end
+  end
+
+  # La reserva: solo los consejeros entran. Al entrar dejan su compañía (su lugar en el personal queda libre),
+  # su cuarto y sus sesiones abiertas (su cuenta sigue, pero no entra mientras esté en reserva: User#linked?).
+  RESERVABLE_ROLES = %w[consejero].freeze
+
+  def self.in_reserve
+    unscoped.where(practice: false).where.not(reserved_at: nil)
+  end
+
+  def reservable?
+    persisted? && !practice? && !reserved? && RESERVABLE_ROLES.include?(rol.to_s)
+  end
+
+  def reserved?
+    reserved_at.present?
+  end
+
+  def reserve!
+    transaction do
+      memberships.destroy_all
+      update_columns(reserved_at: Time.current, company_id: nil, room: nil, updated_at: Time.current)
+      if user
+        user.sessions.destroy_all
+        user.update_columns(full_access_granted: false) if user.full_access_granted?
+      end
+    end
+  end
+
+  # Vuelve a la app sin compañía ni cuarto: se le asignan de nuevo como a cualquier ficha.
+  def restore_from_reserve!
+    update_columns(reserved_at: nil, updated_at: Time.current)
   end
 
   # Quien ya ocupa el lugar de este rol y género en la dirección, si lo hay.

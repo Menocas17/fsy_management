@@ -13,7 +13,8 @@ class AssignmentsController < ApplicationController
 
   def index
     @everyone = Current.user.full_access? && params[:de] != "mi"
-    scope = @everyone ? Assignment.all : Assignment.delegated_by(Current.user.participant)
+    # joins(:participant): las de un consejero en reserva no salen (default_scope de Participant).
+    scope = (@everyone ? Assignment.all : Assignment.delegated_by(Current.user.participant)).joins(:participant)
     @counts = scope.group(:status).count
     @status = params[:estado] if STATUS_FILTERS.key?(params[:estado])
     @assignments = (@status ? scope.where(status: @status) : scope)

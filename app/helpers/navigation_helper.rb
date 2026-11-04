@@ -54,7 +54,8 @@ module NavigationHelper
         { text: "Staff", url: staff_participants_path, lucide_icon: "user-check", section: "staff",
           active_paths: [ staff_participants_path ] },
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
-        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" }
+        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
+        ({ text: "Reserva", url: reserves_path, lucide_icon: "archive", active_paths: [ reserves_path ] } if Current.user&.reserve_manager?)
       ] },
       { id: "evento", label: "Evento", items: [
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },
@@ -150,7 +151,7 @@ module NavigationHelper
   end
 
   # Acceso total en el teléfono va a lo que pasa durante la semana; lo demás lo trabaja en la computadora.
-  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial", "Manuales" ].freeze
+  FULL_ACCESS_MORE_ITEMS = [ "Alertas", "Enfermería", "Conteo", "Historial", "Manuales", "Reserva" ].freeze
   # El consejero, lo que usa con su compañía en la semana, en este orden (tras el escáner).
   COUNSELOR_MORE_ITEMS = [ "Conteo", "Organigrama", "Enfermería", "Compañías", "Jóvenes", "Manuales" ].freeze
 

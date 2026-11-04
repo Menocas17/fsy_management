@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_040117) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -450,10 +450,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_040117) do
     t.string "other_ward"
     t.boolean "practice", default: false, null: false
     t.string "registration_status"
+    t.datetime "reserved_at"
     t.index ["code"], name: "index_participants_on_code", unique: true
     t.index ["company_id"], name: "index_participants_on_company_id"
     t.index ["logistics_area_id"], name: "index_participants_on_logistics_area_id"
     t.index ["practice"], name: "index_participants_on_practice", where: "practice"
+    t.index ["reserved_at"], name: "index_participants_on_reserved_at", where: "(reserved_at IS NOT NULL)"
     t.index ["rol", "gender"], name: "index_participants_one_leader_per_gender", unique: true, where: "((rol = ANY (ARRAY[0, 1, 7])) AND (gender IS NOT NULL))"
   end
 

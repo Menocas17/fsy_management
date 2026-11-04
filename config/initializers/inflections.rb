@@ -23,3 +23,8 @@ ActiveSupport::Inflector.inflections(:es) do |inflect|
   inflect.plural(/z$/i, "ces")
   inflect.irregular "joven", "jóvenes"
 end
+
+# Sin esto Rails singulariza «reserves» como «reserf» (como wolves → wolf): las rutas de la Reserva.
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.irregular "reserve", "reserves"
+end

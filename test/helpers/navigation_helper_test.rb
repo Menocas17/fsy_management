@@ -39,7 +39,7 @@ class NavigationHelperTest < ActionView::TestCase
 
     groups = nav_sections.to_h { |section| [ section[:label], section[:items].map { |item| item[:text] } ] }
     assert_equal({ nil => [ "Inicio" ],
-                   "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama" ],
+                   "Participantes" => [ "Jóvenes", "Staff", "Compañías", "Organigrama", "Reserva" ],
                    "Evento" => [ "Agenda", "Manuales", "Registro", "Alertas" ],
                    "Logística" => [ "Áreas", "Inventario", "Finanzas", "Cuartos" ],
                    "Seguimiento" => [ "Reportes", "Conteo", "Asignaciones", "Enfermería", "Historial" ] }, groups)

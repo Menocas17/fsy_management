@@ -1,6 +1,6 @@
 <%# Cifras y listas de una capacitación. Marcar o quitar a mano vuelve a pintar solo este bloque
     (turbo_stream), así la página no salta arriba entre marca y marca; highlight señala a quién se movió. %>
-<% attendances = training.attendances.recent.includes(participant: [ :company, :logistics_area ]) %>
+<% attendances = training.attendances.joins(:participant).recent.includes(participant: [ :company, :logistics_area ]) %>
 <% absentees = training.absentees.includes(:company, :logistics_area) %>
 <% highlight = local_assigns[:highlight] %>
 <% pending = training.pending? %>
