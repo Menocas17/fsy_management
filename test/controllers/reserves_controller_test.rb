@@ -10,7 +10,7 @@ class ReservesControllerTest < ActionDispatch::IntegrationTest
   test "full access moves a counselor to the reserve: it leaves its company and every list" do
     sign_in_as(users(:one))
     get edit_participant_path(@counselor)
-    assert_select "[data-reserve-participant='#{@counselor.id}']"
+    assert_select "form[data-turbo-confirm-button='Sí, archivar'] [data-reserve-participant='#{@counselor.id}']"
 
     assert_difference -> { AuditLog.where(category: :participantes, action: "reserved").count }, 1 do
       post reserves_path, params: { participant_id: @counselor.id }
@@ -27,6 +27,8 @@ class ReservesControllerTest < ActionDispatch::IntegrationTest
 
     get reserves_path
     assert_select "[data-reserve-row='#{@counselor.id}']", text: /María García/
+    assert_select "form[data-turbo-confirm-button='Sí, devolver'] [data-reserve-restore='#{@counselor.id}']"
+    assert_select "form[data-turbo-confirm-button='Sí, borrar'] [data-reserve-destroy='#{@counselor.id}']"
 
     get staff_participants_path
     assert_response :success
