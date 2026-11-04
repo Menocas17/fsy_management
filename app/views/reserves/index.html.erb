@@ -31,13 +31,15 @@
             </span>
             <span class="flex items-center gap-2 ml-auto">
               <%= button_to restore_reserve_path(participant), method: :patch,
-                    form: { data: { turbo_confirm: "¿Devolver a #{participant.full_name} a la app? Vuelve sin compañía ni cuarto." } },
+                    form: { data: { turbo_confirm: "¿Devolver a #{participant.full_name} a la app?", turbo_confirm_detail: "Vuelve sin compañía ni cuarto.",
+                                 turbo_confirm_button: "Sí, devolver" } },
                     class: button_classes(:secondary, extra: "whitespace-nowrap"), data: { reserve_restore: participant.id } do %>
                 <%= icon "archive-restore", class: "w-4 h-4" %>
                 Devolver
               <% end %>
               <%= button_to reserve_path(participant), method: :delete,
-                    form: { data: { turbo_confirm: "¿Borrar definitivamente a #{participant.full_name}? Se borran su ficha y su cuenta. Esta acción es irreversible." } },
+                    form: { data: { turbo_confirm: "¿Borrar definitivamente a #{participant.full_name}?",
+                                 turbo_confirm_detail: "Se borran su ficha y su cuenta. Esta acción es irreversible.", turbo_confirm_button: "Sí, borrar" } },
                     class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer whitespace-nowrap",
                     data: { reserve_destroy: participant.id } do %>
                 <%= icon "trash-2", class: "w-4 h-4" %>
