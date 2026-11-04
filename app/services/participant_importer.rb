@@ -57,10 +57,12 @@ class ParticipantImporter
   HEADER_SEARCH_ROWS = 10
 
   # role: el rol de todas las filas, diga lo que diga el archivo (la carga de consejeros).
-  def initialize(file, uploaded_by: nil, role: nil)
+  # default_role: el de las filas sin «Rol» (la carga de staff), en vez de joven.
+  def initialize(file, uploaded_by: nil, role: nil, default_role: nil)
     @file = file
     @uploaded_by = uploaded_by
     @role = role
+    @default_role = default_role
   end
 
   def call
@@ -128,6 +130,7 @@ class ParticipantImporter
 
     def process(values, number)
       values[:rol] = @role if @role
+      values[:rol] ||= @default_role if @default_role
       evaluation = ImportRowEvaluator.new(values).evaluate
       participant = evaluation.clean? && evaluation.apply!
       if participant
