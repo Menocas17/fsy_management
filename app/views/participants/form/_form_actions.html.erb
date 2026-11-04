@@ -8,6 +8,16 @@
         Borrar participante
       <% end %>
     <% end %>
+    <%# La reserva (ReservesController): el consejero sale de las listas y las cifras sin borrarse. Solo acceso total. %>
+    <% if can_reserve_participant?(participant) %>
+      <%= button_to reserves_path, params: { participant_id: participant.id },
+            form: { data: { turbo_confirm: "¿Pasar a #{participant.full_name} a la reserva? Deja su compañía y su cuarto, y no aparece en la app hasta que lo devuelvas." } },
+            class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-amber-ink hover:bg-cat-amber/15 transition cursor-pointer",
+            data: { reserve_participant: participant.id } do %>
+        <%= icon "archive", class: "w-4 h-4" %>
+        Pasar a reserva
+      <% end %>
+    <% end %>
     <%# Solo en la propia ficha: la contraseña de otro no se toca desde aquí. %>
     <% if participant.persisted? && participant == Current.user&.participant %>
       <%= link_to edit_password_change_path,

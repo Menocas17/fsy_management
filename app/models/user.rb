@@ -26,8 +26,9 @@ class User < ApplicationRecord
   # Antes era «la cuenta sin participante», y borrar una ficha volvía superadmin a su cuenta.
 
   # Una cuenta sirve si es la del sistema o si sigue atada a una ficha; una que perdió su ficha no entra.
+  # participant, no participant_id: una ficha en reserva no se carga (default_scope), así que su cuenta no entra.
   def linked?
-    superadmin? || participant_id.present?
+    superadmin? || participant.present?
   end
 
   # Crea la cuenta de una ficha con una contraseña aleatoria que nadie conoce: la persona elige la suya con el
@@ -222,6 +223,11 @@ class User < ApplicationRecord
   end
 
   # Ordenar los cuartos y configurar el hotel: el acceso total y el director de logística.
+  # El módulo Reserva (ReservesController): solo acceso total.
+  def reserve_manager?
+    full_access?
+  end
+
   def rooms_manager?
     full_access? || participant&.director_logistica? || false
   end

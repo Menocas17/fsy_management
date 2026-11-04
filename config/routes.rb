@@ -204,6 +204,10 @@ Rails.application.routes.draw do
   # Compañías sugeridas para un joven que se registra sin compañía (CompanySuggester): en su ficha y en el formulario.
   get "companias/sugerencias" => "company_suggestions#show", as: :company_suggestions
   # El QR de una ficha, para el diálogo «Mi QR» de la barra inferior (se pide al abrirlo).
+  # La reserva de consejeros: fichas guardadas fuera de la app, que solo acceso total ve, devuelve o borra.
+  resources :reserves, only: %i[index create destroy], path: "reserva" do
+    patch :restore, on: :member, path: "devolver"
+  end
   get "participants/:participant_id/qr" => "participant_qrs#show", as: :participant_qr
   resources :participants do
       resources :assignments, only: [ :new, :create ], path: "asignaciones"

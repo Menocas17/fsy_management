@@ -29,7 +29,7 @@ class Training < ApplicationRecord
   end
 
   def attended_count
-    @attended_count ||= attendances.count
+    @attended_count ||= attendances.joins(:participant).count
   end
 
   def attendance_rate

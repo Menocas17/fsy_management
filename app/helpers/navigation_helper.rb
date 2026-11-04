@@ -54,7 +54,8 @@ module NavigationHelper
         { text: "Staff", url: staff_participants_path, lucide_icon: "user-check", section: "staff",
           active_paths: [ staff_participants_path ] },
         { text: "Compañías", url: companies_path, lucide_icon: "building-2", section: "companies", active_paths: [ companies_path, auxiliar_companies_path ] },
-        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" }
+        { text: "Organigrama", url: organigrama_path, lucide_icon: "network" },
+        ({ text: "Reserva", url: reserves_path, lucide_icon: "archive", active_paths: [ reserves_path ] } if Current.user&.reserve_manager?)
       ] },
       { id: "evento", label: "Evento", items: [
         { text: "Agenda", url: agenda_path, lucide_icon: "calendar-days", active_paths: [ agenda_path, activities_path ] },

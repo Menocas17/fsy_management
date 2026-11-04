@@ -1,0 +1,52 @@
+<% content_for :title, "Reserva" %>
+<% content_for :eyebrow, "Participantes" %>
+<%# Los consejeros en reserva: fuera de las listas, las cifras y las tablas de la app, pero no borrados. Desde
+    aquí vuelven (sin compañía ni cuarto) o se borran para siempre. Solo acceso total (ReservesController). %>
+<%= render PageComponent.new(width: :page) do |page| %>
+  <% page.with_intro do %>
+    <%= pluralize(@participants.size, "consejero en reserva", plural: "consejeros en reserva") %> · no aparecen en las listas, las cifras ni las compañías
+  <% end %>
+
+  <section class="<%= card_classes("p-5 md:p-6") %>" data-reserve-list>
+    <%= section_heading "En reserva", "archive", tone: :amber %>
+
+    <% if @participants.empty? %>
+      <%= render EmptyStateComponent.new(title: "Nadie en reserva", icon: "archive", tone: :amber, name: "reserve",
+            text: "Un consejero pasa a la reserva desde su ficha, en Editar → «Pasar a reserva». Deja su compañía y su cuarto, y su cuenta no entra mientras esté aquí.") %>
+    <% else %>
+      <ul class="divide-y divide-line-soft">
+        <% @participants.each do |participant| %>
+          <li class="flex flex-wrap items-center gap-x-3 gap-y-3 py-3" data-reserve-row="<%= participant.id %>">
+            <span class="flex items-center gap-3 min-w-0 flex-1 basis-60">
+              <%= render AvatarComponent.new(participant: participant) %>
+              <span class="min-w-0">
+                <span class="block text-body font-bold text-ink-900 truncate"><%= participant.full_name %></span>
+                <span class="block text-label font-semibold text-ink-500 truncate">
+                  <%= [ participant.role_label, participant.stake_name, participant.ward_name ].compact.join(" · ") %>
+                </span>
+                <span class="block text-meta font-semibold text-ink-500 truncate">
+                  En reserva desde el <%= SpanishDates.short_with_time(participant.reserved_at) %><%= " · tiene cuenta" if participant.user %>
+                </span>
+              </span>
+            </span>
+            <span class="flex items-center gap-2 ml-auto">
+              <%= button_to restore_reserve_path(participant), method: :patch,
+                    form: { data: { turbo_confirm: "¿Devolver a #{participant.full_name} a la app? Vuelve sin compañía ni cuarto." } },
+                    class: button_classes(:secondary, extra: "whitespace-nowrap"), data: { reserve_restore: participant.id } do %>
+                <%= icon "archive-restore", class: "w-4 h-4" %>
+                Devolver
+              <% end %>
+              <%= button_to reserve_path(participant), method: :delete,
+                    form: { data: { turbo_confirm: "¿Borrar definitivamente a #{participant.full_name}? Se borran su ficha y su cuenta. Esta acción es irreversible." } },
+                    class: "inline-flex items-center gap-2 h-10 px-3 rounded-control text-sm font-semibold text-cat-rose-ink hover:bg-cat-rose/10 transition cursor-pointer whitespace-nowrap",
+                    data: { reserve_destroy: participant.id } do %>
+                <%= icon "trash-2", class: "w-4 h-4" %>
+                Borrar
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+<% end %>

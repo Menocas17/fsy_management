@@ -109,7 +109,7 @@ class CheckinsController < ApplicationController
     end
 
     def registrations
-      (@training ? @training.attendances : Checkin).recent.includes(participant: :company)
+      (@training ? @training.attendances : Checkin).joins(:participant).recent.includes(participant: :company)
     end
 
     def register(scan)
